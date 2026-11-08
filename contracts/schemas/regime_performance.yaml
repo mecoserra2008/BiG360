@@ -1,0 +1,40 @@
+table: regime_performance
+version: 1
+zone: scores
+owner: macro-w4 (app.macro.markets.regimes, job regime_performance)
+description: >
+  Regime-conditional performance (W4.3) of sector / subsector / region-sector / region portfolios (cap- and
+  equal-weighted, built from the price lake), factor long-short portfolios and ETFs / indices: monthly returns grouped
+  by the regime of the same month (timing contemporaneous) or of the previous month (timing next_month, investable).
+  metric excess = return minus the 3-month T-bill (fred:DGS3MO / 12); relative = return minus the benchmark (S&P 500
+  for global / US aggregates, factors and US instruments; the regional index for other region aggregates). Regime types:
+  cycle_quadrant (W1 cycle clock; scope US, or GLOBAL = mean of the US, EA, JP, GB, CN momenta), hmm_regime
+  (hmm4_us_v1 / hmm4_global_v1, model-based), rate_cycle (hiking / pausing / cutting from macro-w3 cb_rate_cycle when
+  present, else a provisional rule on the official BIS policy-rate series: 6-month change > +10bp hiking, < -10bp
+  cutting, else pausing), inflation_regime (US CPI y/y: below_2, 2_to_3, 3_to_5, above_5). Survivorship: portfolios
+  use every primary common share with prices incl. delisted US names, current sector classification. Overwritten
+  nightly.
+storage: {path: scores/regime_performance, format: parquet, partition_by: [], write_mode: overwrite}
+primary_key: [entity_type, entity_id, weighting, regime_type, scope, regime, timing, metric]
+columns:
+  - {name: entity_type, type: string, nullable: false, description: "sector | subsector | region | factor | etf | index"}
+  - {name: entity_id, type: string, nullable: false, description: "As macro_exposures"}
+  - {name: weighting, type: string, nullable: false, description: "cw | ew | none"}
+  - {name: regime_type, type: enum, nullable: false, values: [cycle_quadrant, hmm_regime, rate_cycle, inflation_regime], description: "Regime dimension"}
+  - {name: scope, type: string, nullable: false, description: "US | GLOBAL | central bank id (fed, ecb, boe, boj ...)"}
+  - {name: regime, type: string, nullable: false, description: "Regime label"}
+  - {name: timing, type: enum, nullable: false, values: [contemporaneous, next_month], description: "Regime of the same month or of the previous month"}
+  - {name: metric, type: enum, nullable: false, values: [excess, relative], description: "Excess over T-bill or relative to the benchmark"}
+  - {name: mean, type: float64, nullable: true, description: "Mean monthly return (fraction)"}
+  - {name: median, type: float64, nullable: true, description: "Median monthly return"}
+  - {name: ann_mean, type: float64, nullable: true, description: "mean x 12"}
+  - {name: vol, type: float64, nullable: true, description: "Monthly standard deviation"}
+  - {name: hit_rate, type: float64, nullable: true, description: "Share of months > 0"}
+  - {name: t_stat, type: float64, nullable: true, description: "mean / (std / sqrt(n))"}
+  - {name: n, type: int32, nullable: false, description: "Months"}
+  - {name: first_month, type: date, nullable: true, description: "First month used"}
+  - {name: last_month, type: date, nullable: true, description: "Last month used"}
+  - {name: is_current, type: bool, nullable: false, description: "Regime equals the latest known state of (regime_type, scope)"}
+  - {name: benchmark, type: string, nullable: true, description: "Benchmark id used for relative"}
+  - {name: model_based, type: bool, nullable: false, description: "True for HMM regimes and the provisional rate-cycle rule"}
+  - {name: computed_at, type: datetime, nullable: false, description: "Write time UTC"}

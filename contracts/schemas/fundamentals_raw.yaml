@@ -1,0 +1,38 @@
+table: fundamentals_raw
+version: 3
+zone: normalized
+owner: ingest-us (sec_xbrl) / ingest-global (esef, edinet, opendart, cvm, akshare, yfinance_fund)
+description: >
+  Source facts exactly as reported (one fact per row), keyed by the source's own entity id and concept name.
+  Adapters MUST NOT map to canonical items here; app.normalize.fundamentals does that using
+  contracts/canonical_line_items.yaml. Dimensional facts (segments) are kept with dimensions_json;
+  canonical mapping uses only facts with no dimensions unless the item says otherwise.
+storage: {path: normalized/fundamentals_raw, format: parquet, partition_by: [source_id, fiscal_year], write_mode: upsert}
+primary_key: [source_id, source_entity_id, filing_id, concept, period_start, period_end, unit, dimensions_hash]
+pit: {knowledge_column: knowledge_date, rule: "fact public from filing knowledge_date"}
+columns:
+  - {name: source_id, type: string, nullable: false, description: "Adapter id"}
+  - {name: fiscal_year, type: int16, nullable: false, description: "Partition: fiscal year of fact (fy from filing, else year(period_end))"}
+  - {name: source_entity_id, type: string, nullable: false, description: "Native entity key (CIK10, LEI, EDINET code, corp_code, CVM code, CN code, yf ticker)"}
+  - {name: issuer_id, type: string, nullable: true, description: "Resolved issuer id (filled by normalize; null at ingest is allowed)"}
+  - {name: filing_id, type: string, nullable: false, description: "FK filings_index.filing_id ('{source_id}:na' for sources without filings e.g. yfinance)"}
+  - {name: form_type, type: string, nullable: true, description: "Native form type"}
+  - {name: taxonomy, type: enum, nullable: false, values: [us-gaap, ifrs-full, dei, srt, jppfs, jpcrp, jpigp, dart, kifrs, cas_label, cvm_account, yfinance, uk-core, other], description: "Concept namespace"}
+  - {name: concept, type: string, nullable: false, description: "Concept/tag/account id as reported (e.g. Revenues, ifrs-full:Revenue, jppfs_cor:NetSales, dart_OperatingIncomeLoss, 3.01, 营业总收入)"}
+  - {name: label, type: string, nullable: true, description: "Human label from source"}
+  - {name: period_type, type: enum, nullable: false, values: [duration, instant], description: "XBRL period type"}
+  - {name: period_start, type: date, nullable: true, description: "Duration start (null for instant)"}
+  - {name: period_end, type: date, nullable: false, description: "Duration end or instant date"}
+  - {name: fiscal_period, type: enum, nullable: true, values: [FY, Q1, Q2, Q3, Q4, H1, H2, 9M, YTD], description: "Filing's fiscal period label (SEC fp), if given"}
+  - {name: value, type: float64, nullable: false, description: "Numeric value in unit (scaled to units, i.e. not thousands/millions)"}
+  - {name: unit, type: string, nullable: false, description: "Unit: ISO currency, 'shares', 'pure', 'USD/shares', etc."}
+  - {name: decimals, type: int16, nullable: true, description: "XBRL decimals attribute"}
+  - {name: dimensions_hash, type: string, nullable: false, description: "'' when no dimensions; else sha1 of sorted dimension members"}
+  - {name: dimensions_json, type: json, nullable: true, description: "Axis->member map for dimensional facts"}
+  - {name: consolidated, type: bool, nullable: true, description: "False for parent-only statements (JP/KR/CN provide both); canonical uses consolidated=true preferentially"}
+  - {name: knowledge_date, type: date, nullable: false, description: "Filing date"}
+  - {name: knowledge_date_estimated, type: bool, nullable: false, description: "True for sources without filing dates (yfinance): period_end + lag rule"}
+  - {name: ingested_at, type: datetime, nullable: false, description: "Write time UTC"}
+  - {name: frame, type: string, nullable: true, description: "SEC companyfacts frame (CY2024Q4I / CY2024) — set only on the fact SEC deems canonical for that calendar period (added v2, ingest-us)"}
+  - {name: is_latest, type: bool, nullable: true, description: "True on the most recently filed version (max knowledge_date, filing_id) of the same entity/concept/period/unit/dimensions; older versions false; null if the adapter does not compute it (added v2, ingest-us)"}
+  - {name: is_forecast, type: bool, nullable: true, description: "True for company forecasts / guidance (TDnet tanshin Forecast/Upper/Lower members; added v3, coverage-A). Forecast rows also carry dims (ResultForecast) and knowledge_date < period_end, so they never reach fundamentals_canonical; null = actual"}

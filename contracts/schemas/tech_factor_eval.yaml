@@ -1,0 +1,37 @@
+table: tech_factor_eval
+version: 1
+zone: features
+owner: technicals (app.techv3.job:run_eval, monthly tech_factor_eval)
+description: >
+  Technicals v3 #1 out-of-sample statistics per factor / composite x horizon x region x segment (docs/TECHNICALS_V3_VALIDATION.md):
+  rank IC of the percentile vs the sector-neutral forward log return (from the close of t + 1) on weekly origins of the
+  liquid universe, Newey-West t, p-values (raw, Benjamini-Hochberg over every factor cell, Holm over the primary
+  cells), decile spread with a month-block CI, monotonicity, and the gate verdict. eval_kind = validation (the
+  walk-forward report, copied from data/reports/technicals_v3) or monitor (the monthly job's trailing-36-month rolling
+  IC on the live history). Segments: all / region / size / regime / year / leak (lag1, permutation).
+storage: {path: features/tech_factor_eval, format: parquet, partition_by: [], write_mode: overwrite, retention: "validation rows + the last 12 monitor runs"}
+primary_key: [eval_date, eval_kind, signal, horizon, region, segment_type, segment]
+columns:
+  - {name: eval_date, type: date, nullable: false, description: "Evaluation run date"}
+  - {name: eval_kind, type: enum, nullable: false, values: [validation, monitor], description: "Walk-forward validation (gate) or rolling monitor"}
+  - {name: signal, type: string, nullable: false, description: "Factor id (hi52, mom, rmom, strev, maxret, ivol, indmom) or composite (comp_wf, comp_all, comp_ridge, composite)"}
+  - {name: horizon, type: int16, nullable: false, description: "Forward sessions (5 / 20 / 60)"}
+  - {name: region, type: string, nullable: false, description: "US / EU / UK / JP or ALL (n-weighted pooled IC per date)"}
+  - {name: segment_type, type: enum, nullable: false, values: [all, size, regime, year, leak], description: "Segment family"}
+  - {name: segment, type: string, nullable: false, description: "all | large/mid/small/micro | covid_2020, year_2022, vix_gt_25, bear_market, ... | YYYY | lag1, permutation"}
+  - {name: n_dates, type: int32, nullable: true, description: "Weekly origins"}
+  - {name: mean_names, type: float64, nullable: true, description: "Average cross-section size"}
+  - {name: mean_ic, type: float64, nullable: true, description: "Mean rank IC (raw sign)"}
+  - {name: aligned_ic, type: float64, nullable: true, description: "Mean IC x the literature sign (> 0 = works as documented)"}
+  - {name: t_stat, type: float64, nullable: true, description: "Newey-West t of the mean IC (ceil(h / 5) + 1 lags)"}
+  - {name: p_value, type: float64, nullable: true, description: "Two-sided normal p-value"}
+  - {name: p_bh, type: float64, nullable: true, description: "Benjamini-Hochberg adjusted p (all factor x horizon x region cells)"}
+  - {name: p_holm, type: float64, nullable: true, description: "Holm adjusted p over the primary cells (pooled, 20 sessions)"}
+  - {name: share_aligned, type: float64, nullable: true, description: "Share of dates with a sign-aligned IC"}
+  - {name: spread, type: float64, nullable: true, description: "Sign-aligned top - bottom decile mean label (log return)"}
+  - {name: spread_lo, type: float64, nullable: true, description: "Spread 95% CI low (month blocks)"}
+  - {name: spread_hi, type: float64, nullable: true, description: "Spread 95% CI high"}
+  - {name: monotonicity, type: float64, nullable: true, description: "Sign-aligned Spearman(decile, mean label)"}
+  - {name: verdict, type: enum, nullable: true, values: [pass, fail, not_validated], description: "Gate verdict of the signal (rows of the primary cell; null elsewhere)"}
+  - {name: detail, type: json, nullable: true, description: "Extra fields (decile means, permutation stats, economics)"}
+  - {name: computed_at, type: datetime, nullable: false, description: "Write time UTC"}

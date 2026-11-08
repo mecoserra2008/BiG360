@@ -1,0 +1,34 @@
+table: backtest_runs
+version: 1
+zone: app_state
+owner: backtest (app.backtest.store via app.api.routers.backtest)
+description: >
+  One row per backtesting-lab run (sync or async). The run directory data/backtest/runs/<run_id>/ (spec.json,
+  status.json, result.json, holdings.parquet, trades.parquet) is the source of truth while a run is in flight; the API
+  syncs this row from status.json (the worker never opens app_state, except the weekly backtest_scheduled job).
+  metrics holds the flat numeric metrics used by /backtest/compare.
+storage: {path: app_state.duckdb, format: duckdb_table, partition_by: [], write_mode: upsert}
+primary_key: [run_id]
+columns:
+  - {name: run_id, type: string, nullable: false, description: "BR + UTC timestamp + 5 random base32 chars"}
+  - {name: strategy_id, type: string, nullable: true, description: "FK backtest_strategies (null for ad-hoc runs)"}
+  - {name: name, type: string, nullable: true, description: "BacktestSpec.name"}
+  - {name: bt_mode, type: enum, nullable: false, values: [rank, event], description: "Strategy mode"}
+  - {name: status, type: enum, nullable: false, values: [queued, running, completed, failed, cancelled], description: "Lifecycle"}
+  - {name: mode, type: enum, nullable: false, values: [sync, async], description: "sync = executed inside the API request; async = backtest_run job on the worker"}
+  - {name: spec, type: json, nullable: false, description: "BacktestSpec JSON"}
+  - {name: spec_hash, type: string, nullable: false, description: "sha1 of the normalized spec (without name / description / timeout)"}
+  - {name: plan_key, type: string, nullable: true, description: "Panel cache key (sha1 of plan + snapshot id + engine versions)"}
+  - {name: snapshot_id, type: string, nullable: true, description: "Serving snapshot run id at build time (data version)"}
+  - {name: seed, type: int64, nullable: false, description: "Random seed (permutations)"}
+  - {name: metrics, type: json, nullable: true, description: "Flat numeric metrics (sharpe, cagr, max_drawdown, oos_sharpe, dsr, pbo, ...)"}
+  - {name: warnings_count, type: int32, nullable: true, description: "Number of result warnings"}
+  - {name: n_trials, type: int64, nullable: true, description: "Multiple-testing counter used for the deflated Sharpe ratio of this run"}
+  - {name: scheduled, type: bool, nullable: true, description: "Run created by the backtest_scheduled job (paper strategy)"}
+  - {name: error, type: string, nullable: true, description: "Error message when failed / cancelled"}
+  - {name: error_code, type: string, nullable: true, description: "spec, dataset, timeout, cancelled, stale, internal"}
+  - {name: estimate_s, type: float64, nullable: true, description: "Estimated cost used for the sync / async decision"}
+  - {name: created_at, type: datetime, nullable: false, description: "UTC"}
+  - {name: started_at, type: datetime, nullable: true, description: "UTC"}
+  - {name: finished_at, type: datetime, nullable: true, description: "UTC"}
+  - {name: duration_s, type: float64, nullable: true, description: "Wall time"}

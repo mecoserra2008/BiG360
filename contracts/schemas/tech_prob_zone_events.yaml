@@ -1,0 +1,68 @@
+table: tech_prob_zone_events
+version: 1
+zone: features
+owner: technicals (app.techprob.job:run_fit_job, weekly technicals_probabilities_fit)
+description: >
+  Point-in-time history of confluence zones touched within 20 sessions of a weekly origin (T3 training / validation),
+  plus one random control band per real zone (level_type_backtest control: same width, centre shifted +-U(0.75, 2.5)
+  ATR). Hold = a later bar's high >= zone_high e^{1.5 sigma} (support; mirrored for resistance) before a close beyond
+  the far edge by >= 0.5 sigma, within 10 sessions after the touch; sigma = EWMA sigma_d at the origin.
+storage: {path: features/tech_prob_zone_events, format: parquet, partition_by: [region], write_mode: overwrite_partition}
+primary_key: [security_id, date, zone_id, is_control]
+columns:
+  - {name: security_id, type: string, nullable: false, description: "FK securities_master"}
+  - {name: date, type: date, nullable: false, description: "Weekly origin"}
+  - {name: region, type: string, nullable: false, description: "prices_daily region partition"}
+  - {name: sector_id, type: string, nullable: true, description: "Sector"}
+  - {name: zone_id, type: int16, nullable: false, description: "confluence zone id at the origin (the control row shares the id of its real zone)"}
+  - {name: is_control, type: bool, nullable: false, description: "Random control band (same width, centre shifted +-U(0.75, 2.5) ATR)"}
+  - {name: zone_low, type: float64, nullable: false, description: "Band low"}
+  - {name: zone_high, type: float64, nullable: false, description: "Band high"}
+  - {name: vix_high, type: float64, nullable: true, description: "FRED VIXCLS > 25 at the origin (1/0)"}
+  - {name: side, type: float64, nullable: true, storage: float32, description: "+1 support / -1 resistance"}
+  - {name: in_zone, type: float64, nullable: true, storage: float32, description: "1 when the origin close is inside the band"}
+  - {name: dist_sigma, type: float64, nullable: true, storage: float32, description: "Log distance close -> near edge / sigma_d (0 inside)"}
+  - {name: width_sigma, type: float64, nullable: true, storage: float32, description: "log(high / low) / sigma_d"}
+  - {name: approach5, type: float64, nullable: true, storage: float32, description: "5-session return toward the band / (sigma_d sqrt 5)"}
+  - {name: approach20, type: float64, nullable: true, storage: float32, description: "20-session return toward the band / (sigma_d sqrt 20)"}
+  - {name: trend_signed, type: float64, nullable: true, storage: float32, description: "side x (trend sub-score - 50) / 50"}
+  - {name: struct_signed, type: float64, nullable: true, storage: float32, description: "side x structure (+1 bullish / -1 bearish)"}
+  - {name: rsi_signed, type: float64, nullable: true, storage: float32, description: "side x (RSI14 - 50) / 50"}
+  - {name: ma50_dist_atr, type: float64, nullable: true, storage: float32, description: "(band centre - SMA50) / ATR"}
+  - {name: ma200_dist_atr, type: float64, nullable: true, storage: float32, description: "(band centre - SMA200) / ATR"}
+  - {name: ma50_in, type: float64, nullable: true, storage: float32, description: "SMA50 inside the band"}
+  - {name: ma200_in, type: float64, nullable: true, storage: float32, description: "SMA200 inside the band"}
+  - {name: close_ma200, type: float64, nullable: true, storage: float32, description: "log(close / SMA200) / sigma_d"}
+  - {name: vp_dist_atr, type: float64, nullable: true, storage: float32, description: "Distance band centre -> nearest volume-profile level / ATR (cap 10)"}
+  - {name: prior_touches, type: float64, nullable: true, storage: float32, description: "Distinct touches of the band in the last 252 sessions"}
+  - {name: prior_resolved, type: float64, nullable: true, storage: float32, description: "Of those, tests resolved (hold / break) before the origin"}
+  - {name: prior_hold_rate, type: float64, nullable: true, storage: float32, description: "(holds + 1) / (resolved + 2)"}
+  - {name: vol_regime, type: float64, nullable: true, storage: float32, description: "0 low / 1 mid / 2 high"}
+  - {name: earn_in20, type: float64, nullable: true, storage: float32, description: "Earnings day within 20 sessions"}
+  - {name: sigma_d, type: float64, nullable: true, storage: float32, description: "EWMA daily vol at the origin"}
+  - {name: fam_anchored_vwap, type: float64, nullable: true, storage: float32, description: "Level family anchored_vwap present in the zone (0 for controls)"}
+  - {name: fam_camarilla, type: float64, nullable: true, storage: float32, description: "Level family camarilla present in the zone (0 for controls)"}
+  - {name: fam_extreme, type: float64, nullable: true, storage: float32, description: "Level family extreme present in the zone (0 for controls)"}
+  - {name: fam_fib_pivot, type: float64, nullable: true, storage: float32, description: "Level family fib_pivot present in the zone (0 for controls)"}
+  - {name: fam_fibonacci, type: float64, nullable: true, storage: float32, description: "Level family fibonacci present in the zone (0 for controls)"}
+  - {name: fam_floor_pivot, type: float64, nullable: true, storage: float32, description: "Level family floor_pivot present in the zone (0 for controls)"}
+  - {name: fam_gap, type: float64, nullable: true, storage: float32, description: "Level family gap present in the zone (0 for controls)"}
+  - {name: fam_market_structure, type: float64, nullable: true, storage: float32, description: "Level family market_structure present in the zone (0 for controls)"}
+  - {name: fam_moving_average, type: float64, nullable: true, storage: float32, description: "Level family moving_average present in the zone (0 for controls)"}
+  - {name: fam_opening_range, type: float64, nullable: true, storage: float32, description: "Level family opening_range present in the zone (0 for controls)"}
+  - {name: fam_period_ohlc, type: float64, nullable: true, storage: float32, description: "Level family period_ohlc present in the zone (0 for controls)"}
+  - {name: fam_round_number, type: float64, nullable: true, storage: float32, description: "Level family round_number present in the zone (0 for controls)"}
+  - {name: fam_swing_pivot, type: float64, nullable: true, storage: float32, description: "Level family swing_pivot present in the zone (0 for controls)"}
+  - {name: fam_volume_profile, type: float64, nullable: true, storage: float32, description: "Level family volume_profile present in the zone (0 for controls)"}
+  - {name: n_families, type: float64, nullable: true, storage: float32, description: "Distinct level families"}
+  - {name: member_count, type: float64, nullable: true, storage: float32, description: "Member levels"}
+  - {name: n_types, type: float64, nullable: true, storage: float32, description: "Distinct level types"}
+  - {name: log_weight_sum, type: float64, nullable: true, storage: float32, description: "log1p(sum of member weights) (neutral reliability)"}
+  - {name: strength, type: float64, nullable: true, storage: float32, description: "Old zone strength 0..100 (baseline only)"}
+  - {name: density, type: float64, nullable: true, storage: float32, description: "KDE peak density / max peak"}
+  - {name: touched, type: bool, nullable: false, description: "Near edge reached within 20 sessions (or close inside the band at the origin)"}
+  - {name: tau, type: int16, nullable: true, description: "Sessions from the origin to the touch"}
+  - {name: outcome, type: int8, nullable: false, description: "0 unresolved, 1 hold, 2 break"}
+  - {name: complete, type: bool, nullable: false, description: "Outcome window fully realised"}
+  - {name: hold, type: bool, nullable: false, description: "outcome = hold"}
+  - {name: computed_at, type: datetime, nullable: false, description: "Write time UTC"}

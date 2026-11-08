@@ -1,0 +1,137 @@
+table: conformal_envelopes
+version: 2
+zone: features
+owner: conformal (app.conformal.envelope_job)
+description: >
+  Application A of docs/CONFORMAL_TECHNICALS_PLAN.md: conformal price envelope per security and day, MODEL-BASED.
+  Joint vector Y = forward log returns at 1/5/10/20 sessions (overlapping; nested covariance V(min(h_i, h_j)) from an
+  EWMA / GARCH variance filter + an earnings jump term) and the next-bar (high, low, close) vector vs the previous close.
+  Radius = pooled rolling split-conformal quantile of the squared Mahalanobis score (separate normal / earnings-event
+  pools), optionally ACI-adjusted; bands b* are closed-form projections a'Y_hat +- sqrt(q a'Sigma a) of the JOINT set
+  (simultaneous over the 4 horizons, hence wider than a single-horizon band); qm_* are the marginal per-horizon radii
+  for a single-horizon band. Coverage is marginal
+  over history ('calibrated to X% over history'), never a statement about a single day. Realised fields are filled
+  as outcomes arrive (the nightly job rewrites the last 21 origin partitions). Retention: last 30 origin dates.
+storage: {path: features/conformal_envelopes, format: parquet, partition_by: [as_of_date], write_mode: upsert, sort_by: [security_id], compression_level: 9}
+primary_key: [as_of_date, security_id]
+pit: {knowledge_column: as_of_date, rule: "shape, radius and bands use prices / earnings dates known at the close of as_of_date; y_*, score_*, nb_y_*, gap_flag, earn_realized are outcomes"}
+columns:
+  - {name: as_of_date, type: date, nullable: false, description: "Origin date (close of the session; partition)"}
+  - {name: security_id, type: string, nullable: false, description: "FK securities_master"}
+  - {name: region, type: string, nullable: false, description: "Listing region (prices_daily partition)"}
+  - {name: pool_key, type: string, nullable: false, description: "Calibration pool '{region}|{sector_id}' ('{region}|*' when the sector pool has < 30 securities)"}
+  - {name: sector_id, type: string, nullable: true, description: "Issuer sector (current-only classification)"}
+  - {name: filter, type: enum, nullable: false, values: [ewma, garch, gru], description: "Shape filter"}
+  - {name: radius_mode, type: enum, nullable: false, values: [plain, aci], description: "Radius used for the stored joint (b*) and marginal (qm*) bands: plain rolling split conformal or ACI-adjusted; next-bar bands always use the ACI radius (P4)"}
+  - {name: model_based, type: bool, nullable: false, description: "Always true: model-based, calibrated to X% over history (marginal), not X% chance today"}
+  - {name: last_close, type: float64, storage: float32, nullable: false, description: "Unadjusted close at as_of_date (bands are in this price basis)"}
+  - {name: sigma_d, type: float64, storage: float32, nullable: true, description: "Filter daily volatility (log return) for the next session, earnings days excluded"}
+  - {name: earn_jump_var, type: float64, storage: float32, nullable: true, description: "Earnings jump variance J (log-return^2) known at as_of_date"}
+  - {name: earn_days_ahead, type: int16, nullable: true, description: "Sessions until the first expected earnings reaction day within 20 sessions (null = none)"}
+  - {name: earn_in_window, type: bool, nullable: false, description: "An earnings reaction day is expected within the 20-session window (event calibration pool)"}
+  - {name: mu_1, type: float64, storage: float32, nullable: true, description: "Predicted mean log return over 1 sessions (0 for the ewma / garch filters)"}
+  - {name: mu_5, type: float64, storage: float32, nullable: true, description: "Predicted mean log return over 5 sessions (0 for the ewma / garch filters)"}
+  - {name: mu_10, type: float64, storage: float32, nullable: true, description: "Predicted mean log return over 10 sessions (0 for the ewma / garch filters)"}
+  - {name: mu_20, type: float64, storage: float32, nullable: true, description: "Predicted mean log return over 20 sessions (0 for the ewma / garch filters)"}
+  - {name: v_1, type: float64, storage: float32, nullable: true, description: "Predicted variance of the 1-session log return incl. the earnings jump when covered (shape)"}
+  - {name: v_5, type: float64, storage: float32, nullable: true, description: "Predicted variance of the 5-session log return incl. the earnings jump when covered (shape)"}
+  - {name: v_10, type: float64, storage: float32, nullable: true, description: "Predicted variance of the 10-session log return incl. the earnings jump when covered (shape)"}
+  - {name: v_20, type: float64, storage: float32, nullable: true, description: "Predicted variance of the 20-session log return incl. the earnings jump when covered (shape)"}
+  - {name: q_80, type: float64, storage: float32, nullable: true, description: "Joint squared-Mahalanobis radius q_hat at 80% (pooled rolling split conformal)"}
+  - {name: q_90, type: float64, storage: float32, nullable: true, description: "Joint squared-Mahalanobis radius q_hat at 90% (pooled rolling split conformal)"}
+  - {name: q_95, type: float64, storage: float32, nullable: true, description: "Joint squared-Mahalanobis radius q_hat at 95% (pooled rolling split conformal)"}
+  - {name: q_aci_80, type: float64, storage: float32, nullable: true, description: "ACI-adjusted joint radius at 80% target (unbounded stored as null)"}
+  - {name: q_aci_90, type: float64, storage: float32, nullable: true, description: "ACI-adjusted joint radius at 90% target (unbounded stored as null)"}
+  - {name: q_aci_95, type: float64, storage: float32, nullable: true, description: "ACI-adjusted joint radius at 95% target (unbounded stored as null)"}
+  - {name: aci_alpha_80, type: float64, storage: float32, nullable: true, description: "Pool ACI level alpha_t for the 80% target"}
+  - {name: aci_alpha_90, type: float64, storage: float32, nullable: true, description: "Pool ACI level alpha_t for the 90% target"}
+  - {name: aci_alpha_95, type: float64, storage: float32, nullable: true, description: "Pool ACI level alpha_t for the 95% target"}
+  - {name: q_n_cal, type: int32, nullable: true, description: "Calibration scores behind q (pool, normal or event)"}
+  - {name: q_pool_kind, type: enum, nullable: false, values: [normal, event], description: "Calibration pool used"}
+  - {name: qm_1_80, type: float64, storage: float32, nullable: true, description: "MARGINAL 80% radius for the 1-session return alone (pooled conformal quantile of y^2 / v_1; band = close x exp(+-sqrt(qm v_1))), radius_mode"}
+  - {name: qm_1_90, type: float64, storage: float32, nullable: true, description: "MARGINAL 90% radius for the 1-session return alone (pooled conformal quantile of y^2 / v_1; band = close x exp(+-sqrt(qm v_1))), radius_mode"}
+  - {name: qm_1_95, type: float64, storage: float32, nullable: true, description: "MARGINAL 95% radius for the 1-session return alone (pooled conformal quantile of y^2 / v_1; band = close x exp(+-sqrt(qm v_1))), radius_mode"}
+  - {name: qm_5_80, type: float64, storage: float32, nullable: true, description: "MARGINAL 80% radius for the 5-session return alone (pooled conformal quantile of y^2 / v_5; band = close x exp(+-sqrt(qm v_5))), radius_mode"}
+  - {name: qm_5_90, type: float64, storage: float32, nullable: true, description: "MARGINAL 90% radius for the 5-session return alone (pooled conformal quantile of y^2 / v_5; band = close x exp(+-sqrt(qm v_5))), radius_mode"}
+  - {name: qm_5_95, type: float64, storage: float32, nullable: true, description: "MARGINAL 95% radius for the 5-session return alone (pooled conformal quantile of y^2 / v_5; band = close x exp(+-sqrt(qm v_5))), radius_mode"}
+  - {name: qm_10_80, type: float64, storage: float32, nullable: true, description: "MARGINAL 80% radius for the 10-session return alone (pooled conformal quantile of y^2 / v_10; band = close x exp(+-sqrt(qm v_10))), radius_mode"}
+  - {name: qm_10_90, type: float64, storage: float32, nullable: true, description: "MARGINAL 90% radius for the 10-session return alone (pooled conformal quantile of y^2 / v_10; band = close x exp(+-sqrt(qm v_10))), radius_mode"}
+  - {name: qm_10_95, type: float64, storage: float32, nullable: true, description: "MARGINAL 95% radius for the 10-session return alone (pooled conformal quantile of y^2 / v_10; band = close x exp(+-sqrt(qm v_10))), radius_mode"}
+  - {name: qm_20_80, type: float64, storage: float32, nullable: true, description: "MARGINAL 80% radius for the 20-session return alone (pooled conformal quantile of y^2 / v_20; band = close x exp(+-sqrt(qm v_20))), radius_mode"}
+  - {name: qm_20_90, type: float64, storage: float32, nullable: true, description: "MARGINAL 90% radius for the 20-session return alone (pooled conformal quantile of y^2 / v_20; band = close x exp(+-sqrt(qm v_20))), radius_mode"}
+  - {name: qm_20_95, type: float64, storage: float32, nullable: true, description: "MARGINAL 95% radius for the 20-session return alone (pooled conformal quantile of y^2 / v_20; band = close x exp(+-sqrt(qm v_20))), radius_mode"}
+  - {name: b1_80_lo, type: float64, storage: float32, nullable: true, description: "80% joint-envelope lower price for the close 1 session(s) ahead (projection of the ellipsoid)"}
+  - {name: b1_80_hi, type: float64, storage: float32, nullable: true, description: "80% joint-envelope upper price for the close 1 session(s) ahead"}
+  - {name: b1_90_lo, type: float64, storage: float32, nullable: true, description: "90% joint-envelope lower price for the close 1 session(s) ahead (projection of the ellipsoid)"}
+  - {name: b1_90_hi, type: float64, storage: float32, nullable: true, description: "90% joint-envelope upper price for the close 1 session(s) ahead"}
+  - {name: b1_95_lo, type: float64, storage: float32, nullable: true, description: "95% joint-envelope lower price for the close 1 session(s) ahead (projection of the ellipsoid)"}
+  - {name: b1_95_hi, type: float64, storage: float32, nullable: true, description: "95% joint-envelope upper price for the close 1 session(s) ahead"}
+  - {name: b5_80_lo, type: float64, storage: float32, nullable: true, description: "80% joint-envelope lower price for the close 5 session(s) ahead (projection of the ellipsoid)"}
+  - {name: b5_80_hi, type: float64, storage: float32, nullable: true, description: "80% joint-envelope upper price for the close 5 session(s) ahead"}
+  - {name: b5_90_lo, type: float64, storage: float32, nullable: true, description: "90% joint-envelope lower price for the close 5 session(s) ahead (projection of the ellipsoid)"}
+  - {name: b5_90_hi, type: float64, storage: float32, nullable: true, description: "90% joint-envelope upper price for the close 5 session(s) ahead"}
+  - {name: b5_95_lo, type: float64, storage: float32, nullable: true, description: "95% joint-envelope lower price for the close 5 session(s) ahead (projection of the ellipsoid)"}
+  - {name: b5_95_hi, type: float64, storage: float32, nullable: true, description: "95% joint-envelope upper price for the close 5 session(s) ahead"}
+  - {name: b10_80_lo, type: float64, storage: float32, nullable: true, description: "80% joint-envelope lower price for the close 10 session(s) ahead (projection of the ellipsoid)"}
+  - {name: b10_80_hi, type: float64, storage: float32, nullable: true, description: "80% joint-envelope upper price for the close 10 session(s) ahead"}
+  - {name: b10_90_lo, type: float64, storage: float32, nullable: true, description: "90% joint-envelope lower price for the close 10 session(s) ahead (projection of the ellipsoid)"}
+  - {name: b10_90_hi, type: float64, storage: float32, nullable: true, description: "90% joint-envelope upper price for the close 10 session(s) ahead"}
+  - {name: b10_95_lo, type: float64, storage: float32, nullable: true, description: "95% joint-envelope lower price for the close 10 session(s) ahead (projection of the ellipsoid)"}
+  - {name: b10_95_hi, type: float64, storage: float32, nullable: true, description: "95% joint-envelope upper price for the close 10 session(s) ahead"}
+  - {name: b20_80_lo, type: float64, storage: float32, nullable: true, description: "80% joint-envelope lower price for the close 20 session(s) ahead (projection of the ellipsoid)"}
+  - {name: b20_80_hi, type: float64, storage: float32, nullable: true, description: "80% joint-envelope upper price for the close 20 session(s) ahead"}
+  - {name: b20_90_lo, type: float64, storage: float32, nullable: true, description: "90% joint-envelope lower price for the close 20 session(s) ahead (projection of the ellipsoid)"}
+  - {name: b20_90_hi, type: float64, storage: float32, nullable: true, description: "90% joint-envelope upper price for the close 20 session(s) ahead"}
+  - {name: b20_95_lo, type: float64, storage: float32, nullable: true, description: "95% joint-envelope lower price for the close 20 session(s) ahead (projection of the ellipsoid)"}
+  - {name: b20_95_hi, type: float64, storage: float32, nullable: true, description: "95% joint-envelope upper price for the close 20 session(s) ahead"}
+  - {name: nb_mu_h, type: float64, storage: float32, nullable: true, description: "Next bar: predicted mean of log(high/prev close)"}
+  - {name: nb_mu_l, type: float64, storage: float32, nullable: true, description: "Next bar: predicted mean of log(low/prev close)"}
+  - {name: nb_mu_c, type: float64, storage: float32, nullable: true, description: "Next bar: predicted mean of log(close/prev close)"}
+  - {name: nb_s_hh, type: float64, storage: float32, nullable: true, description: "Next bar: predicted covariance element hh (h = high, l = low, c = close; log units)"}
+  - {name: nb_s_ll, type: float64, storage: float32, nullable: true, description: "Next bar: predicted covariance element ll (h = high, l = low, c = close; log units)"}
+  - {name: nb_s_cc, type: float64, storage: float32, nullable: true, description: "Next bar: predicted covariance element cc (h = high, l = low, c = close; log units)"}
+  - {name: nb_s_hl, type: float64, storage: float32, nullable: true, description: "Next bar: predicted covariance element hl (h = high, l = low, c = close; log units)"}
+  - {name: nb_s_hc, type: float64, storage: float32, nullable: true, description: "Next bar: predicted covariance element hc (h = high, l = low, c = close; log units)"}
+  - {name: nb_s_lc, type: float64, storage: float32, nullable: true, description: "Next bar: predicted covariance element lc (h = high, l = low, c = close; log units)"}
+  - {name: nb_earn, type: bool, nullable: false, description: "The next session is an expected earnings reaction day (event pool, jump in the shape)"}
+  - {name: nb_q_80, type: float64, storage: float32, nullable: true, description: "Next-bar joint radius at 80%"}
+  - {name: nb_q_90, type: float64, storage: float32, nullable: true, description: "Next-bar joint radius at 90%"}
+  - {name: nb_q_95, type: float64, storage: float32, nullable: true, description: "Next-bar joint radius at 95%"}
+  - {name: nb_q_aci_80, type: float64, storage: float32, nullable: true, description: "Next-bar ACI radius at 80% target"}
+  - {name: nb_q_aci_90, type: float64, storage: float32, nullable: true, description: "Next-bar ACI radius at 90% target"}
+  - {name: nb_q_aci_95, type: float64, storage: float32, nullable: true, description: "Next-bar ACI radius at 95% target"}
+  - {name: nb_h_80_lo, type: float64, storage: float32, nullable: true, description: "Next-bar high: 80% joint-set lower price"}
+  - {name: nb_h_80_hi, type: float64, storage: float32, nullable: true, description: "Next-bar high: 80% joint-set upper price"}
+  - {name: nb_h_90_lo, type: float64, storage: float32, nullable: true, description: "Next-bar high: 90% joint-set lower price"}
+  - {name: nb_h_90_hi, type: float64, storage: float32, nullable: true, description: "Next-bar high: 90% joint-set upper price"}
+  - {name: nb_h_95_lo, type: float64, storage: float32, nullable: true, description: "Next-bar high: 95% joint-set lower price"}
+  - {name: nb_h_95_hi, type: float64, storage: float32, nullable: true, description: "Next-bar high: 95% joint-set upper price"}
+  - {name: nb_l_80_lo, type: float64, storage: float32, nullable: true, description: "Next-bar low: 80% joint-set lower price"}
+  - {name: nb_l_80_hi, type: float64, storage: float32, nullable: true, description: "Next-bar low: 80% joint-set upper price"}
+  - {name: nb_l_90_lo, type: float64, storage: float32, nullable: true, description: "Next-bar low: 90% joint-set lower price"}
+  - {name: nb_l_90_hi, type: float64, storage: float32, nullable: true, description: "Next-bar low: 90% joint-set upper price"}
+  - {name: nb_l_95_lo, type: float64, storage: float32, nullable: true, description: "Next-bar low: 95% joint-set lower price"}
+  - {name: nb_l_95_hi, type: float64, storage: float32, nullable: true, description: "Next-bar low: 95% joint-set upper price"}
+  - {name: nb_c_80_lo, type: float64, storage: float32, nullable: true, description: "Next-bar close: 80% joint-set lower price"}
+  - {name: nb_c_80_hi, type: float64, storage: float32, nullable: true, description: "Next-bar close: 80% joint-set upper price"}
+  - {name: nb_c_90_lo, type: float64, storage: float32, nullable: true, description: "Next-bar close: 90% joint-set lower price"}
+  - {name: nb_c_90_hi, type: float64, storage: float32, nullable: true, description: "Next-bar close: 90% joint-set upper price"}
+  - {name: nb_c_95_lo, type: float64, storage: float32, nullable: true, description: "Next-bar close: 95% joint-set lower price"}
+  - {name: nb_c_95_hi, type: float64, storage: float32, nullable: true, description: "Next-bar close: 95% joint-set upper price"}
+  - {name: y_1, type: float64, storage: float32, nullable: true, description: "Realised log return over 1 sessions (null until available)"}
+  - {name: y_5, type: float64, storage: float32, nullable: true, description: "Realised log return over 5 sessions (null until available)"}
+  - {name: y_10, type: float64, storage: float32, nullable: true, description: "Realised log return over 10 sessions (null until available)"}
+  - {name: y_20, type: float64, storage: float32, nullable: true, description: "Realised log return over 20 sessions (null until available)"}
+  - {name: score_joint, type: float64, storage: float32, nullable: true, description: "Realised squared-Mahalanobis score of the joint vector (null until all horizons are realised)"}
+  - {name: nb_y_h, type: float64, storage: float32, nullable: true, description: "Realised next-bar log(high/close)"}
+  - {name: nb_y_l, type: float64, storage: float32, nullable: true, description: "Realised next-bar log(low/close)"}
+  - {name: nb_y_c, type: float64, storage: float32, nullable: true, description: "Realised next-bar log(close/close)"}
+  - {name: score_nb, type: float64, storage: float32, nullable: true, description: "Realised next-bar score"}
+  - {name: gap_flag, type: bool, nullable: true, description: "Realised next open gapped by more than 3 sigma_d (overnight gap)"}
+  - {name: earn_realized, type: bool, nullable: true, description: "An earnings reaction day actually fell in the 20-session window"}
+  - {name: fan_v, type: "list<float64>", nullable: true, description: "Fan (v2, Technicals v2 T1): predicted variance V(h) of the h-session log return for h = 1..20 (index h-1; filter variance term structure incl. the earnings jump when an event falls in (t, t+h]); null when any horizon is missing"}
+  - {name: fan_qm_80, type: "list<float64>", nullable: true, description: "Fan (v2): MARGINAL 80% radius per horizon h = 1..20 (index h-1), calibrated per h (pooled rolling split conformal of y_h^2 / V(h), lag h, normal / event pool by whether an earnings day falls in (t, t+h]); band = close x exp(+-sqrt(fan_qm fan_v)); radius_mode"}
+  - {name: fan_qm_90, type: "list<float64>", nullable: true, description: "Fan (v2): MARGINAL 90% radius per horizon h = 1..20 (see fan_qm_80)"}
+  - {name: fan_qm_95, type: "list<float64>", nullable: true, description: "Fan (v2): MARGINAL 95% radius per horizon h = 1..20 (see fan_qm_80)"}
+  - {name: computed_at, type: datetime, nullable: false, description: "Write time UTC"}
+  - {name: run_id, type: string, nullable: true, description: "job_runs.run_id"}

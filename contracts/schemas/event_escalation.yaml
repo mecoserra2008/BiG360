@@ -1,0 +1,39 @@
+table: event_escalation
+version: 1
+zone: scores
+owner: event-models (app.events_models.hawkes, job event_escalation)
+description: >
+  C1 bivariate discrete-time Hawkes model per country x theme group on daily labelled event counts (T1 ev_n of the
+  group's themes): dimension 1 = the country, dimension 2 = its W-weighted neighbours (row-standardized geographic
+  / linkage W). Intensity lambda_i(t) = mu_i + sum_j alpha_ij sum_{s<t} beta exp(-beta (t-s-1)) N_j(s), fitted by
+  EM (branching-structure latent attribution) with beta chosen by likelihood on a grid. branching_ratio = spectral
+  radius of [alpha_ij] (< 1 stationary); alpha_self = own excitation, alpha_from_nbrs = neighbours -> country,
+  alpha_to_nbrs = country -> neighbours (cross-excitation / spillover). Escalation probability = P(sum of the
+  next 7 / 30 days' events > the historical 90th percentile of 7 / 30-day sums), by Monte-Carlo simulation of the
+  fitted process from the current state (Poisson cluster draws; neighbours simulated jointly). Model-based.
+  One snapshot per run (as_of).
+storage: {path: scores/event_escalation, format: parquet, partition_by: [], write_mode: upsert, retention: "last 104 snapshots"}
+primary_key: [as_of, iso2, theme_group]
+columns:
+  - {name: as_of, type: date, nullable: false, description: "Last day of data used"}
+  - {name: iso2, type: string, nullable: false, description: "Country ISO2"}
+  - {name: theme_group, type: string, nullable: false, description: "Theme group (taxonomy group: geo, social, politics, macro, ...) or all"}
+  - {name: window_start, type: date, nullable: false, description: "First day fitted"}
+  - {name: n_days, type: int32, nullable: false, description: "Days fitted"}
+  - {name: n_events, type: int64, nullable: false, description: "Events of the country in the window"}
+  - {name: mu, type: float64, nullable: true, description: "Background rate (events/day)"}
+  - {name: alpha_self, type: float64, nullable: true, description: "Self-excitation (expected offspring per own event)"}
+  - {name: alpha_from_nbrs, type: float64, nullable: true, description: "Excitation from neighbour events"}
+  - {name: alpha_to_nbrs, type: float64, nullable: true, description: "Excitation of neighbours by own events"}
+  - {name: beta, type: float64, nullable: true, description: "Kernel decay (1/day)"}
+  - {name: branching_ratio, type: float64, nullable: true, description: "Spectral radius of the excitation matrix"}
+  - {name: lambda_now, type: float64, nullable: true, description: "Conditional intensity for the next day"}
+  - {name: expected_7d, type: float64, nullable: true, description: "Expected events over the next 7 days"}
+  - {name: expected_30d, type: float64, nullable: true, description: "Expected events over the next 30 days"}
+  - {name: threshold_7d, type: float64, nullable: true, description: "Historical 90th percentile of 7-day sums"}
+  - {name: threshold_30d, type: float64, nullable: true, description: "Historical 90th percentile of 30-day sums (scaled from 7-day when history < 60 days)"}
+  - {name: p_escalation_7d, type: float64, nullable: true, description: "P(next 7-day sum > threshold_7d)"}
+  - {name: p_escalation_30d, type: float64, nullable: true, description: "P(next 30-day sum > threshold_30d)"}
+  - {name: llf, type: float64, nullable: true, description: "Log-likelihood (Poisson)"}
+  - {name: converged, type: bool, nullable: false, description: "EM converged"}
+  - {name: computed_at, type: datetime, nullable: false, description: "Write time UTC"}

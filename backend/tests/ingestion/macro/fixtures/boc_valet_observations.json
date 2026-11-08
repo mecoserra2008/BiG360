@@ -1,0 +1,131 @@
+{
+    "terms": {
+        "url": "https://www.bankofcanada.ca/terms/"
+    },
+    "seriesDetail": {
+        "BD.CDN.10YR.DQ.YLD": {
+            "label": "Benchmark bond yield, 10-year",
+            "description": "The yield on the Government of Canada 10-year benchmark bond. This series represents the prevailing market interest rate for the 10-year Government of Canada bond and is used as a reference for financial market analysis and reporting.",
+            "dimension": {
+                "key": "d",
+                "name": "Date"
+            }
+        },
+        "BD.CDN.2YR.DQ.YLD": {
+            "label": "Benchmark bond yield, 2-year",
+            "description": "The yield on the Government of Canada 2-year benchmark bond. This series reflects the prevailing interest rate for the 2-year term and is used to monitor short-term government borrowing costs.",
+            "dimension": {
+                "key": "d",
+                "name": "Date"
+            }
+        },
+        "TB.CDN.90D.MID": {
+            "label": "Treasury bills, 3-month",
+            "description": "The mid-market yield for Government of Canada treasury bills with a 3-month maturity. Treasury bill yields presented are an average of sample secondary market yields taken throughout the business day. (V39065)",
+            "dimension": {
+                "key": "d",
+                "name": "Date"
+            }
+        },
+        "V39079": {
+            "label": "Target for the overnight rate (business daily)",
+            "description": "Also called the policy interest rate, the average rate that the Bank of Canada wants to see in the market for overnight money market financing. (V39079)",
+            "dimension": {
+                "key": "d",
+                "name": "Date"
+            }
+        }
+    },
+    "observations": [
+        {
+            "d": "2026-10-01",
+            "TB.CDN.90D.MID": {
+                "v": "2.39"
+            },
+            "V39079": {
+                "v": "2.25"
+            },
+            "BD.CDN.10YR.DQ.YLD": {
+                "v": "3.94"
+            },
+            "BD.CDN.2YR.DQ.YLD": {
+                "v": "3.27"
+            }
+        },
+        {
+            "d": "2026-10-02",
+            "TB.CDN.90D.MID": {
+                "v": "2.38"
+            },
+            "V39079": {
+                "v": "2.25"
+            },
+            "BD.CDN.10YR.DQ.YLD": {
+                "v": "3.93"
+            },
+            "BD.CDN.2YR.DQ.YLD": {
+                "v": "3.25"
+            }
+        },
+        {
+            "d": "2026-10-05",
+            "BD.CDN.2YR.DQ.YLD": {
+                "v": "3.26"
+            },
+            "V39079": {
+                "v": "2.25"
+            },
+            "TB.CDN.90D.MID": {
+                "v": "2.38"
+            },
+            "BD.CDN.10YR.DQ.YLD": {
+                "v": "3.96"
+            }
+        },
+        {
+            "d": "2026-10-06",
+            "BD.CDN.10YR.DQ.YLD": {
+                "v": "3.92"
+            },
+            "V39079": {
+                "v": "2.25"
+            },
+            "TB.CDN.90D.MID": {
+                "v": "2.38"
+            },
+            "BD.CDN.2YR.DQ.YLD": {
+                "v": "3.23"
+            }
+        },
+        {
+            "d": "2026-10-07",
+            "TB.CDN.90D.MID": {
+                "v": "2.39"
+            },
+            "BD.CDN.10YR.DQ.YLD": {
+                "v": "3.94"
+            },
+            "BD.CDN.2YR.DQ.YLD": {
+                "v": "3.23"
+            },
+            "V39079": {
+                "v": "2.25"
+            }
+        },
+        {
+            "d": "2026-10-08",
+            "BD.CDN.10YR.DQ.YLD": {
+                "v": "3.93"
+            },
+            "TB.CDN.90D.MID": {
+                "v": "2.39"
+            },
+            "BD.CDN.2YR.DQ.YLD": {
+                "v": "3.24"
+            },
+            "V39079": {
+                "v": "2.25"
+            }
+        }
+    ]
+}

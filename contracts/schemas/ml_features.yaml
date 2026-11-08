@@ -1,0 +1,31 @@
+table: ml_features
+version: 1
+zone: ml
+owner: ml (app.ml.features)
+description: >
+  Cross-sectional feature matrix, one row per (date, security) on rebalance dates (every Friday + month-ends),
+  all features PIT (knowledge_date <= date). Feature columns are prefixed 'f_' and registered in
+  backend/app/ml/feature_registry.yaml (owned by ml agent) with family + transform. Raw features are stored;
+  cross-sectional rank-gauss normalization happens in the model pipeline.
+storage: {path: ml/ml_features, format: parquet, partition_by: [year], write_mode: upsert}
+primary_key: [date, security_id]
+pit: {knowledge_column: date, rule: "every f_* computed from data with knowledge_date <= date"}
+dynamic_columns:
+  source: backend/app/ml/feature_registry.yaml
+  pattern: "f_{feature_id}"
+  type: float32
+  nullable: true
+columns:
+  - {name: date, type: date, nullable: false, description: "Rebalance date"}
+  - {name: year, type: int16, nullable: false, description: "Partition"}
+  - {name: security_id, type: string, nullable: false, description: "FK securities_master"}
+  - {name: issuer_id, type: string, nullable: false, description: "FK issuers"}
+  - {name: sector_id, type: string, nullable: false, description: "Sector at date"}
+  - {name: subsector_id, type: string, nullable: true, description: "Subsector"}
+  - {name: region, type: string, nullable: false, description: "Region"}
+  - {name: size_bucket, type: string, nullable: true, description: "large/mid/small"}
+  - {name: market_cap_usd, type: float64, nullable: true, description: "For weighting / filters"}
+  - {name: adv_usd_20d, type: float64, nullable: true, description: "20d avg dollar volume (liquidity filter)"}
+  - {name: in_universe, type: bool, nullable: false, description: "Member of training universe at date (liquidity + data filters)"}
+  - {name: feature_set_version, type: string, nullable: false, description: "Hash of feature registry"}
+  - {name: computed_at, type: datetime, nullable: false, description: "Write time UTC"}

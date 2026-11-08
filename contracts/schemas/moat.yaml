@@ -1,0 +1,32 @@
+table: moat
+version: 1
+zone: scores
+owner: analytics-valuation (app.analytics.moat)
+description: >
+  Moat classification per issuer (weekly + on new annual filing). Evidence components each scored 0..100;
+  classification rule in scoring.yaml moat section.
+storage: {path: scores/moat, format: parquet, partition_by: [], write_mode: upsert}
+primary_key: [as_of_date, issuer_id]
+pit: {knowledge_column: as_of_date, rule: "inputs knowledge_date <= as_of_date"}
+columns:
+  - {name: as_of_date, type: date, nullable: false, description: "Evaluation date"}
+  - {name: issuer_id, type: string, nullable: false, description: "FK issuers"}
+  - {name: moat_class, type: enum, nullable: false, values: [wide, narrow, none, insufficient_data], description: "Classification"}
+  - {name: confidence, type: float64, nullable: false, description: "0..1"}
+  - {name: moat_score, type: float64, nullable: true, description: "0..100 weighted evidence score"}
+  - {name: roic_wacc_spread_avg, type: float64, nullable: true, description: "Mean (ROIC - WACC) over window"}
+  - {name: roic_wacc_persistence, type: float64, nullable: true, description: "Share of years ROIC > WACC"}
+  - {name: years_evaluated, type: int16, nullable: true, description: "Years of history used (max 10)"}
+  - {name: gm_level_pct, type: float64, nullable: true, description: "Peer percentile of gross margin level"}
+  - {name: gm_stability_pct, type: float64, nullable: true, description: "Peer percentile of -stdev(gross margin)"}
+  - {name: margin_premium_pct, type: float64, nullable: true, description: "Percentile of operating margin minus peer median"}
+  - {name: subsector_revenue_share, type: float64, nullable: true, description: "Issuer revenue / sum subsector revenue (global, USD)"}
+  - {name: intangibles_intensity_pct, type: float64, nullable: true, description: "Percentile of (R&D + intangibles amort + capitalized intangibles)/revenue"}
+  - {name: component_scores, type: json, nullable: false, description: "{component_id: score0..100} for all components"}
+  - {name: sources_of_moat, type: list<string>, nullable: true, description: "Heuristic tags: scale, intangibles, switching_costs, network, cost_advantage, efficient_scale (ordered by strength)"}
+  - {name: wacc, type: float64, nullable: true, description: "WACC used"}
+  - {name: component_detail, type: json, nullable: true, description: "Added (analytics-valuation): {component_id: {score, value, threshold, passed, weight, history?[{fiscal_year, value}]}} + _roic_vs_wacc [{fiscal_year, roic, hurdle}] (financials: ROE vs cost of equity)"}
+  - {name: moat_sources, type: json, nullable: true, description: "Added: typed sources [{type: scale|intangibles|switching_costs|network|cost_advantage|efficient_scale, strength 0..100}] (wide/narrow only)"}
+  - {name: model_variant, type: enum, nullable: true, values: [standard, financial], description: "Added: financial = ROE-CoE / pretax-margin variant (banks, insurers, consumer finance, holdings, levered FINS)"}
+  - {name: computed_at, type: datetime, nullable: false, description: "Write time UTC"}
+  - {name: run_id, type: string, nullable: true, description: "Producing run"}

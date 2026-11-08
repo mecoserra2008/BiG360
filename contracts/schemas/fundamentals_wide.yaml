@@ -1,0 +1,31 @@
+table: fundamentals_wide
+version: 1
+zone: features
+owner: ref-identity (app.normalize.fundamentals)
+description: >
+  Derived pivot of fundamentals_canonical: one row per (issuer, period, currency_basis, knowledge_date),
+  one float64 column per canonical item id. Each row holds the full statement AS KNOWN at knowledge_date
+  (later restatements produce new rows). currency_basis LOCAL = reporting currency, USD = converted.
+storage: {path: features/fundamentals_wide, format: parquet, partition_by: [currency_basis, period_kind], write_mode: upsert}
+primary_key: [issuer_id, period_end, period_kind, currency_basis, knowledge_date]
+pit: {knowledge_column: knowledge_date, rule: "as-of row = max(knowledge_date) <= D per (issuer_id, period_end, period_kind, currency_basis)"}
+dynamic_columns:
+  source: contracts/canonical_line_items.yaml
+  pattern: "{item_id}"
+  type: float64
+  nullable: true
+columns:
+  - {name: issuer_id, type: string, nullable: false, description: "FK issuers"}
+  - {name: currency_basis, type: enum, nullable: false, values: [LOCAL, USD], description: "Partition: value currency basis"}
+  - {name: period_kind, type: enum, nullable: false, values: [FY, Q, H, TTM], description: "Partition; INSTANT items are joined onto the period_end row"}
+  - {name: fiscal_year, type: int16, nullable: false, description: "Fiscal year"}
+  - {name: fiscal_period, type: enum, nullable: false, values: [FY, Q1, Q2, Q3, Q4, H1, H2, TTM], description: "Fiscal period"}
+  - {name: period_start, type: date, nullable: true, description: "Period start"}
+  - {name: period_end, type: date, nullable: false, description: "Period end"}
+  - {name: currency, type: string, nullable: false, description: "Currency of the monetary columns (reporting ccy or USD)"}
+  - {name: gaap, type: string, nullable: false, description: "Accounting framework"}
+  - {name: knowledge_date, type: date, nullable: false, description: "Max knowledge_date of the constituent items"}
+  - {name: knowledge_date_estimated, type: bool, nullable: false, description: "Any constituent imputed"}
+  - {name: coverage, type: float32, nullable: false, description: "Share of 'core' items present (0..1)"}
+  - {name: dq_score, type: float32, nullable: false, description: "Mean item dq_score weighted by core items"}
+  - {name: computed_at, type: datetime, nullable: false, description: "Write time UTC"}

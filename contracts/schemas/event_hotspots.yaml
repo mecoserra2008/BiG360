@@ -1,0 +1,44 @@
+table: event_hotspots
+version: 1
+zone: scores
+owner: event-models (app.events_models.hotspots, job event_hotspots)
+description: >
+  B1 spatial hotspots of GDELT event activity by ISO week x market theme x measure over countries (T1
+  event_daily_agg). Measures: attention (weekly mean attention_z, i.e. unusual coverage vs the country's own
+  baseline), tone (weekly mean article tone, else event tone), intensity (theme share of the country's labelled
+  events + articles; for theme 'all' the conflict share of events). Countries need >= 20 labelled items per day on
+  average in the week. Spatial weights w_kind / w_source (linkage spatial_weights when available, else Natural Earth
+  queen contiguity with nearest-neighbour fill for islands), row-standardized. Global Moran's I (permutation p, 499
+  perms) is repeated on each row of the (week, theme, measure) cross-section; LISA (local Moran, conditional
+  permutation p) quadrant HH/LL/HL/LH; Getis-Ord Gi* z with hotspot bins hot/cold at 90/95/99% (permutation p);
+  emerging hotspot class (ESRI-style rules on the location's Gi* history up to that week with a Mann-Kendall
+  trend) new/consecutive/intensifying/persistent/diminishing/sporadic/oscillating/historical (suffix _hot / _cold)
+  or none. Model-based. Incremental: weeks whose T1 input changed are recomputed (newest-first backfills converge).
+storage: {path: scores/event_hotspots, format: parquet, partition_by: [year], write_mode: upsert, retention: "forever"}
+primary_key: [week, theme, measure, iso2]
+columns:
+  - {name: year, type: int16, nullable: false, description: "Partition: year of week"}
+  - {name: week, type: date, nullable: false, description: "Week start (Monday, UTC)"}
+  - {name: theme, type: string, nullable: false, description: "Market theme id (app.events_v2.taxonomy) or 'all'"}
+  - {name: measure, type: enum, nullable: false, values: [attention, tone, intensity], description: "Mapped variable"}
+  - {name: iso2, type: string, nullable: false, description: "Country ISO2"}
+  - {name: value, type: float64, nullable: true, description: "Weekly value of the measure"}
+  - {name: n_items, type: int32, nullable: false, description: "Labelled events + articles of the country (theme) in the week"}
+  - {name: lisa_i, type: float64, nullable: true, description: "Local Moran's I"}
+  - {name: lisa_p, type: float64, nullable: true, description: "LISA folded (directed) conditional-permutation pseudo p, esda convention (~2 alpha false-positive rate at alpha under the null)"}
+  - {name: lisa_quadrant, type: enum, nullable: false, values: [HH, LH, LL, HL, ns], description: "Quadrant when lisa_p < 0.05, else ns"}
+  - {name: gi_z, type: float64, nullable: true, description: "Getis-Ord Gi* z (includes the location)"}
+  - {name: gi_p, type: float64, nullable: true, description: "Gi* permutation p"}
+  - {name: hotspot, type: enum, nullable: false, values: [hot99, hot95, hot90, cold99, cold95, cold90, ns], description: "Gi* bin"}
+  - {name: emerging_class, type: string, nullable: true, description: "Emerging hotspot class as of this week (e.g. new_hot, persistent_hot, sporadic_cold, none)"}
+  - {name: n_weeks_hist, type: int16, nullable: false, description: "Weeks of history used for the emerging class"}
+  - {name: mk_tau, type: float64, nullable: true, description: "Mann-Kendall tau of the Gi* z history"}
+  - {name: mk_p, type: float64, nullable: true, description: "Mann-Kendall p"}
+  - {name: moran_i, type: float64, nullable: true, description: "Global Moran's I of the cross-section"}
+  - {name: moran_p, type: float64, nullable: true, description: "Global Moran permutation p"}
+  - {name: moran_z, type: float64, nullable: true, description: "Global Moran z (permutation)"}
+  - {name: n_units, type: int16, nullable: false, description: "Countries in the cross-section"}
+  - {name: w_kind, type: string, nullable: false, description: "Weights kind"}
+  - {name: w_source, type: string, nullable: false, description: "linkage | natural_earth_fallback"}
+  - {name: input_hash, type: string, nullable: false, description: "Fingerprint of the T1 week input (incremental recompute)"}
+  - {name: computed_at, type: datetime, nullable: false, description: "Write time UTC"}

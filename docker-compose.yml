@@ -1,0 +1,56 @@
+# BiG Equity 360 - OPTIONAL Docker path. The primary path is native Windows: .\run_all.ps1
+#   docker compose up --build            (API :8000, frontend :5173, worker in background)
+# Data lives in ./data on the host (bind mount) so native and Docker runs share the same lake.
+# Keys: ./.env is mounted read-only into the backend containers (never baked into images).
+name: big360
+
+x-backend: &backend
+  build:
+    context: .
+    dockerfile: backend/Dockerfile
+  image: big360-backend:latest
+  env_file:
+    - path: ./.env
+      required: false
+  environment:
+    BIG360_ROOT: /app
+    BIG360_SCHEDULER_TZ: ${BIG360_SCHEDULER_TZ:-Europe/Lisbon}
+    BIG360_CORS_ORIGINS: '["http://localhost:5173","http://127.0.0.1:5173"]'
+  volumes:
+    - ./data:/app/data
+    - ./contracts:/app/contracts:ro
+    - ./.env:/app/.env:ro
+    - ./models_store:/app/models_store
+  restart: unless-stopped
+
+services:
+  api:
+    <<: *backend
+    container_name: big360-api
+    command: ["python", "-m", "uvicorn", "app.api.main:app", "--host", "0.0.0.0", "--port", "8000"]
+    ports:
+      - "127.0.0.1:8000:8000"
+
+  worker:
+    <<: *backend
+    container_name: big360-worker
+    command: ["python", "-m", "app.scheduler.worker"]
+    healthcheck:
+      test: ["CMD", "python", "-c", "import json,time,datetime as d;h=json.load(open('/app/data/state/worker.json'));assert (d.datetime.now(d.timezone.utc)-d.datetime.fromisoformat(h['heartbeat_at'])).total_seconds()<120"]
+      interval: 60s
+      timeout: 10s
+      start_period: 60s
+    stop_grace_period: 5m
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: big360-frontend
+    environment:
+      VITE_USE_MOCK: "false"
+      VITE_API_URL: http://localhost:8000
+    ports:
+      - "127.0.0.1:5173:5173"
+    depends_on:
+      - api

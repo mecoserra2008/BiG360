@@ -1,0 +1,17 @@
+﻿F2 CAPITAL MARKET YIELDS – GOVERNMENT BONDS
+Title,Australian Government 2 year bond,Australian Government 3 year bond,Australian Government 5 year bond,Australian Government 10 year bond,Australian Government Indexed Bond
+Description,"Yields on Australian government bonds, interpolated, 2 years maturity","Yields on Australian government bonds, interpolated, 3 years maturity","Yields on Australian government bonds, interpolated, 5 years maturity","Yields on Australian government bonds, interpolated, 10 years maturity","Yields on Australian government indexed bonds, interpolated, 10 years maturity"
+Frequency,Daily,Daily,Daily,Daily,Daily
+Type,Original,Original,Original,Original,Original
+Units,Per cent per annum,Per cent per annum,Per cent per annum,Per cent per annum,Per cent per annum
+
+
+Source,RBA,RBA,RBA,RBA,RBA
+Publication date,09-Oct-2026,09-Oct-2026,09-Oct-2026,09-Oct-2026,09-Oct-2026
+Series ID,FCMYGBAG2D,FCMYGBAG3D,FCMYGBAG5D,FCMYGBAG10D,FCMYGBAGID
+30-Sep-2026,4.942,4.922,4.983,5.344,2.942
+01-Oct-2026,4.987,4.973,5.037,5.397,2.992
+02-Oct-2026,4.909,4.891,4.960,5.334,2.926
+05-Oct-2026
+06-Oct-2026,4.931,4.923,5.005,5.394,2.987
+07-Oct-2026,4.940,4.933,5.014,5.404,3.002

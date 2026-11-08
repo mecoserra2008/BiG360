@@ -1,0 +1,362 @@
+{
+"Fecha_-_Date": [
+[
+"",
+""
+],
+[
+"",
+"Fecha de Publicación"
+],
+[
+"",
+"Date of publication"
+],
+[
+"",
+" 2026-10-16 "
+]
+],
+"Última_-_Current": [
+[
+"",
+"",
+"",
+"",
+"",
+""
+],
+[
+"",
+"",
+"",
+"",
+"",
+""
+],
+[
+"",
+"",
+"",
+"",
+"",
+""
+],
+[
+"LEI",
+"ISIN",
+"Emisor / Issuer",
+"Tenedor de la Posición / Position holder",
+"Fecha posición / Position date",
+"Posición corta (%) / Net short position (%)"
+],
+[
+"54930002KP75TLLLNO21",
+"ES0125220311",
+"ACCIONA, S.A.",
+"BlackRock Investment Management (UK) Limited",
+" 2026-08-04 ",
+0.62
+],
+[
+"54930002KP75TLLLNO21",
+"ES0125220311",
+"ACCIONA, S.A.",
+"AQR Capital Management, LLC",
+" 2026-10-06 ",
+0.5
+],
+[
+"9598004A3FTY3TEHHN09",
+"ES0109067019",
+"AMADEUS IT GROUP, S.A.",
+"AQR Capital Management, LLC",
+" 2026-10-13 ",
+0.5
+],
+[
+"959800GZESQUFLUH5402",
+"ES0109260291",
+"AMPER, S.A.",
+"Arrowstreet Capital, Limited Partnership",
+" 2026-10-14 ",
+0.6
+],
+[
+"959800GZESQUFLUH5402",
+"ES0109260291",
+"AMPER, S.A.",
+"WorldQuant, LLC",
+" 2026-10-06 ",
+0.71
+],
+[
+"959800GZESQUFLUH5402",
+"ES0109260531",
+"AMPER, S.A.",
+"Connor, Clark & Lunn Investment Management Ltd.",
+" 2026-06-29 ",
+0.6
+],
+[
+"959800GZESQUFLUH5402",
+"ES0109260531",
+"AMPER, S.A.",
+"Tudor Capital Europe LLP",
+" 2026-06-30 ",
+0.5
+],
+[
+"959800GZESQUFLUH5402",
+"ES0109260531",
+"AMPER, S.A.",
+"ActusRayPartners Limited",
+" 2026-05-11 ",
+0.92
+],
+[
+"95980020140005491929",
+"ES0109427734",
+"ATRESMEDIA CORPORACION DE MEDIOS DE COMUNICACION, S.A.",
+"Connor, Clark & Lunn Investment Management Ltd.",
+" 2026-09-24 ",
+0.5
+],
+[
+"5493008T4YG3AQUI7P67",
+"ES0105066007",
+"CELLNEX TELECOM, S.A.",
+"AQR Capital Management, LLC",
+" 2026-08-18 ",
+0.5
+]
+],
+"Serie_-_Series": [
+[
+"",
+"",
+"",
+"",
+"",
+""
+],
+[
+"",
+"",
+"",
+"",
+"",
+""
+],
+[
+"",
+"",
+"",
+"",
+"",
+""
+],
+[
+"LEI",
+"ISIN",
+"Emisor / Issuer",
+"Tenedor de la Posición / Position holder",
+"Fecha posición / Position date",
+"Posición corta (%) / Net short position (%)"
+],
+[
+"54930002KP75TLLLNO21",
+"ES0125220311",
+"ACCIONA, S.A.",
+"BlackRock Investment Management (UK) Limited",
+" 2026-08-04 ",
+0.62
+],
+[
+"54930002KP75TLLLNO21",
+"ES0125220311",
+"ACCIONA, S.A.",
+"BlackRock Investment Management (UK) Limited",
+" 2026-03-13 ",
+0.78
+],
+[
+"54930002KP75TLLLNO21",
+"ES0125220311",
+"ACCIONA, S.A.",
+"BlackRock Investment Management (UK) Limited",
+" 2026-02-24 ",
+0.88
+],
+[
+"54930002KP75TLLLNO21",
+"ES0125220311",
+"ACCIONA, S.A.",
+"BlackRock Investment Management (UK) Limited",
+" 2026-02-13 ",
+0.91
+],
+[
+"54930002KP75TLLLNO21",
+"ES0125220311",
+"ACCIONA, S.A.",
+"BlackRock Investment Management (UK) Limited",
+" 2025-11-18 ",
+1.0
+],
+[
+"54930002KP75TLLLNO21",
+"ES0125220311",
+"ACCIONA, S.A.",
+"BlackRock Investment Management (UK) Limited",
+" 2025-11-07 ",
+0.9
+],
+[
+"54930002KP75TLLLNO21",
+"ES0125220311",
+"ACCIONA, S.A.",
+"BlackRock Investment Management (UK) Limited",
+" 2025-10-31 ",
+0.8
+],
+[
+"54930002KP75TLLLNO21",
+"ES0125220311",
+"ACCIONA, S.A.",
+"BlackRock Investment Management (UK) Limited",
+" 2025-08-19 ",
+0.7
+],
+[
+"54930002KP75TLLLNO21",
+"ES0125220311",
+"ACCIONA, S.A.",
+"BlackRock Investment Management (UK) Limited",
+" 2025-08-13 ",
+0.64
+],
+[
+"54930002KP75TLLLNO21",
+"ES0125220311",
+"ACCIONA, S.A.",
+"BlackRock Investment Management (UK) Limited",
+" 2025-07-21 ",
+0.52
+]
+],
+"Anteriores_-_Previous": [
+[
+"",
+"",
+"",
+"",
+"",
+""
+],
+[
+"",
+"",
+"",
+"",
+"",
+""
+],
+[
+"",
+"",
+"",
+"",
+"",
+""
+],
+[
+"LEI",
+"ISIN",
+"Emisor / Issuer",
+"Tenedor de la Posición / Position holder",
+"Fecha posición / Position date",
+"Posición corta (%) / Net short position (%)"
+],
+[
+"54930002KP75TLLLNO21",
+"ES0125220311",
+"ACCIONA, S.A.",
+"AKO Capital LLP",
+" 2021-02-19 ",
+0.0
+],
+[
+"54930002KP75TLLLNO21",
+"ES0125220311",
+"ACCIONA, S.A.",
+"AKO Capital LLP",
+" 2021-02-18 ",
+0.55
+],
+[
+"54930002KP75TLLLNO21",
+"ES0125220311",
+"ACCIONA, S.A.",
+"AKO Capital LLP",
+" 2021-02-11 ",
+0.72
+],
+[
+"54930002KP75TLLLNO21",
+"ES0125220311",
+"ACCIONA, S.A.",
+"AKO Capital LLP",
+" 2021-01-26 ",
+0.66
+],
+[
+"54930002KP75TLLLNO21",
+"ES0125220311",
+"ACCIONA, S.A.",
+"AKO Capital LLP",
+" 2021-01-20 ",
+0.78
+],
+[
+"54930002KP75TLLLNO21",
+"ES0125220311",
+"ACCIONA, S.A.",
+"AKO Capital LLP",
+" 2020-12-11 ",
+0.89
+],
+[
+"54930002KP75TLLLNO21",
+"ES0125220311",
+"ACCIONA, S.A.",
+"AKO Capital LLP",
+" 2020-11-06 ",
+0.94
+],
+[
+"54930002KP75TLLLNO21",
+"ES0125220311",
+"ACCIONA, S.A.",
+"AKO Capital LLP",
+" 2020-11-04 ",
+0.88
+],
+[
+"54930002KP75TLLLNO21",
+"ES0125220311",
+"ACCIONA, S.A.",
+"AKO Capital LLP",
+" 2020-10-06 ",
+0.98
+],
+[
+"54930002KP75TLLLNO21",
+"ES0125220311",
+"ACCIONA, S.A.",
+"AKO Capital LLP",
+" 2020-10-01 ",
+1.0
+]
+]
+}

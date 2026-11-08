@@ -1,0 +1,94 @@
+# Supplementary concept chains for global sources whose namespaces are not in canonical_line_items.yaml.
+# Owner: ingest-global. Consumer: app.normalize.fundamentals (ref-identity) — merge each list AFTER the item's own chains
+# (lowest precedence). Same semantics as canonical_line_items.yaml: first non-dimensional consolidated concept wins;
+# 'A + B' = sum. Item ids must exist in canonical_line_items.yaml (checked by tests/ingestion/global/test_global_mapping.py).
+#
+# Namespaces
+#   yfinance  : fundamentals_raw rows with source_id=yfinance_fund, taxonomy=yfinance (Yahoo statement row labels).
+#               Signs follow Yahoo (capex / dividends / buybacks negative => normalizer applies the item 'sign' rule).
+#   baostock  : source_id=baostock, taxonomy=other, concept 'baostock:<field>' (CAS, pubDate PIT; few absolute fields).
+#   kr_label  : OpenDART rows without a standard account_id are stored as 'dart_label:<account_nm>' (taxonomy dart);
+#               the most common Korean labels are listed here. Also K-IFRS account ids missing from the 'kr' chains
+#               (found in the DART bulk 2026H1 data of the KR universe; coverage-A). (Standard labels are already re-keyed to account_ids by
+#               the adapter, e.g. 매출액 -> ifrs-full_Revenue.)
+#   tdnet     : TDnet kessan-tanshin summary facts (source_id tdnet, taxonomy other, concept 'tse-ed-t:<name>',
+#               non-dimensional actuals only; forecasts carry dims + is_forecast). Added v2 by coverage-A.
+#   tifrs     : Taiwan MOPS 'tifrs-*' extension concepts (source_id mops, taxonomy other), e.g. pre-2017 revenue
+#               tifrs-bsci-ci:OperatingRevenue (industrial consolidated). Added v2 by coverage-A.
+#   cnmv_ipp  : CNMV (Spain) semiannual IPP XBRL facts (source_id cnmv_es, taxonomy other): 'cnmv_ipp:I<code>' (general
+#               scheme 2016/2019), 'cnmv_ipp_en:I<code>' (credit institutions), 'cnmv_ipp08:<prefix>.<Local>' (2008 taxonomy,
+#               H2-2008..H2-2015). Consolidated statements only; H2 reports carry FY cumulative values. Added by coverage-B.
+#   ifrs_uk   : FRC UK taxonomy concepts (taxonomy uk-core, concept 'uk-core:<Local>') found in UK ESEF/UKSEF packages and in the
+#               Companies House Accounts Data Product iXBRL accounts (FRS 101 / 102 / 105; coverage v2 W2, 2026-10-31).
+version: 2
+
+items:
+  revenue:                   {ifrs_uk: ["uk-core:TurnoverRevenue"], yfinance: ["Total Revenue", "Operating Revenue"], baostock: ["baostock:MBRevenue"], kr_label: ["dart_label:영업수익", "dart_label:매출"], tdnet: ["tse-ed-t:NetSales", "tse-ed-t:SalesIFRS", "tse-ed-t:OperatingRevenues", "tse-ed-t:NetSalesUS", "tse-ed-t:OperatingRevenuesIFRS", "tse-ed-t:OrdinaryRevenuesBK", "tse-ed-t:OrdinaryRevenuesIN"], tifrs: ["tifrs-bsci-ci:OperatingRevenue"], cnmv_ipp: ["cnmv_ipp:I1205", "cnmv_ipp08:ifrs-gp.RevenueTotalByNature"]}
+  cost_of_revenue:           {ifrs_uk: ["uk-core:CostSales"], yfinance: ["Cost Of Revenue", "Reconciled Cost Of Revenue"], kr_label: ["dart_label:매출원가"]}
+  gross_profit:              {ifrs_uk: ["uk-core:GrossProfitLoss"], yfinance: ["Gross Profit"], kr_label: ["dart_label:매출총이익"]}
+  sga:                       {yfinance: ["Selling General And Administration"], kr_label: ["dart_label:판매비와관리비", "dart_label:판매비와 관리비"]}
+  rnd:                       {ifrs_uk: ["uk-core:ResearchDevelopmentExpenseRecognisedInProfitOrLoss"], yfinance: ["Research And Development"]}
+  sbc:                       {ifrs_uk: ["uk-core:Share-basedPaymentExpenseEquitySettled"], yfinance: ["Stock Based Compensation"]}
+  depreciation_amortization: {ifrs_uk: ["uk-core:DepreciationAmortisationExpense"], yfinance: ["Depreciation And Amortization", "Reconciled Depreciation", "Depreciation Amortization Depletion"], cnmv_ipp: ["cnmv_ipp:I1211", "cnmv_ipp_en:I1524", "cnmv_ipp08:ifrs-gp.DepreciationAndAmortisation"]}
+  operating_income:          {ifrs_uk: ["uk-core:OperatingProfitLoss"], yfinance: ["Operating Income", "Total Operating Income As Reported"], kr_label: ["ifrs-full_ProfitLossFromOperatingActivities", "dart_label:영업이익(손실)", "dart_label:영업손익"], tdnet: ["tse-ed-t:OperatingIncome", "tse-ed-t:OperatingIncomeIFRS", "tse-ed-t:OperatingIncomeUS"], cnmv_ipp: ["cnmv_ipp:I1245", "cnmv_ipp_en:I1540", "cnmv_ipp08:ipp-gen.ResultadoExplotacionNiif", "cnmv_ipp08:ipp-enc.ResultadoActividadExplotacionNiif"]}
+  interest_expense:          {ifrs_uk: ["uk-core:InterestPayableSimilarChargesFinanceCosts"], yfinance: ["Interest Expense", "Interest Expense Non Operating"], kr_label: ["dart_label:금융비용", "dart_label:금융원가"], cnmv_ipp: ["cnmv_ipp:I1251"]}
+  pretax_income:             {ifrs_uk: ["uk-core:ProfitLossOnOrdinaryActivitiesBeforeTax"], yfinance: ["Pretax Income"], kr_label: ["dart_label:법인세비용차감전순이익", "dart_label:법인세차감전순이익"], tdnet: ["tse-ed-t:ProfitBeforeTaxIFRS", "tse-ed-t:IncomeBeforeIncomeTaxesUS"], cnmv_ipp: ["cnmv_ipp:I1265", "cnmv_ipp_en:I1550", "cnmv_ipp08:ipp-gen.ResultadoAntesImpuestosNiif", "cnmv_ipp08:ipp-enc.ResultadoAntesImpuestosNiif", "cnmv_ipp08:ifrs-gp.ProfitLossBeforeTax"]}
+  income_tax:                {ifrs_uk: ["uk-core:TaxTaxCreditOnProfitOrLossOnOrdinaryActivities", "uk-core:IncomeTaxExpenseCredit"], yfinance: ["Tax Provision"], kr_label: ["dart_label:법인세비용"], cnmv_ipp: ["cnmv_ipp:I1270", "cnmv_ipp_en:I1551", "cnmv_ipp08:ifrs-gp.IncomeTaxExpenseIncome"]}
+  net_income:                {ifrs_uk: ["uk-core:ProfitLoss", "uk-core:ProfitLossOnOrdinaryActivitiesAfterTax"], yfinance: ["Net Income Including Noncontrolling Interests"], baostock: ["baostock:netProfit"], kr_label: ["dart_label:당기순이익(손실)", "dart_label:분기순이익", "dart_label:반기순이익"], tdnet: ["tse-ed-t:ProfitIFRS"], cnmv_ipp: ["cnmv_ipp:I1288", "cnmv_ipp:I1305", "cnmv_ipp_en:I1570", "cnmv_ipp08:ipp-gen.ResultadoEjercicioNiif", "cnmv_ipp08:ifrs-gp.ProfitLoss", "cnmv_ipp08:ipp-enc.ResultadoConsolidadoEjercicioNiif"]}
+  net_income_parent:         {yfinance: ["Net Income Common Stockholders", "Net Income"], kr_label: ["dart_label:지배기업 소유주지분", "dart_label:지배기업의 소유주에게 귀속되는 당기순이익"], tdnet: ["tse-ed-t:ProfitAttributableToOwnersOfParent", "tse-ed-t:ProfitAttributableToOwnersOfParentIFRS", "tse-ed-t:NetIncomeUS", "tse-ed-t:NetIncome"], cnmv_ipp: ["cnmv_ipp:I1300", "cnmv_ipp_en:I1572", "cnmv_ipp08:ifrs-gp.ProfitLossAttributableToEquityHoldersOfParent"]}
+  eps_diluted:               {yfinance: ["Diluted EPS"], kr_label: ["ifrs-full_DilutedEarningsLossPerShareFromContinuingOperations", "ifrs-full_BasicEarningsLossPerShare", "dart_label:희석주당이익", "dart_label:희석주당순이익"], tdnet: ["tse-ed-t:DilutedNetIncomePerShare", "tse-ed-t:DilutedEarningsPerShareIFRS", "tse-ed-t:DilutedNetIncomePerShareUS"], cnmv_ipp: ["cnmv_ipp:I1295", "cnmv_ipp_en:I1590", "cnmv_ipp08:ifrs-gp.DilutedEarningsLossPerShare"]}
+  shares_diluted_weighted:   {yfinance: ["Diluted Average Shares"]}
+  ebit:                      {yfinance: ["EBIT"]}
+  ebitda:                    {yfinance: ["EBITDA", "Normalized EBITDA"]}
+  cash_and_equivalents:      {ifrs_uk: ["uk-core:CashBankOnHand", "uk-core:CashCashEquivalents"], yfinance: ["Cash And Cash Equivalents"], kr_label: ["dart_label:현금및현금성자산"], tdnet: ["tse-ed-t:CashAndEquivalentsEndOfPeriod", "tse-ed-t:CashAndCashEquivalentsAtEndOfPeriodIFRS", "tse-ed-t:CashAndEquivalentsEndOfPeriodUS"], cnmv_ipp: ["cnmv_ipp:I1072", "cnmv_ipp_en:I1040", "cnmv_ipp08:ifrs-gp.CashAndCashEquivalents", "cnmv_ipp08:ifrs-gp.CashAndBalancesWithCentralBanks"]}
+  cash_and_st_investments:   {yfinance: ["Cash Cash Equivalents And Short Term Investments"]}
+  accounts_receivable:       {ifrs_uk: ["uk-core:Debtors"], yfinance: ["Accounts Receivable", "Receivables"], kr_label: ["dart_label:매출채권", "dart_label:매출채권 및 기타채권"], cnmv_ipp: ["cnmv_ipp:I1061"]}
+  inventory:                 {ifrs_uk: ["uk-core:TotalInventories"], yfinance: ["Inventory"], kr_label: ["dart_label:재고자산"], cnmv_ipp: ["cnmv_ipp:I1055"]}
+  total_current_assets:      {ifrs_uk: ["uk-core:CurrentAssets"], yfinance: ["Current Assets"], cnmv_ipp: ["cnmv_ipp:I1085", "cnmv_ipp08:ipp-gen.ActivoCorrienteNiif"]}
+  ppe_net:                   {ifrs_uk: ["uk-core:PropertyPlantEquipment"], yfinance: ["Net PPE"], kr_label: ["ifrs-full_PropertyPlantAndEquipmentIncludingRightofuseAssets", "dart_label:유형자산"], cnmv_ipp: ["cnmv_ipp:I1033", "cnmv_ipp_en:I1101"]}
+  goodwill:                  {yfinance: ["Goodwill"], cnmv_ipp: ["cnmv_ipp:I1031", "cnmv_ipp_en:I1111"]}
+  intangible_assets:         {ifrs_uk: ["uk-core:IntangibleAssets"], yfinance: ["Other Intangible Assets"], kr_label: ["dart_label:무형자산"]}
+  total_assets:              {ifrs_uk: ["uk-core:TotalAssets", "uk-core:FixedAssets + uk-core:CurrentAssets"], yfinance: ["Total Assets"], tdnet: ["tse-ed-t:TotalAssets", "tse-ed-t:TotalAssetsIFRS", "tse-ed-t:TotalAssetsUS"], cnmv_ipp: ["cnmv_ipp:I1100", "cnmv_ipp_en:I1150", "cnmv_ipp08:ipp-gen.TotalActivoNiif", "cnmv_ipp08:ipp-enc.TotalActivoNiif"]}
+  accounts_payable:          {yfinance: ["Accounts Payable", "Payables"], kr_label: ["dart_label:매입채무", "dart_label:매입채무 및 기타채무"], cnmv_ipp: ["cnmv_ipp:I1125"]}
+  short_term_debt:           {yfinance: ["Current Debt", "Current Debt And Capital Lease Obligation"], kr_label: ["dart_label:단기차입금"]}
+  total_current_liabilities: {ifrs_uk: ["uk-core:CurrentLiabilities"], yfinance: ["Current Liabilities"], cnmv_ipp: ["cnmv_ipp:I1130", "cnmv_ipp08:ipp-gen.PasivoCorrienteNiif"]}
+  long_term_debt:            {yfinance: ["Long Term Debt", "Long Term Debt And Capital Lease Obligation"], kr_label: ["dart_label:장기차입금"]}
+  total_debt:                {ifrs_uk: ["uk-core:TotalBorrowings"], yfinance: ["Total Debt"]}
+  total_liabilities:         {ifrs_uk: ["uk-core:TotalLiabilities"], yfinance: ["Total Liabilities Net Minority Interest"], cnmv_ipp: ["cnmv_ipp:I1120 + cnmv_ipp:I1130", "cnmv_ipp_en:I1260", "cnmv_ipp08:ipp-gen.PasivoNoCorrienteNiif + cnmv_ipp08:ipp-gen.PasivoCorrienteNiif", "cnmv_ipp08:ipp-enc.TotalPasivoNiif"]}
+  total_equity_parent:       {yfinance: ["Stockholders Equity", "Common Stock Equity"], kr_label: ["dart_label:지배기업 소유주지분", "dart_label:지배기업의 소유주에게 귀속되는 자본"], tdnet: ["tse-ed-t:OwnersEquity", "tse-ed-t:EquityAttributableToOwnersOfParentIFRS", "tse-ed-t:ShareholdersEquityUS"], cnmv_ipp: ["cnmv_ipp:I1189", "cnmv_ipp_en:I1270 + cnmv_ipp_en:I1380", "cnmv_ipp08:ifrs-gp.EquityAttributableToEquityHoldersOfParent"]}
+  total_equity:              {ifrs_uk: ["uk-core:Equity", "uk-core:NetAssetsLiabilities"], yfinance: ["Total Equity Gross Minority Interest"], tdnet: ["tse-ed-t:NetAssets", "tse-ed-t:TotalEquityIFRS", "tse-ed-t:EquityIncludingPortionAttributableToNonControllingInterestUS"], cnmv_ipp: ["cnmv_ipp:I1195", "cnmv_ipp_en:I1450", "cnmv_ipp08:ipp-gen.PatrimonioNetoNiif", "cnmv_ipp08:ipp-enc.TotalPatrimonioNetoNiif"]}
+  shares_outstanding:        {ifrs_uk: ["uk-core:NumberSharesIssuedFullyPaid"], yfinance: ["Ordinary Shares Number", "Share Issued", "info:sharesOutstanding"], baostock: ["baostock:totalShare"]}
+  net_debt:                  {yfinance: ["Net Debt"]}
+  # invested_capital: no yfinance chain since 2026-10-27 (Yahoo "Invested Capital" = debt + equity, gross of cash, and
+  # equal to total debt on many quarterly rows, e.g. ASML: ROIC 606%); always derived with the canonical formula
+  cfo:                       {ifrs_uk: ["uk-core:NetCashFlowsFromUsedInOperatingActivities"], yfinance: ["Operating Cash Flow", "Cash Flow From Continuing Operating Activities"], kr_label: ["dart_label:영업활동현금흐름", "dart_label:영업활동으로 인한 현금흐름"], tdnet: ["tse-ed-t:CashFlowsFromOperatingActivities", "tse-ed-t:CashFlowsFromOperatingActivitiesIFRS", "tse-ed-t:CashFlowsFromOperatingActivitiesUS"], cnmv_ipp: ["cnmv_ipp:I1435", "cnmv_ipp:I8435", "cnmv_ipp_en:I1800", "cnmv_ipp08:ipp-gen.FlujosEfectivoActividadesExplotacionIndirectoNiif", "cnmv_ipp08:ipp-gen.FlujosEfectivoActividadesExplotacionDirecto", "cnmv_ipp08:ipp-enc.FlujosEfectivoNetosActividadesExplotacionNiif"]}
+  capex:                     {ifrs_uk: ["uk-core:PurchasePropertyPlantEquipment"], yfinance: ["Capital Expenditure", "Purchase Of PPE"], kr_label: ["dart_label:유형자산의 취득"], cnmv_ipp: ["cnmv_ipp:I1442", "cnmv_ipp:I8442", "cnmv_ipp_en:I1871 + cnmv_ipp_en:I1872", "cnmv_ipp08:ipp-gen.InmovilizadoMaterialIntangibleInversionesInmobiliariasPagos", "cnmv_ipp08:ipp-gen.InmovilizadoMaterialIntangibleInversionesInmobiliariasPagosDirecto", "cnmv_ipp08:ifrs-gp.PaymentsToAcquirePropertyPlantAndEquipment + cnmv_ipp08:ifrs-gp.PaymentsToAcquireIntangibleAssets"]}
+  dividends_paid:            {ifrs_uk: ["uk-core:DividendsPaid", "uk-core:DividendsPaidOnShares"], yfinance: ["Cash Dividends Paid", "Common Stock Dividend Paid"], kr_label: ["dart_label:배당금지급", "dart_label:배당금의 지급"], cnmv_ipp: ["cnmv_ipp:I1485", "cnmv_ipp:I8485", "cnmv_ipp_en:I1901", "cnmv_ipp08:ifrs-gp.PaymentsOfDividendsClassifiedAsFinancing", "cnmv_ipp08:ipp-gen.PagosDividendosRemuneracionesOtrosInstrumentosPatrimonioNetoDirecto"]}
+  buybacks:                  {yfinance: ["Repurchase Of Capital Stock", "Common Stock Payments"], kr_label: ["dart_label:자기주식의 취득"], cnmv_ipp: ["cnmv_ipp:I1473", "cnmv_ipp:I8473", "cnmv_ipp_en:I1904"]}
+  fcf:                       {yfinance: ["Free Cash Flow"]}
+  # coverage-A: TDnet tanshin summary (tse-ed-t) chains for items without other supplementary chains
+  ordinary_income: {tdnet: ["tse-ed-t:OrdinaryIncome"]}
+  eps_basic: {tdnet: ["tse-ed-t:NetIncomePerShare", "tse-ed-t:BasicEarningsPerShareIFRS", "tse-ed-t:NetIncomePerShareUS"], kr_label: ["ifrs-full_BasicEarningsLossPerShareFromContinuingOperations"], cnmv_ipp: ["cnmv_ipp:I1290", "cnmv_ipp_en:I1580", "cnmv_ipp08:ifrs-gp.BasicEarningsLossPerShare"]}
+  cfi: {ifrs_uk: ["uk-core:NetCashFlowsFromUsedInInvestingActivities"], tdnet: ["tse-ed-t:CashFlowsFromInvestingActivities", "tse-ed-t:CashFlowsFromInvestingActivitiesIFRS", "tse-ed-t:CashFlowsFromInvestingActivitiesUS"], cnmv_ipp: ["cnmv_ipp:I1460", "cnmv_ipp:I8460", "cnmv_ipp_en:I1860", "cnmv_ipp08:ipp-gen.FlujosEfectivoActividadesInversionIndirectoNiif", "cnmv_ipp08:ipp-gen.FlujosEfectivoActividadesInversionDirecto", "cnmv_ipp08:ipp-enc.FlujosEfectivoNetosActividadesInversionNiif"]}
+  cff: {ifrs_uk: ["uk-core:NetCashFlowsFromUsedInFinancingActivities"], tdnet: ["tse-ed-t:CashFlowsFromFinancingActivities", "tse-ed-t:CashFlowsFromFinancingActivitiesIFRS", "tse-ed-t:CashFlowsFromFinancingActivitiesUS"], cnmv_ipp: ["cnmv_ipp:I1490", "cnmv_ipp:I8490", "cnmv_ipp_en:I1890", "cnmv_ipp08:ipp-gen.FlujosEfectivoActividadesFinanciacionIndirectoNiif", "cnmv_ipp08:ipp-gen.FlujosEfectivoActividadesFinanciacionDirecto", "cnmv_ipp08:es-be-fs.TotalFlujosEfectivoNetoActividadesFinanciacion"]}
+  # coverage-B: CNMV IPP (Spain, cnmv_ipp:*) chains for items without other supplementary chains
+  net_income_continuing: {cnmv_ipp: ["cnmv_ipp:I1280", "cnmv_ipp_en:I1560", "cnmv_ipp08:ipp-gen.ResultadoEjercicioProcedenteOperacionesContinuadasNiif", "cnmv_ipp08:ipp-enc.ResultadoActividadOrdinariaNiif"]}
+  net_income_discontinued: {cnmv_ipp: ["cnmv_ipp:I1285", "cnmv_ipp_en:I1561", "cnmv_ipp08:ifrs-gp.ProfitLossFromDiscontinuedOperationsNetOfTax", "cnmv_ipp08:es-be-fs.ResultadoOperacionesInterrumpidas"]}
+  minority_interest_income: {cnmv_ipp: ["cnmv_ipp:I1289", "cnmv_ipp_en:I1571", "cnmv_ipp08:ifrs-gp.ProfitLossAttributableToMinorityInterest"]}
+  interest_income_bank: {cnmv_ipp: ["cnmv_ipp_en:I1501", "cnmv_ipp08:ifrs-gp.InterestIncomeTotalFinancialInstitutions"]}
+  interest_expense_bank: {cnmv_ipp: ["cnmv_ipp_en:I1502", "cnmv_ipp08:ifrs-gp.InterestExpenseTotalFinancialInstitutions"]}
+  minority_interest: {cnmv_ipp: ["cnmv_ipp:I1193", "cnmv_ipp_en:I1410", "cnmv_ipp08:ifrs-gp.MinorityInterest"]}
+  acquisitions: {cnmv_ipp: ["cnmv_ipp:I1441", "cnmv_ipp:I8441"]}
+  debt_issuance: {cnmv_ipp: ["cnmv_ipp:I1481", "cnmv_ipp:I8481"]}
+  debt_repayment: {ifrs_uk: ["uk-core:RepaymentsBorrowingsClassifiedAsFinancingActivities"], cnmv_ipp: ["cnmv_ipp:I1482", "cnmv_ipp:I8482"]}
+  # coverage v2 W2 (2026-10-31): FRC UK taxonomy (FRS 101 / 102 / 105 'core') concepts of the Companies House iXBRL
+  # accounts (app.ingestion.ch_accounts; concept names from a sample of the Accounts Data Product)
+  general_admin: {ifrs_uk: ["uk-core:AdministrativeExpenses"]}
+  selling_marketing: {ifrs_uk: ["uk-core:DistributionCosts"]}
+  interest_income: {ifrs_uk: ["uk-core:OtherInterestReceivableSimilarIncomeFinanceIncome"]}
+  long_term_investments: {ifrs_uk: ["uk-core:InvestmentsFixedAssets"]}
+  employees: {ifrs_uk: ["uk-core:AverageNumberEmployeesDuringPeriod"]}
+  capex_intangibles: {ifrs_uk: ["uk-core:PurchaseIntangibleAssets"]}
+  interest_paid: {ifrs_uk: ["uk-core:InterestPaidClassifiedAsFinancingActivities"]}
+  taxes_paid: {ifrs_uk: ["uk-core:IncomeTaxesPaidRefundClassifiedAsOperatingActivities"]}
+  stock_issuance: {ifrs_uk: ["uk-core:IssueEquityInstruments"]}

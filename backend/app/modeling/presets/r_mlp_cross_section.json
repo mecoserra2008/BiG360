@@ -1,0 +1,144 @@
+{
+ "title": "Neural net (MLP) for next-month returns vs linear",
+ "description": "A small MLP on style signals with a mandatory linear baseline comparison.",
+ "question": "factors",
+ "tags": [
+  "ML",
+  "neural",
+  "cross-section"
+ ],
+ "method_note": "Gu-Kelly-Xiu (2020) style shallow network: early stopping on a time-ordered validation block, seed averaging; the DM test against OLS on the same folds is the verdict. Caveat: the universe is today's constituents (membership history starts 2026-10), so early years carry survivorship bias; read the premium as an upper bound.",
+ "expected_outputs": [
+  "OOS metrics vs linear",
+  "training curves",
+  "DM test"
+ ],
+ "runtime_s": 52.4,
+ "validated": "2026-11-06 on snapshot R20261106T010757G9ZB",
+ "result": {
+  "run_id": "SR20261106T022521YTSNC",
+  "beats_linear": false,
+  "verdict": "MLP does not significantly beat linear baseline (DM p = 0.222)",
+  "n_obs": 45546,
+  "metrics": {
+   "oos_rmse": 0.0967690597457085,
+   "oos_r2_oos": 0.0005541583574167896,
+   "oos_rank_ic": 0.023261133034474843,
+   "dm_p_vs_linear": 0.22188293680622534,
+   "linear_oos_rmse": 0.09679945495445189
+  },
+  "coefficients": []
+ },
+ "study": {
+  "name": "Neural net (MLP) for next-month returns vs linear",
+  "method": "mlp",
+  "y": "fwd_ret_1m",
+  "x": [
+   "earnings_yield",
+   "gross_prof",
+   "mom_12_1",
+   "ivol",
+   "log_mcap"
+  ],
+  "params": {
+   "hidden": [
+    32,
+    16
+   ],
+   "max_epochs": 30,
+   "n_seeds": 2,
+   "cv": {
+    "folds": 4,
+    "scheme": "purged_kfold",
+    "purge": 1,
+    "embargo": 1
+   }
+  },
+  "dataset": {
+   "kind": "panel",
+   "frequency": "M",
+   "start": "2014-01-01",
+   "entities": {
+    "universe": "mvp_us"
+   },
+   "variables": [
+    {
+     "name": "fwd_ret_1m",
+     "source": "prices",
+     "field": "ret",
+     "transforms": [
+      {
+       "op": "fwd_compound",
+       "k": 1
+      },
+      {
+       "op": "winsorize"
+      }
+     ]
+    },
+    {
+     "name": "earnings_yield",
+     "source": "valuation",
+     "field": "earnings_yield",
+     "transforms": [
+      {
+       "op": "cs_rank"
+      }
+     ]
+    },
+    {
+     "name": "gross_prof",
+     "source": "ratios",
+     "field": "gross_profitability",
+     "transforms": [
+      {
+       "op": "winsorize"
+      },
+      {
+       "op": "cs_zscore"
+      }
+     ]
+    },
+    {
+     "name": "mom_12_1",
+     "source": "tech_factors",
+     "field": "mom",
+     "transforms": [
+      {
+       "op": "winsorize"
+      },
+      {
+       "op": "cs_zscore"
+      }
+     ]
+    },
+    {
+     "name": "ivol",
+     "source": "tech_factors",
+     "field": "ivol",
+     "transforms": [
+      {
+       "op": "winsorize"
+      },
+      {
+       "op": "cs_zscore"
+      }
+     ]
+    },
+    {
+     "name": "log_mcap",
+     "source": "valuation",
+     "field": "market_cap_usd",
+     "transforms": [
+      {
+       "op": "log"
+      },
+      {
+       "op": "cs_zscore"
+      }
+     ]
+    }
+   ]
+  }
+ }
+}

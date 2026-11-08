@@ -1,0 +1,36 @@
+.env
+.venv/
+# data lake: rebuilt by the app's jobs; only the curated seed lists are versioned
+/data/*
+!/data/reference/
+/data/reference/*
+!/data/reference/seeds/
+/data/reference/seeds/regulatory_register.csv
+__pycache__/
+*.pyc
+node_modules/
+dist/
+.DS_Store
+*.log
+models_store/
+packaging/out/
+packaging/cache/
+frontend/dist_app/
+
+# local working material, not part of the app
+scratchpad/
+video/
+*.pdf
+!docs/**/*.pdf
+# build output / caches / secrets
+runtime/
+.pytest_cache/
+.ruff_cache/
+.mypy_cache/
+*.pem
+*.key
+*.p12
+*.pfx
+.env.*
+!.env.example
+.claude/

@@ -1,0 +1,30 @@
+table: event_changepoints
+version: 1
+zone: scores
+owner: event-models (app.events_models.bocpd, job event_changepoints)
+description: >
+  C2 Bayesian online change-point detection (Adams & MacKay 2007; Normal-Gamma conjugate, constant hazard 1/100,
+  run length truncated at 400; trailing 365-day window) on daily attention (log1p(events + articles), day-of-week
+  cycle removed) and tone (article tone, else event tone) streams per label: country x theme (all themes and each theme with enough volume), sector (all themes) and
+  the most covered issuers. A change point is reported when the MAP run length collapses (by > 3) and the new regime persists >= 3 days,
+  dated at the first day of the new regime, and kept only if the level moved >= 1 sd of the previous regime or its
+  dispersion changed by a factor > 2 (synthetic calibration: ~0.13 false alarms per 200-day null series, 97%
+  detection of 1.5-sd shifts); cp_prob = max posterior mass on run lengths <= 3 around the change. The detector class
+  (app.events_models.bocpd.BOCPD) is online: update(x) per observation, serializable state (to_dict / from_dict),
+  reused by the realtime layer. Model-based.
+storage: {path: scores/event_changepoints, format: parquet, partition_by: [], write_mode: upsert, retention: "forever"}
+primary_key: [label_type, label, theme, stream, date]
+columns:
+  - {name: label_type, type: enum, nullable: false, values: [country, sector, issuer], description: "Label dictionary"}
+  - {name: label, type: string, nullable: false, description: "ISO2 / sector id / issuer_id"}
+  - {name: theme, type: string, nullable: false, description: "Theme id or 'all'"}
+  - {name: stream, type: enum, nullable: false, values: [attention, tone], description: "Monitored stream"}
+  - {name: date, type: date, nullable: false, description: "First day of the new regime"}
+  - {name: cp_prob, type: float64, nullable: false, description: "Posterior probability of a recent change (run length <= 3)"}
+  - {name: run_length_before, type: int32, nullable: true, description: "MAP run length the day before (length of the previous regime)"}
+  - {name: mean_before, type: float64, nullable: true, description: "Mean of the previous regime"}
+  - {name: mean_after, type: float64, nullable: true, description: "Mean of the new regime so far (through the last day)"}
+  - {name: shift_sd, type: float64, nullable: true, description: "(mean_after - mean_before) / sd of the previous regime"}
+  - {name: direction, type: enum, nullable: false, values: [up, down, flat], description: "Sign of the shift (|shift_sd| < 0.5 = flat)"}
+  - {name: n_after, type: int32, nullable: false, description: "Days observed in the new regime"}
+  - {name: computed_at, type: datetime, nullable: false, description: "Write time UTC"}

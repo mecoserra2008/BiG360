@@ -1,0 +1,37 @@
+table: macro_exposures
+version: 1
+zone: scores
+owner: macro-w4 (app.macro.markets.exposures, job macro_exposures)
+description: >
+  Point-in-time macro sensitivities (W4.2): rolling weekly regressions (trailing 156 weeks, >= 52 observations)
+  re-estimated at every month end, for securities (universe full; the last `history_months` month ends) and aggregates
+  (sector / subsector / region-sector / region portfolios cap- and equal-weighted, factor long-short portfolios, ETFs /
+  indices / futures; full history). Returns are local-currency weekly total returns (adj_close). Models:
+  joint = r = a + sum_k b_k f_k + b_u u + e with f = (d2y, dcurve, dbe10, dcredit, usd, oil) and u = the S&P 500 return
+  orthogonalised on f in the same window (so the macro betas are total effects; equity_resid is the equity shock not
+  explained by macro); univariate = one regression per factor (total beta; equity = CAPM beta to the S&P 500);
+  surprise = changes of the W2 surprise indices (growth, inflation, labor of the entity's home economy; model-based)
+  + u. Standard errors are Newey-West HAC(4). Securities are shrunk (empirical Bayes) toward their sector mean:
+  beta = m + w (beta_raw - m), w = tau2 / (tau2 + se_raw^2), se = sqrt(w) se_raw (tau2 = cross-sectional variance of raw
+  betas in the sector minus the mean squared se); aggregates are not shrunk (w = 1). Extends macro_betas (unchanged).
+storage: {path: scores/macro_exposures, format: parquet, partition_by: [entity_type], write_mode: overwrite}
+primary_key: [as_of_date, entity_type, entity_id, weighting, model, factor_id]
+columns:
+  - {name: as_of_date, type: date, nullable: false, description: "Month-end estimation date (data <= as_of only)"}
+  - {name: entity_type, type: enum, nullable: false, values: [security, sector, subsector, region, factor, etf, index, future], description: "Entity kind"}
+  - {name: entity_id, type: string, nullable: false, description: "security_id | sector_id or REGION:SECTOR (e.g. US:TECH) | subsector_id | region | factor id (quality, value ...) | ETF:XLK | IDX:^GSPC | IDX:CL=F"}
+  - {name: weighting, type: enum, nullable: false, values: [cw, ew, none], description: "Portfolio weighting (none for single instruments and factor long-short)"}
+  - {name: model, type: enum, nullable: false, values: [joint, univariate, surprise], description: "Regression model"}
+  - {name: factor_id, type: string, nullable: false, description: "joint d2y,dcurve,dbe10,dcredit,usd,oil,equity_resid | univariate d2y,d10y,dcurve,dreal10,dbe10,dcredit,usd,oil,equity | surprise surp_growth,surp_inflation,surp_labor,equity_resid"}
+  - {name: beta, type: float64, nullable: true, description: "Shrunk beta: return per factor unit (per +100bp; elasticity to USD / oil / equity; per +100 surprise points)"}
+  - {name: beta_raw, type: float64, nullable: true, description: "OLS beta before shrinkage"}
+  - {name: se, type: float64, nullable: true, description: "HAC standard error (posterior after shrinkage)"}
+  - {name: t_stat, type: float64, nullable: true, description: "beta_raw / raw HAC se"}
+  - {name: shrink_weight, type: float64, nullable: true, description: "w in [0,1] (1 = no shrinkage)"}
+  - {name: peer_percentile, type: float64, nullable: true, description: "Percentile (0-100) of beta within sector (securities)"}
+  - {name: r2, type: float64, nullable: true, description: "Regression R2"}
+  - {name: n_obs, type: int32, nullable: false, description: "Weeks used"}
+  - {name: window_weeks, type: int16, nullable: false, description: "Window length"}
+  - {name: scope, type: string, nullable: true, description: "Surprise model: economy of the surprise indices (US, EA, GLOBAL ...)"}
+  - {name: computed_at, type: datetime, nullable: false, description: "Write time UTC"}
+  - {name: run_id, type: string, nullable: true, description: "Producing run"}

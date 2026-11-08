@@ -1,0 +1,39 @@
+table: macro_expectations
+version: 1
+zone: scores
+owner: macro-w2 (app.macro.expectations, jobs macro_expectations / macro_expectations_backfill)
+description: >
+  MODEL-BASED EXPECTATIONS (NOT CONSENSUS). Our own point-in-time forecast of the upcoming value of each linked core
+  series, snapshotted strictly before the scheduled release (forecast_made_at < scheduled_at) using only data with
+  knowledge_date < release date. Models: SARIMA/ARIMA with a bounded AIC order search (reusing Model Studio's
+  app.modeling.methods.timeseries SARIMAX fitter), a seasonal-naive / naive benchmark, and for GDP the DFM nowcast
+  (app.macro.nowcast) when one exists before the release. Rows are immutable (never rewritten once written); a new
+  model version adds rows. backfill=true rows were reconstructed historically from ALFRED vintages or realtime
+  knowledge dates. model_based is always true.
+storage: {path: scores/macro_expectations, format: parquet, partition_by: [], write_mode: upsert}
+primary_key: [release_event_id, series_id, model, version]
+columns:
+  - {name: release_event_id, type: string, nullable: false, description: "FK macro_releases"}
+  - {name: series_id, type: string, nullable: false, description: "FK macro_series"}
+  - {name: country, type: string, nullable: false, description: "ISO2 or EA"}
+  - {name: measure, type: string, nullable: false, description: "Measure forecast (see macro_release_events.measure)"}
+  - {name: target_period, type: date, nullable: false, description: "Reference period forecast"}
+  - {name: scheduled_at, type: datetime, nullable: false, description: "Release time UTC"}
+  - {name: forecast_made_at, type: datetime, nullable: false, description: "Snapshot time UTC; always < scheduled_at"}
+  - {name: data_cutoff, type: date, nullable: false, description: "Max knowledge_date of the data used (< release date)"}
+  - {name: point, type: float64, nullable: false, description: "Model-based expectation (measure units)"}
+  - {name: lo80, type: float64, nullable: true, description: "80% interval low"}
+  - {name: hi80, type: float64, nullable: true, description: "80% interval high"}
+  - {name: lo95, type: float64, nullable: true, description: "95% interval low"}
+  - {name: hi95, type: float64, nullable: true, description: "95% interval high"}
+  - {name: model, type: enum, nullable: false, values: [sarima, seasonal_naive, naive, dfm_nowcast], description: "Model family"}
+  - {name: model_spec, type: string, nullable: true, description: "e.g. SARIMA(1,0,1)x(0,1,1,12) or value 12 periods earlier"}
+  - {name: params, type: json, nullable: true, description: "Selected order, AIC, coefficients"}
+  - {name: n_train, type: int32, nullable: true, description: "Observations used"}
+  - {name: is_primary, type: bool, nullable: false, description: "The expectation used for surprises (dfm_nowcast for GDP when available > sarima > naive fallback)"}
+  - {name: model_based, type: bool, nullable: false, description: "Always true: model-based expectation, not consensus"}
+  - {name: label, type: string, nullable: false, description: "Model-based expectation (not consensus)"}
+  - {name: version, type: string, nullable: false, description: "Expectation model version"}
+  - {name: backfill, type: bool, nullable: false, description: "Reconstructed historically (point-in-time)"}
+  - {name: computed_at, type: datetime, nullable: false, description: "Write time UTC"}
+  - {name: run_id, type: string, nullable: true, description: "Producing run"}

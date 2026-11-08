@@ -1,0 +1,35 @@
+table: futures_curve
+version: 1
+zone: normalized
+owner: cross-asset (app.ingestion.futures_curve, jobs futures_curve / futures_curve_backfill)
+description: >
+  Daily futures term structures: one row per (root, contract month, trading date) for the next N listed contracts of
+  every tracked futures root (energy, metals, grains, softs, livestock, US Treasury, US equity index, FX and crypto
+  futures), from Yahoo Finance specific contract-month tickers {ROOT}{month code}{yy}.{exchange} (e.g. CLZ26.NYM,
+  GCZ26.CMX, ESZ26.CME, ZNZ26.CBT, KCZ26.NYB). MARKET DATA, source "yahoo" (not official). Yahoo serves only contracts
+  that are still trading: expired contracts are not served, so history before the nightly job started contains only
+  contracts that were still live at backfill time (deferred months on older dates). Gaps are kept as gaps: a listed
+  contract Yahoo does not serve is recorded in futures_contracts (status missing) and never interpolated. Weekend-dated
+  bars (Yahoo labels the Globex Sunday-evening session with the Sunday date) and bars after the as-of session are
+  dropped. expiry is an APPROXIMATE last trading day from the exchange rule of each root (app.ingestion.futures_curve
+  EXPIRY_RULES; NYSE holiday calendar as the business-day proxy), so days_to_expiry may be off by 1-2 days around
+  exchange-specific holidays.
+storage: {path: normalized/futures_curve, format: parquet, partition_by: [root], write_mode: upsert, sort_by: [contract_month, date], compression_level: 9}
+primary_key: [root, contract_month, date]
+pit: {knowledge_column: knowledge_date, rule: "end-of-day market data: usable from the trading date (close)"}
+columns:
+  - {name: root, type: string, nullable: false, description: "Futures root (CL, GC, ES, ZN, 6E, BTC ...); partition"}
+  - {name: contract_month, type: date, nullable: false, description: "Delivery / contract month (first day of the month)"}
+  - {name: date, type: date, nullable: false, description: "Trading date (exchange session date)"}
+  - {name: contract, type: string, nullable: false, description: "Month code + 2-digit year, e.g. Z26"}
+  - {name: symbol, type: string, nullable: false, description: "Yahoo ticker, e.g. CLZ26.NYM"}
+  - {name: expiry, type: date, nullable: false, description: "APPROXIMATE last trading day (exchange rule, see EXPIRY_RULES)"}
+  - {name: days_to_expiry, type: int16, nullable: false, unit: days, description: "Calendar days from date to expiry"}
+  - {name: open, type: float32, nullable: true, description: "Daily open (Yahoo)"}
+  - {name: high, type: float32, nullable: true, description: "Daily high (Yahoo)"}
+  - {name: low, type: float32, nullable: true, description: "Daily low (Yahoo)"}
+  - {name: close, type: float32, nullable: false, description: "Daily close / settlement as published by Yahoo (usually the exchange settlement price)"}
+  - {name: volume, type: int64, nullable: true, description: "Contracts traded (Yahoo; the latest bar's volume can lag one day and is refreshed by the next run's overlap)"}
+  - {name: source, type: enum, nullable: false, values: [yahoo], description: "Market data source (not official)"}
+  - {name: knowledge_date, type: date, nullable: false, description: "= date (end-of-day market data)"}
+  - {name: ingested_at, type: datetime, nullable: false, description: "Write time UTC"}

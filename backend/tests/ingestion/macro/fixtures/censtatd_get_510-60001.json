@@ -1,0 +1,95 @@
+{
+ "header": {
+  "status": {
+   "name": "Success",
+   "code": 0,
+   "description": "Query success",
+   "apiHelp": "https://www.censtatd.gov.hk/en/web_table.html?id=510-60001&api_popup=1"
+  },
+  "title": "Consumer Price Indices (October 2019 – September 2020 = 100)",
+  "tablenote": [
+   "Four series of Consumer Price Indices (CPIs) are compiled to reflect the impact of consumer price changes on households in different expenditure ranges.     The CPI(A), CPI(B) and CPI(C) are compiled based on the expenditure patterns of households in the relatively low, medium and relatively high expenditure ranges.  By aggregating the expenditure patterns of all households covered by the above three indices, a Composite CPI is also compiled to reflect the impact of consumer price changes on the household sector as a whole.  The year-on-year rate of change in this index is generally taken to reflect overall consumer price inflation.     The CPI(A), CPI(B) and CPI(C) cover some 50%, 30% and 10% of households in Hong Kong respectively.  The average monthly household expenditures of these groups at 2025 prices are broadly equivalent to $7,100 - $29,000, $29,000 - $53,100 and $53,100 - $99,300 respectively, and that of the Composite CPI is broadly equivalent to $7,100 - $99,300.     Percentage changes are derived from rounded indices of more than 1 decimal place.     The year-on-year rates of change before October 2020 were derived using the index series in the base periods at that time (for instance the 2014/15-based index series), compared with the index a year earlier in the same base period.     The month-to-month rates of change before November 2019 were derived using the index series in the base periods at that time (for instance the 2014/15-based index series), compared with the index a month earlier in the same base period."
+  ],
+  "source": "Monthly Retail Price Survey  Consumer Price Index Section,  Census and Statistics Department  (Enquiry telephone no. : 3903 7374  Enquiry e-mail : cpi@censtatd.gov.hk)",
+  "count": {
+   "noOfRecords": 7920,
+   "started": "2026-10-11T13:28:05+00:00",
+   "finished": "2026-10-11T13:28:06+00:00",
+   "durationSeconds": 0.194767
+  }
+ },
+ "dataSet": [
+  {
+   "freq": "M",
+   "period": "202606",
+   "sv": "CC_CM_1920",
+   "svDesc": "Index",
+   "figure": 110.4,
+   "sd_value": ""
+  },
+  {
+   "freq": "M",
+   "period": "202607",
+   "sv": "CC_CM_1920",
+   "svDesc": "Index",
+   "figure": 110.7,
+   "sd_value": ""
+  },
+  {
+   "freq": "M",
+   "period": "202608",
+   "sv": "CC_CM_1920",
+   "svDesc": "Index",
+   "figure": 110.8,
+   "sd_value": ""
+  },
+  {
+   "freq": "M",
+   "period": "202606",
+   "sv": "CC_CM_1920",
+   "svDesc": "Month-to-month % change",
+   "figure": 0,
+   "sd_value": "[φ3]"
+  },
+  {
+   "freq": "M",
+   "period": "202607",
+   "sv": "CC_CM_1920",
+   "svDesc": "Month-to-month % change",
+   "figure": 0.2,
+   "sd_value": ""
+  },
+  {
+   "freq": "M",
+   "period": "202608",
+   "sv": "CC_CM_1920",
+   "svDesc": "Month-to-month % change",
+   "figure": 0.1,
+   "sd_value": ""
+  },
+  {
+   "freq": "M",
+   "period": "202606",
+   "sv": "CC_CM_1920",
+   "svDesc": "Year-on-year % change",
+   "figure": 2,
+   "sd_value": ""
+  },
+  {
+   "freq": "M",
+   "period": "202607",
+   "sv": "CC_CM_1920",
+   "svDesc": "Year-on-year % change",
+   "figure": 1.7,
+   "sd_value": ""
+  },
+  {
+   "freq": "M",
+   "period": "202608",
+   "sv": "CC_CM_1920",
+   "svDesc": "Year-on-year % change",
+   "figure": 1.7,
+   "sd_value": ""
+  }
+ ]
+}

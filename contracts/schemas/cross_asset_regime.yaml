@@ -1,0 +1,37 @@
+table: cross_asset_regime
+version: 1
+zone: scores
+owner: cross-asset (app.analytics.cross_asset, job cross_asset_signals)
+description: >
+  Daily cross-asset correlation regime and risk-on / risk-off gauge. Eigen-concentration = largest eigenvalue / N of
+  the rolling 60 / 120-day correlation matrix of daily log returns over the fixed basket in `basket` (S&P 500, EURO
+  STOXX 50, Nikkei 225, EEM, WTI, gold, copper, UST 10y synthetic, EUR/USD, USD/JPY, AUD/USD official, HYG); computed
+  only on windows where every member has >= 80 % complete rows (asynchronous closes across time zones bias
+  cross-region correlations down). risk_composite is MODEL-BASED: mean of the available component z-scores (+ =
+  risk-on; >= 4 of 8 components). Overwritten nightly.
+storage: {path: scores/cross_asset_regime, format: parquet, partition_by: [], write_mode: overwrite, sort_by: [date], compression_level: 9}
+primary_key: [date]
+pit: {knowledge_column: knowledge_date, rule: "market closes of the date; FRED inputs by knowledge_date"}
+columns:
+  - {name: date, type: date, nullable: false, description: "Date (union calendar for correlations, S&P 500 sessions for the composite)"}
+  - {name: eig1_share_60, type: float32, nullable: true, description: "First-eigenvalue share of the 60-day correlation matrix (1/N .. 1)"}
+  - {name: avg_corr_60, type: float32, nullable: true, description: "Mean off-diagonal correlation, 60 days"}
+  - {name: eig1_share_120, type: float32, nullable: true, description: "First-eigenvalue share, 120 days"}
+  - {name: avg_corr_120, type: float32, nullable: true, description: "Mean off-diagonal correlation, 120 days"}
+  - {name: eig1_z_120, type: float32, nullable: true, description: "Time-series z of eig1_share_120 (756 days, min 252)"}
+  - {name: n_assets, type: int16, nullable: true, description: "Basket size N"}
+  - {name: basket, type: string, nullable: true, description: "Comma-separated basket asset_ids"}
+  - {name: risk_composite, type: float32, nullable: true, description: "MODEL-BASED risk-on (+) / risk-off (-) composite: mean of component z-scores"}
+  - {name: risk_regime, type: enum, nullable: true, values: [risk_on, neutral, risk_off], description: "MODEL-BASED label: > 0.5 risk_on, < -0.5 risk_off"}
+  - {name: risk_n_components, type: int8, nullable: true, description: "Components available"}
+  - {name: comp_equity_trend, type: float32, nullable: true, description: "z of S&P 500 63-day log return (+)"}
+  - {name: comp_vix, type: float32, nullable: true, description: "-z of VIX level"}
+  - {name: comp_vix_term, type: float32, nullable: true, description: "-z of ln(VIX / VIX3M) (inversion = risk-off)"}
+  - {name: comp_credit_rel, type: float32, nullable: true, description: "z of the 63-day change of ln(HYG / IEF) total return"}
+  - {name: comp_hy_oas, type: float32, nullable: true, description: "-z of ICE BofA US HY OAS (FRED, official; history from 2023-10)"}
+  - {name: comp_copper_gold, type: float32, nullable: true, description: "z of the 63-day change of ln(copper / gold) front months"}
+  - {name: comp_audjpy, type: float32, nullable: true, description: "z of the 63-day AUD/JPY log return (official fixings)"}
+  - {name: comp_usd, type: float32, nullable: true, description: "-z of the 63-day change of the Fed broad dollar index (FRED DTWEXBGS, official)"}
+  - {name: knowledge_date, type: date, nullable: false, description: "= date"}
+  - {name: computed_at, type: datetime, nullable: false, description: "Write time UTC"}
+  - {name: run_id, type: string, nullable: true, description: "job_runs.run_id"}

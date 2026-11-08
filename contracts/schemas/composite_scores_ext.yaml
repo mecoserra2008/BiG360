@@ -1,0 +1,32 @@
+table: composite_scores_ext
+version: 1
+zone: scores
+owner: analytics-scoring (app.analytics.scoring_full)
+description: >
+  Composite scores per profile for every security OUTSIDE the MVP model universe (full-universe extension, 2026-10-30),
+  one row per security x profile even when the composite cannot be computed (score null, reason insufficient_data with
+  the missing inputs). Scores are weighted means of the anchored factor scores (factor_scores_ext); grade = quintile of
+  the MVP composite distribution of the same date and profile (A = would rank in the top 20 % of the MVP universe);
+  rank_global / rank_sector = rank among ALL scored securities (MVP + extended); the MVP rows in composite_scores keep
+  their MVP-universe ranks. Retention: last 10 days daily, older dates month-ends only.
+storage: {path: scores/composite_scores_ext, format: parquet, partition_by: [as_of_month], write_mode: upsert, retention: "daily 10d, then month-end"}
+primary_key: [as_of_date, security_id, profile_id]
+columns:
+  - {name: as_of_date, type: date, nullable: false, description: "Scoring date"}
+  - {name: as_of_month, type: string, nullable: false, description: "Partition YYYY-MM"}
+  - {name: security_id, type: string, nullable: false, description: "FK securities_master"}
+  - {name: issuer_id, type: string, nullable: false, description: "FK issuers"}
+  - {name: profile_id, type: string, nullable: false, description: "Weight profile id (balanced, quality_value, growth, momentum, defensive, ml_blend)"}
+  - {name: score, type: float64, nullable: true, description: "0..100"}
+  - {name: grade, type: enum, nullable: true, values: [A, B, C, D, E], description: "Quintile of the MVP composite distribution (same date, profile)"}
+  - {name: rank_global, type: int32, nullable: true, description: "Rank among all scored securities (MVP + extended)"}
+  - {name: rank_sector, type: int32, nullable: true, description: "Rank within sector x peer region among all scored securities"}
+  - {name: sector_count, type: int32, nullable: true, description: "Scored securities in sector x peer region (MVP + extended)"}
+  - {name: n_scored, type: int32, nullable: true, description: "Scored securities of the profile (MVP + extended)"}
+  - {name: coverage, type: float32, nullable: false, description: "Weighted coverage of factors"}
+  - {name: dq_score, type: float32, nullable: false, description: "Data quality 0..1 of inputs"}
+  - {name: scope, type: enum, nullable: false, values: [extended, mvp], description: "extended = anchored; mvp = copy of the issuer's MVP row"}
+  - {name: reason, type: enum, nullable: true, values: [insufficient_data], description: "Why score is null"}
+  - {name: missing_inputs, type: list<string>, nullable: true, description: "'<factor>:<cause>' items, cause in no_statements | no_sector | stale_statements | low_coverage | no_market_cap | no_prices | stale_prices | short_history | no_moat; plus 'factors:<n>/5' and 'core:<n>/2'"}
+  - {name: computed_at, type: datetime, nullable: false, description: "Write time UTC"}
+  - {name: run_id, type: string, nullable: true, description: "Producing run"}

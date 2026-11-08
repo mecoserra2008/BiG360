@@ -1,0 +1,65 @@
+table: theses
+version: 1
+zone: app_state
+owner: theses (app.theses.store via app.api.routers.theses; auto_status / status_reasons / evaluated_at also by job thesis_eval)
+description: >
+  Investment theses (roadmap v2 item #8, single-user decision log). A thesis has a subject (security, sector, country,
+  macro theme or cross-asset asset), a direction / horizon / conviction, Markdown text, key drivers, dated catalysts,
+  KPIs to watch with thresholds (formula-engine expressions over screener field ids, metric refs, cross-asset or macro
+  cell refs), entry / target / stop price bands on the subject price instrument (price_id), invalidation conditions and
+  optional links to a W4 macro scenario, a Model Studio study / run and a backtesting-lab strategy / run (ids only).
+  Linked alert rules carry alerts.thesis_id. JSON columns: key_drivers / tags = arrays of strings; catalysts =
+  [{catalyst_id, label, date, kind: earnings|macro|corporate|product|regulatory|custom, source, source_ref, done}];
+  kpis = [{kpi_id, label, kind: metric|expr|xa|macro, ref, expr, op: gt|gte|lt|lte|between, threshold, threshold_hi,
+  role: confirm|invalidate|watch, unit}]; invalidation = [{condition_id, label, kind: price_below|price_above|kpi|date|
+  manual, level, kpi_id, date, triggered}]; origin = {kind: manual|company|screener|studio|cross_asset|backtest, ref,
+  label}; status_reasons = [{level: ok|info|risk|invalid, code, message}].
+storage: {path: app_state.duckdb, format: duckdb_table, partition_by: [], write_mode: upsert}
+primary_key: [thesis_id]
+columns:
+  - {name: thesis_id, type: string, nullable: false, description: "TH + UTC timestamp + 6 random base32 chars"}
+  - {name: title, type: string, nullable: false, description: "Display title"}
+  - {name: subject_type, type: enum, nullable: false, values: [security, sector, country, macro_theme, cross_asset], description: "What the thesis is about"}
+  - {name: subject_id, type: string, nullable: false, description: "security_id | sector_id | ISO2 (or EA) | macro theme id | cross-asset asset_id"}
+  - {name: subject_label, type: string, nullable: true, description: "Display label of the subject (ticker / sector name / country / theme / asset name)"}
+  - {name: security_id, type: string, nullable: true, description: "Security of a security subject (denormalized from subject_id)"}
+  - {name: price_id, type: string, nullable: true, description: "Instrument whose price defines bands and performance (security_id / ETF: / IDX: id in serving prices); default by subject (the security, sector ETF, country index, cross-asset instrument); null for macro themes without a proxy"}
+  - {name: price_currency, type: string, nullable: true, description: "Currency of the price bands (price_id trading currency)"}
+  - {name: direction, type: enum, nullable: false, values: [long, short, neutral], description: "Expected direction (neutral = watch / relative view)"}
+  - {name: horizon, type: enum, nullable: false, values: ["1M", "3M", "6M", "12M", "24M", "36M+"], description: "Investment horizon"}
+  - {name: horizon_date, type: date, nullable: true, description: "inception_date + horizon (time-stop date)"}
+  - {name: conviction, type: int16, nullable: false, description: "1 (low) .. 5 (high)"}
+  - {name: status, type: enum, nullable: false, values: [idea, active, closed], description: "Board column (user-controlled lifecycle)"}
+  - {name: thesis_md, type: string, nullable: true, description: "Thesis text (Markdown)"}
+  - {name: key_drivers, type: json, nullable: true, description: "Array of strings"}
+  - {name: catalysts, type: json, nullable: true, description: "Array of catalysts (see description)"}
+  - {name: kpis, type: json, nullable: true, description: "Array of KPI specs (see description)"}
+  - {name: entry_lo, type: float64, nullable: true, description: "Entry band low (price_currency)"}
+  - {name: entry_hi, type: float64, nullable: true, description: "Entry band high (price_currency)"}
+  - {name: target, type: float64, nullable: true, description: "Target price (price_currency)"}
+  - {name: stop, type: float64, nullable: true, description: "Stop / invalidation price (price_currency)"}
+  - {name: invalidation, type: json, nullable: true, description: "Array of invalidation conditions (see description)"}
+  - {name: scenario_id, type: string, nullable: true, description: "Linked W4 macro scenario (macro_scenarios.scenario_id or preset_*)"}
+  - {name: study_id, type: string, nullable: true, description: "Linked Model Studio study (studies.study_id)"}
+  - {name: studio_run_id, type: string, nullable: true, description: "Linked Model Studio run"}
+  - {name: backtest_strategy_id, type: string, nullable: true, description: "Linked backtesting-lab strategy (backtest_strategies.strategy_id; id only)"}
+  - {name: backtest_run_id, type: string, nullable: true, description: "Linked backtesting-lab run (id only)"}
+  - {name: benchmark_id, type: string, nullable: true, description: "Benchmark instrument (default: region index for securities, IDX:^GSPC otherwise)"}
+  - {name: sector_benchmark_id, type: string, nullable: true, description: "Sector benchmark instrument (US sector SPDR ETF for securities / sectors)"}
+  - {name: tags, type: json, nullable: true, description: "Array of strings"}
+  - {name: origin, type: json, nullable: true, description: "Where the thesis was created from (see description)"}
+  - {name: review_every_days, type: int16, nullable: true, description: "Review cadence in days (null = no reminders)"}
+  - {name: next_review_date, type: date, nullable: true, description: "Next scheduled review"}
+  - {name: inception_date, type: date, nullable: true, description: "Date performance is measured from (activation date; creation date for ideas)"}
+  - {name: inception_price, type: float64, nullable: true, description: "Close of price_id on inception_date (price_currency)"}
+  - {name: opened_at, type: datetime, nullable: true, description: "UTC time the thesis became active"}
+  - {name: closed_at, type: datetime, nullable: true, description: "UTC time the thesis was closed"}
+  - {name: exit_price, type: float64, nullable: true, description: "Close of price_id at close"}
+  - {name: close_reason, type: enum, nullable: true, values: [target_hit, stopped, invalidated, time_expired, thesis_changed, other], description: "Why it was closed"}
+  - {name: outcome, type: enum, nullable: true, values: [win, loss, flat], description: "Result at close (default from the direction-signed return; user may override)"}
+  - {name: post_mortem_md, type: string, nullable: true, description: "Post-mortem (Markdown, template on close)"}
+  - {name: auto_status, type: enum, nullable: true, values: [on_track, at_risk, invalidated, unknown], description: "Automatic status from rules + latest serving data (app.theses.evaluate)"}
+  - {name: status_reasons, type: json, nullable: true, description: "Reasons behind auto_status (see description)"}
+  - {name: evaluated_at, type: datetime, nullable: true, description: "UTC time of the last evaluation"}
+  - {name: created_at, type: datetime, nullable: false, description: "UTC"}
+  - {name: updated_at, type: datetime, nullable: false, description: "UTC"}

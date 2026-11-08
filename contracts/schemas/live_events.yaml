@@ -1,0 +1,32 @@
+table: live_events
+version: 1
+zone: normalized
+owner: realtime (app.realtime.compact)
+description: >
+  GDELT 15-minute items seen by the real-time layer (R1), labelled with the events_v2 parsers: GKG articles (kind
+  article: issuer / theme / country labels, live story id, sentiment), salient CAMEO events (kind event) and per-slot
+  summaries (kind slot). The nightly gdelt_stream tables (gdelt_article_labels / gdelt_event_labels) remain the
+  system of record; this table keeps what the live path saw and when (knowledge_ts = first seen).
+storage: {path: normalized/live_events, format: parquet, partition_by: [date], write_mode: append, retention: "articles 180 d (pruning not automated yet), slots forever"}
+primary_key: [event_key]
+pit: {knowledge_column: knowledge_ts, rule: "first seen by the real-time path"}
+columns:
+  - {name: event_key, type: string, nullable: false, description: "gdelt:a:<url_hash> | gdelt:e:<GLOBALEVENTID> | gdelt:slot:<stamp>"}
+  - {name: date, type: date, nullable: false, description: "Partition: UTC date of knowledge_ts"}
+  - {name: kind, type: enum, nullable: false, values: [article, event, slot], description: "Item kind"}
+  - {name: slot, type: string, nullable: true, description: "GDELT slot YYYYmmddHHMMSS"}
+  - {name: title, type: string, nullable: true, description: "Article title"}
+  - {name: url, type: string, nullable: true, description: "Source URL"}
+  - {name: domain, type: string, nullable: true, description: "Source domain"}
+  - {name: language, type: string, nullable: true, description: "ISO 639-1"}
+  - {name: tone, type: float64, nullable: true, description: "GDELT tone"}
+  - {name: themes, type: list<string>, nullable: true, description: "events_v2 theme ids"}
+  - {name: countries, type: list<string>, nullable: true, description: "ISO2 (GLOBAL allowed)"}
+  - {name: issuer_ids, type: list<string>, nullable: true, description: "Linked issuers"}
+  - {name: story_id, type: string, nullable: true, description: "Live story cluster id"}
+  - {name: sentiment_score, type: float64, nullable: true, description: "FinBERT P(pos) - P(neg) (issuer-linked English titles)"}
+  - {name: source_ts, type: datetime, nullable: true, description: "Slot timestamp UTC"}
+  - {name: knowledge_ts, type: datetime, nullable: false, description: "First seen by the real-time path, UTC"}
+  - {name: bus_id, type: int64, nullable: false, description: "Hot-store message id"}
+  - {name: payload, type: json, nullable: true, description: "Full live payload"}
+  - {name: compacted_at, type: datetime, nullable: false, description: "Write time UTC"}

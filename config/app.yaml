@@ -1,0 +1,22 @@
+# Windows app settings (docs/OPERATIONS_ROADMAP.md O3). Owner: platform (app.desktop).
+# Read by the tray app (python -m app.desktop.tray / BiG360.exe) when it starts the supervisor.
+# Data location is NOT set here: it is BIG360_DATA_DIR (installer writes it to <install>\.env; dev tree: <root>\data).
+version: 1
+
+api_host: 127.0.0.1
+api_port: 8010              # dashboard: http://127.0.0.1:8010/
+serve_ui: true              # supervisor --serve-ui: the API serves the built UI (app_dist / frontend/dist_app)
+filler: true                # run the low-priority gap filler (O1)
+schedule: true              # worker runs the active schedule profile (false = job queue only, no scheduled refresh)
+realtime: false             # worker also runs the realtime supervisor (R1)
+start_supervisor: true      # the tray starts the supervisor when it is not running (and restarts it if it dies)
+
+status_poll_s: 60           # tray: refresh of /api/v1/system/status
+notifications: true         # tray: Windows notifications for new ops alerts (refresh failed, data stale, ...)
+notify_severities: [error, warn]
+
+# "Update available" check: a folder or share holding newer builds. Either a latest.json
+#   {"version": "1.0.1", "file": "BiG360Setup-1.0.1.exe", "notes": "..."}
+# or files named BiG360Setup-<version>.exe / BiG360-<version>-portable.zip. Env BIG360_UPDATE_DIR wins. Empty = off.
+update_dir: ""
+update_check_h: 24

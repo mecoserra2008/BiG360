@@ -1,0 +1,146 @@
+{
+ "title": "Value premium stability as controls are added (Oster delta)",
+ "description": "How much does the earnings-yield coefficient move when size, momentum, profitability and volatility controls enter one at a time? Oster (2019) bias-adjusted beta and delta.",
+ "question": "factors",
+ "tags": [
+  "robustness",
+  "value",
+  "Oster"
+ ],
+ "method_note": "Adds controls sequentially and tracks the treatment coefficient and R2; Oster's delta is how strong unobserved selection would have to be (relative to observed) to drive the effect to zero (|delta| > 1 = robust). Caveat: the universe is today's constituents (membership history starts 2026-10), so early years carry survivorship bias; read the premium as an upper bound.",
+ "expected_outputs": [
+  "coefficient path",
+  "beta* (bias-adjusted)",
+  "delta"
+ ],
+ "runtime_s": 5.1,
+ "validated": "2026-11-06 on snapshot R20261106T010757G9ZB",
+ "result": {
+  "run_id": "SR20261106T023354XJH9W",
+  "verdict": "no effect",
+  "metrics": {
+   "beta_star": -0.0026103751021948167
+  },
+  "coefficients": [
+   {
+    "term": "earnings_yield: short",
+    "estimate": -0.0066815100667399615,
+    "statistic": -1.4480422210293444,
+    "p_value": 0.14760524297894215
+   },
+   {
+    "term": "earnings_yield: full",
+    "estimate": -0.0036669350875886924,
+    "statistic": -0.9903155294186395,
+    "p_value": 0.3220199184189282
+   },
+   {
+    "term": "earnings_yield: Oster β*",
+    "estimate": -0.0026103751021948167,
+    "statistic": null,
+    "p_value": null
+   }
+  ]
+ },
+ "study": {
+  "name": "Value premium stability as controls are added (Oster delta)",
+  "method": "coef_stability",
+  "y": "fwd_ret_1m",
+  "x": [
+   "log_mcap",
+   "mom_12_1",
+   "gross_prof",
+   "ivol"
+  ],
+  "params": {
+   "treatment": "earnings_yield",
+   "cluster": "date"
+  },
+  "dataset": {
+   "kind": "panel",
+   "frequency": "M",
+   "start": "2012-01-01",
+   "entities": {
+    "universe": "mvp_us"
+   },
+   "variables": [
+    {
+     "name": "fwd_ret_1m",
+     "source": "prices",
+     "field": "ret",
+     "transforms": [
+      {
+       "op": "fwd_compound",
+       "k": 1
+      },
+      {
+       "op": "winsorize"
+      }
+     ]
+    },
+    {
+     "name": "earnings_yield",
+     "source": "valuation",
+     "field": "earnings_yield",
+     "transforms": [
+      {
+       "op": "cs_rank"
+      }
+     ]
+    },
+    {
+     "name": "log_mcap",
+     "source": "valuation",
+     "field": "market_cap_usd",
+     "transforms": [
+      {
+       "op": "log"
+      },
+      {
+       "op": "cs_zscore"
+      }
+     ]
+    },
+    {
+     "name": "mom_12_1",
+     "source": "tech_factors",
+     "field": "mom",
+     "transforms": [
+      {
+       "op": "winsorize"
+      },
+      {
+       "op": "cs_zscore"
+      }
+     ]
+    },
+    {
+     "name": "gross_prof",
+     "source": "ratios",
+     "field": "gross_profitability",
+     "transforms": [
+      {
+       "op": "winsorize"
+      },
+      {
+       "op": "cs_zscore"
+      }
+     ]
+    },
+    {
+     "name": "ivol",
+     "source": "tech_factors",
+     "field": "ivol",
+     "transforms": [
+      {
+       "op": "winsorize"
+      },
+      {
+       "op": "cs_zscore"
+      }
+     ]
+    }
+   ]
+  }
+ }
+}

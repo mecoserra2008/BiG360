@@ -1,0 +1,90 @@
+{
+ "title": "High-yield OAS shocks -> cyclical sectors (distributed lag)",
+ "description": "Equal-weight industrials return on current and lagged changes in the ICE BofA US high-yield OAS (recent history).",
+ "question": "macro",
+ "tags": [
+  "macro",
+  "credit",
+  "sectors"
+ ],
+ "method_note": "Weekly frequency because the ICE BofA OAS history in the lake starts in late 2023 (FRED licence window). HAC errors; the long-run multiplier sums the lag coefficients. Expect a negative contemporaneous response.",
+ "expected_outputs": [
+  "lag coefficients with HAC SEs",
+  "long-run multiplier",
+  "joint F-test"
+ ],
+ "runtime_s": 2.3,
+ "validated": "2026-11-06 on snapshot R20261106T010757G9ZB",
+ "result": {
+  "run_id": "SR20261106T015400Z4KPM",
+  "n_obs": 155,
+  "metrics": {
+   "r2": 0.2125227366694583,
+   "adj_r2": 0.19687749302712954,
+   "aic": -750.5226168900456,
+   "oos_rmse": 0.019187779021403402
+  },
+  "coefficients": [
+   {
+    "term": "d_hy_oas",
+    "estimate": -0.07506393694847398,
+    "statistic": -5.9344171885469805,
+    "p_value": 2.9489112495349002e-09
+   },
+   {
+    "term": "d_hy_oas_L1",
+    "estimate": -0.0023883296110058998,
+    "statistic": -0.13233211026641883,
+    "p_value": 0.8947216103854961
+   },
+   {
+    "term": "d_hy_oas_L2",
+    "estimate": -0.008791936117236396,
+    "statistic": -1.0950943818420642,
+    "p_value": 0.2734752897584677
+   }
+  ]
+ },
+ "study": {
+  "name": "High-yield OAS shocks -> cyclical sectors (distributed lag)",
+  "method": "distributed_lag",
+  "y": "indu_ret",
+  "x": [
+   "d_hy_oas"
+  ],
+  "params": {
+   "lags": 2,
+   "cov_type": "HAC"
+  },
+  "dataset": {
+   "kind": "timeseries",
+   "frequency": "W",
+   "start": "2023-11-01",
+   "variables": [
+    {
+     "name": "indu_ret",
+     "source": "prices",
+     "field": "ret",
+     "entity_agg": "mean",
+     "entities": {
+      "universe": "mvp_us",
+      "sectors": [
+       "INDU"
+      ]
+     }
+    },
+    {
+     "name": "d_hy_oas",
+     "source": "macro",
+     "field": "fred:BAMLH0A0HYM2",
+     "transforms": [
+      {
+       "op": "diff"
+      }
+     ],
+     "agg": "last"
+    }
+   ]
+  }
+ }
+}

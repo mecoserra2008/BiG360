@@ -1,0 +1,128 @@
+{
+ "title": "Industrial production nowcast with conformal intervals",
+ "description": "Next-month change in US industrial production from claims, financial conditions and the curve; ridge with 90 % split-conformal intervals.",
+ "question": "forecasting",
+ "tags": [
+  "forecasting",
+  "macro",
+  "conformal"
+ ],
+ "method_note": "Point-in-time (vintage-aware) macro alignment: each regressor is the value known at month end. Ridge on a walk-forward window; the conformal band is calibrated only on earlier folds' errors, so its coverage is an honest out-of-sample number.",
+ "expected_outputs": [
+  "OOS R2 vs mean",
+  "conformal 90 % band and coverage",
+  "coefficient path"
+ ],
+ "runtime_s": 0.6,
+ "validated": "2026-11-06 on snapshot R20261106T010757G9ZB",
+ "result": {
+  "run_id": "SR20261106T015429E9T5W",
+  "n_obs": 441,
+  "metrics": {
+   "conformal_coverage": 0.8915094339622641,
+   "oos_rmse": 0.014510545854623913,
+   "oos_r2_oos": 0.03198887314015286
+  },
+  "coefficients": [
+   {
+    "term": "d_claims",
+    "estimate": -0.011612775543884197,
+    "statistic": null,
+    "p_value": null
+   },
+   {
+    "term": "nfci",
+    "estimate": -0.0035998978924867936,
+    "statistic": null,
+    "p_value": null
+   },
+   {
+    "term": "term_spread",
+    "estimate": -4.902307147702676e-05,
+    "statistic": null,
+    "p_value": null
+   },
+   {
+    "term": "d_ip",
+    "estimate": 0.02138075431782636,
+    "statistic": null,
+    "p_value": null
+   }
+  ]
+ },
+ "study": {
+  "name": "Industrial production nowcast with conformal intervals",
+  "method": "regularized",
+  "y": "d_ip_next",
+  "x": [
+   "d_claims",
+   "nfci",
+   "term_spread",
+   "d_ip"
+  ],
+  "params": {
+   "model": "ridge",
+   "cv": {
+    "folds": 5,
+    "scheme": "expanding",
+    "purge": 1,
+    "conformal_alpha": 0.1
+   }
+  },
+  "dataset": {
+   "kind": "timeseries",
+   "frequency": "M",
+   "start": "1990-01-01",
+   "variables": [
+    {
+     "name": "d_ip_next",
+     "source": "macro",
+     "field": "fred:INDPRO",
+     "transforms": [
+      {
+       "op": "log_diff"
+      },
+      {
+       "op": "lead",
+       "k": 1
+      }
+     ]
+    },
+    {
+     "name": "d_claims",
+     "source": "macro",
+     "field": "fred:ICSA",
+     "transforms": [
+      {
+       "op": "log_diff"
+      }
+     ],
+     "agg": "mean"
+    },
+    {
+     "name": "nfci",
+     "source": "macro",
+     "field": "fred:NFCI",
+     "agg": "mean"
+    },
+    {
+     "name": "term_spread",
+     "source": "macro",
+     "field": "fred:T10Y3M",
+     "agg": "mean"
+    },
+    {
+     "name": "d_ip",
+     "source": "macro",
+     "field": "fred:INDPRO",
+     "transforms": [
+      {
+       "op": "log_diff"
+      }
+     ]
+    }
+   ],
+   "macro_alignment": "pit"
+  }
+ }
+}

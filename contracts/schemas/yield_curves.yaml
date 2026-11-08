@@ -1,0 +1,29 @@
+table: yield_curves
+version: 1
+zone: normalized
+owner: rates-w3 (app.rates.curves_job, jobs rates_curves / rates_curves_backfill)
+description: >
+  Official sovereign and money-market yield curves in LONG format: one row per (date, curve, tenor, measure).
+  Rates are stored as INTEGER basis points x 100 (value_bp_x100; 4.2512 % -> 42512, i.e. 0.01 bp precision).
+  Curves and their sources are catalogued in app.rates.registry (US Treasury par / real XML, Fed H.15 via FRED, ECB
+  euro area AAA / all-issuer and Bundesbank Bund curves reconstructed from the published Svensson parameters
+  (yield_curve_params), BoE nominal / real / inflation / OIS spline curves, MoF JGB, Banco de Espana, Banco de
+  Portugal (IGCP OT), SNB, BoC, RBA, Riksbank, Norges Bank, EURIBOR via Banco de Espana, and monthly ~10y
+  benchmark yields of the rest of the world ({CC}_LT10: ECB IRS convergence yields for the EU27, OECD otherwise).
+  type = measure (par | spot | forward | yield), kind = nominal | real | inflation | ois | money_market.
+  Spot rates are continuously compounded for the Svensson curves (ECB / Bundesbank) and as published otherwise.
+storage: {path: normalized/yield_curves, format: parquet, partition_by: [year], write_mode: upsert, sort_by: [curve_id, type, tenor_months, date], compression_level: 9}
+primary_key: [date, curve_id, tenor_months, type]
+pit: {knowledge_column: knowledge_date, rule: "usable from knowledge_date = min(date + the source's publication lag (app.rates.registry Publish), first retrieval date); knowledge_date_estimated = true for back-filled history"}
+columns:
+  - {name: year, type: int16, nullable: false, description: "Partition: calendar year of date"}
+  - {name: date, type: date, nullable: false, description: "Curve date (business day of the market; first day of the month for monthly curves)"}
+  - {name: curve_id, type: string, nullable: false, description: "Curve id (app.rates.registry), e.g. US_TSY, EA_AAA, DE_BUND, GB_GILT, JP_JGB, IT_LT10"}
+  - {name: tenor_months, type: int16, nullable: false, unit: months, description: "Maturity in months (0 = overnight)"}
+  - {name: type, type: enum, nullable: false, values: [par, spot, forward, yield], description: "Measure: par / constant-maturity yield, zero-coupon spot rate, instantaneous forward rate, or a benchmark / market-average yield"}
+  - {name: kind, type: enum, nullable: false, values: [nominal, real, inflation, ois, money_market], description: "Curve kind (redundant with curve_id; dictionary-encoded for filtering)"}
+  - {name: value_bp_x100, type: int32, nullable: false, unit: bp_x100, description: "Rate in basis points x 100 (divide by 10000 for percent)"}
+  - {name: source, type: string, nullable: false, description: "Source id: ust, fred_h15, ecb, bundesbank, boe, mof_jp, bde, bpstat, snb, boc, rba, riksbank, norges, ecb_irs, oecd, fred_oecd_mei"}
+  - {name: knowledge_date, type: date, nullable: false, description: "Date the value became public (see pit)"}
+  - {name: knowledge_date_estimated, type: bool, nullable: false, description: "True when knowledge_date is the publication-lag rule (history), false when it is the observed retrieval date"}
+  - {name: ingested_at, type: datetime, nullable: false, description: "Write time UTC"}

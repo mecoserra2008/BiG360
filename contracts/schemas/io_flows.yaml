@@ -1,0 +1,23 @@
+table: io_flows
+version: 1
+zone: normalized
+owner: linkage (app.linkage.iotables)
+description: >
+  A3 inter-country inter-industry flows from the OECD Inter-Country Input-Output tables (official, USD millions,
+  current prices), aggregated from the 45 ICIO industries to our 11 sectors (+ NONMKT = public administration,
+  education, households). src -> dst = intermediate inputs supplied by src country-sector to dst country-sector;
+  dst_sector 'FD' = final demand (households, NPISH, government, GFCF, inventories, direct purchases abroad) of dst
+  country. 'XR' = ICIO rest of world.
+storage: {path: normalized/io_flows, format: parquet, partition_by: [year], write_mode: upsert, retention: "forever"}
+primary_key: [edition, year, src_iso2, src_sector, dst_iso2, dst_sector]
+pit: {knowledge_column: knowledge_date, rule: "edition release (Nov 30 of the edition year)"}
+columns:
+  - {name: edition, type: int16, nullable: false, description: "ICIO edition (e.g. 2023)"}
+  - {name: year, type: int16, nullable: false, description: "Reference year"}
+  - {name: src_iso2, type: string, nullable: false, description: "Supplying country (ISO2; XR = rest of world)"}
+  - {name: src_sector, type: string, nullable: false, description: "Supplying sector (sector_taxonomy id or NONMKT)"}
+  - {name: dst_iso2, type: string, nullable: false, description: "Using country (ISO2; XR = rest of world)"}
+  - {name: dst_sector, type: string, nullable: false, description: "Using sector, or FD = final demand"}
+  - {name: value_usd_m, type: float64, nullable: false, unit: "USD millions", description: "Flow value"}
+  - {name: knowledge_date, type: date, nullable: false, description: "Edition release (rule)"}
+  - {name: ingested_at, type: datetime, nullable: false, description: "Write time UTC"}

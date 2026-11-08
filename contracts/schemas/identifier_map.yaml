@@ -1,0 +1,22 @@
+table: identifier_map
+version: 2
+zone: reference
+owner: ref-identity
+description: >
+  Cross-reference from external identifiers to internal ids, with validity windows. Ingestion adapters write
+  source-native keys (source_entity_id); normalization resolves them through this table. Also records
+  merged duplicate issuer ids (id_type=issuer_alias).
+storage: {path: reference/identifier_map, format: parquet, partition_by: [], write_mode: overwrite}
+primary_key: [id_type, id_value, valid_from]
+columns:
+  - {name: id_type, type: enum, nullable: false, values: [cik, ticker_mic, yf_ticker, polygon_ticker, isin, cusip, figi, composite_figi, share_class_figi, lei, edinet_code, jp_sec_code, dart_corp_code, kr_stock_code, cvm_code, cnpj, cn_code, hk_code, uk_company_number, permid, name_country, issuer_alias, gdelt_org_name], description: "Identifier namespace"}
+  - {name: id_value, type: string, nullable: false, description: "Identifier value, normalized (upper-case, zero-padded CIK, ticker_mic as SYMBOL@MIC, name_country as NORMNAME@CC)"}
+  - {name: entity_level, type: enum, nullable: false, values: [issuer, security, listing], description: "Which internal id this maps to"}
+  - {name: issuer_id, type: string, nullable: false, description: "Internal issuer id"}
+  - {name: security_id, type: string, nullable: true, description: "Internal security id if entity_level in (security, listing)"}
+  - {name: listing_id, type: string, nullable: true, description: "Internal listing id if entity_level=listing"}
+  - {name: valid_from, type: date, nullable: false, description: "Start validity (1900-01-01 if unknown)"}
+  - {name: valid_to, type: date, nullable: true, description: "End validity (null = current)"}
+  - {name: source_id, type: string, nullable: false, description: "Who asserted the mapping (sec_edgar, openfigi, gleif, manual, sec_ftd (CUSIP), derived_cusip (US/CA ISIN computed from a CUSIP: prefix + CUSIP + ISO 6166 check digit, confidence 0.95; v2), ...)"}
+  - {name: confidence, type: float32, nullable: false, description: "0..1 (1 = authoritative registry; <0.9 = fuzzy name match, needs review)"}
+  - {name: updated_at, type: datetime, nullable: false, description: "Last update UTC"}

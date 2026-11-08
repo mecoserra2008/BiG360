@@ -1,0 +1,52 @@
+table: sc_metrics
+version: 1
+zone: features
+owner: supply-chain (app.supply_chain.network, job supply_chain_network)
+description: >
+  Roadmap #9 per-issuer supply-chain and geography metrics (as_of). Network (sc_edges, resolved + unresolved nodes):
+  customer / supplier counts, top-customer share and customer HHI over disclosed revenue shares (a lower bound: the
+  undisclosed remainder is treated as fully diversified), PageRank (damping 0.85, weights = confidence) and
+  betweenness (resolved-issuer subgraph, undirected, sampled k <= 500) and degree centrality. Geography: country HHI,
+  top country, domestic share, exposure-weighted country risk (sum_c w_c x country_risk.risk_score) on direct and
+  look-through weights; event pressure / recession probability weighted the same way. Coverage: geo_source and
+  coverage_level (full = geo revenue + disclosed links, partial = one of them, sparse = home-country / statistical only).
+storage: {path: features/sc_metrics, format: parquet, partition_by: [], write_mode: overwrite, retention: "latest snapshot"}
+primary_key: [as_of, issuer_id]
+columns:
+  - {name: as_of, type: date, nullable: false, description: "Build date"}
+  - {name: issuer_id, type: string, nullable: false, description: "Issuer"}
+  - {name: security_id, type: string, nullable: true, description: "Primary security"}
+  - {name: country, type: string, nullable: true, description: "Home country"}
+  - {name: region, type: string, nullable: true, description: "Region"}
+  - {name: sector_id, type: string, nullable: true, description: "Sector"}
+  - {name: n_customers, type: int32, nullable: false, description: "Disclosed customers (edges where the issuer is supplier)"}
+  - {name: n_customers_resolved, type: int32, nullable: false, description: "Disclosed customers resolved to issuers"}
+  - {name: n_suppliers, type: int32, nullable: false, description: "Disclosed suppliers (edges where the issuer is customer)"}
+  - {name: n_suppliers_resolved, type: int32, nullable: false, description: "Disclosed suppliers resolved to issuers"}
+  - {name: n_unweighted, type: int32, nullable: false, description: "Customer edges without a revenue share"}
+  - {name: disclosed_customer_share, type: float64, nullable: true, description: "Sum of disclosed customer revenue shares (capped at 1)"}
+  - {name: top_customer_share, type: float64, nullable: true, description: "Largest disclosed customer revenue share"}
+  - {name: top_customer_key, type: string, nullable: true, description: "Largest customer node key"}
+  - {name: top_customer_name, type: string, nullable: true, description: "Largest customer name"}
+  - {name: customer_hhi, type: float64, nullable: true, description: "Sum of squared disclosed customer shares (0-1, lower bound)"}
+  - {name: pagerank, type: float64, nullable: true, description: "PageRank on the supplier -> customer graph (x N, 1 = average)"}
+  - {name: betweenness, type: float64, nullable: true, description: "Normalised betweenness (resolved subgraph)"}
+  - {name: degree_centrality, type: float64, nullable: true, description: "Degree / (N - 1)"}
+  - {name: n_neighbours_stat, type: int16, nullable: false, description: "Statistical neighbours (partial_corr)"}
+  - {name: geo_source, type: enum, nullable: false, values: [geo_revenue, home_country, none], description: "Source of the direct country weights"}
+  - {name: geo_period_end, type: date, nullable: true, description: "Fiscal year end of the geographic breakdown"}
+  - {name: geo_knowledge_date, type: date, nullable: true, description: "Filing date of the geographic breakdown"}
+  - {name: geo_source_id, type: string, nullable: true, description: "company_geo_revenue source of the breakdown (sec_fsds, esef_textblock, ...)"}
+  - {name: geo_method, type: string, nullable: true, description: "xbrl_dimensional | ixbrl_textblock_table"}
+  - {name: geo_confidence, type: float64, nullable: true, description: "1.0 tagged facts; 0.7-0.8 parsed note tables"}
+  - {name: n_countries, type: int16, nullable: false, description: "Countries with direct weight"}
+  - {name: geo_hhi, type: float64, nullable: true, description: "Country HHI of direct weights"}
+  - {name: top_country, type: string, nullable: true, description: "Largest direct country"}
+  - {name: top_country_share, type: float64, nullable: true, description: "Its weight"}
+  - {name: domestic_share, type: float64, nullable: true, description: "Direct weight of the home country"}
+  - {name: country_risk, type: float64, nullable: true, description: "Exposure-weighted country risk_score (direct weights; model-based)"}
+  - {name: country_risk_look_through, type: float64, nullable: true, description: "Same on look-through weights"}
+  - {name: event_pressure, type: float64, nullable: true, description: "Exposure-weighted event pressure (direct)"}
+  - {name: recession_prob, type: float64, nullable: true, description: "Exposure-weighted recession probability (direct)"}
+  - {name: coverage_level, type: enum, nullable: false, values: [full, partial, sparse], description: "Data coverage"}
+  - {name: computed_at, type: datetime, nullable: false, description: "Write time UTC"}

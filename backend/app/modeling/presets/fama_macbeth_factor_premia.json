@@ -1,0 +1,98 @@
+{
+ "title": "Fama-MacBeth: premia of our factor scores",
+ "description": "Monthly cross-sections of mvp_us: next-month return (target) on cross-sectionally standardized quality, value, momentum, growth and profitability scores known at month end. Premia are the time-series means of the monthly slopes with Newey-West standard errors.",
+ "tags": [
+  "panel",
+  "Fama-MacBeth",
+  "factors"
+ ],
+ "study": {
+  "name": "Factor-score premia (FM)",
+  "method": "fama_macbeth",
+  "y": "ret_next",
+  "x": [
+   "quality",
+   "value",
+   "momentum",
+   "growth",
+   "profitability"
+  ],
+  "params": {},
+  "dataset": {
+   "kind": "panel",
+   "frequency": "M",
+   "start": "2017-06-01",
+   "entities": {
+    "universe": "mvp_us"
+   },
+   "variables": [
+    {
+     "name": "ret_next",
+     "source": "prices",
+     "field": "ret",
+     "transforms": [
+      {
+       "op": "lead",
+       "k": 1
+      },
+      {
+       "op": "winsorize",
+       "lower": 0.01,
+       "upper": 0.99
+      }
+     ]
+    },
+    {
+     "name": "quality",
+     "source": "factor_scores",
+     "field": "quality",
+     "transforms": [
+      {
+       "op": "cs_zscore"
+      }
+     ]
+    },
+    {
+     "name": "value",
+     "source": "factor_scores",
+     "field": "value",
+     "transforms": [
+      {
+       "op": "cs_zscore"
+      }
+     ]
+    },
+    {
+     "name": "momentum",
+     "source": "factor_scores",
+     "field": "momentum",
+     "transforms": [
+      {
+       "op": "cs_zscore"
+      }
+     ]
+    },
+    {
+     "name": "growth",
+     "source": "factor_scores",
+     "field": "growth",
+     "transforms": [
+      {
+       "op": "cs_zscore"
+      }
+     ]
+    },
+    {
+     "name": "profitability",
+     "source": "factor_scores",
+     "field": "profitability",
+     "transforms": [
+      {
+       "op": "cs_zscore"
+      }
+     ]
+    }
+   ]
+  }
+ }
+}

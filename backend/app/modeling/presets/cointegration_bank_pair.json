@@ -1,0 +1,57 @@
+{
+ "title": "Cointegration pair: JPM vs BAC",
+ "description": "Weekly log prices of JPMorgan and Bank of America since 2015: Engle-Granger and Johansen tests, OLS hedge ratio, spread with +/-2 sd bands, rolling z-score and half-life.",
+ "tags": [
+  "cointegration",
+  "pairs",
+  "banks"
+ ],
+ "study": {
+  "name": "JPM / BAC pair",
+  "method": "cointegration",
+  "y": "jpm",
+  "x": [
+   "bac"
+  ],
+  "params": {
+   "z_window": 52
+  },
+  "dataset": {
+   "kind": "timeseries",
+   "frequency": "W",
+   "start": "2015-01-01",
+   "variables": [
+    {
+     "name": "jpm",
+     "source": "prices",
+     "field": "adj_close",
+     "entities": {
+      "tickers": [
+       "JPM"
+      ]
+     },
+     "transforms": [
+      {
+       "op": "log"
+      }
+     ]
+    },
+    {
+     "name": "bac",
+     "source": "prices",
+     "field": "adj_close",
+     "entities": {
+      "tickers": [
+       "BAC"
+      ]
+     },
+     "transforms": [
+      {
+       "op": "log"
+      }
+     ]
+    }
+   ]
+  }
+ }
+}

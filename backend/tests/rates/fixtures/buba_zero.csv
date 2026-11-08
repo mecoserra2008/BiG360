@@ -1,0 +1,13 @@
+﻿"";BBSIS.D.I.ZST.ZI.EUR.S1311.B.A604.R02XX.R.A.A._Z._Z.A;BBSIS.D.I.ZST.ZI.EUR.S1311.B.A604.R02XX.R.A.A._Z._Z.A_FLAGS;BBSIS.D.I.ZST.ZI.EUR.S1311.B.A604.R10XX.R.A.A._Z._Z.A;BBSIS.D.I.ZST.ZI.EUR.S1311.B.A604.R10XX.R.A.A._Z._Z.A_FLAGS;BBSIS.D.I.ZST.ZI.EUR.S1311.B.A604.R30XX.R.A.A._Z._Z.A;BBSIS.D.I.ZST.ZI.EUR.S1311.B.A604.R30XX.R.A.A._Z._Z.A_FLAGS
+"";Zinsstrukturkurve (Svensson-Methode) / Börsennotierte             Bundeswertpapiere / 2,0 Jahr(e) RLZ / Tageswerte;;Zinsstrukturkurve (Svensson-Methode) / Börsennotierte             Bundeswertpapiere / 10,0 Jahr(e) RLZ / Tageswerte;;Zinsstrukturkurve (Svensson-Methode) / Börsennotierte Bundeswertpapiere / 30,0 Jahr(e) RLZ  / Tageswerte;
+Dezimalstellen;2;;2;;2;
+Dimension;Eins;;Eins;;Eins;
+Einheit;Prozent;;Prozent;;Prozent;
+Format der Zeitangabe;P1D;;P1D;;P1D;
+Kategorie;ZRZS;;ZRZS;;ZRZS;
+Kommentar;Monatsendstandsreihe: WZ9810. Bis Juli 1997 liegen lediglich Ultimowerte vor.;;Monatsendstandsreihe: WZ9826. Bis Juli 1997 liegen lediglich Ultimowerte vor.;;;
+Kommentar (englisch);;;;;;
+Stand vom;30.10.2026 12:24:21 Uhr;;30.10.2026 12:24:22 Uhr;;30.10.2026 12:24:24 Uhr;
+2026-10-28;3,08;;3,43;;3,77;
+2026-10-29;3,08;;3,42;;3,77;
+2026-10-30;3,06;;3,40;;3,78;

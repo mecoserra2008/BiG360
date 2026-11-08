@@ -1,0 +1,101 @@
+{
+ "title": "Bank return quantiles given rate and credit conditions",
+ "description": "Distribution of the next-month financials return given the curve slope, credit spread and VIX.",
+ "question": "forecasting",
+ "tags": [
+  "probabilistic",
+  "banks",
+  "credit"
+ ],
+ "method_note": "Banks' downside depends on credit stress and the curve. Quantile boosting reveals whether the left tail widens more than the median moves; CQR guarantees marginal coverage out of fold. Caveat: the universe is today's constituents (membership history starts 2026-10), so early years carry survivorship bias; read the premium as an upper bound.",
+ "expected_outputs": [
+  "fan chart",
+  "pinball vs climatology",
+  "CQR coverage"
+ ],
+ "runtime_s": 3.4,
+ "validated": "2026-11-06 on snapshot R20261106T010757G9ZB",
+ "result": {
+  "run_id": "SR20261106T020502VESD2",
+  "beats_baseline": true,
+  "beats_linear": false,
+  "verdict": "quantile GBM beats linear-Gaussian baseline on CRPS (DM p = 0.00101); point forecast: quantile GBM (median) is worse than linear baseline out of sample (mean loss 0.003922 vs 0.003725)",
+  "n_obs": 369,
+  "metrics": {
+   "oos_rmse": 0.06262675697759736,
+   "oos_r2_oos": -0.05935456442133491,
+   "crps": 0.03146410998065833,
+   "crps_linear": 0.033473483683168465,
+   "crps_skill_vs_linear": 0.060028819274658085,
+   "coverage_90": 0.6801801801801802,
+   "dm_p_crps_vs_linear": 0.0010084544408152803,
+   "conformal_coverage": 0.9550561797752809,
+   "dm_p_vs_linear": 0.12078792823490368
+  },
+  "coefficients": []
+ },
+ "study": {
+  "name": "Bank return quantiles given rate and credit conditions",
+  "method": "quantile_gbm",
+  "y": "fwd_fins_1m",
+  "x": [
+   "slope",
+   "baa_spread",
+   "vix"
+  ],
+  "params": {
+   "n_estimators": 150,
+   "num_leaves": 7,
+   "min_child_samples": 20,
+   "cv": {
+    "folds": 5,
+    "scheme": "expanding",
+    "purge": 1,
+    "conformal_alpha": 0.1
+   }
+  },
+  "dataset": {
+   "kind": "timeseries",
+   "frequency": "M",
+   "start": "1996-01-01",
+   "variables": [
+    {
+     "name": "fwd_fins_1m",
+     "source": "prices",
+     "field": "ret",
+     "transforms": [
+      {
+       "op": "fwd_compound",
+       "k": 1
+      }
+     ],
+     "entity_agg": "mean",
+     "entities": {
+      "universe": "mvp_us",
+      "sectors": [
+       "FINS"
+      ]
+     }
+    },
+    {
+     "name": "slope",
+     "source": "macro",
+     "field": "fred:T10Y2Y",
+     "agg": "last"
+    },
+    {
+     "name": "baa_spread",
+     "source": "macro",
+     "field": "fred:BAA10Y",
+     "agg": "last"
+    },
+    {
+     "name": "vix",
+     "source": "macro",
+     "field": "fred:VIXCLS",
+     "agg": "last"
+    }
+   ]
+  }
+ }
+}

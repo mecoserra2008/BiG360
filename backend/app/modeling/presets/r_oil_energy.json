@@ -1,0 +1,95 @@
+{
+ "title": "Oil price shocks -> energy equities",
+ "description": "Equal-weight energy-sector return on the monthly WTI crude return and the US dollar.",
+ "question": "macro",
+ "tags": [
+  "macro",
+  "commodities",
+  "energy"
+ ],
+ "method_note": "Energy equities are levered on crude: the oil beta should be well above 0.3. The broad dollar controls for the common USD component of commodity prices. Caveat: the universe is today's constituents (membership history starts 2026-10), so early years carry survivorship bias; read the premium as an upper bound.",
+ "expected_outputs": [
+  "oil and USD betas (HAC)",
+  "R2",
+  "residual diagnostics"
+ ],
+ "runtime_s": 2.2,
+ "validated": "2026-11-06 on snapshot R20261106T010757G9ZB",
+ "result": {
+  "run_id": "SR20261106T0156533HS91",
+  "n_obs": 238,
+  "metrics": {
+   "r2": 0.3156694004812306,
+   "adj_r2": 0.30984531027256024,
+   "aic": -564.7658913497505,
+   "oos_rmse": 0.11166605186984829
+  },
+  "coefficients": [
+   {
+    "term": "oil_ret",
+    "estimate": 0.3407621827729303,
+    "statistic": 3.321524514999282,
+    "p_value": 0.0008952711724055214
+   },
+   {
+    "term": "d_usd",
+    "estimate": -0.958535987409162,
+    "statistic": -1.7568690041212371,
+    "p_value": 0.07894013996067502
+   }
+  ]
+ },
+ "study": {
+  "name": "Oil price shocks -> energy equities",
+  "method": "ols",
+  "y": "energy_ret",
+  "x": [
+   "oil_ret",
+   "d_usd"
+  ],
+  "params": {
+   "cov_type": "HAC"
+  },
+  "dataset": {
+   "kind": "timeseries",
+   "frequency": "M",
+   "start": "2007-01-01",
+   "variables": [
+    {
+     "name": "energy_ret",
+     "source": "prices",
+     "field": "ret",
+     "entity_agg": "mean",
+     "entities": {
+      "universe": "mvp_us",
+      "sectors": [
+       "ENRG"
+      ]
+     }
+    },
+    {
+     "name": "oil_ret",
+     "source": "cross_asset",
+     "field": "CL:price",
+     "transforms": [
+      {
+       "op": "pct_change"
+      }
+     ],
+     "agg": "last"
+    },
+    {
+     "name": "d_usd",
+     "source": "macro",
+     "field": "fred:DTWEXBGS",
+     "transforms": [
+      {
+       "op": "pct_change"
+      }
+     ],
+     "agg": "last"
+    }
+   ]
+  }
+ }
+}

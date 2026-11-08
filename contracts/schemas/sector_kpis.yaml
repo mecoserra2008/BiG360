@@ -1,0 +1,28 @@
+table: sector_kpis
+version: 2
+zone: features
+owner: analytics-scoring (app.analytics.sector_kpis)
+description: >
+  Sector-specific KPI values (contracts/sector_kpis.yaml -> kpi_sets) per issuer and period. Only KPIs from
+  sets applicable to the issuer's subsector are computed. Long format, PIT-versioned.
+storage: {path: features/sector_kpis, format: parquet, partition_by: [sector_id], write_mode: upsert}
+primary_key: [issuer_id, kpi_id, period_end, period_kind, knowledge_date]
+pit: {knowledge_column: knowledge_date, rule: "same as fundamentals_wide"}
+columns:
+  - {name: issuer_id, type: string, nullable: false, description: "FK issuers"}
+  - {name: sector_id, type: string, nullable: false, description: "Partition: sector at compute time"}
+  - {name: subsector_id, type: string, nullable: false, description: "Subsector at compute time"}
+  - {name: kpi_set_id, type: string, nullable: false, description: "kpi_sets id that defined the KPI"}
+  - {name: kpi_id, type: string, nullable: false, description: "KPI id"}
+  - {name: period_kind, type: enum, nullable: false, values: [FY, Q, H, TTM], description: "Period kind"}
+  - {name: fiscal_year, type: int16, nullable: false, description: "Fiscal year"}
+  - {name: fiscal_period, type: string, nullable: false, description: "FY/Q1../TTM"}
+  - {name: period_end, type: date, nullable: false, description: "Period end"}
+  - {name: value, type: float64, nullable: true, description: "KPI value"}
+  - {name: unit, type: enum, nullable: false, values: [ratio, pct, x, days, currency_usd, score, count, years], description: "Unit"}
+  - {name: inputs_complete, type: bool, nullable: false, description: "All inputs present"}
+  - {name: knowledge_date, type: date, nullable: false, description: "Max knowledge_date of inputs"}
+  - {name: dq_score, type: float32, nullable: true, description: "fundamentals_wide.dq_score of the period row (v2)"}
+  - {name: peer_rank, type: int16, nullable: true, description: "Position of the KPI in kpi_set.peer_metrics (1 = most relevant for peer comparison; null = not a headline metric) (v2)"}
+  - {name: computed_at, type: datetime, nullable: false, description: "Write time UTC"}
+  - {name: run_id, type: string, nullable: true, description: "Producing run"}

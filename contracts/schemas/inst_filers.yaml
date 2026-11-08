@@ -1,0 +1,40 @@
+table: inst_filers
+version: 1
+zone: scores
+owner: smart-money (app.analytics.smart_money_13f)
+description: >
+  13F filer metrics per quarter from institutional_holdings (SEC, official), PIT on the quarter's cutoff = filing
+  deadline (period end + 45 days, next SEC business day, + 1 business day for after-hours filings; the run date while the quarter is still being filed). Long equity
+  book only (put_call none, SH). hedge_fund_like is a transparent MODEL-BASED classification: 10 <= n_positions <= 1000,
+  AUM >= $50M, stock_share >= 0.6 and (turnover >= 0.15 or option_share >= 0.05 or (top10_weight >= 0.50 and
+  turnover >= 0.05)). ret_next_q / excess_ret_next_q =
+  buy-and-hold return of the reported book over the FOLLOWING quarter (known only at ret_known_date = next period end;
+  past-performance input of the smart cohort, never a label). smart_score / in_smart_cohort (MODEL-BASED): mean excess
+  return of the books of q-4 .. q-1 (>= 3), cohort = hedge-fund-like filers with smart_score > 0 in the top decile.
+storage: {path: scores/inst_filers, format: parquet, partition_by: [], write_mode: overwrite, sort_by: [period_end, filer_cik], compression_level: 9}
+primary_key: [filer_cik, period_end]
+pit: {knowledge_column: knowledge_date, rule: "usable from the quarter cutoff (13F deadline); smart_score uses returns realised by the period end"}
+columns:
+  - {name: filer_cik, type: string, nullable: false, description: "Manager CIK"}
+  - {name: filer_name, type: string, nullable: true, description: "Manager name"}
+  - {name: period_end, type: date, nullable: false, description: "13F quarter end"}
+  - {name: knowledge_date, type: date, nullable: false, description: "Quarter cutoff (filing deadline or run date)"}
+  - {name: is_complete, type: bool, nullable: false, description: "Cutoff reached the filing deadline"}
+  - {name: n_positions, type: int32, nullable: false, description: "Long equity positions (CUSIPs)"}
+  - {name: aum_usd, type: float64, nullable: false, description: "Reported long equity value USD"}
+  - {name: stock_share, type: float64, nullable: true, description: "Value share in positions mapped to single stocks (common / ADR / preferred / REIT units)"}
+  - {name: top10_weight, type: float64, nullable: true, description: "Value share of the 10 largest positions"}
+  - {name: hhi_weights, type: float64, nullable: true, description: "Sum of squared value weights"}
+  - {name: option_share, type: float64, nullable: true, description: "Put + call value / (long + option value)"}
+  - {name: turnover, type: float64, nullable: true, description: "min(buys, sells) / mean AUM q, q-1 (share changes x price); null without a previous filing"}
+  - {name: hedge_fund_like, type: bool, nullable: false, description: "MODEL-BASED classification (rule in description)"}
+  - {name: ret_next_q, type: float64, nullable: true, description: "Return of this quarter-end book over the next quarter (past performance once realised)"}
+  - {name: excess_ret_next_q, type: float64, nullable: true, description: "ret_next_q minus the equal-weight mean of all filers (coverage >= 0.5)"}
+  - {name: ret_coverage, type: float64, nullable: true, description: "Priced value / AUM"}
+  - {name: ret_known_date, type: date, nullable: true, description: "Date the return is realised (next period end)"}
+  - {name: smart_score, type: float64, nullable: true, description: "MODEL-BASED: mean excess return of books q-4..q-1"}
+  - {name: smart_n_quarters, type: int32, nullable: true, description: "Quarters in smart_score"}
+  - {name: smart_rank_pct, type: float64, nullable: true, description: "Percentile of smart_score among hedge-fund-like filers with >= 3 quarters"}
+  - {name: in_smart_cohort, type: bool, nullable: false, description: "MODEL-BASED smart cohort member at this quarter"}
+  - {name: computed_at, type: datetime, nullable: false, description: "Write time UTC"}
+  - {name: run_id, type: string, nullable: true, description: "job_runs.run_id"}

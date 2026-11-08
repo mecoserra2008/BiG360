@@ -1,0 +1,38 @@
+table: model_runs
+version: 2
+zone: ml
+owner: ml (app.ml.train)
+description: >
+  Registry of trained models (walk-forward runs) with summary metrics. Artifacts under models_store/{model_run_id}/.
+  v2: added `fold_metrics` (per-fold train/test windows + rank_ic + sharpe, found missing by frontend
+  verification against docs/CONTRACT_GAPS_FRONTEND.md #12's ModelRunDetail.fold_metrics).
+storage: {path: ml/model_runs, format: parquet, partition_by: [], write_mode: upsert}
+primary_key: [model_run_id]
+columns:
+  - {name: model_run_id, type: string, nullable: false, description: "M + timestamp + short hash"}
+  - {name: model_type, type: enum, nullable: false, values: [xgboost_rank, ft_transformer, cs_attention, ensemble, insider_xgb, insider_iforest, macro_hmm], description: "Model family"}
+  - {name: horizon, type: enum, nullable: true, values: ["1M", "3M", "6M"], description: "Target horizon"}
+  - {name: universe_id, type: string, nullable: false, description: "Training universe"}
+  - {name: feature_set_version, type: string, nullable: false, description: "Feature registry hash"}
+  - {name: train_start, type: date, nullable: false, description: "First feature date"}
+  - {name: train_end, type: date, nullable: false, description: "Last feature date of final fold train"}
+  - {name: oos_start, type: date, nullable: true, description: "First OOS date"}
+  - {name: oos_end, type: date, nullable: true, description: "Last OOS date"}
+  - {name: cv_scheme, type: json, nullable: false, description: "{type: expanding|rolling, n_folds, test_months, purge_days, embargo_days}"}
+  - {name: params, type: json, nullable: false, description: "Hyperparameters"}
+  - {name: ic_mean, type: float64, nullable: true, description: "Mean Pearson IC (OOS)"}
+  - {name: rank_ic_mean, type: float64, nullable: true, description: "Mean Spearman IC (OOS)"}
+  - {name: rank_ic_ir, type: float64, nullable: true, description: "rank_ic_mean / std"}
+  - {name: rank_ic_tstat, type: float64, nullable: true, description: "Newey-West t of rank IC"}
+  - {name: decile_spread_ann, type: float64, nullable: true, description: "Annualized D10-D1 excess return"}
+  - {name: long_short_sharpe, type: float64, nullable: true, description: "Sharpe of D10-D1"}
+  - {name: turnover_monthly, type: float64, nullable: true, description: "Avg top-decile turnover"}
+  - {name: hit_rate, type: float64, nullable: true, description: "Share of dates with rank IC > 0"}
+  - {name: status, type: enum, nullable: false, values: [running, completed, failed, archived], description: "Status"}
+  - {name: is_production, type: bool, nullable: false, description: "Used for live predictions (one per model_type x horizon)"}
+  - {name: artifact_path, type: string, nullable: true, description: "Relative to models_store/"}
+  - {name: feature_importance, type: json, nullable: true, description: "[{feature, importance}] mean |SHAP| top 50"}
+  - {name: fold_metrics, type: json, nullable: true, description: "[{fold_id, train_start, train_end, test_start, test_end, n_train, n_test, rank_ic, sharpe, seconds}] one per walk-forward fold (added v2)"}
+  - {name: notes, type: string, nullable: true, description: "Free text"}
+  - {name: created_at, type: datetime, nullable: false, description: "Start time UTC"}
+  - {name: finished_at, type: datetime, nullable: true, description: "End time UTC"}

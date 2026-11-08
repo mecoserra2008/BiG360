@@ -1,0 +1,103 @@
+{
+ "title": "Rate shocks -> banks (local projections)",
+ "description": "Impulse response of the equal-weight US financials return to a 10Y Treasury yield change, controlling for the curve slope, horizons 0-6 months.",
+ "question": "macro",
+ "tags": [
+  "macro",
+  "rates",
+  "banks"
+ ],
+ "method_note": "Jorda (2005) local projections: one regression per horizon of the cumulative bank return on the yield shock, HAC errors. Steeper curves help net interest margins; level shocks hurt via bond losses (2023). The shock is the monthly change in the official Treasury par 10Y yield. Caveat: the universe is today's constituents (membership history starts 2026-10), so early years carry survivorship bias; read the premium as an upper bound.",
+ "expected_outputs": [
+  "cumulative IRF by horizon with bands",
+  "per-horizon coefficients"
+ ],
+ "runtime_s": 2.3,
+ "validated": "2026-11-06 on snapshot R20261106T010757G9ZB",
+ "result": {
+  "run_id": "SR20261106T015953KH9S3",
+  "metrics": {},
+  "coefficients": [
+   {
+    "term": "d_10y h=0",
+    "estimate": 0.0379483410793876,
+    "statistic": 2.2088147386685533,
+    "p_value": 0.027187529466105958
+   },
+   {
+    "term": "d_10y h=1",
+    "estimate": 0.0570948004347093,
+    "statistic": 2.2528641366357114,
+    "p_value": 0.024267716732534146
+   },
+   {
+    "term": "d_10y h=2",
+    "estimate": 0.0602853860100849,
+    "statistic": 1.7852144430132115,
+    "p_value": 0.07422654014084454
+   },
+   {
+    "term": "d_10y h=3",
+    "estimate": 0.060165929965119366,
+    "statistic": 1.446285052178395,
+    "p_value": 0.1480972665765706
+   }
+  ]
+ },
+ "study": {
+  "name": "Rate shocks -> banks (local projections)",
+  "method": "local_projection",
+  "y": "fins_ret",
+  "x": [
+   "d_10y",
+   "d_slope"
+  ],
+  "params": {
+   "horizon": 6,
+   "y_lags": 2,
+   "shock_lags": 2,
+   "cumulative": true
+  },
+  "dataset": {
+   "kind": "timeseries",
+   "frequency": "M",
+   "start": "2000-01-01",
+   "variables": [
+    {
+     "name": "fins_ret",
+     "source": "prices",
+     "field": "ret",
+     "entity_agg": "mean",
+     "entities": {
+      "universe": "mvp_us",
+      "sectors": [
+       "FINS"
+      ]
+     }
+    },
+    {
+     "name": "d_10y",
+     "source": "macro",
+     "field": "ust:10Y",
+     "transforms": [
+      {
+       "op": "diff"
+      }
+     ],
+     "agg": "last"
+    },
+    {
+     "name": "d_slope",
+     "source": "macro",
+     "field": "fred:T10Y2Y",
+     "transforms": [
+      {
+       "op": "diff"
+      }
+     ],
+     "agg": "last"
+    }
+   ]
+  }
+ }
+}

@@ -1,0 +1,104 @@
+{
+ "title": "Dollar and global equities",
+ "description": "Monthly return of the global large-cap universe on broad-dollar changes and the VIX.",
+ "question": "macro",
+ "tags": [
+  "macro",
+  "FX",
+  "global"
+ ],
+ "method_note": "A stronger dollar tightens global financial conditions (Bruno-Shin): expect a negative contemporaneous dollar beta for non-US equities and a negative VIX beta. Caveat: the universe is today's constituents (membership history starts 2026-10), so early years carry survivorship bias; read the premium as an upper bound.",
+ "expected_outputs": [
+  "lag coefficients",
+  "long-run multipliers"
+ ],
+ "runtime_s": 3.6,
+ "validated": "2026-11-06 on snapshot R20261106T010757G9ZB",
+ "result": {
+  "run_id": "SR20261106T014909KW72T",
+  "n_obs": 237,
+  "metrics": {
+   "r2": 0.6064184227045061,
+   "adj_r2": 0.5996325334407907,
+   "aic": -1049.2152895797174,
+   "oos_rmse": 0.022491705222830245
+  },
+  "coefficients": [
+   {
+    "term": "d_usd",
+    "estimate": -0.7540892772664907,
+    "statistic": -7.695822937904584,
+    "p_value": 1.4058637941130112e-14
+   },
+   {
+    "term": "d_usd_L1",
+    "estimate": -0.22054535467885725,
+    "statistic": -1.8151986315110487,
+    "p_value": 0.0694933899414842
+   },
+   {
+    "term": "d_vix",
+    "estimate": -0.004206054547131687,
+    "statistic": -9.921592088624417,
+    "p_value": 3.353635047751767e-23
+   },
+   {
+    "term": "d_vix_L1",
+    "estimate": -0.0007194529534155004,
+    "statistic": -2.4790739843206193,
+    "p_value": 0.01317239802451069
+   }
+  ]
+ },
+ "study": {
+  "name": "Dollar and global equities",
+  "method": "distributed_lag",
+  "y": "glob_ret",
+  "x": [
+   "d_usd",
+   "d_vix"
+  ],
+  "params": {
+   "lags": 1,
+   "cov_type": "HAC"
+  },
+  "dataset": {
+   "kind": "timeseries",
+   "frequency": "M",
+   "start": "2007-01-01",
+   "variables": [
+    {
+     "name": "glob_ret",
+     "source": "prices",
+     "field": "ret",
+     "entity_agg": "mean",
+     "entities": {
+      "universe": "mvp_global"
+     }
+    },
+    {
+     "name": "d_usd",
+     "source": "macro",
+     "field": "fred:DTWEXBGS",
+     "transforms": [
+      {
+       "op": "pct_change"
+      }
+     ],
+     "agg": "last"
+    },
+    {
+     "name": "d_vix",
+     "source": "macro",
+     "field": "fred:VIXCLS",
+     "transforms": [
+      {
+       "op": "diff"
+      }
+     ],
+     "agg": "last"
+    }
+   ]
+  }
+ }
+}

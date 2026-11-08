@@ -1,0 +1,28 @@
+table: connectedness
+version: 1
+zone: scores
+owner: event-models (app.events_models.connectedness, job event_connectedness)
+description: >
+  B3 Diebold-Yilmaz (2012/2014) connectedness: generalized FEVD (H = 10) of a rolling VAR(1) (ridge-stabilized OLS,
+  200 trading-day windows, step 5 days) on daily log returns or log absolute returns (vol proxy) of country equity
+  indices (local index, country ETF fallback) and US sector ETFs. row_type system = total connectedness index (%);
+  node = to / from / net per node; pair = net pairwise directional connectedness node -> other (%), pair rows only
+  at month ends and the latest window. Model-based. Incremental: windows already stored are not recomputed.
+storage: {path: scores/connectedness, format: parquet, partition_by: [universe], write_mode: upsert, retention: "forever"}
+primary_key: [universe, date, row_type, node, other]
+columns:
+  - {name: universe, type: enum, nullable: false, values: [country_ret, country_vol, sector_ret, sector_vol], description: "Node set x variable"}
+  - {name: date, type: date, nullable: false, description: "Window end date"}
+  - {name: row_type, type: enum, nullable: false, values: [system, node, pair], description: "Row kind"}
+  - {name: node, type: string, nullable: false, description: "ISO2 / sector id ('*' for system rows)"}
+  - {name: other, type: string, nullable: false, description: "Pair counterpart ('*' otherwise)"}
+  - {name: total, type: float64, nullable: true, description: "Total connectedness index (system rows)"}
+  - {name: to_others, type: float64, nullable: true, description: "Directional TO others (node rows)"}
+  - {name: from_others, type: float64, nullable: true, description: "Directional FROM others (node rows)"}
+  - {name: net, type: float64, nullable: true, description: "node: to - from; pair: node -> other minus other -> node"}
+  - {name: window, type: int16, nullable: false, description: "Window length (days)"}
+  - {name: horizon, type: int16, nullable: false, description: "FEVD horizon"}
+  - {name: lags, type: int16, nullable: false, description: "VAR lags"}
+  - {name: n_nodes, type: int16, nullable: false, description: "Nodes in the VAR"}
+  - {name: series_id, type: string, nullable: true, description: "Price series used for the node"}
+  - {name: computed_at, type: datetime, nullable: false, description: "Write time UTC"}

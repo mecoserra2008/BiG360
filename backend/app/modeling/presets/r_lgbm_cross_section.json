@@ -1,0 +1,157 @@
+{
+ "title": "LightGBM cross-sectional return forecast vs linear",
+ "description": "Can gradient boosting on value / quality / momentum / risk signals forecast next-month returns better than a linear model on the same purged folds?",
+ "question": "factors",
+ "tags": [
+  "ML",
+  "LightGBM",
+  "cross-section"
+ ],
+ "method_note": "LightGBM with early stopping inside each training fold; out-of-fold predictions are compared with a linear baseline by a Diebold-Mariano test and by rank IC. Return forecasting has a low signal-to-noise ratio: an OOS R2 near zero with a positive rank IC is a normal outcome. Caveat: the universe is today's constituents (membership history starts 2026-10), so early years carry survivorship bias; read the premium as an upper bound.",
+ "expected_outputs": [
+  "OOS RMSE / rank IC vs linear",
+  "DM test",
+  "learning curve",
+  "importance"
+ ],
+ "runtime_s": 8.7,
+ "validated": "2026-11-06 on snapshot R20261106T010757G9ZB",
+ "result": {
+  "run_id": "SR20261106T022512YXG44",
+  "beats_linear": false,
+  "verdict": "LightGBM is worse than linear baseline out of sample (mean loss 0.008936 vs 0.008919)",
+  "n_obs": 47586,
+  "metrics": {
+   "oos_rmse": 0.09453281741252285,
+   "oos_r2_oos": -0.002566217189188924,
+   "oos_rank_ic": 0.026788078342413552,
+   "dm_p_vs_linear": 0.004523088364393074,
+   "linear_oos_rmse": 0.09443954784461771
+  },
+  "coefficients": []
+ },
+ "study": {
+  "name": "LightGBM cross-sectional return forecast vs linear",
+  "method": "lightgbm",
+  "y": "fwd_ret_1m",
+  "x": [
+   "earnings_yield",
+   "pb_rank",
+   "gross_prof",
+   "mom_12_1",
+   "ivol",
+   "log_mcap"
+  ],
+  "params": {
+   "n_estimators": 300,
+   "learning_rate": 0.03,
+   "num_leaves": 15,
+   "min_child_samples": 500,
+   "cv": {
+    "folds": 5,
+    "scheme": "purged_kfold",
+    "purge": 1,
+    "embargo": 1
+   }
+  },
+  "dataset": {
+   "kind": "panel",
+   "frequency": "M",
+   "start": "2012-01-01",
+   "entities": {
+    "universe": "mvp_us"
+   },
+   "variables": [
+    {
+     "name": "fwd_ret_1m",
+     "source": "prices",
+     "field": "ret",
+     "transforms": [
+      {
+       "op": "fwd_compound",
+       "k": 1
+      },
+      {
+       "op": "winsorize"
+      }
+     ]
+    },
+    {
+     "name": "earnings_yield",
+     "source": "valuation",
+     "field": "earnings_yield",
+     "transforms": [
+      {
+       "op": "cs_rank"
+      }
+     ]
+    },
+    {
+     "name": "pb_rank",
+     "source": "valuation",
+     "field": "pb",
+     "transforms": [
+      {
+       "op": "winsorize"
+      },
+      {
+       "op": "cs_rank"
+      }
+     ]
+    },
+    {
+     "name": "gross_prof",
+     "source": "ratios",
+     "field": "gross_profitability",
+     "transforms": [
+      {
+       "op": "winsorize"
+      },
+      {
+       "op": "cs_zscore"
+      }
+     ]
+    },
+    {
+     "name": "mom_12_1",
+     "source": "tech_factors",
+     "field": "mom",
+     "transforms": [
+      {
+       "op": "winsorize"
+      },
+      {
+       "op": "cs_zscore"
+      }
+     ]
+    },
+    {
+     "name": "ivol",
+     "source": "tech_factors",
+     "field": "ivol",
+     "transforms": [
+      {
+       "op": "winsorize"
+      },
+      {
+       "op": "cs_zscore"
+      }
+     ]
+    },
+    {
+     "name": "log_mcap",
+     "source": "valuation",
+     "field": "market_cap_usd",
+     "transforms": [
+      {
+       "op": "log"
+      },
+      {
+       "op": "cs_zscore"
+      }
+     ]
+    }
+   ]
+  }
+ }
+}

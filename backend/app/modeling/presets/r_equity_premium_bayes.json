@@ -1,0 +1,128 @@
+{
+ "title": "Equity premium with Bayesian ridge (Welch-Goyal check)",
+ "description": "The same predictors in a Bayesian ridge: posterior coefficients and calibrated predictive intervals.",
+ "question": "forecasting",
+ "tags": [
+  "probabilistic",
+  "Bayesian",
+  "equity premium"
+ ],
+ "method_note": "Evidence-maximized ridge shrinkage; the posterior sd of each slope replaces a t-stat. Expect a CRPS close to the linear-Gaussian baseline (no free lunch) and a well-calibrated PIT. Caveat: the universe is today's constituents (membership history starts 2026-10), so early years carry survivorship bias; read the premium as an upper bound.",
+ "expected_outputs": [
+  "posterior coefficients",
+  "CRPS vs baseline",
+  "PIT / calibration"
+ ],
+ "runtime_s": 0.2,
+ "validated": "2026-11-06 on snapshot R20261106T010757G9ZB",
+ "result": {
+  "run_id": "SR20261106T0151487ZD0J",
+  "beats_baseline": false,
+  "beats_linear": false,
+  "verdict": "Bayesian ridge is worse than linear-Gaussian baseline on CRPS (mean 0.0281 vs 0.02797); point forecast: Bayesian ridge is worse than linear baseline out of sample (mean loss 0.002649 vs 0.002615)",
+  "n_obs": 369,
+  "metrics": {
+   "oos_rmse": 0.051465267275306155,
+   "oos_r2_oos": 0.005833045502110834,
+   "crps": 0.028098567213205545,
+   "crps_linear": 0.027965887295654395,
+   "crps_skill_vs_linear": -0.004744348575407731,
+   "coverage_90": 0.8783783783783784,
+   "dm_p_crps_vs_linear": 0.8129631685039248,
+   "conformal_coverage": 0.9550561797752809,
+   "dm_p_vs_linear": 0.7945403424080971
+  },
+  "coefficients": [
+   {
+    "term": "term_spread",
+    "estimate": -0.002401397184882189,
+    "statistic": -1.1327128248402882,
+    "p_value": null
+   },
+   {
+    "term": "baa_spread",
+    "estimate": 0.0035303691798059247,
+    "statistic": 0.7602846132941864,
+    "p_value": null
+   },
+   {
+    "term": "vix",
+    "estimate": 0.0008543282421781389,
+    "statistic": 2.247591913934547,
+    "p_value": null
+   },
+   {
+    "term": "nfci",
+    "estimate": -0.013250117673057782,
+    "statistic": -2.04575414706521,
+    "p_value": null
+   }
+  ]
+ },
+ "study": {
+  "name": "Equity premium with Bayesian ridge (Welch-Goyal check)",
+  "method": "bayes_ridge",
+  "y": "fwd_mkt_1m",
+  "x": [
+   "term_spread",
+   "baa_spread",
+   "vix",
+   "nfci"
+  ],
+  "params": {
+   "model": "bayes_ridge",
+   "cv": {
+    "folds": 5,
+    "scheme": "expanding",
+    "purge": 1,
+    "conformal_alpha": 0.1
+   }
+  },
+  "dataset": {
+   "kind": "timeseries",
+   "frequency": "M",
+   "start": "1996-01-01",
+   "variables": [
+    {
+     "name": "fwd_mkt_1m",
+     "source": "prices",
+     "field": "ret",
+     "transforms": [
+      {
+       "op": "fwd_compound",
+       "k": 1
+      }
+     ],
+     "entity_agg": "mean",
+     "entities": {
+      "universe": "mvp_us"
+     }
+    },
+    {
+     "name": "term_spread",
+     "source": "macro",
+     "field": "fred:T10Y3M",
+     "agg": "last"
+    },
+    {
+     "name": "baa_spread",
+     "source": "macro",
+     "field": "fred:BAA10Y",
+     "agg": "last"
+    },
+    {
+     "name": "vix",
+     "source": "macro",
+     "field": "fred:VIXCLS",
+     "agg": "last"
+    },
+    {
+     "name": "nfci",
+     "source": "macro",
+     "field": "fred:NFCI",
+     "agg": "last"
+    }
+   ]
+  }
+ }
+}

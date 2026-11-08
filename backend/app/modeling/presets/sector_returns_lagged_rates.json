@@ -1,0 +1,62 @@
+{
+ "title": "Sector returns vs lagged rates (distributed lag OLS, HAC)",
+ "description": "Equal-weighted monthly return of US financials (mvp_us) on the current and 3 lagged monthly changes in the 10Y Treasury yield and the 10Y-2Y slope. Newey-West HAC errors, joint F-tests per lag block and long-run multipliers.",
+ "tags": [
+  "regression",
+  "distributed lag",
+  "rates",
+  "sectors"
+ ],
+ "study": {
+  "name": "Financials vs lagged rate changes",
+  "method": "distributed_lag",
+  "y": "fins_ret",
+  "x": [
+   "d_10y",
+   "d_slope"
+  ],
+  "params": {
+   "lags": 3,
+   "cov_type": "HAC"
+  },
+  "dataset": {
+   "kind": "timeseries",
+   "frequency": "M",
+   "start": "2005-01-01",
+   "variables": [
+    {
+     "name": "fins_ret",
+     "source": "prices",
+     "field": "ret",
+     "entity_agg": "mean",
+     "entities": {
+      "universe": "mvp_us",
+      "sectors": [
+       "FINS"
+      ]
+     }
+    },
+    {
+     "name": "d_10y",
+     "source": "macro",
+     "field": "fred:DGS10",
+     "transforms": [
+      {
+       "op": "diff"
+      }
+     ]
+    },
+    {
+     "name": "d_slope",
+     "source": "macro",
+     "field": "fred:T10Y2Y",
+     "transforms": [
+      {
+       "op": "diff"
+      }
+     ]
+    }
+   ]
+  }
+ }
+}

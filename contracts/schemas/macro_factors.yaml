@@ -1,0 +1,27 @@
+table: macro_factors
+version: 1
+zone: scores
+owner: macro-w4 (app.macro.markets.factors, job macro_factors)
+description: >
+  Macro -> markets factor set (W4.1) from OFFICIAL series already in the lake (FRED/H.15 Treasury yields and TIPS,
+  Fed broad dollar index, EIA oil via FRED, IMF commodity index, Moody's Baa-Treasury spread via FRED, BIS / central-bank
+  policy rates, BLS CPI) plus derived states (W1 cycle clock, W2 surprise indices, HMM regimes, rate-cycle phase). One
+  row per (frequency, date, factor_id). Numeric factors are period changes (value) of an official level (level):
+  rates / spreads in percentage points (1.0 = 100bp), USD / oil / commodities as fractional changes (0.01 = 1%),
+  surprise-index changes in units of 100 index points. The equity factor (S&P 500 return) comes from the price lake
+  (market data, not macro). State factors (cycle_quadrant_*, hmm_regime_*, rate_cycle_*, inflation_regime_*) carry
+  `state` and a null value. Weeks are ISO weeks keyed by their Monday (level = last observation in the week); months by
+  the first day of the month. Overwritten nightly.
+storage: {path: scores/macro_factors, format: parquet, partition_by: [frequency], write_mode: overwrite}
+primary_key: [frequency, date, factor_id]
+columns:
+  - {name: frequency, type: enum, nullable: false, values: [D, W, M], description: "Sampling frequency"}
+  - {name: date, type: date, nullable: false, description: "Period key (day; Monday of the ISO week; month start)"}
+  - {name: factor_id, type: string, nullable: false, description: "d2y, d10y, dcurve, dreal10, dbe10, dcredit, usd, oil, commodities, copper, equity, surp_<theme>_<CC>, cycle_quadrant_<US|GLOBAL>, hmm_regime_<US|GLOBAL>, rate_cycle_<bank>, inflation_regime_US"}
+  - {name: value, type: float64, nullable: true, description: "Period change in the factor unit (null for state factors)"}
+  - {name: level, type: float64, nullable: true, description: "Underlying official level at period end (yield %, index level, spread %)"}
+  - {name: state, type: string, nullable: true, description: "State label for state factors"}
+  - {name: unit, type: enum, nullable: false, values: [pp, frac, idx100, state], description: "pp = percentage points, frac = fractional change, idx100 = 100 surprise-index points"}
+  - {name: source, type: string, nullable: false, description: "Official series id(s) or producing table (fred:DGS2, macro_cycle, cb_rate_cycle, bis:WS_CBPOL.M.US, price lake IDX:^GSPC)"}
+  - {name: model_based, type: bool, nullable: false, description: "True for model outputs (surprise indices vs model-based expectations, HMM regimes, provisional rate-cycle rule)"}
+  - {name: computed_at, type: datetime, nullable: false, description: "Write time UTC"}

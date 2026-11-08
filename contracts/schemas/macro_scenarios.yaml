@@ -1,0 +1,19 @@
+table: macro_scenarios
+version: 1
+zone: app_state
+owner: api (app.macro.markets.store via /api/v1/macro/v4/scenarios)
+description: >
+  User-defined macro scenarios (W4.4) saved from the API. shocks = JSON object with any subset of rates_2y_bp,
+  rates_10y_bp, breakeven_10y_bp, real_10y_bp, credit_bp, usd_pct, oil_pct, equity_pct, growth_surprise,
+  inflation_surprise, labor_surprise; options = JSON {mode: isolated | conditional, var_propagation: bool,
+  var_horizon_months: int}.
+storage: {path: app_state.duckdb, format: duckdb_table, partition_by: [], write_mode: upsert}
+primary_key: [scenario_id]
+columns:
+  - {name: scenario_id, type: string, nullable: false, description: "X + UTC timestamp + 6 random base32 chars"}
+  - {name: name, type: string, nullable: false, description: "Display name"}
+  - {name: description, type: string, nullable: true, description: "Free text"}
+  - {name: shocks, type: json, nullable: false, description: "Shock JSON"}
+  - {name: options, type: json, nullable: true, description: "Options JSON"}
+  - {name: created_at, type: datetime, nullable: false, description: "UTC"}
+  - {name: updated_at, type: datetime, nullable: false, description: "UTC"}

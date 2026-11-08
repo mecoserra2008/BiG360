@@ -1,0 +1,21 @@
+table: credit_market_stats
+version: 1
+zone: normalized
+owner: rates-w3 (app.rates.trace, job credit_trace)
+description: >
+  FINRA TRACE market aggregate statistics (corporate and agency debt market breadth and sentiment, 144A, Treasury
+  daily / weekly aggregates) from the keyed FINRA API (api.finra.org, group fixedIncomeMarket), stored LONG and
+  schema-agnostic: every numeric field of a record becomes one metric row; the non-numeric fields form the category.
+  Filled only when FINRA_API_CLIENT_ID / FINRA_API_CLIENT_SECRET are configured (free FINRA API account); the FINRA
+  Fixed Income Data website is NOT scraped (its terms of use forbid robots).
+storage: {path: normalized/credit_market_stats, format: parquet, partition_by: [dataset], write_mode: upsert, sort_by: [category, metric, date]}
+primary_key: [dataset, date, category, metric]
+pit: {knowledge_column: knowledge_date, rule: "end-of-day aggregates published the same evening: knowledge_date = date"}
+columns:
+  - {name: dataset, type: string, nullable: false, description: "Partition: FINRA dataset name (corporateAndAgencyDebtMarketBreadth, ...)"}
+  - {name: date, type: date, nullable: false, description: "Trade report date / week / month start"}
+  - {name: category, type: string, nullable: false, description: "Non-numeric fields of the record joined with '|' (e.g. product / rating class)"}
+  - {name: metric, type: string, nullable: false, description: "Numeric field name"}
+  - {name: value, type: float64, nullable: true, description: "Value as published"}
+  - {name: knowledge_date, type: date, nullable: false, description: "= date"}
+  - {name: ingested_at, type: datetime, nullable: false, description: "Write time UTC"}

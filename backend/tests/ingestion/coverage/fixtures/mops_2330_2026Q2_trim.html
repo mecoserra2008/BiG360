@@ -1,0 +1,579 @@
+<?xml version="1.0" encoding="UTF-8"?> 
+<html xmlns="http://www.w3.org/1999/xhtml"
+xmlns:ifrs-full="https://xbrl.ifrs.org/taxonomy/2025-03-27/ifrs-full"
+xmlns:iso4217="http://www.xbrl.org/2003/iso4217"
+xmlns:link="http://www.xbrl.org/2003/linkbase"
+xmlns:xbrldi="http://xbrl.org/2006/xbrldi"
+xmlns:xbrldt="http://xbrl.org/2005/xbrldt"
+xmlns:xbrli="http://www.xbrl.org/2003/instance"
+xmlns:xlink="http://www.w3.org/1999/xlink"
+xmlns:ix="http://www.xbrl.org/2013/inlineXBRL"
+xmlns:ixt="http://www.xbrl.org/inlineXBRL/transformation/2015-02-26"
+xmlns:tifrs-SCF="http://www.xbrl.org/tifrs/scf/2026-03-31"
+xmlns:tifrs-ar="http://www.xbrl.org/tifrs/ar/2026-03-31"
+xmlns:tifrs-bsci-ci="http://www.xbrl.org/tifrs/bsci/ci/2026-03-31"
+xmlns:tifrs-es="http://www.xbrl.org/tifrs/es/2026-03-31"
+xmlns:tifrs-notes="http://www.xbrl.org/tifrs/notes/2026-03-31">
+<head> 
+	<meta http-equiv="Content-Type" content="text/html; charset=utf-8" /> 
+	<title> 2330 2026Q2 Financial report</title> 
+	<script src="https://code.jquery.com/jquery-3.2.1.min.js" type="text/javascript"></script> 
+	<script type="text/javascript"> 
+		/*<![CDATA[*/ 
+		function showChineseReport() { 
+			$(".zh").show();
+			$(".en").hide();
+		}
+		function showEnglishReport() {
+			$(".en").show();
+			$(".zh").hide();
+		}
+		$(document).ready(function() { 
+			if (location.search.indexOf("?") != -1 && 
+			location.search.split("?")[1].split("=")[1] == "en") 
+				showEnglishReport(); 
+			else 
+				showChineseReport(); 
+		});	
+		/*]]>*/ 
+	</script> 
+	<style type="text/css"> 
+		body,html {height: 100%;} 
+		body {font-size: 15px;font-family: Arial;color: #000;background: #4E5869;margin: 0;padding: 0;background-color: #FFF;} 
+		td,th {border: 1px solid #dddddd;padding: 5px;color: #333;background-color: #FFF;} 
+		th#t1 {color: #165c98 !important;} 
+		ul,ol,dl {padding: 0;margin: 0;} 
+		h3 {color: #165c98;font-size: 18px;} 
+		pre {font-size: 15px;font-family: Arial;} 
+		.container {width: 100%;background: #FFF;margin: 0 auto;background-color: #999;} 
+		.header {text-align: center;background: #165c98;margin-right: auto;color: #fff;} 
+		.header > div:first-of-type {position: absolute;right: 15px;top: 15px;} 
+		.header > div:nth-of-type(2) {font-size: 25px;text-align: center;line-height: 35px;} 
+		.header a {text-decoration: none;margin:0 10px;color: #ffffff;} 
+		.nav {float: left;width: 200px;height: calc(100% - 85px);overflow: auto;background: #fff;padding-bottom: 15px;} 
+		.nav > div {padding: 10px;color: #165c98;font-size: 20px;font-weight: bold;} 
+		.nav > ul {list-style: none;border-top: 1px solid #666;margin-bottom: 15px;} 
+		.nav > ul li{border-bottom: 1px solid #666;} 
+		.nav > ul a{padding: 5px 2px 5px 10px;display: block;text-decoration: none;background: #fff;color: #333;} 
+		.nav > ul a:hover{background: #165c98;color: #fff;} 
+		.content {width: calc(100% - 200px);height: calc(100% - 70px); float: left;background: #efefef;overflow: auto;} 
+		.content > div[id*="link"] {height: 15px;} 
+		.content table {border-collapse: collapse;margin: 0 20px;} 
+		.content ul, 
+		.content ol {padding: 15px 10px 10px 15px;} 
+		.content table tr th {background: #7fcef5;color: #165c98;} 
+		.content table tr:first-child th {background: #165c98;color: #fff;font-size: 15px;text-align: left;} 
+		.content table tr:nth-of-type(odd) > td {background-color: #d3edfa;} 
+		.title {font-size: 18px;font-weight: bold;margin-left: 20px;} 
+		.rptidx {color: #000;margin-left: 20px;} 
+		.amt {text-align: right} 
+		.note {font-family: 細明體} 
+		@media print{ 
+			.header a{display: none;} 
+			.nav{display: none;} 
+			.content{width: 100%;height:auto;float: inherit;overflow: inherit;background: #fff!important;} 
+			.content table{width: 100%!important;margin: 0;} 
+			body{color: #000;} 
+			td,th{color: #000;border: 1px solid #000;} 
+		} 
+	</style> 
+</head> 
+<body> 
+	<div style="display:none"> 
+		<ix:header> 
+			<ix:hidden></ix:hidden> 
+			<ix:references>
+				<link:schemaRef xlink:href="tifrs-ci-cr-2026-03-31.xsd" xlink:type="simple"/>
+			</ix:references>
+			<ix:resources>
+<xbrli:context id="From20250101To20250630_UnappropriatedRetainedEarningsAccumulatedDeficitMember"> 
+					<xbrli:entity> 
+						<xbrli:identifier scheme="http://www.twse.com.tw">2330</xbrli:identifier> 
+					</xbrli:entity> 
+					<xbrli:period> 
+						<xbrli:startDate>2025-01-01</xbrli:startDate> 
+						<xbrli:endDate>2025-06-30</xbrli:endDate> 
+					</xbrli:period> 
+					<xbrli:scenario> 
+						<xbrldi:explicitMember dimension="ifrs-full:ComponentsOfEquityAxis">tifrs-es:UnappropriatedRetainedEarningsAccumulatedDeficitMember</xbrldi:explicitMember> 
+					</xbrli:scenario> 
+				</xbrli:context>
+<xbrli:context id="From20250101To20250630_OrdinaryShareMember"> 
+					<xbrli:entity> 
+						<xbrli:identifier scheme="http://www.twse.com.tw">2330</xbrli:identifier> 
+					</xbrli:entity> 
+					<xbrli:period> 
+						<xbrli:startDate>2025-01-01</xbrli:startDate> 
+						<xbrli:endDate>2025-06-30</xbrli:endDate> 
+					</xbrli:period> 
+					<xbrli:scenario> 
+						<xbrldi:explicitMember dimension="ifrs-full:ComponentsOfEquityAxis">tifrs-es:OrdinaryShareMember</xbrldi:explicitMember> 
+					</xbrli:scenario> 
+				</xbrli:context>
+<xbrli:context id="From20260101To20260630_EquityAttributableToOwnersOfParentMember"> 
+					<xbrli:entity> 
+						<xbrli:identifier scheme="http://www.twse.com.tw">2330</xbrli:identifier> 
+					</xbrli:entity> 
+					<xbrli:period> 
+						<xbrli:startDate>2026-01-01</xbrli:startDate> 
+						<xbrli:endDate>2026-06-30</xbrli:endDate> 
+					</xbrli:period> 
+					<xbrli:scenario> 
+						<xbrldi:explicitMember dimension="ifrs-full:ComponentsOfEquityAxis">ifrs-full:EquityAttributableToOwnersOfParentMember</xbrldi:explicitMember> 
+					</xbrli:scenario> 
+				</xbrli:context>
+<xbrli:context id="From20250101To20250630_IssuedCapitalMember"> 
+					<xbrli:entity> 
+						<xbrli:identifier scheme="http://www.twse.com.tw">2330</xbrli:identifier> 
+					</xbrli:entity> 
+					<xbrli:period> 
+						<xbrli:startDate>2025-01-01</xbrli:startDate> 
+						<xbrli:endDate>2025-06-30</xbrli:endDate> 
+					</xbrli:period> 
+					<xbrli:scenario> 
+						<xbrldi:explicitMember dimension="ifrs-full:ComponentsOfEquityAxis">ifrs-full:IssuedCapitalMember</xbrldi:explicitMember> 
+					</xbrli:scenario> 
+				</xbrli:context>
+<xbrli:context id="From20250101To20250630"> 
+					<xbrli:entity> 
+						<xbrli:identifier scheme="http://www.twse.com.tw">2330</xbrli:identifier> 
+					</xbrli:entity> 
+					<xbrli:period> 
+						<xbrli:startDate>2025-01-01</xbrli:startDate> 
+						<xbrli:endDate>2025-06-30</xbrli:endDate> 
+					</xbrli:period> 
+				</xbrli:context>
+<xbrli:context id="From20250101To20250630_RetainedEarningsMember"> 
+					<xbrli:entity> 
+						<xbrli:identifier scheme="http://www.twse.com.tw">2330</xbrli:identifier> 
+					</xbrli:entity> 
+					<xbrli:period> 
+						<xbrli:startDate>2025-01-01</xbrli:startDate> 
+						<xbrli:endDate>2025-06-30</xbrli:endDate> 
+					</xbrli:period> 
+					<xbrli:scenario> 
+						<xbrldi:explicitMember dimension="ifrs-full:ComponentsOfEquityAxis">ifrs-full:RetainedEarningsMember</xbrldi:explicitMember> 
+					</xbrli:scenario> 
+				</xbrli:context>
+<xbrli:context id="From20250101To20250630_EquityAttributableToOwnersOfParentMember"> 
+					<xbrli:entity> 
+						<xbrli:identifier scheme="http://www.twse.com.tw">2330</xbrli:identifier> 
+					</xbrli:entity> 
+					<xbrli:period> 
+						<xbrli:startDate>2025-01-01</xbrli:startDate> 
+						<xbrli:endDate>2025-06-30</xbrli:endDate> 
+					</xbrli:period> 
+					<xbrli:scenario> 
+						<xbrldi:explicitMember dimension="ifrs-full:ComponentsOfEquityAxis">ifrs-full:EquityAttributableToOwnersOfParentMember</xbrldi:explicitMember> 
+					</xbrli:scenario> 
+				</xbrli:context>
+<xbrli:context id="From20260101To20260630_SpecialReserveMember"> 
+					<xbrli:entity> 
+						<xbrli:identifier scheme="http://www.twse.com.tw">2330</xbrli:identifier> 
+					</xbrli:entity> 
+					<xbrli:period> 
+						<xbrli:startDate>2026-01-01</xbrli:startDate> 
+						<xbrli:endDate>2026-06-30</xbrli:endDate> 
+					</xbrli:period> 
+					<xbrli:scenario> 
+						<xbrldi:explicitMember dimension="ifrs-full:ComponentsOfEquityAxis">tifrs-es:SpecialReserveMember</xbrldi:explicitMember> 
+					</xbrli:scenario> 
+				</xbrli:context>
+<xbrli:context id="AsOf20260630"> 
+					<xbrli:entity> 
+						<xbrli:identifier scheme="http://www.twse.com.tw">2330</xbrli:identifier> 
+					</xbrli:entity> 
+					<xbrli:period> 
+						<xbrli:instant>2026-06-30</xbrli:instant> 
+					</xbrli:period> 
+				</xbrli:context>
+<xbrli:context id="AsOf20250630"> 
+					<xbrli:entity> 
+						<xbrli:identifier scheme="http://www.twse.com.tw">2330</xbrli:identifier> 
+					</xbrli:entity> 
+					<xbrli:period> 
+						<xbrli:instant>2025-06-30</xbrli:instant> 
+					</xbrli:period> 
+				</xbrli:context>
+<xbrli:context id="From20250101To20250630_Others-OtherEquityInterestMember"> 
+					<xbrli:entity> 
+						<xbrli:identifier scheme="http://www.twse.com.tw">2330</xbrli:identifier> 
+					</xbrli:entity> 
+					<xbrli:period> 
+						<xbrli:startDate>2025-01-01</xbrli:startDate> 
+						<xbrli:endDate>2025-06-30</xbrli:endDate> 
+					</xbrli:period> 
+					<xbrli:scenario> 
+						<xbrldi:explicitMember dimension="ifrs-full:ComponentsOfEquityAxis">tifrs-es:Others-OtherEquityInterestMember</xbrldi:explicitMember> 
+					</xbrli:scenario> 
+				</xbrli:context>
+<xbrli:context id="From20260101To20260630_OtherEquityInterestMember"> 
+					<xbrli:entity> 
+						<xbrli:identifier scheme="http://www.twse.com.tw">2330</xbrli:identifier> 
+					</xbrli:entity> 
+					<xbrli:period> 
+						<xbrli:startDate>2026-01-01</xbrli:startDate> 
+						<xbrli:endDate>2026-06-30</xbrli:endDate> 
+					</xbrli:period> 
+					<xbrli:scenario> 
+						<xbrldi:explicitMember dimension="ifrs-full:ComponentsOfEquityAxis">ifrs-full:OtherEquityInterestMember</xbrldi:explicitMember> 
+					</xbrli:scenario> 
+				</xbrli:context>
+<xbrli:context id="From20260101To20260630_RetainedEarningsMember"> 
+					<xbrli:entity> 
+						<xbrli:identifier scheme="http://www.twse.com.tw">2330</xbrli:identifier> 
+					</xbrli:entity> 
+					<xbrli:period> 
+						<xbrli:startDate>2026-01-01</xbrli:startDate> 
+						<xbrli:endDate>2026-06-30</xbrli:endDate> 
+					</xbrli:period> 
+					<xbrli:scenario> 
+						<xbrldi:explicitMember dimension="ifrs-full:ComponentsOfEquityAxis">ifrs-full:RetainedEarningsMember</xbrldi:explicitMember> 
+					</xbrli:scenario> 
+				</xbrli:context>
+<xbrli:context id="From20250101To20250630_StatutoryReserveMember"> 
+					<xbrli:entity> 
+						<xbrli:identifier scheme="http://www.twse.com.tw">2330</xbrli:identifier> 
+					</xbrli:entity> 
+					<xbrli:period> 
+						<xbrli:startDate>2025-01-01</xbrli:startDate> 
+						<xbrli:endDate>2025-06-30</xbrli:endDate> 
+					</xbrli:period> 
+					<xbrli:scenario> 
+						<xbrldi:explicitMember dimension="ifrs-full:ComponentsOfEquityAxis">ifrs-full:StatutoryReserveMember</xbrldi:explicitMember> 
+					</xbrli:scenario> 
+				</xbrli:context>
+<xbrli:context id="AsOf20251231"> 
+					<xbrli:entity> 
+						<xbrli:identifier scheme="http://www.twse.com.tw">2330</xbrli:identifier> 
+					</xbrli:entity> 
+					<xbrli:period> 
+						<xbrli:instant>2025-12-31</xbrli:instant> 
+					</xbrli:period> 
+				</xbrli:context>
+<xbrli:context id="From20250101To20250630_ReserveOfExchangeDifferencesOnTranslationMember"> 
+					<xbrli:entity> 
+						<xbrli:identifier scheme="http://www.twse.com.tw">2330</xbrli:identifier> 
+					</xbrli:entity> 
+					<xbrli:period> 
+						<xbrli:startDate>2025-01-01</xbrli:startDate> 
+						<xbrli:endDate>2025-06-30</xbrli:endDate> 
+					</xbrli:period> 
+					<xbrli:scenario> 
+						<xbrldi:explicitMember dimension="ifrs-full:ComponentsOfEquityAxis">ifrs-full:ReserveOfExchangeDifferencesOnTranslationMember</xbrldi:explicitMember> 
+					</xbrli:scenario> 
+				</xbrli:context>
+<xbrli:context id="From20260101To20260630_UnappropriatedRetainedEarningsAccumulatedDeficitMember"> 
+					<xbrli:entity> 
+						<xbrli:identifier scheme="http://www.twse.com.tw">2330</xbrli:identifier> 
+					</xbrli:entity> 
+					<xbrli:period> 
+						<xbrli:startDate>2026-01-01</xbrli:startDate> 
+						<xbrli:endDate>2026-06-30</xbrli:endDate> 
+					</xbrli:period> 
+					<xbrli:scenario> 
+						<xbrldi:explicitMember dimension="ifrs-full:ComponentsOfEquityAxis">tifrs-es:UnappropriatedRetainedEarningsAccumulatedDeficitMember</xbrldi:explicitMember> 
+					</xbrli:scenario> 
+				</xbrli:context>
+<xbrli:context id="From20260101To20260630_NoncontrollingInterestsMember"> 
+					<xbrli:entity> 
+						<xbrli:identifier scheme="http://www.twse.com.tw">2330</xbrli:identifier> 
+					</xbrli:entity> 
+					<xbrli:period> 
+						<xbrli:startDate>2026-01-01</xbrli:startDate> 
+						<xbrli:endDate>2026-06-30</xbrli:endDate> 
+					</xbrli:period> 
+					<xbrli:scenario> 
+						<xbrldi:explicitMember dimension="ifrs-full:ComponentsOfEquityAxis">ifrs-full:NoncontrollingInterestsMember</xbrldi:explicitMember> 
+					</xbrli:scenario> 
+				</xbrli:context>
+<xbrli:context id="From20260401To20260630"> 
+					<xbrli:entity> 
+						<xbrli:identifier scheme="http://www.twse.com.tw">2330</xbrli:identifier> 
+					</xbrli:entity> 
+					<xbrli:period> 
+						<xbrli:startDate>2026-04-01</xbrli:startDate> 
+						<xbrli:endDate>2026-06-30</xbrli:endDate> 
+					</xbrli:period> 
+				</xbrli:context>
+<xbrli:context id="AsOf20260630_OrdinaryShareMember"> 
+					<xbrli:entity> 
+						<xbrli:identifier scheme="http://www.twse.com.tw">2330</xbrli:identifier> 
+					</xbrli:entity> 
+					<xbrli:period> 
+						<xbrli:instant>2026-06-30</xbrli:instant> 
+					</xbrli:period> 
+					<xbrli:scenario> 
+						<xbrldi:explicitMember dimension="ifrs-full:ComponentsOfEquityAxis">tifrs-es:OrdinaryShareMember</xbrldi:explicitMember> 
+					</xbrli:scenario> 
+				</xbrli:context>
+<xbrli:context id="From20250101To20250630_GainsLossesOnHedgingInstrumentsMember"> 
+					<xbrli:entity> 
+						<xbrli:identifier scheme="http://www.twse.com.tw">2330</xbrli:identifier> 
+					</xbrli:entity> 
+					<xbrli:period> 
+						<xbrli:startDate>2025-01-01</xbrli:startDate> 
+						<xbrli:endDate>2025-06-30</xbrli:endDate> 
+					</xbrli:period> 
+					<xbrli:scenario> 
+						<xbrldi:explicitMember dimension="ifrs-full:ComponentsOfEquityAxis">tifrs-es:GainsLossesOnHedgingInstrumentsMember</xbrldi:explicitMember> 
+					</xbrli:scenario> 
+				</xbrli:context>
+<xbrli:context id="From20260101To20260630_ReserveOfGainsAndLossesOnFinancialAssetsMeasuredAtFairValueThroughOtherComprehensiveIncomeMember"> 
+					<xbrli:entity> 
+						<xbrli:identifier scheme="http://www.twse.com.tw">2330</xbrli:identifier> 
+					</xbrli:entity> 
+					<xbrli:period> 
+						<xbrli:startDate>2026-01-01</xbrli:startDate> 
+						<xbrli:endDate>2026-06-30</xbrli:endDate> 
+					</xbrli:period> 
+					<xbrli:scenario> 
+						<xbrldi:explicitMember dimension="ifrs-full:ComponentsOfEquityAxis">ifrs-full:ReserveOfGainsAndLossesOnFinancialAssetsMeasuredAtFairValueThroughOtherComprehensiveIncomeMember</xbrldi:explicitMember> 
+					</xbrli:scenario> 
+				</xbrli:context>
+<xbrli:context id="From20250101To20250630_NoncontrollingInterestsMember"> 
+					<xbrli:entity> 
+						<xbrli:identifier scheme="http://www.twse.com.tw">2330</xbrli:identifier> 
+					</xbrli:entity> 
+					<xbrli:period> 
+						<xbrli:startDate>2025-01-01</xbrli:startDate> 
+						<xbrli:endDate>2025-06-30</xbrli:endDate> 
+					</xbrli:period> 
+					<xbrli:scenario> 
+						<xbrldi:explicitMember dimension="ifrs-full:ComponentsOfEquityAxis">ifrs-full:NoncontrollingInterestsMember</xbrldi:explicitMember> 
+					</xbrli:scenario> 
+				</xbrli:context>
+<xbrli:context id="From20260101To20260630_StatutoryReserveMember"> 
+					<xbrli:entity> 
+						<xbrli:identifier scheme="http://www.twse.com.tw">2330</xbrli:identifier> 
+					</xbrli:entity> 
+					<xbrli:period> 
+						<xbrli:startDate>2026-01-01</xbrli:startDate> 
+						<xbrli:endDate>2026-06-30</xbrli:endDate> 
+					</xbrli:period> 
+					<xbrli:scenario> 
+						<xbrldi:explicitMember dimension="ifrs-full:ComponentsOfEquityAxis">ifrs-full:StatutoryReserveMember</xbrldi:explicitMember> 
+					</xbrli:scenario> 
+				</xbrli:context>
+<xbrli:context id="From20250101To20250630_OtherEquityInterestMember"> 
+					<xbrli:entity> 
+						<xbrli:identifier scheme="http://www.twse.com.tw">2330</xbrli:identifier> 
+					</xbrli:entity> 
+					<xbrli:period> 
+						<xbrli:startDate>2025-01-01</xbrli:startDate> 
+						<xbrli:endDate>2025-06-30</xbrli:endDate> 
+					</xbrli:period> 
+					<xbrli:scenario> 
+						<xbrldi:explicitMember dimension="ifrs-full:ComponentsOfEquityAxis">ifrs-full:OtherEquityInterestMember</xbrldi:explicitMember> 
+					</xbrli:scenario> 
+				</xbrli:context>
+<xbrli:context id="From20250401To20250630"> 
+					<xbrli:entity> 
+						<xbrli:identifier scheme="http://www.twse.com.tw">2330</xbrli:identifier> 
+					</xbrli:entity> 
+					<xbrli:period> 
+						<xbrli:startDate>2025-04-01</xbrli:startDate> 
+						<xbrli:endDate>2025-06-30</xbrli:endDate> 
+					</xbrli:period> 
+				</xbrli:context>
+<xbrli:context id="From20250101To20250630_ReserveOfGainsAndLossesOnFinancialAssetsMeasuredAtFairValueThroughOtherComprehensiveIncomeMember"> 
+					<xbrli:entity> 
+						<xbrli:identifier scheme="http://www.twse.com.tw">2330</xbrli:identifier> 
+					</xbrli:entity> 
+					<xbrli:period> 
+						<xbrli:startDate>2025-01-01</xbrli:startDate> 
+						<xbrli:endDate>2025-06-30</xbrli:endDate> 
+					</xbrli:period> 
+					<xbrli:scenario> 
+						<xbrldi:explicitMember dimension="ifrs-full:ComponentsOfEquityAxis">ifrs-full:ReserveOfGainsAndLossesOnFinancialAssetsMeasuredAtFairValueThroughOtherComprehensiveIncomeMember</xbrldi:explicitMember> 
+					</xbrli:scenario> 
+				</xbrli:context>
+<xbrli:context id="From20260101To20260630_CapitalReserveMember"> 
+					<xbrli:entity> 
+						<xbrli:identifier scheme="http://www.twse.com.tw">2330</xbrli:identifier> 
+					</xbrli:entity> 
+					<xbrli:period> 
+						<xbrli:startDate>2026-01-01</xbrli:startDate> 
+						<xbrli:endDate>2026-06-30</xbrli:endDate> 
+					</xbrli:period> 
+					<xbrli:scenario> 
+						<xbrldi:explicitMember dimension="ifrs-full:ComponentsOfEquityAxis">ifrs-full:CapitalReserveMember</xbrldi:explicitMember> 
+					</xbrli:scenario> 
+				</xbrli:context>
+<xbrli:context id="From20260101To20260630_TotalEquityMember"> 
+					<xbrli:entity> 
+						<xbrli:identifier scheme="http://www.twse.com.tw">2330</xbrli:identifier> 
+					</xbrli:entity> 
+					<xbrli:period> 
+						<xbrli:startDate>2026-01-01</xbrli:startDate> 
+						<xbrli:endDate>2026-06-30</xbrli:endDate> 
+					</xbrli:period> 
+					<xbrli:scenario> 
+						<xbrldi:explicitMember dimension="ifrs-full:ComponentsOfEquityAxis">tifrs-es:TotalEquityMember</xbrldi:explicitMember> 
+					</xbrli:scenario> 
+				</xbrli:context>
+<xbrli:context id="From20260101To20260630_ReserveOfExchangeDifferencesOnTranslationMember"> 
+					<xbrli:entity> 
+						<xbrli:identifier scheme="http://www.twse.com.tw">2330</xbrli:identifier> 
+					</xbrli:entity> 
+					<xbrli:period> 
+						<xbrli:startDate>2026-01-01</xbrli:startDate> 
+						<xbrli:endDate>2026-06-30</xbrli:endDate> 
+					</xbrli:period> 
+					<xbrli:scenario> 
+						<xbrldi:explicitMember dimension="ifrs-full:ComponentsOfEquityAxis">ifrs-full:ReserveOfExchangeDifferencesOnTranslationMember</xbrldi:explicitMember> 
+					</xbrli:scenario> 
+				</xbrli:context>
+<xbrli:context id="From20260101To20260630"> 
+					<xbrli:entity> 
+						<xbrli:identifier scheme="http://www.twse.com.tw">2330</xbrli:identifier> 
+					</xbrli:entity> 
+					<xbrli:period> 
+						<xbrli:startDate>2026-01-01</xbrli:startDate> 
+						<xbrli:endDate>2026-06-30</xbrli:endDate> 
+					</xbrli:period> 
+				</xbrli:context>
+<xbrli:context id="From20260101To20260630_GainsLossesOnHedgingInstrumentsMember"> 
+					<xbrli:entity> 
+						<xbrli:identifier scheme="http://www.twse.com.tw">2330</xbrli:identifier> 
+					</xbrli:entity> 
+					<xbrli:period> 
+						<xbrli:startDate>2026-01-01</xbrli:startDate> 
+						<xbrli:endDate>2026-06-30</xbrli:endDate> 
+					</xbrli:period> 
+					<xbrli:scenario> 
+						<xbrldi:explicitMember dimension="ifrs-full:ComponentsOfEquityAxis">tifrs-es:GainsLossesOnHedgingInstrumentsMember</xbrldi:explicitMember> 
+					</xbrli:scenario> 
+				</xbrli:context>
+<xbrli:context id="From20250101To20250630_CapitalReserveMember"> 
+					<xbrli:entity> 
+						<xbrli:identifier scheme="http://www.twse.com.tw">2330</xbrli:identifier> 
+					</xbrli:entity> 
+					<xbrli:period> 
+						<xbrli:startDate>2025-01-01</xbrli:startDate> 
+						<xbrli:endDate>2025-06-30</xbrli:endDate> 
+					</xbrli:period> 
+					<xbrli:scenario> 
+						<xbrldi:explicitMember dimension="ifrs-full:ComponentsOfEquityAxis">ifrs-full:CapitalReserveMember</xbrldi:explicitMember> 
+					</xbrli:scenario> 
+				</xbrli:context>
+<xbrli:context id="From20250101To20250630_TotalEquityMember"> 
+					<xbrli:entity> 
+						<xbrli:identifier scheme="http://www.twse.com.tw">2330</xbrli:identifier> 
+					</xbrli:entity> 
+					<xbrli:period> 
+						<xbrli:startDate>2025-01-01</xbrli:startDate> 
+						<xbrli:endDate>2025-06-30</xbrli:endDate> 
+					</xbrli:period> 
+					<xbrli:scenario> 
+						<xbrldi:explicitMember dimension="ifrs-full:ComponentsOfEquityAxis">tifrs-es:TotalEquityMember</xbrldi:explicitMember> 
+					</xbrli:scenario> 
+				</xbrli:context>
+<xbrli:context id="From20260101To20260630_Others-OtherEquityInterestMember"> 
+					<xbrli:entity> 
+						<xbrli:identifier scheme="http://www.twse.com.tw">2330</xbrli:identifier> 
+					</xbrli:entity> 
+					<xbrli:period> 
+						<xbrli:startDate>2026-01-01</xbrli:startDate> 
+						<xbrli:endDate>2026-06-30</xbrli:endDate> 
+					</xbrli:period> 
+					<xbrli:scenario> 
+						<xbrldi:explicitMember dimension="ifrs-full:ComponentsOfEquityAxis">tifrs-es:Others-OtherEquityInterestMember</xbrldi:explicitMember> 
+					</xbrli:scenario> 
+				</xbrli:context>
+<xbrli:context id="From20260101To20260630_OrdinaryShareMember"> 
+					<xbrli:entity> 
+						<xbrli:identifier scheme="http://www.twse.com.tw">2330</xbrli:identifier> 
+					</xbrli:entity> 
+					<xbrli:period> 
+						<xbrli:startDate>2026-01-01</xbrli:startDate> 
+						<xbrli:endDate>2026-06-30</xbrli:endDate> 
+					</xbrli:period> 
+					<xbrli:scenario> 
+						<xbrldi:explicitMember dimension="ifrs-full:ComponentsOfEquityAxis">tifrs-es:OrdinaryShareMember</xbrldi:explicitMember> 
+					</xbrli:scenario> 
+				</xbrli:context>
+<xbrli:context id="From20260101To20260630_IssuedCapitalMember"> 
+					<xbrli:entity> 
+						<xbrli:identifier scheme="http://www.twse.com.tw">2330</xbrli:identifier> 
+					</xbrli:entity> 
+					<xbrli:period> 
+						<xbrli:startDate>2026-01-01</xbrli:startDate> 
+						<xbrli:endDate>2026-06-30</xbrli:endDate> 
+					</xbrli:period> 
+					<xbrli:scenario> 
+						<xbrldi:explicitMember dimension="ifrs-full:ComponentsOfEquityAxis">ifrs-full:IssuedCapitalMember</xbrldi:explicitMember> 
+					</xbrli:scenario> 
+				</xbrli:context>
+<xbrli:unit id="TWD"> 
+					<xbrli:measure>iso4217:TWD</xbrli:measure> 
+				</xbrli:unit>
+<xbrli:unit id="Shares"> 
+					<xbrli:measure>xbrli:shares</xbrli:measure> 
+				</xbrli:unit>
+<xbrli:unit id="EarningsPerShare"> 
+					<xbrli:divide> 
+						<xbrli:unitNumerator> 
+							<xbrli:measure>iso4217:TWD</xbrli:measure> 
+						</xbrli:unitNumerator> 
+						<xbrli:unitDenominator> 
+							<xbrli:measure>xbrli:shares</xbrli:measure> 
+						</xbrli:unitDenominator> 
+					</xbrli:divide> 
+				</xbrli:unit>
+<xbrli:unit id="Pure"> 
+					<xbrli:measure>xbrli:pure</xbrli:measure> 
+				</xbrli:unit>
+</ix:resources>
+</ix:header>
+</div>
+<body>
+<p><ix:nonFraction name="ifrs-full:Assets" contextRef="AsOf20260630" format="ixt:numdotdecimal" scale="3" decimals="-3" unitRef="TWD">9,375,654,727</ix:nonFraction></p>
+<p><ix:nonFraction name="ifrs-full:Assets" contextRef="AsOf20251231" format="ixt:numdotdecimal" scale="3" decimals="-3" unitRef="TWD">7,933,023,878</ix:nonFraction></p>
+<p><ix:nonFraction name="ifrs-full:Assets" contextRef="AsOf20250630" format="ixt:numdotdecimal" scale="3" decimals="-3" unitRef="TWD">7,006,349,549</ix:nonFraction></p>
+<p><ix:nonFraction name="ifrs-full:OtherEquityInterest" contextRef="AsOf20260630" format="ixt:numdotdecimal" scale="3" decimals="-3" unitRef="TWD">49,790,695</ix:nonFraction></p>
+<p><ix:nonFraction name="ifrs-full:OtherEquityInterest" contextRef="AsOf20251231" format="ixt:numdotdecimal" scale="3" sign="-" decimals="-3" unitRef="TWD">16,676,412</ix:nonFraction></p>
+<p><ix:nonFraction name="ifrs-full:OtherEquityInterest" contextRef="AsOf20250630" format="ixt:numdotdecimal" scale="3" sign="-" decimals="-3" unitRef="TWD">182,465,738</ix:nonFraction></p>
+<p><ix:nonFraction name="ifrs-full:Revenue" contextRef="From20260401To20260630" format="ixt:numdotdecimal" scale="3" decimals="-3" unitRef="TWD">1,270,380,250</ix:nonFraction></p>
+<p><ix:nonFraction name="ifrs-full:Revenue" contextRef="From20250401To20250630" format="ixt:numdotdecimal" scale="3" decimals="-3" unitRef="TWD">933,791,869</ix:nonFraction></p>
+<p><ix:nonFraction name="ifrs-full:Revenue" contextRef="From20260101To20260630" format="ixt:numdotdecimal" scale="3" decimals="-3" unitRef="TWD">2,404,483,690</ix:nonFraction></p>
+<p><ix:nonFraction name="ifrs-full:Revenue" contextRef="From20250101To20250630" format="ixt:numdotdecimal" scale="3" decimals="-3" unitRef="TWD">1,773,045,533</ix:nonFraction></p>
+<p><ix:nonFraction name="ifrs-full:ProfitLoss" contextRef="From20260401To20260630" format="ixt:numdotdecimal" scale="3" decimals="-3" unitRef="TWD">706,780,923</ix:nonFraction></p>
+<p><ix:nonFraction name="ifrs-full:ProfitLoss" contextRef="From20250401To20250630" format="ixt:numdotdecimal" scale="3" decimals="-3" unitRef="TWD">397,493,424</ix:nonFraction></p>
+<p><ix:nonFraction name="ifrs-full:ProfitLoss" contextRef="From20260101To20260630" format="ixt:numdotdecimal" scale="3" decimals="-3" unitRef="TWD">1,279,582,227</ix:nonFraction></p>
+<p><ix:nonFraction name="ifrs-full:ProfitLoss" contextRef="From20250101To20250630" format="ixt:numdotdecimal" scale="3" decimals="-3" unitRef="TWD">758,226,085</ix:nonFraction></p>
+<p><ix:nonFraction name="ifrs-full:BasicEarningsLossPerShare" contextRef="From20260401To20260630" format="ixt:numdotdecimal" scale="0" decimals="2" unitRef="EarningsPerShare">27.25</ix:nonFraction></p>
+<p><ix:nonFraction name="ifrs-full:BasicEarningsLossPerShare" contextRef="From20250401To20250630" format="ixt:numdotdecimal" scale="0" decimals="2" unitRef="EarningsPerShare">15.36</ix:nonFraction></p>
+<p><ix:nonFraction name="ifrs-full:BasicEarningsLossPerShare" contextRef="From20260101To20260630" format="ixt:numdotdecimal" scale="0" decimals="2" unitRef="EarningsPerShare">49.33</ix:nonFraction></p>
+<p><ix:nonFraction name="ifrs-full:BasicEarningsLossPerShare" contextRef="From20250101To20250630" format="ixt:numdotdecimal" scale="0" decimals="2" unitRef="EarningsPerShare">29.31</ix:nonFraction></p>
+<p><ix:nonFraction name="ifrs-full:ProfitLoss" contextRef="From20260101To20260630_OrdinaryShareMember" format="ixt:numdotdecimal" scale="3" decimals="-3" unitRef="TWD">0</ix:nonFraction></p>
+<p><ix:nonFraction name="ifrs-full:ProfitLoss" contextRef="From20260101To20260630_IssuedCapitalMember" format="ixt:numdotdecimal" scale="3" decimals="-3" unitRef="TWD">0</ix:nonFraction></p>
+<p><ix:nonFraction name="ifrs-full:ProfitLoss" contextRef="From20260101To20260630_CapitalReserveMember" format="ixt:numdotdecimal" scale="3" decimals="-3" unitRef="TWD">0</ix:nonFraction></p>
+<p><ix:nonFraction name="ifrs-full:ProfitLoss" contextRef="From20260101To20260630_StatutoryReserveMember" format="ixt:numdotdecimal" scale="3" decimals="-3" unitRef="TWD">0</ix:nonFraction></p>
+<p><ix:nonFraction name="ifrs-full:ProfitLoss" contextRef="From20260101To20260630_SpecialReserveMember" format="ixt:numdotdecimal" scale="3" decimals="-3" unitRef="TWD">0</ix:nonFraction></p>
+<p><ix:nonFraction name="ifrs-full:ProfitLoss" contextRef="From20260101To20260630_UnappropriatedRetainedEarningsAccumulatedDeficitMember" format="ixt:numdotdecimal" scale="3" decimals="-3" unitRef="TWD">1,279,041,690</ix:nonFraction></p>
+<p><ix:nonFraction name="ifrs-full:ProfitLoss" contextRef="From20260101To20260630_RetainedEarningsMember" format="ixt:numdotdecimal" scale="3" decimals="-3" unitRef="TWD">1,279,041,690</ix:nonFraction></p>
+<p><ix:nonFraction name="ifrs-full:ProfitLoss" contextRef="From20260101To20260630_ReserveOfExchangeDifferencesOnTranslationMember" format="ixt:numdotdecimal" scale="3" decimals="-3" unitRef="TWD">0</ix:nonFraction></p>
+<p><ix:nonFraction name="ifrs-full:ProfitLoss" contextRef="From20260101To20260630_ReserveOfGainsAndLossesOnFinancialAssetsMeasuredAtFairValueThroughOtherComprehensiveIncomeMember" format="ixt:numdotdecimal" scale="3" decimals="-3" unitRef="TWD">0</ix:nonFraction></p>
+<p><ix:nonFraction name="ifrs-full:ProfitLoss" contextRef="From20260101To20260630_GainsLossesOnHedgingInstrumentsMember" format="ixt:numdotdecimal" scale="3" decimals="-3" unitRef="TWD">0</ix:nonFraction></p>
+<p><ix:nonFraction name="ifrs-full:ProfitLoss" contextRef="From20260101To20260630_Others-OtherEquityInterestMember" format="ixt:numdotdecimal" scale="3" decimals="-3" unitRef="TWD">0</ix:nonFraction></p>
+<p><ix:nonFraction name="ifrs-full:ProfitLoss" contextRef="From20260101To20260630_OtherEquityInterestMember" format="ixt:numdotdecimal" scale="3" decimals="-3" unitRef="TWD">0</ix:nonFraction></p>
+<p><ix:nonFraction name="ifrs-full:ProfitLoss" contextRef="From20260101To20260630_EquityAttributableToOwnersOfParentMember" format="ixt:numdotdecimal" scale="3" decimals="-3" unitRef="TWD">1,279,041,690</ix:nonFraction></p>
+<p><ix:nonFraction name="ifrs-full:ProfitLoss" contextRef="From20260101To20260630_NoncontrollingInterestsMember" format="ixt:numdotdecimal" scale="3" decimals="-3" unitRef="TWD">540,537</ix:nonFraction></p>
+<p><ix:nonFraction name="ifrs-full:ProfitLoss" contextRef="From20260101To20260630_TotalEquityMember" format="ixt:numdotdecimal" scale="3" decimals="-3" unitRef="TWD">1,279,582,227</ix:nonFraction></p>
+<p><ix:nonFraction name="ifrs-full:ProfitLoss" contextRef="From20250101To20250630_OrdinaryShareMember" format="ixt:numdotdecimal" scale="3" decimals="-3" unitRef="TWD">0</ix:nonFraction></p>
+<p><ix:nonFraction name="ifrs-full:ProfitLoss" contextRef="From20250101To20250630_IssuedCapitalMember" format="ixt:numdotdecimal" scale="3" decimals="-3" unitRef="TWD">0</ix:nonFraction></p>
+<p><ix:nonFraction name="ifrs-full:ProfitLoss" contextRef="From20250101To20250630_CapitalReserveMember" format="ixt:numdotdecimal" scale="3" decimals="-3" unitRef="TWD">0</ix:nonFraction></p>
+<p><ix:nonFraction name="ifrs-full:ProfitLoss" contextRef="From20250101To20250630_StatutoryReserveMember" format="ixt:numdotdecimal" scale="3" decimals="-3" unitRef="TWD">0</ix:nonFraction></p>
+<p><ix:nonFraction name="ifrs-full:ProfitLoss" contextRef="From20250101To20250630_UnappropriatedRetainedEarningsAccumulatedDeficitMember" format="ixt:numdotdecimal" scale="3" decimals="-3" unitRef="TWD">759,837,230</ix:nonFraction></p>
+<p><ix:nonFraction name="ifrs-full:ProfitLoss" contextRef="From20250101To20250630_RetainedEarningsMember" format="ixt:numdotdecimal" scale="3" decimals="-3" unitRef="TWD">759,837,230</ix:nonFraction></p>
+<p><ix:nonFraction name="ifrs-full:ProfitLoss" contextRef="From20250101To20250630_ReserveOfExchangeDifferencesOnTranslationMember" format="ixt:numdotdecimal" scale="3" decimals="-3" unitRef="TWD">0</ix:nonFraction></p>
+<p><ix:nonFraction name="ifrs-full:ProfitLoss" contextRef="From20250101To20250630_ReserveOfGainsAndLossesOnFinancialAssetsMeasuredAtFairValueThroughOtherComprehensiveIncomeMember" format="ixt:numdotdecimal" scale="3" decimals="-3" unitRef="TWD">0</ix:nonFraction></p>
+<p><ix:nonFraction name="ifrs-full:ProfitLoss" contextRef="From20250101To20250630_GainsLossesOnHedgingInstrumentsMember" format="ixt:numdotdecimal" scale="3" decimals="-3" unitRef="TWD">0</ix:nonFraction></p>
+<p><ix:nonFraction name="ifrs-full:ProfitLoss" contextRef="From20250101To20250630_Others-OtherEquityInterestMember" format="ixt:numdotdecimal" scale="3" decimals="-3" unitRef="TWD">0</ix:nonFraction></p>
+<p><ix:nonFraction name="ifrs-full:ProfitLoss" contextRef="From20250101To20250630_OtherEquityInterestMember" format="ixt:numdotdecimal" scale="3" decimals="-3" unitRef="TWD">0</ix:nonFraction></p>
+<p><ix:nonFraction name="ifrs-full:ProfitLoss" contextRef="From20250101To20250630_EquityAttributableToOwnersOfParentMember" format="ixt:numdotdecimal" scale="3" decimals="-3" unitRef="TWD">759,837,230</ix:nonFraction></p>
+<p><ix:nonFraction name="ifrs-full:ProfitLoss" contextRef="From20250101To20250630_NoncontrollingInterestsMember" format="ixt:numdotdecimal" scale="3" sign="-" decimals="-3" unitRef="TWD">1,611,145</ix:nonFraction></p>
+<p><ix:nonFraction name="ifrs-full:ProfitLoss" contextRef="From20250101To20250630_TotalEquityMember" format="ixt:numdotdecimal" scale="3" decimals="-3" unitRef="TWD">758,226,085</ix:nonFraction></p>
+<p><ix:nonFraction name="ifrs-full:Equity" contextRef="AsOf20260630_OrdinaryShareMember" format="ixt:numdotdecimal" scale="3" decimals="-3" unitRef="TWD">259,323,701</ix:nonFraction></p>
+</body></html>

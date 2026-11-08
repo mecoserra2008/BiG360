@@ -1,0 +1,33 @@
+table: activist_filings
+version: 1
+zone: normalized
+owner: smart-money (app.ingestion.sec_13dg)
+description: >
+  SEC Schedule 13D / 13G beneficial-ownership filings (> 5% holders; 13D = active / control intent, 13G = passive)
+  with both parties, from the EDGAR master index (one line per CIK of a filing). The subject company and the filer are
+  told apart by the SEC ticker map / our CIK identifiers, the filing header for ambiguous 13Ds, or a manager-name
+  heuristic (role_source). Official SEC data; knowledge_date = Date Filed (dissemination date when delayed > 5 days).
+storage: {path: normalized/activist_filings, format: parquet, partition_by: [year], write_mode: upsert, sort_by: [knowledge_date, filing_id]}
+primary_key: [filing_id]
+pit: {knowledge_column: knowledge_date, rule: "usable from the filing date"}
+columns:
+  - {name: filing_id, type: string, nullable: false, description: "sec_edgar:<accession>"}
+  - {name: year, type: int16, nullable: false, description: "Partition: year(knowledge_date)"}
+  - {name: accession, type: string, nullable: false, description: "EDGAR accession number"}
+  - {name: form_type, type: string, nullable: false, description: "SC 13D, SC 13D/A, SC 13G, SC 13G/A, SCHEDULE 13D(/A), SCHEDULE 13G(/A)"}
+  - {name: schedule, type: enum, nullable: false, values: ["13D", "13G"], description: "Schedule family"}
+  - {name: is_amendment, type: bool, nullable: false, description: "Form ends with /A"}
+  - {name: filed_date, type: date, nullable: false, description: "EDGAR Date Filed"}
+  - {name: knowledge_date, type: date, nullable: false, description: "PIT date"}
+  - {name: subject_cik, type: string, nullable: false, description: "Subject company CIK (10 digits)"}
+  - {name: subject_name, type: string, nullable: true, description: "Subject company name (EDGAR index)"}
+  - {name: filer_cik, type: string, nullable: true, description: "First filer CIK"}
+  - {name: filer_name, type: string, nullable: true, description: "First filer name"}
+  - {name: other_filer_ciks, type: list<string>, nullable: true, description: "Further joint filers"}
+  - {name: n_filers, type: int32, nullable: false, description: "Number of filer CIKs"}
+  - {name: role_source, type: enum, nullable: false, values: [ticker_map, header, name_heuristic, unresolved], description: "How subject vs filer was decided"}
+  - {name: issuer_id, type: string, nullable: true, description: "Subject issuer (identity: cik)"}
+  - {name: security_id, type: string, nullable: true, description: "Subject primary security"}
+  - {name: url, type: string, nullable: false, description: "EDGAR filing index URL"}
+  - {name: source_id, type: string, nullable: false, description: "sec_edgar"}
+  - {name: ingested_at, type: datetime, nullable: false, description: "Write time UTC"}

@@ -1,0 +1,28 @@
+table: company_neighbours
+version: 1
+zone: features
+owner: supply-chain (app.supply_chain.neighbours, job supply_chain_neighbours)
+description: >
+  Roadmap #9 STATISTICAL economic neighbours (layer = statistical; NOT disclosed relationships): per issuer the top 10
+  issuers by co-movement of weekly log returns over the last 104 weeks (one security per issuer, >= 52 common weeks).
+  return_corr = Pearson correlation (>= 0.5); partial_corr = correlation of residuals after removing the region
+  equal-weight market return, i.e. partial correlation controlling for the market (>= 0.3). Point-in-time: only weeks ending <= as_of.
+  Latest snapshot only (rebuilt weekly). Used as a fallback "economic neighbours" layer in the network view.
+storage: {path: features/company_neighbours, format: parquet, partition_by: [], write_mode: overwrite, retention: "latest snapshot"}
+primary_key: [as_of, issuer_id, method, neighbour_issuer_id]
+pit: {knowledge_column: as_of, rule: "weekly returns of weeks ending <= as_of"}
+columns:
+  - {name: as_of, type: date, nullable: false, description: "Last price date used"}
+  - {name: issuer_id, type: string, nullable: false, description: "Issuer"}
+  - {name: security_id, type: string, nullable: false, description: "Security whose returns were used"}
+  - {name: neighbour_issuer_id, type: string, nullable: false, description: "Neighbour issuer"}
+  - {name: neighbour_security_id, type: string, nullable: false, description: "Neighbour security"}
+  - {name: method, type: enum, nullable: false, values: [partial_corr, return_corr], description: "Co-movement measure"}
+  - {name: rho, type: float64, nullable: false, description: "Correlation (-1..1)"}
+  - {name: rank, type: int16, nullable: false, description: "Rank within issuer and method (1 = strongest)"}
+  - {name: n_obs, type: int16, nullable: false, description: "Common weekly observations"}
+  - {name: window_weeks, type: int16, nullable: false, description: "Weeks in the window"}
+  - {name: same_sector, type: bool, nullable: false, description: "Same sector"}
+  - {name: same_region, type: bool, nullable: false, description: "Same region"}
+  - {name: layer, type: enum, nullable: false, values: [statistical], description: "Always statistical (not disclosed)"}
+  - {name: computed_at, type: datetime, nullable: false, description: "Write time UTC"}

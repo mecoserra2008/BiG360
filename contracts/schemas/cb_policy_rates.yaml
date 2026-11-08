@@ -1,0 +1,25 @@
+table: cb_policy_rates
+version: 1
+zone: scores
+owner: macro-w3 (app.macro.cb.rates, job cb_rates)
+description: >
+  Daily (business days) policy rate and corridor per central bank, from official sources only (bank's own series via
+  FRED/ECB/BoE/BoC/RBA/Riksbank/Norges Bank/BCB/BanRep/NIFC-LPR; BIS WS_CBPOL compilation as cross-check and as the
+  daily series where the bank's own daily series is not machine-readable). Step series carried forward from the last
+  official observation. Overwritten nightly.
+storage: {path: scores/cb_policy_rates, format: parquet, partition_by: [], write_mode: overwrite}
+primary_key: [bank, date]
+columns:
+  - {name: bank, type: string, nullable: false, description: "Bank code (app.macro.cb.banks: fed, ecb, boe, boj, snb, boc, rba, riksbank, norges, bcb, banxico, bcch, banrep, bcrp, rbi, bok, pboc)"}
+  - {name: date, type: date, nullable: false, description: "Business day"}
+  - {name: policy_rate, type: float64, nullable: true, unit: percent, description: "Policy rate in force (Fed: target-range midpoint)"}
+  - {name: lower, type: float64, nullable: true, unit: percent, description: "Corridor / target range lower bound (Fed DFEDTARL, ECB DFR, Riksbank deposit)"}
+  - {name: upper, type: float64, nullable: true, unit: percent, description: "Corridor / target range upper bound (Fed DFEDTARU, ECB MLF, BoC Bank Rate, Riksbank lending)"}
+  - {name: deposit, type: float64, nullable: true, unit: percent, description: "Deposit facility / interest on reserves (Fed IORB)"}
+  - {name: lending, type: float64, nullable: true, unit: percent, description: "Lending facility (Fed column = ON RRP award rate; PBoC = 5Y LPR)"}
+  - {name: mro, type: float64, nullable: true, unit: percent, description: "ECB main refinancing operations rate"}
+  - {name: overnight, type: float64, nullable: true, unit: percent, description: "Official overnight market rate (EFFR, EUR STR, SONIA, TONA call, CORRA, SARON monthly, Selic effective); null when older than 14 days"}
+  - {name: bis_rate, type: float64, nullable: true, unit: percent, description: "BIS WS_CBPOL daily compilation (cross-check)"}
+  - {name: source, type: string, nullable: true, description: "Series that supplied policy_rate"}
+  - {name: obs_date, type: date, nullable: true, description: "Date of the last official observation carried into this row (freshness)"}
+  - {name: computed_at, type: datetime, nullable: false, description: "Write time UTC"}

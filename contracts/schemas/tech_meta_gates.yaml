@@ -1,0 +1,24 @@
+table: tech_meta_gates
+version: 1
+zone: features
+owner: technicals (app.techmeta.job:run_fit_job, weekly tech_meta_fit)
+description: >
+  Gate verdict per meta-labelling output (Technicals v3 #2), copied from data/reports/technicals_v3/meta/gate.json at
+  each weekly fit: meta_h10 / meta_h20 / meta_h40 = calibration gate of the meta P(win) (ECE, regimes, better than
+  T2 alone and a context-free logistic model, permutation / leakage tests); decision_h10 / 20 / 40 = economic check of
+  take / skip and sizing in the Backtest Lab engine. PASS -> production, FAIL / not validated -> experimental.
+storage: {path: features/tech_meta_gates, format: parquet, partition_by: [], write_mode: overwrite, retention: "last 7 fits"}
+primary_key: [fit_date, output]
+columns:
+  - {name: fit_date, type: date, nullable: false, description: "Fit date"}
+  - {name: output, type: string, nullable: false, description: "meta_h10 / meta_h20 / meta_h40 / decision_h10 / decision_h20 / decision_h40"}
+  - {name: verdict, type: enum, nullable: false, values: [pass, fail, not_validated], description: "Gate verdict"}
+  - {name: shown_as, type: enum, nullable: false, values: [production, experimental], description: "production / experimental"}
+  - {name: ece, type: float64, nullable: true, description: "Expected calibration error of meta P(win) (probability units)"}
+  - {name: max_regime_gap, type: float64, nullable: true, description: "Largest |realised - predicted| over the gated regimes"}
+  - {name: beats_baselines, type: bool, nullable: true, description: "Brier and log-loss better than T2 alone and the context-free logistic model"}
+  - {name: economic_t, type: float64, nullable: true, description: "decision_*: paired t of meta-filtered minus all setups (daily returns, US)"}
+  - {name: summary, type: string, nullable: true, description: "One-line summary"}
+  - {name: detail, type: json, nullable: true, description: "Full gate record"}
+  - {name: validated_at, type: string, nullable: true, description: "Validation run time"}
+  - {name: computed_at, type: datetime, nullable: false, description: "Write time UTC"}

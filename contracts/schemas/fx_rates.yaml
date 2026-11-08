@@ -1,0 +1,18 @@
+table: fx_rates
+version: 2
+zone: normalized
+owner: ingest-market
+description: >
+  Daily FX fixings vs USD. Precedence per (date,currency): ECB reference (via EUR cross) > FRED H.10 > yfinance.
+  Period averages (for flow items) are computed by app.normalize.fx.period_average(currency, start, end)
+  as the arithmetic mean of available daily rates; never stored separately.
+storage: {path: normalized/fx_rates, format: parquet, partition_by: [year], write_mode: upsert}
+primary_key: [date, currency]
+columns:
+  - {name: date, type: date, nullable: false, description: "Fixing date"}
+  - {name: year, type: int16, nullable: false, description: "Partition column = year(date)"}
+  - {name: currency, type: string, nullable: false, description: "ISO 4217 (USD itself stored with rate 1.0)"}
+  - {name: usd_per_unit, type: float64, nullable: false, description: "USD value of 1 unit of currency"}
+  - {name: units_per_usd, type: float64, nullable: false, description: "1 / usd_per_unit"}
+  - {name: source_id, type: enum, nullable: false, values: [ecb, fred, yfinance, polygon, central_bank, filled], description: "Source of the fixing ('filled' = forward-filled over a holiday, max 5 days; 'central_bank' = national CB gap filler for CLP/ARS/COP/PEN, added v2)"}
+  - {name: ingested_at, type: datetime, nullable: false, description: "Write time UTC"}

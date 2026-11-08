@@ -1,0 +1,40 @@
+table: earnings_events
+version: 1
+zone: features
+owner: earnings (app.earnings.events)
+description: >
+  Historical earnings releases, one row per issuer x fiscal period. Release-date preference: official earnings
+  release (SEC 8-K Item 2.02 acceptance time; TDnet kessan tanshin; HKEX results announcement) > provider date
+  (Yahoo, labelled provider) > official periodic report filing (10-Q / 10-K / 20-F, EDINET, DART, CVM, ESEF, FCA NSM,
+  ...; can lag the first public release). Period matching: an 8-K 2.02 / provider date belongs to the latest fiscal
+  period ending 0-100 days before it (period_inferred = true when the period comes from the calendar quarter only).
+  reaction_date = first session whose close reflects the news (post-market releases react the next trading day).
+  PIT: knowledge_date = release date (exchange-local).
+storage: {path: features/earnings_events, format: parquet, partition_by: [region], write_mode: overwrite, sort_by: [issuer_id, period_end]}
+primary_key: [issuer_id, period_end]
+pit: {knowledge_column: knowledge_date, rule: "the release is public on release_date (release_ts when known)"}
+columns:
+  - {name: issuer_id, type: string, nullable: false, description: "FK issuers"}
+  - {name: security_id, type: string, nullable: true, description: "Primary security (prices / reactions)"}
+  - {name: region, type: string, nullable: false, description: "Partition (issuer region)"}
+  - {name: country, type: string, nullable: true, description: "Issuer country ISO2"}
+  - {name: period_end, type: date, nullable: false, description: "Fiscal period end of the reported results"}
+  - {name: fiscal_year, type: int16, nullable: true, description: "Fiscal year"}
+  - {name: fiscal_period, type: enum, nullable: true, values: [Q1, Q2, Q3, Q4, H1, H2, FY], description: "Q4 = annual release of a quarterly reporter; FY = annual-only reporter"}
+  - {name: period_inferred, type: bool, nullable: false, description: "Period taken from the calendar quarter preceding the date (no filing matched)"}
+  - {name: release_date, type: date, nullable: false, description: "Release date, exchange-local calendar"}
+  - {name: release_ts, type: datetime, nullable: true, description: "Release time UTC when known"}
+  - {name: session, type: enum, nullable: false, values: [pre_market, intraday, post_market, unknown], description: "Release time vs the primary listing's regular session (exchange time zone)"}
+  - {name: reaction_date, type: date, nullable: true, description: "First weekday reflecting the release (next weekday for post-market; release day otherwise). Exchange holidays are resolved against the security's own trading days in earnings_reactions.reaction_date"}
+  - {name: date_source, type: enum, nullable: false, values: [official_release, official_filing, provider], description: "official_release = earnings-release document (8-K 2.02 / tanshin / HKEX results); official_filing = periodic report filing; provider = Yahoo date (no official record)"}
+  - {name: source_id, type: string, nullable: false, description: "sec_edgar | tdnet | hkex | edinet | opendart | dart_bulk | cvm | esef_xbrl_org | fca_nsm | ... | yahoo"}
+  - {name: source_label, type: string, nullable: false, description: "Human label, e.g. 'SEC 8-K Item 2.02 (acceptance time)', 'Provider date (Yahoo)'"}
+  - {name: form_type, type: string, nullable: true, description: "Native form of the release document"}
+  - {name: filing_id, type: string, nullable: true, description: "filings_index id (or sec_edgar:<accession>) of the release document"}
+  - {name: url, type: string, nullable: true, description: "Document URL"}
+  - {name: report_filing_date, type: date, nullable: true, description: "Date of the periodic report (10-Q / 10-K / statutory) for the period, if any"}
+  - {name: report_form_type, type: string, nullable: true, description: "Form of the periodic report"}
+  - {name: provider_date, type: date, nullable: true, description: "Yahoo date for the same period (cross-check)"}
+  - {name: knowledge_date, type: date, nullable: false, description: "= release_date"}
+  - {name: computed_at, type: datetime, nullable: false, description: "Write time UTC"}
+  - {name: run_id, type: string, nullable: true, description: "job_runs.run_id"}

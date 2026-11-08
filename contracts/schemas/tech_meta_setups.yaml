@@ -1,0 +1,43 @@
+table: tech_meta_setups
+version: 1
+zone: scores
+owner: technicals (app.techmeta.job:run_score_job, nightly tech_meta_score)
+description: >
+  Technicals v3 #2 meta-labelled setups (MODEL-BASED, calibrated on history; gate docs/TECHNICALS_V3_VALIDATION.md
+  "Meta-labelling"): per security with a v2 T2 setup and horizon H = 10 / 20 / 40, the context-adjusted (meta) P(T1
+  before the invalidation within H), P(loss), P(neither), meta expected R after costs, the take / skip decision at the
+  in-sample threshold, the capped quarter-Kelly risk fraction, the top drivers of the adjustment vs T2 and the context
+  feature vector used for query-time thesis barriers. The model (data/models/technicals_v3/meta/<fit_date>/) starts
+  from the T2 probability as an offset and is refitted weekly by tech_meta_fit.
+storage: {path: scores/tech_meta_setups, format: parquet, partition_by: [], write_mode: overwrite, retention: "latest + month-end snapshots"}
+primary_key: [as_of_date, security_id, horizon]
+columns:
+  - {name: as_of_date, type: date, nullable: false, description: "tech_prob_setups as_of (setup origin = that close)"}
+  - {name: security_id, type: string, nullable: false, description: "FK securities_master"}
+  - {name: horizon, type: int16, nullable: false, description: "H sessions (10 / 20 / 40)"}
+  - {name: direction, type: int8, nullable: false, description: "+1 long / -1 short (primary setup)"}
+  - {name: region, type: string, nullable: true, description: "Security region"}
+  - {name: in_domain, type: bool, nullable: false, description: "Stock (not ETF / index) in a validated region (US / EU / UK / JP); outside -> always experimental"}
+  - {name: p_win, type: float64, nullable: true, description: "Meta P(T1 before invalidation within H), calibrated"}
+  - {name: p_loss, type: float64, nullable: true, description: "Meta P(invalidation first or same bar), capped at 1 - p_win"}
+  - {name: p_neither, type: float64, nullable: true, description: "1 - p_win - p_loss"}
+  - {name: expected_r, type: float64, nullable: true, description: "Meta expected R = p_win R:R - p_loss - costs + p_neither x E[R | neither] (R units)"}
+  - {name: take, type: bool, nullable: true, description: "expected_r > threshold (threshold chosen in-sample on the fit's calibration year)"}
+  - {name: kelly_fraction, type: float64, nullable: true, description: "Suggested fraction of equity at risk (1R): 0.25 x E[R] / E[R^2], capped at 0.02; 0 when skip"}
+  - {name: size_rel, type: float64, nullable: true, description: "kelly_fraction / median of taken setups in the calibration year (0..3); 0 when skip"}
+  - {name: threshold, type: float64, nullable: true, description: "Take threshold on meta expected R (-inf = take every setup)"}
+  - {name: logit_adj, type: float64, nullable: true, description: "Meta logit minus the T2 logit before calibration (size of the context adjustment)"}
+  - {name: t2_p_win, type: float64, nullable: true, description: "v2 T2 P(win) (base)"}
+  - {name: t2_p_loss, type: float64, nullable: true, description: "v2 T2 P(loss)"}
+  - {name: t2_expected_r, type: float64, nullable: true, description: "v2 T2 expected R"}
+  - {name: t2_expected_r_mtm, type: float64, nullable: true, description: "v2 T2 expected R incl. the marked-to-market time exit"}
+  - {name: reward_risk_close, type: float64, nullable: true, description: "R:R from the close"}
+  - {name: cost_r, type: float64, nullable: true, description: "Round-trip costs in R"}
+  - {name: mtm_r, type: float64, nullable: true, description: "E[R | neither by H] (T2 surface)"}
+  - {name: drivers, type: json, nullable: true, description: "Top 5 contributions to the win model beyond the T2 offset: [{feature, group, label, value, contribution (logit units)}]"}
+  - {name: features, type: json, nullable: true, description: "Context feature vector of the origin (+ _direction), for query-time scoring of custom barriers"}
+  - {name: model_kind, type: enum, nullable: true, values: [lr, xgb], description: "Learner chosen in-sample at the fit"}
+  - {name: fit_date, type: string, nullable: true, description: "Meta model fit date"}
+  - {name: gate, type: enum, nullable: false, values: [production, experimental], description: "meta_h<H> verdict (tech_meta_gates): production = passed the calibration gate and in_domain"}
+  - {name: gate_decision, type: enum, nullable: false, values: [production, experimental], description: "decision_h<H> verdict (economic check in the Backtest Lab engine) for take / skip and size"}
+  - {name: computed_at, type: datetime, nullable: false, description: "Write time UTC"}

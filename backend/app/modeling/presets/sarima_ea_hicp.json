@@ -1,0 +1,46 @@
+{
+ "title": "SARIMA: EA HICP monthly",
+ "description": "Euro-area headline HICP inflation (y/y, ECB) with a seasonal ARIMA (s=12): differencing chosen by ADF/KPSS, (p,q)(P,Q) searched by AIC, a 24-month forecast fan and rolling-origin evaluation against naive and seasonal-naive forecasts.",
+ "tags": [
+  "time series",
+  "SARIMA",
+  "inflation",
+  "euro area"
+ ],
+ "study": {
+  "name": "EA HICP SARIMA",
+  "method": "arima",
+  "y": "hicp_yoy",
+  "x": [],
+  "params": {
+   "auto": true,
+   "seasonal_order": [
+    0,
+    0,
+    0,
+    12
+   ],
+   "max_p": 2,
+   "max_q": 2,
+   "max_P": 1,
+   "max_Q": 1,
+   "criterion": "aic",
+   "forecast_steps": 24,
+   "eval_folds": 24
+  },
+  "dataset": {
+   "kind": "timeseries",
+   "frequency": "M",
+   "start": "1997-01-01",
+   "macro_alignment": "period",
+   "variables": [
+    {
+     "name": "hicp_yoy",
+     "source": "macro",
+     "field": "ecb:HICP.M.U2.N.000000.4D0.ANR",
+     "transforms": []
+    }
+   ]
+  }
+ }
+}

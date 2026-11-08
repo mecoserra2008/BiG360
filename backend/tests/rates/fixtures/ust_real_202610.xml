@@ -1,0 +1,406 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes" ?>
+<feed xml:base="https://home.treasury.gov/resource-center/data-chart-center/interest-rates/pages/xml" xmlns:d="http://schemas.microsoft.com/ado/2007/08/dataservices" xmlns:m="http://schemas.microsoft.com/ado/2007/08/dataservices/metadata" xmlns="http://www.w3.org/2005/Atom"> 
+<title type="text">DailyTreasuryRealYieldCurveRateData</title>
+<id>https://home.treasury.gov/resource-center/data-chart-center/interest-rates/pages/xml-item?data=daily_treasury_real_yield_curve</id>
+  <updated>2026-10-31T02:04:29Z</updated>
+  <link rel="self" title="DailyTreasuryRealYieldCurveRateData" href="DailyTreasuryRealYieldCurveRateData"/>
+<entry>
+<id>https://home.treasury.gov/resource-center/data-chart-center/interest-rates/pages/xml-item?data=daily_treasury_real_yield_curve&amp;id=328</id>
+<title type="text"></title>
+<updated>2026-10-31T02:04:29Z</updated>
+<author><name /></author>
+<link rel="edit" title="DailyTreasuryRealYieldCurveRateDatum" href="/resource-center/data-chart-center/interest-rates/pages/xml-item?data=daily_treasury_real_yield_curve&amp;id=328" />
+<category term="TreasuryDataWarehouseModel.DailyTreasuryRealYieldCurveRateDatum" scheme="http://schemas.microsoft.com/ado/2007/08/dataservices/scheme" />
+<content type="application/xml">
+<m:properties>
+<d:DailyTreasuryRealYieldCurveRateDataId m:type="Edm.Int32">328</d:DailyTreasuryRealYieldCurveRateDataId>
+<d:NEW_DATE m:type="Edm.DateTime">2026-10-01T00:00:00</d:NEW_DATE>
+<d:TC_5YEAR m:type="Edm.Double">2.65</d:TC_5YEAR>
+<d:TC_7YEAR m:type="Edm.Double">2.76</d:TC_7YEAR>
+<d:TC_10YEAR m:type="Edm.Double">2.88</d:TC_10YEAR>
+<d:TC_20YEAR m:type="Edm.Double">3.16</d:TC_20YEAR>
+<d:TC_30YEAR m:type="Edm.Double">3.31</d:TC_30YEAR>
+</m:properties>
+</content>
+</entry>
+<entry>
+<id>https://home.treasury.gov/resource-center/data-chart-center/interest-rates/pages/xml-item?data=daily_treasury_real_yield_curve&amp;id=329</id>
+<title type="text"></title>
+<updated>2026-10-31T02:04:29Z</updated>
+<author><name /></author>
+<link rel="edit" title="DailyTreasuryRealYieldCurveRateDatum" href="/resource-center/data-chart-center/interest-rates/pages/xml-item?data=daily_treasury_real_yield_curve&amp;id=329" />
+<category term="TreasuryDataWarehouseModel.DailyTreasuryRealYieldCurveRateDatum" scheme="http://schemas.microsoft.com/ado/2007/08/dataservices/scheme" />
+<content type="application/xml">
+<m:properties>
+<d:DailyTreasuryRealYieldCurveRateDataId m:type="Edm.Int32">329</d:DailyTreasuryRealYieldCurveRateDataId>
+<d:NEW_DATE m:type="Edm.DateTime">2026-10-02T00:00:00</d:NEW_DATE>
+<d:TC_5YEAR m:type="Edm.Double">2.69</d:TC_5YEAR>
+<d:TC_7YEAR m:type="Edm.Double">2.80</d:TC_7YEAR>
+<d:TC_10YEAR m:type="Edm.Double">2.92</d:TC_10YEAR>
+<d:TC_20YEAR m:type="Edm.Double">3.19</d:TC_20YEAR>
+<d:TC_30YEAR m:type="Edm.Double">3.34</d:TC_30YEAR>
+</m:properties>
+</content>
+</entry>
+<entry>
+<id>https://home.treasury.gov/resource-center/data-chart-center/interest-rates/pages/xml-item?data=daily_treasury_real_yield_curve&amp;id=330</id>
+<title type="text"></title>
+<updated>2026-10-31T02:04:29Z</updated>
+<author><name /></author>
+<link rel="edit" title="DailyTreasuryRealYieldCurveRateDatum" href="/resource-center/data-chart-center/interest-rates/pages/xml-item?data=daily_treasury_real_yield_curve&amp;id=330" />
+<category term="TreasuryDataWarehouseModel.DailyTreasuryRealYieldCurveRateDatum" scheme="http://schemas.microsoft.com/ado/2007/08/dataservices/scheme" />
+<content type="application/xml">
+<m:properties>
+<d:DailyTreasuryRealYieldCurveRateDataId m:type="Edm.Int32">330</d:DailyTreasuryRealYieldCurveRateDataId>
+<d:NEW_DATE m:type="Edm.DateTime">2026-10-05T00:00:00</d:NEW_DATE>
+<d:TC_5YEAR m:type="Edm.Double">2.70</d:TC_5YEAR>
+<d:TC_7YEAR m:type="Edm.Double">2.82</d:TC_7YEAR>
+<d:TC_10YEAR m:type="Edm.Double">2.95</d:TC_10YEAR>
+<d:TC_20YEAR m:type="Edm.Double">3.22</d:TC_20YEAR>
+<d:TC_30YEAR m:type="Edm.Double">3.37</d:TC_30YEAR>
+</m:properties>
+</content>
+</entry>
+<entry>
+<id>https://home.treasury.gov/resource-center/data-chart-center/interest-rates/pages/xml-item?data=daily_treasury_real_yield_curve&amp;id=331</id>
+<title type="text"></title>
+<updated>2026-10-31T02:04:29Z</updated>
+<author><name /></author>
+<link rel="edit" title="DailyTreasuryRealYieldCurveRateDatum" href="/resource-center/data-chart-center/interest-rates/pages/xml-item?data=daily_treasury_real_yield_curve&amp;id=331" />
+<category term="TreasuryDataWarehouseModel.DailyTreasuryRealYieldCurveRateDatum" scheme="http://schemas.microsoft.com/ado/2007/08/dataservices/scheme" />
+<content type="application/xml">
+<m:properties>
+<d:DailyTreasuryRealYieldCurveRateDataId m:type="Edm.Int32">331</d:DailyTreasuryRealYieldCurveRateDataId>
+<d:NEW_DATE m:type="Edm.DateTime">2026-10-06T00:00:00</d:NEW_DATE>
+<d:TC_5YEAR m:type="Edm.Double">2.66</d:TC_5YEAR>
+<d:TC_7YEAR m:type="Edm.Double">2.77</d:TC_7YEAR>
+<d:TC_10YEAR m:type="Edm.Double">2.91</d:TC_10YEAR>
+<d:TC_20YEAR m:type="Edm.Double">3.19</d:TC_20YEAR>
+<d:TC_30YEAR m:type="Edm.Double">3.35</d:TC_30YEAR>
+</m:properties>
+</content>
+</entry>
+<entry>
+<id>https://home.treasury.gov/resource-center/data-chart-center/interest-rates/pages/xml-item?data=daily_treasury_real_yield_curve&amp;id=332</id>
+<title type="text"></title>
+<updated>2026-10-31T02:04:29Z</updated>
+<author><name /></author>
+<link rel="edit" title="DailyTreasuryRealYieldCurveRateDatum" href="/resource-center/data-chart-center/interest-rates/pages/xml-item?data=daily_treasury_real_yield_curve&amp;id=332" />
+<category term="TreasuryDataWarehouseModel.DailyTreasuryRealYieldCurveRateDatum" scheme="http://schemas.microsoft.com/ado/2007/08/dataservices/scheme" />
+<content type="application/xml">
+<m:properties>
+<d:DailyTreasuryRealYieldCurveRateDataId m:type="Edm.Int32">332</d:DailyTreasuryRealYieldCurveRateDataId>
+<d:NEW_DATE m:type="Edm.DateTime">2026-10-07T00:00:00</d:NEW_DATE>
+<d:TC_5YEAR m:type="Edm.Double">2.66</d:TC_5YEAR>
+<d:TC_7YEAR m:type="Edm.Double">2.78</d:TC_7YEAR>
+<d:TC_10YEAR m:type="Edm.Double">2.92</d:TC_10YEAR>
+<d:TC_20YEAR m:type="Edm.Double">3.20</d:TC_20YEAR>
+<d:TC_30YEAR m:type="Edm.Double">3.36</d:TC_30YEAR>
+</m:properties>
+</content>
+</entry>
+<entry>
+<id>https://home.treasury.gov/resource-center/data-chart-center/interest-rates/pages/xml-item?data=daily_treasury_real_yield_curve&amp;id=333</id>
+<title type="text"></title>
+<updated>2026-10-31T02:04:29Z</updated>
+<author><name /></author>
+<link rel="edit" title="DailyTreasuryRealYieldCurveRateDatum" href="/resource-center/data-chart-center/interest-rates/pages/xml-item?data=daily_treasury_real_yield_curve&amp;id=333" />
+<category term="TreasuryDataWarehouseModel.DailyTreasuryRealYieldCurveRateDatum" scheme="http://schemas.microsoft.com/ado/2007/08/dataservices/scheme" />
+<content type="application/xml">
+<m:properties>
+<d:DailyTreasuryRealYieldCurveRateDataId m:type="Edm.Int32">333</d:DailyTreasuryRealYieldCurveRateDataId>
+<d:NEW_DATE m:type="Edm.DateTime">2026-10-08T00:00:00</d:NEW_DATE>
+<d:TC_5YEAR m:type="Edm.Double">2.62</d:TC_5YEAR>
+<d:TC_7YEAR m:type="Edm.Double">2.74</d:TC_7YEAR>
+<d:TC_10YEAR m:type="Edm.Double">2.87</d:TC_10YEAR>
+<d:TC_20YEAR m:type="Edm.Double">3.15</d:TC_20YEAR>
+<d:TC_30YEAR m:type="Edm.Double">3.31</d:TC_30YEAR>
+</m:properties>
+</content>
+</entry>
+<entry>
+<id>https://home.treasury.gov/resource-center/data-chart-center/interest-rates/pages/xml-item?data=daily_treasury_real_yield_curve&amp;id=334</id>
+<title type="text"></title>
+<updated>2026-10-31T02:04:29Z</updated>
+<author><name /></author>
+<link rel="edit" title="DailyTreasuryRealYieldCurveRateDatum" href="/resource-center/data-chart-center/interest-rates/pages/xml-item?data=daily_treasury_real_yield_curve&amp;id=334" />
+<category term="TreasuryDataWarehouseModel.DailyTreasuryRealYieldCurveRateDatum" scheme="http://schemas.microsoft.com/ado/2007/08/dataservices/scheme" />
+<content type="application/xml">
+<m:properties>
+<d:DailyTreasuryRealYieldCurveRateDataId m:type="Edm.Int32">334</d:DailyTreasuryRealYieldCurveRateDataId>
+<d:NEW_DATE m:type="Edm.DateTime">2026-10-09T00:00:00</d:NEW_DATE>
+<d:TC_5YEAR m:type="Edm.Double">2.68</d:TC_5YEAR>
+<d:TC_7YEAR m:type="Edm.Double">2.79</d:TC_7YEAR>
+<d:TC_10YEAR m:type="Edm.Double">2.91</d:TC_10YEAR>
+<d:TC_20YEAR m:type="Edm.Double">3.17</d:TC_20YEAR>
+<d:TC_30YEAR m:type="Edm.Double">3.32</d:TC_30YEAR>
+</m:properties>
+</content>
+</entry>
+<entry>
+<id>https://home.treasury.gov/resource-center/data-chart-center/interest-rates/pages/xml-item?data=daily_treasury_real_yield_curve&amp;id=335</id>
+<title type="text"></title>
+<updated>2026-10-31T02:04:29Z</updated>
+<author><name /></author>
+<link rel="edit" title="DailyTreasuryRealYieldCurveRateDatum" href="/resource-center/data-chart-center/interest-rates/pages/xml-item?data=daily_treasury_real_yield_curve&amp;id=335" />
+<category term="TreasuryDataWarehouseModel.DailyTreasuryRealYieldCurveRateDatum" scheme="http://schemas.microsoft.com/ado/2007/08/dataservices/scheme" />
+<content type="application/xml">
+<m:properties>
+<d:DailyTreasuryRealYieldCurveRateDataId m:type="Edm.Int32">335</d:DailyTreasuryRealYieldCurveRateDataId>
+<d:NEW_DATE m:type="Edm.DateTime">2026-10-13T00:00:00</d:NEW_DATE>
+<d:TC_5YEAR m:type="Edm.Double">2.67</d:TC_5YEAR>
+<d:TC_7YEAR m:type="Edm.Double">2.77</d:TC_7YEAR>
+<d:TC_10YEAR m:type="Edm.Double">2.88</d:TC_10YEAR>
+<d:TC_20YEAR m:type="Edm.Double">3.13</d:TC_20YEAR>
+<d:TC_30YEAR m:type="Edm.Double">3.28</d:TC_30YEAR>
+</m:properties>
+</content>
+</entry>
+<entry>
+<id>https://home.treasury.gov/resource-center/data-chart-center/interest-rates/pages/xml-item?data=daily_treasury_real_yield_curve&amp;id=336</id>
+<title type="text"></title>
+<updated>2026-10-31T02:04:29Z</updated>
+<author><name /></author>
+<link rel="edit" title="DailyTreasuryRealYieldCurveRateDatum" href="/resource-center/data-chart-center/interest-rates/pages/xml-item?data=daily_treasury_real_yield_curve&amp;id=336" />
+<category term="TreasuryDataWarehouseModel.DailyTreasuryRealYieldCurveRateDatum" scheme="http://schemas.microsoft.com/ado/2007/08/dataservices/scheme" />
+<content type="application/xml">
+<m:properties>
+<d:DailyTreasuryRealYieldCurveRateDataId m:type="Edm.Int32">336</d:DailyTreasuryRealYieldCurveRateDataId>
+<d:NEW_DATE m:type="Edm.DateTime">2026-10-14T00:00:00</d:NEW_DATE>
+<d:TC_5YEAR m:type="Edm.Double">2.64</d:TC_5YEAR>
+<d:TC_7YEAR m:type="Edm.Double">2.73</d:TC_7YEAR>
+<d:TC_10YEAR m:type="Edm.Double">2.84</d:TC_10YEAR>
+<d:TC_20YEAR m:type="Edm.Double">3.09</d:TC_20YEAR>
+<d:TC_30YEAR m:type="Edm.Double">3.24</d:TC_30YEAR>
+</m:properties>
+</content>
+</entry>
+<entry>
+<id>https://home.treasury.gov/resource-center/data-chart-center/interest-rates/pages/xml-item?data=daily_treasury_real_yield_curve&amp;id=337</id>
+<title type="text"></title>
+<updated>2026-10-31T02:04:29Z</updated>
+<author><name /></author>
+<link rel="edit" title="DailyTreasuryRealYieldCurveRateDatum" href="/resource-center/data-chart-center/interest-rates/pages/xml-item?data=daily_treasury_real_yield_curve&amp;id=337" />
+<category term="TreasuryDataWarehouseModel.DailyTreasuryRealYieldCurveRateDatum" scheme="http://schemas.microsoft.com/ado/2007/08/dataservices/scheme" />
+<content type="application/xml">
+<m:properties>
+<d:DailyTreasuryRealYieldCurveRateDataId m:type="Edm.Int32">337</d:DailyTreasuryRealYieldCurveRateDataId>
+<d:NEW_DATE m:type="Edm.DateTime">2026-10-15T00:00:00</d:NEW_DATE>
+<d:TC_5YEAR m:type="Edm.Double">2.58</d:TC_5YEAR>
+<d:TC_7YEAR m:type="Edm.Double">2.67</d:TC_7YEAR>
+<d:TC_10YEAR m:type="Edm.Double">2.78</d:TC_10YEAR>
+<d:TC_20YEAR m:type="Edm.Double">3.03</d:TC_20YEAR>
+<d:TC_30YEAR m:type="Edm.Double">3.18</d:TC_30YEAR>
+</m:properties>
+</content>
+</entry>
+<entry>
+<id>https://home.treasury.gov/resource-center/data-chart-center/interest-rates/pages/xml-item?data=daily_treasury_real_yield_curve&amp;id=338</id>
+<title type="text"></title>
+<updated>2026-10-31T02:04:29Z</updated>
+<author><name /></author>
+<link rel="edit" title="DailyTreasuryRealYieldCurveRateDatum" href="/resource-center/data-chart-center/interest-rates/pages/xml-item?data=daily_treasury_real_yield_curve&amp;id=338" />
+<category term="TreasuryDataWarehouseModel.DailyTreasuryRealYieldCurveRateDatum" scheme="http://schemas.microsoft.com/ado/2007/08/dataservices/scheme" />
+<content type="application/xml">
+<m:properties>
+<d:DailyTreasuryRealYieldCurveRateDataId m:type="Edm.Int32">338</d:DailyTreasuryRealYieldCurveRateDataId>
+<d:NEW_DATE m:type="Edm.DateTime">2026-10-16T00:00:00</d:NEW_DATE>
+<d:TC_5YEAR m:type="Edm.Double">2.52</d:TC_5YEAR>
+<d:TC_7YEAR m:type="Edm.Double">2.62</d:TC_7YEAR>
+<d:TC_10YEAR m:type="Edm.Double">2.74</d:TC_10YEAR>
+<d:TC_20YEAR m:type="Edm.Double">3.01</d:TC_20YEAR>
+<d:TC_30YEAR m:type="Edm.Double">3.16</d:TC_30YEAR>
+</m:properties>
+</content>
+</entry>
+<entry>
+<id>https://home.treasury.gov/resource-center/data-chart-center/interest-rates/pages/xml-item?data=daily_treasury_real_yield_curve&amp;id=339</id>
+<title type="text"></title>
+<updated>2026-10-31T02:04:29Z</updated>
+<author><name /></author>
+<link rel="edit" title="DailyTreasuryRealYieldCurveRateDatum" href="/resource-center/data-chart-center/interest-rates/pages/xml-item?data=daily_treasury_real_yield_curve&amp;id=339" />
+<category term="TreasuryDataWarehouseModel.DailyTreasuryRealYieldCurveRateDatum" scheme="http://schemas.microsoft.com/ado/2007/08/dataservices/scheme" />
+<content type="application/xml">
+<m:properties>
+<d:DailyTreasuryRealYieldCurveRateDataId m:type="Edm.Int32">339</d:DailyTreasuryRealYieldCurveRateDataId>
+<d:NEW_DATE m:type="Edm.DateTime">2026-10-19T00:00:00</d:NEW_DATE>
+<d:TC_5YEAR m:type="Edm.Double">2.56</d:TC_5YEAR>
+<d:TC_7YEAR m:type="Edm.Double">2.67</d:TC_7YEAR>
+<d:TC_10YEAR m:type="Edm.Double">2.80</d:TC_10YEAR>
+<d:TC_20YEAR m:type="Edm.Double">3.06</d:TC_20YEAR>
+<d:TC_30YEAR m:type="Edm.Double">3.21</d:TC_30YEAR>
+</m:properties>
+</content>
+</entry>
+<entry>
+<id>https://home.treasury.gov/resource-center/data-chart-center/interest-rates/pages/xml-item?data=daily_treasury_real_yield_curve&amp;id=340</id>
+<title type="text"></title>
+<updated>2026-10-31T02:04:29Z</updated>
+<author><name /></author>
+<link rel="edit" title="DailyTreasuryRealYieldCurveRateDatum" href="/resource-center/data-chart-center/interest-rates/pages/xml-item?data=daily_treasury_real_yield_curve&amp;id=340" />
+<category term="TreasuryDataWarehouseModel.DailyTreasuryRealYieldCurveRateDatum" scheme="http://schemas.microsoft.com/ado/2007/08/dataservices/scheme" />
+<content type="application/xml">
+<m:properties>
+<d:DailyTreasuryRealYieldCurveRateDataId m:type="Edm.Int32">340</d:DailyTreasuryRealYieldCurveRateDataId>
+<d:NEW_DATE m:type="Edm.DateTime">2026-10-20T00:00:00</d:NEW_DATE>
+<d:TC_5YEAR m:type="Edm.Double">2.55</d:TC_5YEAR>
+<d:TC_7YEAR m:type="Edm.Double">2.65</d:TC_7YEAR>
+<d:TC_10YEAR m:type="Edm.Double">2.77</d:TC_10YEAR>
+<d:TC_20YEAR m:type="Edm.Double">3.02</d:TC_20YEAR>
+<d:TC_30YEAR m:type="Edm.Double">3.16</d:TC_30YEAR>
+</m:properties>
+</content>
+</entry>
+<entry>
+<id>https://home.treasury.gov/resource-center/data-chart-center/interest-rates/pages/xml-item?data=daily_treasury_real_yield_curve&amp;id=341</id>
+<title type="text"></title>
+<updated>2026-10-31T02:04:29Z</updated>
+<author><name /></author>
+<link rel="edit" title="DailyTreasuryRealYieldCurveRateDatum" href="/resource-center/data-chart-center/interest-rates/pages/xml-item?data=daily_treasury_real_yield_curve&amp;id=341" />
+<category term="TreasuryDataWarehouseModel.DailyTreasuryRealYieldCurveRateDatum" scheme="http://schemas.microsoft.com/ado/2007/08/dataservices/scheme" />
+<content type="application/xml">
+<m:properties>
+<d:DailyTreasuryRealYieldCurveRateDataId m:type="Edm.Int32">341</d:DailyTreasuryRealYieldCurveRateDataId>
+<d:NEW_DATE m:type="Edm.DateTime">2026-10-21T00:00:00</d:NEW_DATE>
+<d:TC_5YEAR m:type="Edm.Double">2.55</d:TC_5YEAR>
+<d:TC_7YEAR m:type="Edm.Double">2.65</d:TC_7YEAR>
+<d:TC_10YEAR m:type="Edm.Double">2.76</d:TC_10YEAR>
+<d:TC_20YEAR m:type="Edm.Double">3.01</d:TC_20YEAR>
+<d:TC_30YEAR m:type="Edm.Double">3.15</d:TC_30YEAR>
+</m:properties>
+</content>
+</entry>
+<entry>
+<id>https://home.treasury.gov/resource-center/data-chart-center/interest-rates/pages/xml-item?data=daily_treasury_real_yield_curve&amp;id=342</id>
+<title type="text"></title>
+<updated>2026-10-31T02:04:29Z</updated>
+<author><name /></author>
+<link rel="edit" title="DailyTreasuryRealYieldCurveRateDatum" href="/resource-center/data-chart-center/interest-rates/pages/xml-item?data=daily_treasury_real_yield_curve&amp;id=342" />
+<category term="TreasuryDataWarehouseModel.DailyTreasuryRealYieldCurveRateDatum" scheme="http://schemas.microsoft.com/ado/2007/08/dataservices/scheme" />
+<content type="application/xml">
+<m:properties>
+<d:DailyTreasuryRealYieldCurveRateDataId m:type="Edm.Int32">342</d:DailyTreasuryRealYieldCurveRateDataId>
+<d:NEW_DATE m:type="Edm.DateTime">2026-10-22T00:00:00</d:NEW_DATE>
+<d:TC_5YEAR m:type="Edm.Double">2.33</d:TC_5YEAR>
+<d:TC_7YEAR m:type="Edm.Double">2.48</d:TC_7YEAR>
+<d:TC_10YEAR m:type="Edm.Double">2.64</d:TC_10YEAR>
+<d:TC_20YEAR m:type="Edm.Double">2.91</d:TC_20YEAR>
+<d:TC_30YEAR m:type="Edm.Double">3.05</d:TC_30YEAR>
+</m:properties>
+</content>
+</entry>
+<entry>
+<id>https://home.treasury.gov/resource-center/data-chart-center/interest-rates/pages/xml-item?data=daily_treasury_real_yield_curve&amp;id=343</id>
+<title type="text"></title>
+<updated>2026-10-31T02:04:29Z</updated>
+<author><name /></author>
+<link rel="edit" title="DailyTreasuryRealYieldCurveRateDatum" href="/resource-center/data-chart-center/interest-rates/pages/xml-item?data=daily_treasury_real_yield_curve&amp;id=343" />
+<category term="TreasuryDataWarehouseModel.DailyTreasuryRealYieldCurveRateDatum" scheme="http://schemas.microsoft.com/ado/2007/08/dataservices/scheme" />
+<content type="application/xml">
+<m:properties>
+<d:DailyTreasuryRealYieldCurveRateDataId m:type="Edm.Int32">343</d:DailyTreasuryRealYieldCurveRateDataId>
+<d:NEW_DATE m:type="Edm.DateTime">2026-10-23T00:00:00</d:NEW_DATE>
+<d:TC_5YEAR m:type="Edm.Double">2.34</d:TC_5YEAR>
+<d:TC_7YEAR m:type="Edm.Double">2.49</d:TC_7YEAR>
+<d:TC_10YEAR m:type="Edm.Double">2.66</d:TC_10YEAR>
+<d:TC_20YEAR m:type="Edm.Double">2.94</d:TC_20YEAR>
+<d:TC_30YEAR m:type="Edm.Double">3.08</d:TC_30YEAR>
+</m:properties>
+</content>
+</entry>
+<entry>
+<id>https://home.treasury.gov/resource-center/data-chart-center/interest-rates/pages/xml-item?data=daily_treasury_real_yield_curve&amp;id=344</id>
+<title type="text"></title>
+<updated>2026-10-31T02:04:29Z</updated>
+<author><name /></author>
+<link rel="edit" title="DailyTreasuryRealYieldCurveRateDatum" href="/resource-center/data-chart-center/interest-rates/pages/xml-item?data=daily_treasury_real_yield_curve&amp;id=344" />
+<category term="TreasuryDataWarehouseModel.DailyTreasuryRealYieldCurveRateDatum" scheme="http://schemas.microsoft.com/ado/2007/08/dataservices/scheme" />
+<content type="application/xml">
+<m:properties>
+<d:DailyTreasuryRealYieldCurveRateDataId m:type="Edm.Int32">344</d:DailyTreasuryRealYieldCurveRateDataId>
+<d:NEW_DATE m:type="Edm.DateTime">2026-10-26T00:00:00</d:NEW_DATE>
+<d:TC_5YEAR m:type="Edm.Double">2.37</d:TC_5YEAR>
+<d:TC_7YEAR m:type="Edm.Double">2.51</d:TC_7YEAR>
+<d:TC_10YEAR m:type="Edm.Double">2.66</d:TC_10YEAR>
+<d:TC_20YEAR m:type="Edm.Double">2.93</d:TC_20YEAR>
+<d:TC_30YEAR m:type="Edm.Double">3.07</d:TC_30YEAR>
+</m:properties>
+</content>
+</entry>
+<entry>
+<id>https://home.treasury.gov/resource-center/data-chart-center/interest-rates/pages/xml-item?data=daily_treasury_real_yield_curve&amp;id=345</id>
+<title type="text"></title>
+<updated>2026-10-31T02:04:29Z</updated>
+<author><name /></author>
+<link rel="edit" title="DailyTreasuryRealYieldCurveRateDatum" href="/resource-center/data-chart-center/interest-rates/pages/xml-item?data=daily_treasury_real_yield_curve&amp;id=345" />
+<category term="TreasuryDataWarehouseModel.DailyTreasuryRealYieldCurveRateDatum" scheme="http://schemas.microsoft.com/ado/2007/08/dataservices/scheme" />
+<content type="application/xml">
+<m:properties>
+<d:DailyTreasuryRealYieldCurveRateDataId m:type="Edm.Int32">345</d:DailyTreasuryRealYieldCurveRateDataId>
+<d:NEW_DATE m:type="Edm.DateTime">2026-10-27T00:00:00</d:NEW_DATE>
+<d:TC_5YEAR m:type="Edm.Double">2.37</d:TC_5YEAR>
+<d:TC_7YEAR m:type="Edm.Double">2.50</d:TC_7YEAR>
+<d:TC_10YEAR m:type="Edm.Double">2.64</d:TC_10YEAR>
+<d:TC_20YEAR m:type="Edm.Double">2.91</d:TC_20YEAR>
+<d:TC_30YEAR m:type="Edm.Double">3.05</d:TC_30YEAR>
+</m:properties>
+</content>
+</entry>
+<entry>
+<id>https://home.treasury.gov/resource-center/data-chart-center/interest-rates/pages/xml-item?data=daily_treasury_real_yield_curve&amp;id=346</id>
+<title type="text"></title>
+<updated>2026-10-31T02:04:29Z</updated>
+<author><name /></author>
+<link rel="edit" title="DailyTreasuryRealYieldCurveRateDatum" href="/resource-center/data-chart-center/interest-rates/pages/xml-item?data=daily_treasury_real_yield_curve&amp;id=346" />
+<category term="TreasuryDataWarehouseModel.DailyTreasuryRealYieldCurveRateDatum" scheme="http://schemas.microsoft.com/ado/2007/08/dataservices/scheme" />
+<content type="application/xml">
+<m:properties>
+<d:DailyTreasuryRealYieldCurveRateDataId m:type="Edm.Int32">346</d:DailyTreasuryRealYieldCurveRateDataId>
+<d:NEW_DATE m:type="Edm.DateTime">2026-10-28T00:00:00</d:NEW_DATE>
+<d:TC_5YEAR m:type="Edm.Double">2.36</d:TC_5YEAR>
+<d:TC_7YEAR m:type="Edm.Double">2.51</d:TC_7YEAR>
+<d:TC_10YEAR m:type="Edm.Double">2.67</d:TC_10YEAR>
+<d:TC_20YEAR m:type="Edm.Double">2.96</d:TC_20YEAR>
+<d:TC_30YEAR m:type="Edm.Double">3.10</d:TC_30YEAR>
+</m:properties>
+</content>
+</entry>
+<entry>
+<id>https://home.treasury.gov/resource-center/data-chart-center/interest-rates/pages/xml-item?data=daily_treasury_real_yield_curve&amp;id=347</id>
+<title type="text"></title>
+<updated>2026-10-31T02:04:29Z</updated>
+<author><name /></author>
+<link rel="edit" title="DailyTreasuryRealYieldCurveRateDatum" href="/resource-center/data-chart-center/interest-rates/pages/xml-item?data=daily_treasury_real_yield_curve&amp;id=347" />
+<category term="TreasuryDataWarehouseModel.DailyTreasuryRealYieldCurveRateDatum" scheme="http://schemas.microsoft.com/ado/2007/08/dataservices/scheme" />
+<content type="application/xml">
+<m:properties>
+<d:DailyTreasuryRealYieldCurveRateDataId m:type="Edm.Int32">347</d:DailyTreasuryRealYieldCurveRateDataId>
+<d:NEW_DATE m:type="Edm.DateTime">2026-10-29T00:00:00</d:NEW_DATE>
+<d:TC_5YEAR m:type="Edm.Double">2.31</d:TC_5YEAR>
+<d:TC_7YEAR m:type="Edm.Double">2.46</d:TC_7YEAR>
+<d:TC_10YEAR m:type="Edm.Double">2.63</d:TC_10YEAR>
+<d:TC_20YEAR m:type="Edm.Double">2.92</d:TC_20YEAR>
+<d:TC_30YEAR m:type="Edm.Double">3.07</d:TC_30YEAR>
+</m:properties>
+</content>
+</entry>
+<entry>
+<id>https://home.treasury.gov/resource-center/data-chart-center/interest-rates/pages/xml-item?data=daily_treasury_real_yield_curve&amp;id=348</id>
+<title type="text"></title>
+<updated>2026-10-31T02:04:29Z</updated>
+<author><name /></author>
+<link rel="edit" title="DailyTreasuryRealYieldCurveRateDatum" href="/resource-center/data-chart-center/interest-rates/pages/xml-item?data=daily_treasury_real_yield_curve&amp;id=348" />
+<category term="TreasuryDataWarehouseModel.DailyTreasuryRealYieldCurveRateDatum" scheme="http://schemas.microsoft.com/ado/2007/08/dataservices/scheme" />
+<content type="application/xml">
+<m:properties>
+<d:DailyTreasuryRealYieldCurveRateDataId m:type="Edm.Int32">348</d:DailyTreasuryRealYieldCurveRateDataId>
+<d:NEW_DATE m:type="Edm.DateTime">2026-10-30T00:00:00</d:NEW_DATE>
+<d:TC_5YEAR m:type="Edm.Double">2.25</d:TC_5YEAR>
+<d:TC_7YEAR m:type="Edm.Double">2.42</d:TC_7YEAR>
+<d:TC_10YEAR m:type="Edm.Double">2.60</d:TC_10YEAR>
+<d:TC_20YEAR m:type="Edm.Double">2.92</d:TC_20YEAR>
+<d:TC_30YEAR m:type="Edm.Double">3.08</d:TC_30YEAR>
+</m:properties>
+</content>
+</entry>
+</feed>

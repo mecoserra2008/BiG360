@@ -1,0 +1,733 @@
+{
+"resultCount": 14,
+"storiResultItems": [
+{
+"companyName": "UCB",
+"companyNumber": "0403053608",
+"nationality": "BE",
+"reportingTopicName": "Half-yearly financial report",
+"datePublication": "2026-07-30T07:00:28.43",
+"dateReceived": "2026-07-30T07:04:28.35",
+"lei": "2138008J191VLSGY5A09",
+"mainDocuments": [
+{
+"fileDataId": "04d2a076-2ed3-43cb-996e-79beb739a189",
+"language": "nl",
+"title": "260729_HY Management Report_2026-NL.pdf",
+"originalFileName": "260729_HY Management Report_2026-NL.pdf",
+"size": 797,
+"fileType": "pdf"
+},
+{
+"fileDataId": "020c976a-bfa2-404f-9cc4-3fdd6d4e5240",
+"language": "fr",
+"title": "260729_HY Management Report_2026-FR.pdf",
+"originalFileName": "260729_HY Management Report_2026-FR.pdf",
+"size": 809,
+"fileType": "pdf"
+},
+{
+"fileDataId": "27758c26-a033-4a4b-877f-5c6d7479bcc9",
+"language": "en",
+"title": "260729_HY Management Report_2026-EN.pdf",
+"originalFileName": "260729_HY Management Report_2026-EN.pdf",
+"size": 906,
+"fileType": "pdf"
+}
+],
+"isinCodes": [
+{
+"code": "BE0003739530",
+"startDate": "2011-01-01T00:00:00",
+"isinType": "Shares",
+"market": "Euronext Brussels"
+}
+],
+"documentTitle": ""
+},
+{
+"companyName": "UCB",
+"companyNumber": "0403053608",
+"nationality": "BE",
+"reportingTopicName": "Annual financial report",
+"datePublication": "2026-02-26T07:00:00",
+"dateReceived": "2026-02-26T13:21:19.477",
+"lei": "2138008J191VLSGY5A09",
+"mainDocuments": [
+{
+"fileDataId": "b91faa3c-06ab-45a6-a9ae-4cd440f18020",
+"language": "nl",
+"title": "ucb-2025-12-31-1-nl.xhtml",
+"originalFileName": "ucb-2025-12-31-1-nl.xhtml",
+"size": 110514,
+"fileType": "xhtml"
+},
+{
+"fileDataId": "8dc3dad1-21be-4c9f-a4ef-e44a8b9e253b",
+"language": "nl",
+"title": "2138008J191VLSGY5A09-2025-12-31-1-nl.xbri",
+"originalFileName": "2138008J191VLSGY5A09-2025-12-31-1-nl.xbri",
+"size": 69471,
+"fileType": "xbri"
+},
+{
+"fileDataId": "a700118c-14e6-4712-afd2-134a10cc2927",
+"language": "fr",
+"title": "2138008J191VLSGY5A09-2025-12-31-1-fr.xbri",
+"originalFileName": "2138008J191VLSGY5A09-2025-12-31-1-fr.xbri",
+"size": 69495,
+"fileType": "xbri"
+},
+{
+"fileDataId": "78d6a9b2-46e0-4464-9e9c-3835b08b173e",
+"language": "fr",
+"title": "ucb-2025-12-31-1-fr.xhtml",
+"originalFileName": "ucb-2025-12-31-1-fr.xhtml",
+"size": 110659,
+"fileType": "xhtml"
+},
+{
+"fileDataId": "4fece3cc-dc46-4f19-9e72-33e333cde384",
+"language": "en",
+"title": "2138008J191VLSGY5A09-2025-12-31-1-en.xbri",
+"originalFileName": "2138008J191VLSGY5A09-2025-12-31-1-en.xbri",
+"size": 78811,
+"fileType": "xbri"
+},
+{
+"fileDataId": "e494b1ea-268c-4175-a9b3-a0c6e4945a32",
+"language": "en",
+"title": "ucb-2025-12-31-1-en.xhtml",
+"originalFileName": "ucb-2025-12-31-1-en.xhtml",
+"size": 127322,
+"fileType": "xhtml"
+}
+],
+"isinCodes": [
+{
+"code": "BE0003739530",
+"startDate": "2011-01-01T00:00:00",
+"isinType": "Shares",
+"market": "Euronext Brussels"
+}
+],
+"documentTitle": ""
+},
+{
+"companyName": "UCB",
+"companyNumber": "0403053608",
+"nationality": "BE",
+"reportingTopicName": "Half-yearly financial report",
+"datePublication": "2025-07-31T07:00:00",
+"dateReceived": "2025-07-31T07:02:16.613",
+"lei": "2138008J191VLSGY5A09",
+"mainDocuments": [
+{
+"fileDataId": "d84b7510-eeca-4f22-9e5b-4619343d7ba7",
+"language": "nl",
+"title": "UCB_Half-Year_2025_Report-NL-FINAL.pdf",
+"originalFileName": "UCB_Half-Year_2025_Report-NL-FINAL.pdf",
+"size": 1583,
+"fileType": "pdf"
+},
+{
+"fileDataId": "f60ebf94-6051-4e2f-8e4a-6f0db1028769",
+"language": "fr",
+"title": "UCB_Half-Year_2025_Report-FR-FINAL.pdf",
+"originalFileName": "UCB_Half-Year_2025_Report-FR-FINAL.pdf",
+"size": 1554,
+"fileType": "pdf"
+},
+{
+"fileDataId": "90afcc95-c23a-48e7-8b96-1cae4c5579fe",
+"language": "en",
+"title": "UCB_Half-Year_2025_Report-EN-FINAL.pdf",
+"originalFileName": "UCB_Half-Year_2025_Report-EN-FINAL.pdf",
+"size": 1487,
+"fileType": "pdf"
+}
+],
+"isinCodes": [
+{
+"code": "BE0003739530",
+"startDate": "2011-01-01T00:00:00",
+"isinType": "Shares",
+"market": "Euronext Brussels"
+}
+],
+"documentTitle": ""
+},
+{
+"companyName": "UCB",
+"companyNumber": "0403053608",
+"nationality": "BE",
+"reportingTopicName": "Annual financial report",
+"datePublication": "2025-02-27T00:00:00",
+"dateReceived": "2025-02-27T07:02:24.37",
+"lei": "2138008J191VLSGY5A09",
+"mainDocuments": [
+{
+"fileDataId": "d6acab5b-abea-415e-a7a2-539e43488320",
+"language": "nl",
+"title": "2138008J191VLSGY5A09-2024-12-31-0-nl.xhtml",
+"originalFileName": "2138008J191VLSGY5A09-2024-12-31-0-nl.xhtml",
+"size": 79427,
+"fileType": "xhtml"
+},
+{
+"fileDataId": "059e5f59-ceac-41ec-9d94-df75b989c9af",
+"language": "nl",
+"title": "2138008J191VLSGY5A09-2024-12-31-0-nl.zip",
+"originalFileName": "2138008J191VLSGY5A09-2024-12-31-0-nl.zip",
+"size": 43879,
+"fileType": "zip"
+},
+{
+"fileDataId": "b6e09e77-52a8-4ed9-9ba1-432a0376e4fd",
+"language": "fr",
+"title": "2138008J191VLSGY5A09-2024-12-31-0-fr.xhtml",
+"originalFileName": "2138008J191VLSGY5A09-2024-12-31-0-fr.xhtml",
+"size": 84558,
+"fileType": "xhtml"
+},
+{
+"fileDataId": "497a68e0-372d-460b-9937-5abaf553e6a0",
+"language": "fr",
+"title": "2138008J191VLSGY5A09-2024-12-31-0-fr.zip",
+"originalFileName": "2138008J191VLSGY5A09-2024-12-31-0-fr.zip",
+"size": 44086,
+"fileType": "zip"
+},
+{
+"fileDataId": "5f20c105-9ebd-4447-838d-6ff1535589fb",
+"language": "en",
+"title": "2138008J191VLSGY5A09-2024-12-31-0-en 3.zip",
+"originalFileName": "2138008J191VLSGY5A09-2024-12-31-0-en 3.zip",
+"size": 43395,
+"fileType": "zip"
+},
+{
+"fileDataId": "30f6d398-e209-432b-9fee-dedaaa4b67da",
+"language": "en",
+"title": "2138008J191VLSGY5A09-2024-12-31-0-en.xhtml",
+"originalFileName": "2138008J191VLSGY5A09-2024-12-31-0-en.xhtml",
+"size": 76582,
+"fileType": "xhtml"
+}
+],
+"isinCodes": [
+{
+"code": "BE0003739530",
+"startDate": "2011-01-01T00:00:00",
+"isinType": "Shares",
+"market": "Euronext Brussels"
+}
+],
+"documentTitle": ""
+},
+{
+"companyName": "UCB",
+"companyNumber": "0403053608",
+"nationality": "BE",
+"reportingTopicName": "Half-yearly financial report",
+"datePublication": "2024-07-25T07:00:00",
+"dateReceived": "2024-07-25T07:43:53.767",
+"lei": "2138008J191VLSGY5A09",
+"mainDocuments": [
+{
+"fileDataId": "e9eb7d4e-d666-4bd2-8cdb-55de2fb66130",
+"language": "nl",
+"title": "UCB_Half-Year_2024_Report-NL-FINAL.pdf",
+"originalFileName": "UCB_Half-Year_2024_Report-NL-FINAL.pdf",
+"size": 1284,
+"fileType": "pdf"
+},
+{
+"fileDataId": "c5353401-e570-4bf4-aba0-c387e6d532ed",
+"language": "fr",
+"title": "UCB_Half-Year_2024_Report-FR-FINAL.pdf",
+"originalFileName": "UCB_Half-Year_2024_Report-FR-FINAL.pdf",
+"size": 1171,
+"fileType": "pdf"
+},
+{
+"fileDataId": "924247b9-3c19-45c3-b358-ad3fbf69a388",
+"language": "en",
+"title": "UCB_Half-Year_2024_Report-EN-FINAL.pdf",
+"originalFileName": "UCB_Half-Year_2024_Report-EN-FINAL.pdf",
+"size": 1197,
+"fileType": "pdf"
+}
+],
+"isinCodes": [
+{
+"code": "BE0003739530",
+"startDate": "2011-01-01T00:00:00",
+"isinType": "Shares",
+"market": "Euronext Brussels"
+}
+],
+"documentTitle": ""
+},
+{
+"companyName": "UCB",
+"companyNumber": "0403053608",
+"nationality": "BE",
+"reportingTopicName": "Annual financial report",
+"datePublication": "2024-02-28T07:00:00",
+"dateReceived": "2024-03-04T19:54:49.52",
+"lei": "2138008J191VLSGY5A09",
+"mainDocuments": [
+{
+"fileDataId": "902172d9-f762-49ac-b779-020403d18db3",
+"language": "nl",
+"title": "2138008J191VLSGY5A09-2023-12-31-nl.zip",
+"originalFileName": "2138008J191VLSGY5A09-2023-12-31-nl.zip",
+"size": 40874,
+"fileType": "zip"
+},
+{
+"fileDataId": "8ab2508d-b8ed-417c-b190-637459ba3d1b",
+"language": "nl",
+"title": "2138008J191VLSGY5A09-2023-12-31-nl.xhtml",
+"originalFileName": "2138008J191VLSGY5A09-2023-12-31-nl.xhtml",
+"size": 72115,
+"fileType": "xhtml"
+},
+{
+"fileDataId": "a4ab19a4-1f12-4961-8a1b-3d204193b283",
+"language": "fr",
+"title": "2138008J191VLSGY5A09-2023-12-31-fr.xhtml",
+"originalFileName": "2138008J191VLSGY5A09-2023-12-31-fr.xhtml",
+"size": 78079,
+"fileType": "xhtml"
+},
+{
+"fileDataId": "21e39d8d-71ba-43e5-baec-debe20305407",
+"language": "fr",
+"title": "2138008J191VLSGY5A09-2023-12-31-fr.zip",
+"originalFileName": "2138008J191VLSGY5A09-2023-12-31-fr.zip",
+"size": 42262,
+"fileType": "zip"
+},
+{
+"fileDataId": "17bebd52-36bf-49b9-94dc-34221a6a5490",
+"language": "en",
+"title": "2138008J191VLSGY5A09-2023-12-31-en v2.zip",
+"originalFileName": "2138008J191VLSGY5A09-2023-12-31-en v2.zip",
+"size": 40824,
+"fileType": "zip"
+},
+{
+"fileDataId": "80ee3f5e-8217-4d3e-bcc4-e5f0d267c289",
+"language": "en",
+"title": "2138008J191VLSGY5A09-2023-12-31-en.xhtml",
+"originalFileName": "2138008J191VLSGY5A09-2023-12-31-en.xhtml",
+"size": 67824,
+"fileType": "xhtml"
+}
+],
+"isinCodes": [
+{
+"code": "BE0003739530",
+"startDate": "2011-01-01T00:00:00",
+"isinType": "Shares",
+"market": "Euronext Brussels"
+}
+],
+"documentTitle": ""
+},
+{
+"companyName": "UCB",
+"companyNumber": "0403053608",
+"nationality": "BE",
+"reportingTopicName": "Half-yearly financial report",
+"datePublication": "2023-07-27T07:00:00",
+"dateReceived": "2023-07-27T08:28:58.95",
+"lei": "2138008J191VLSGY5A09",
+"mainDocuments": [
+{
+"fileDataId": "579a646f-5874-4e8f-be43-da04b660050d",
+"language": "nl",
+"title": "2023_Half-Year_Report-NL.pdf",
+"originalFileName": "2023_Half-Year_Report-NL.pdf",
+"size": 1093,
+"fileType": "pdf"
+},
+{
+"fileDataId": "e9e3528b-fb50-4a09-80a9-c03843c54a8b",
+"language": "fr",
+"title": "2023_Half-Year_Report-FR.pdf",
+"originalFileName": "2023_Half-Year_Report-FR.pdf",
+"size": 1098,
+"fileType": "pdf"
+},
+{
+"fileDataId": "dd624ecd-cccb-4013-afd2-5fa0a080b8fb",
+"language": "en",
+"title": "UCB Half-Year 2023 Report - EN - final.pdf",
+"originalFileName": "UCB Half-Year 2023 Report - EN - final.pdf",
+"size": 1073,
+"fileType": "pdf"
+}
+],
+"isinCodes": [
+{
+"code": "BE0003739530",
+"startDate": "2011-01-01T00:00:00",
+"isinType": "Shares",
+"market": "Euronext Brussels"
+}
+],
+"documentTitle": ""
+},
+{
+"companyName": "UCB",
+"companyNumber": "0403053608",
+"nationality": "BE",
+"reportingTopicName": "Annual financial report",
+"datePublication": "2023-02-22T08:00:00",
+"dateReceived": "2023-03-24T09:14:27.17",
+"lei": "2138008J191VLSGY5A09",
+"mainDocuments": [
+{
+"fileDataId": "1da0ba5e-c9d7-433b-9f8f-7bef28b01db2",
+"language": "nl",
+"title": "21380029O1RSZIAVOR95-2022-12-31-nl.zip",
+"originalFileName": "21380029O1RSZIAVOR95-2022-12-31-nl.zip",
+"size": 17747,
+"fileType": "zip"
+},
+{
+"fileDataId": "fd8b2d4a-1409-499e-a829-9d648de9faab",
+"language": "nl",
+"title": "21380029O1RSZIAVOR95-2022-12-31-nl.xhtml",
+"originalFileName": "21380029O1RSZIAVOR95-2022-12-31-nl.xhtml",
+"size": 31511,
+"fileType": "xhtml"
+},
+{
+"fileDataId": "0843c854-8a49-4bc5-9568-27bd3f87c980",
+"language": "fr",
+"title": "21380029O1RSZIAVOR95-2022-12-31-fr.xhtml",
+"originalFileName": "21380029O1RSZIAVOR95-2022-12-31-fr.xhtml",
+"size": 32249,
+"fileType": "xhtml"
+},
+{
+"fileDataId": "e2fa200c-a364-4801-a5a9-c77b7b2c275a",
+"language": "fr",
+"title": "21380029O1RSZIAVOR95-2022-12-31-fr.zip",
+"originalFileName": "21380029O1RSZIAVOR95-2022-12-31-fr.zip",
+"size": 18157,
+"fileType": "zip"
+},
+{
+"fileDataId": "070654b2-de71-4ddd-b5f4-3b57ce41a132",
+"language": "en",
+"title": "21380029O1RSZIAVOR95-2022-12-31-en (1).zip",
+"originalFileName": "21380029O1RSZIAVOR95-2022-12-31-en (1).zip",
+"size": 18304,
+"fileType": "zip"
+},
+{
+"fileDataId": "4626fa78-f8f9-424e-bd59-8160fcd6ad15",
+"language": "en",
+"title": "21380029O1RSZIAVOR95-2022-12-31-en.xhtml",
+"originalFileName": "21380029O1RSZIAVOR95-2022-12-31-en.xhtml",
+"size": 32062,
+"fileType": "xhtml"
+}
+],
+"isinCodes": [
+{
+"code": "BE0003739530",
+"startDate": "2011-01-01T00:00:00",
+"isinType": "Shares",
+"market": "Euronext Brussels"
+}
+],
+"documentTitle": ""
+},
+{
+"companyName": "UCB",
+"companyNumber": "0403053608",
+"nationality": "BE",
+"reportingTopicName": "Half-yearly financial report",
+"datePublication": "2022-07-28T07:00:00",
+"dateReceived": "2022-09-28T14:01:58.687",
+"lei": "2138008J191VLSGY5A09",
+"mainDocuments": [
+{
+"fileDataId": "b56240ff-c0a4-4b13-a9c2-36a4f7e9811e",
+"language": "nl",
+"title": "UCB Half-Year 2022 Report - NL - Final.pdf",
+"originalFileName": "UCB Half-Year 2022 Report - NL - Final.pdf",
+"size": 1505,
+"fileType": "pdf"
+},
+{
+"fileDataId": "67be205f-101e-44e7-8299-cb110f741f2c",
+"language": "fr",
+"title": "UCB Half-Year 2022 Report - FR - Final.pdf",
+"originalFileName": "UCB Half-Year 2022 Report - FR - Final.pdf",
+"size": 1543,
+"fileType": "pdf"
+},
+{
+"fileDataId": "e984ecf1-e701-4adf-806c-237d550e7354",
+"language": "en",
+"title": "UCB Half-Year 2022 Report - EN - Final.pdf",
+"originalFileName": "UCB Half-Year 2022 Report - EN - Final.pdf",
+"size": 1447,
+"fileType": "pdf"
+}
+],
+"isinCodes": [
+{
+"code": "BE0003739530",
+"startDate": "2011-01-01T00:00:00",
+"isinType": "Shares",
+"market": "Euronext Brussels"
+}
+],
+"documentTitle": ""
+},
+{
+"companyName": "UCB",
+"companyNumber": "0403053608",
+"nationality": "BE",
+"reportingTopicName": "Annual financial report",
+"datePublication": "2022-02-24T07:00:00",
+"dateReceived": "2022-02-24T17:04:35.627",
+"lei": "2138008J191VLSGY5A09",
+"mainDocuments": [
+{
+"fileDataId": "0fcdfdc2-cdaf-4ba3-b911-05d0d613fd96",
+"language": "nl",
+"title": "ucbsa-2021-12-31 (NL).zip",
+"originalFileName": "ucbsa-2021-12-31 (NL).zip",
+"size": 16900,
+"fileType": "zip"
+},
+{
+"fileDataId": "84efc683-0f3b-41e2-95e9-f876058a2138",
+"language": "nl",
+"title": "ucbsa-2021-12-31.html",
+"originalFileName": "ucbsa-2021-12-31.html",
+"size": 24368,
+"fileType": "html"
+},
+{
+"fileDataId": "595980c0-3d6d-42a1-a716-283cf651a9e5",
+"language": "fr",
+"title": "ucbsa-2021-12-31.html",
+"originalFileName": "ucbsa-2021-12-31.html",
+"size": 19003,
+"fileType": "html"
+},
+{
+"fileDataId": "7b80de7f-6e9b-416e-b17e-5a2ea24e4c35",
+"language": "fr",
+"title": "ucbsa-2021-12-31 (FR).zip",
+"originalFileName": "ucbsa-2021-12-31 (FR).zip",
+"size": 12891,
+"fileType": "zip"
+},
+{
+"fileDataId": "e7e7b3d0-0119-4aa0-9780-237c62e2841f",
+"language": "en",
+"title": "ucbsa-2021-12-31.html",
+"originalFileName": "ucbsa-2021-12-31.html",
+"size": 18086,
+"fileType": "html"
+},
+{
+"fileDataId": "5a333d09-4c7d-41c4-94cc-82252814ea22",
+"language": "en",
+"title": "ucbsa-2021-12-31.zip",
+"originalFileName": "ucbsa-2021-12-31.zip",
+"size": 11029,
+"fileType": "zip"
+}
+],
+"isinCodes": [
+{
+"code": "BE0003739530",
+"startDate": "2011-01-01T00:00:00",
+"isinType": "Shares",
+"market": "Euronext Brussels"
+}
+],
+"documentTitle": ""
+},
+{
+"companyName": "UCB",
+"companyNumber": "0403053608",
+"nationality": "BE",
+"reportingTopicName": "Half-yearly financial report",
+"datePublication": "2021-07-29T07:00:00",
+"dateReceived": "2021-08-09T14:15:41.007",
+"lei": "2138008J191VLSGY5A09",
+"mainDocuments": [
+{
+"fileDataId": "92530507-9b02-41c9-a57f-72a0b2b21d3d",
+"language": "nl",
+"title": "",
+"originalFileName": "2021 HY report - final_29-07-21 - NL.pdf",
+"size": 1650,
+"fileType": "pdf"
+},
+{
+"fileDataId": "7da95548-b7b2-4d5a-b3cd-c7e419ff4542",
+"language": "fr",
+"title": "",
+"originalFileName": "2021 HY report - final_29-07-21 - FR.pdf",
+"size": 1655,
+"fileType": "pdf"
+},
+{
+"fileDataId": "3e38ecf2-d33b-4322-842b-6509d71b2e5e",
+"language": "en",
+"title": "",
+"originalFileName": "2021 HY report - final_29-07-21 - ENG (1).pdf",
+"size": 1621,
+"fileType": "pdf"
+}
+],
+"isinCodes": [
+{
+"code": "BE0003739530",
+"startDate": "2011-01-01T00:00:00",
+"isinType": "Shares",
+"market": "Euronext Brussels"
+}
+],
+"documentTitle": ""
+},
+{
+"companyName": "UCB",
+"companyNumber": "0403053608",
+"nationality": "BE",
+"reportingTopicName": "Annual financial report",
+"datePublication": "2021-02-25T07:00:00",
+"dateReceived": "2021-03-02T12:21:43.557",
+"lei": "2138008J191VLSGY5A09",
+"mainDocuments": [
+{
+"fileDataId": "04efee4b-a2db-4bb9-a662-09848d704ec6",
+"language": "nl",
+"title": "",
+"originalFileName": "2020 integrated annual report - NL.pdf",
+"size": 6960,
+"fileType": "pdf"
+},
+{
+"fileDataId": "2c6189ff-5ae0-4a79-b7b3-78824911a5ca",
+"language": "fr",
+"title": "",
+"originalFileName": "2020 integrated annual report - FR.pdf",
+"size": 7363,
+"fileType": "pdf"
+},
+{
+"fileDataId": "4a97934d-72d6-49b9-b72a-05d3de83107e",
+"language": "en",
+"title": "",
+"originalFileName": "2020 IAR - ENG.pdf",
+"size": 6953,
+"fileType": "pdf"
+}
+],
+"isinCodes": [
+{
+"code": "BE0003739530",
+"startDate": "2011-01-01T00:00:00",
+"isinType": "Shares",
+"market": "Euronext Brussels"
+}
+],
+"documentTitle": ""
+},
+{
+"companyName": "UCB",
+"companyNumber": "0403053608",
+"nationality": "BE",
+"reportingTopicName": "Announcement of notification of major shareholding",
+"datePublication": "2026-08-31T20:00:54.407",
+"dateReceived": "2026-08-31T20:01:32.683",
+"lei": "2138008J191VLSGY5A09",
+"mainDocuments": [
+{
+"fileDataId": "3ac6537f-edfd-49d4-afc9-a6c6b1ba3945",
+"language": "nl",
+"title": "NL Transparency PR Wellington 25.08.26.pdf",
+"originalFileName": "NL Transparency PR Wellington 25.08.26.pdf",
+"size": 300,
+"fileType": "pdf"
+},
+{
+"fileDataId": "88acbf2b-63d6-4ecd-baa0-dea60ec586de",
+"language": "fr",
+"title": "FR Transparency PR Wellington 25.08.26.pdf",
+"originalFileName": "FR Transparency PR Wellington 25.08.26.pdf",
+"size": 299,
+"fileType": "pdf"
+},
+{
+"fileDataId": "9bda1034-a254-44fd-b756-72339c86e95e",
+"language": "en",
+"title": "EN Transparency PR Wellington 25.08.26.pdf",
+"originalFileName": "EN Transparency PR Wellington 25.08.26.pdf",
+"size": 299,
+"fileType": "pdf"
+}
+],
+"isinCodes": [
+{
+"code": "BE0003739530",
+"startDate": "2011-01-01T00:00:00",
+"isinType": "Shares",
+"market": "Euronext Brussels"
+}
+],
+"documentTitle": ""
+},
+{
+"companyName": "UCB",
+"companyNumber": "0403053608",
+"nationality": "BE",
+"reportingTopicName": "Minutes of extraordinary general meeting",
+"datePublication": "2026-05-13T18:12:00",
+"dateReceived": "2026-05-13T18:17:17.123",
+"lei": "2138008J191VLSGY5A09",
+"mainDocuments": [
+{
+"fileDataId": "241b4fa1-e7b6-4c63-9e80-80b1537643de",
+"language": "fr",
+"title": "FR NL EGM 2026 Minutes.pdf",
+"originalFileName": "FR NL EGM 2026 Minutes.pdf",
+"size": 321,
+"fileType": "pdf"
+},
+{
+"fileDataId": "8aa88b56-8c9b-4380-aaab-2840444e9145",
+"language": "en",
+"title": "EN EGM 2026 Minutes.pdf",
+"originalFileName": "EN EGM 2026 Minutes.pdf",
+"size": 267,
+"fileType": "pdf"
+}
+],
+"isinCodes": [
+{
+"code": "BE0003739530",
+"startDate": "2011-01-01T00:00:00",
+"isinType": "Shares",
+"market": "Euronext Brussels"
+}
+],
+"documentTitle": ""
+}
+]
+}

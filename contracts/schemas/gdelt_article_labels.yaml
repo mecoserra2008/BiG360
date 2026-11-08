@@ -1,0 +1,29 @@
+table: gdelt_article_labels
+version: 1
+zone: normalized
+owner: events-v2 (app.events_v2.pipeline)
+description: >
+  T2 labelled GDELT GKG 2.1 articles (English + translingual), compact encoding (E3). One row per kept article URL
+  per day. Kept when it has a linked issuer (OrgLinker on V1Organizations + PAGE_TITLE context, confidence >= 0.5) or
+  at least one market theme (GKG theme map or English headline rules). The title is NOT stored here (only on
+  news_stories); story_id links the article to its story. Full detail for the last 180 days, then salient-only.
+storage: {path: normalized/gdelt_article_labels, format: parquet, partition_by: [year_month], write_mode: append, retention: "full 180 d, then salient-only"}
+primary_key: [url_hash, date]
+pit: {knowledge_column: date, rule: "GKG DATE (UTC) date"}
+columns:
+  - {name: year_month, type: string, nullable: false, description: "Partition YYYY-MM of date"}
+  - {name: date, type: date, nullable: false, description: "GKG DATE UTC date"}
+  - {name: minute, type: int16, nullable: false, description: "Minute of day (UTC) of the 15-min GKG slot"}
+  - {name: url_hash, type: int64, nullable: false, description: "blake2b-64 of the normalised DocumentIdentifier"}
+  - {name: domain_id, type: int32, nullable: true, description: "event_labels domain id (SourceCommonName)"}
+  - {name: lang_id, type: int8, nullable: true, description: "event_labels lang id (en for the English feed, srclc for translingual)"}
+  - {name: tone_x100, type: int16, nullable: true, description: "V1.5Tone tone x 100"}
+  - {name: polarity_x10, type: int16, nullable: true, description: "V1.5Tone polarity x 10"}
+  - {name: theme_mask, type: int64, nullable: false, description: "Market-theme bitmask"}
+  - {name: sector_mask, type: int16, nullable: false, description: "Sector bitmask (linked issuers' sectors | GKG theme -> sector)"}
+  - {name: countries, type: list<int16>, nullable: false, description: "Country label ids: top-3 V1Locations countries (FIPS -> ISO2), else linked-issuer countries, GLOBAL rule"}
+  - {name: issuer_ids, type: list<int32>, nullable: false, description: "Linked issuer ids, may be empty"}
+  - {name: issuer_conf, type: list<int8>, nullable: false, description: "Link confidence x 100 per issuer (>= 50)"}
+  - {name: story_id, type: int64, nullable: true, description: "news_stories story id"}
+  - {name: n_events, type: int16, nullable: false, description: "GDELT events coded from / mentioned in this article (that day)"}
+  - {name: salience, type: int16, nullable: false, description: "x100: log1p(story size) + log1p(n_events) + |tone|/5 + 2 if issuer-linked"}

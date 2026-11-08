@@ -1,0 +1,24 @@
+table: short_interest
+version: 2
+zone: normalized
+owner: ingest-us (finra_short_interest)
+description: FINRA bi-monthly short interest (US). Knowledge date = FINRA publication date (~7 business days after settlement).
+storage: {path: normalized/short_interest, format: parquet, partition_by: [year], write_mode: upsert}
+primary_key: [security_id, settlement_date]
+pit: {knowledge_column: knowledge_date, rule: "usable from publication date"}
+columns:
+  - {name: security_id, type: string, nullable: false, description: "FK securities_master; provisional 'finra:<symbol>' until resolvable (see security_id_resolved)"}
+  - {name: settlement_date, type: date, nullable: false, description: "Settlement date"}
+  - {name: year, type: int16, nullable: false, description: "Partition"}
+  - {name: short_interest_shares, type: float64, nullable: false, description: "Shares short"}
+  - {name: avg_daily_volume, type: float64, nullable: true, description: "FINRA average daily volume"}
+  - {name: days_to_cover, type: float64, nullable: true, description: "short_interest / ADV"}
+  - {name: short_pct_float, type: float64, nullable: true, description: "short_interest / float (if float known)"}
+  - {name: knowledge_date, type: date, nullable: false, description: "Publication date"}
+  - {name: source_id, type: string, nullable: false, description: "finra"}
+  - {name: ingested_at, type: datetime, nullable: false, description: "Write time UTC"}
+  - {name: symbol, type: string, nullable: true, description: "FINRA symbolCode as published (added v2)"}
+  - {name: issue_name, type: string, nullable: true, description: "FINRA issueName (added v2)"}
+  - {name: market_class, type: string, nullable: true, description: "FINRA marketClassCode (NYSE, NNM, ARCA, BZX, OTC ...) (added v2)"}
+  - {name: security_id_resolved, type: bool, nullable: true, description: "False when security_id is the provisional key 'finra:<symbol>' because identity resolution could not map the symbol at ingest time (added v2)"}
+  - {name: knowledge_date_estimated, type: bool, nullable: true, description: "True when the publication date is imputed (settlement + 8 business days) instead of observed (CDN Last-Modified) (added v2)"}

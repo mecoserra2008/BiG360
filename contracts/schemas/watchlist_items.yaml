@@ -1,0 +1,12 @@
+table: watchlist_items
+version: 1
+zone: app_state
+owner: api (app.api.routers.watchlists)
+description: Securities in a watchlist.
+storage: {path: app_state.duckdb, format: duckdb_table, partition_by: [], write_mode: upsert}
+primary_key: [watchlist_id, security_id]
+columns:
+  - {name: watchlist_id, type: string, nullable: false, description: "FK watchlists"}
+  - {name: security_id, type: string, nullable: false, description: "FK securities_master"}
+  - {name: note, type: string, nullable: true, description: "User note"}
+  - {name: added_at, type: datetime, nullable: false, description: "UTC"}

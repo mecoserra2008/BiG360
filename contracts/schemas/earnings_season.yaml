@@ -1,0 +1,33 @@
+table: earnings_season
+version: 1
+zone: scores
+owner: earnings (app.earnings.signals)
+description: >
+  Earnings-season tracker per calendar quarter of period_end (season '2026Q3' = periods ending Jul-Sep 2026) x region
+  x sector, with 'ALL' roll-ups. Expected reporters = issuers that reported the same calendar quarter a year earlier or
+  have a calendar row for the season; reported = earnings_events of the season with release_date <= as_of. Surprises
+  are vs our MODEL-BASED expectation (not consensus): share beating (surprise > 0), median surprise z / %, reaction
+  breadth = share of reporters with CAR[-1,+1] > 0. Recomputed every run for the current and previous 7 seasons.
+storage: {path: scores/earnings_season, format: parquet, partition_by: [], write_mode: overwrite, sort_by: [season, region, sector_id]}
+primary_key: [season, region, sector_id]
+pit: {knowledge_column: as_of_date, rule: "aggregates of releases known on as_of_date"}
+columns:
+  - {name: season, type: string, nullable: false, description: "YYYYQn of the period end"}
+  - {name: region, type: string, nullable: false, description: "Region or ALL"}
+  - {name: sector_id, type: string, nullable: false, description: "Sector or ALL"}
+  - {name: n_expected, type: int32, nullable: false, description: "Expected reporters"}
+  - {name: n_reported, type: int32, nullable: false, description: "Reported so far"}
+  - {name: share_reported, type: float64, nullable: true, description: "n_reported / n_expected"}
+  - {name: n_upcoming_7d, type: int32, nullable: false, description: "Expected in the next 7 days (earnings_calendar)"}
+  - {name: n_eps_surprise, type: int32, nullable: false, description: "Reporters with an EPS model surprise"}
+  - {name: pct_beat_eps, type: float64, nullable: true, description: "Share with EPS surprise > 0"}
+  - {name: median_eps_surprise_z, type: float64, nullable: true, description: "Median EPS surprise z"}
+  - {name: n_rev_surprise, type: int32, nullable: false, description: "Reporters with a revenue model surprise"}
+  - {name: pct_beat_rev, type: float64, nullable: true, description: "Share with revenue surprise > 0"}
+  - {name: median_rev_surprise_pct, type: float64, nullable: true, description: "Median revenue surprise %"}
+  - {name: n_reactions, type: int32, nullable: false, description: "Reporters with CAR[-1,+1]"}
+  - {name: median_car_m1_p1, type: float64, nullable: true, description: "Median CAR[-1,+1]"}
+  - {name: reaction_breadth, type: float64, nullable: true, description: "Share with CAR[-1,+1] > 0"}
+  - {name: median_abs_move_ratio, type: float64, nullable: true, description: "Median |CAR[-1,+1]| / realised-vol baseline"}
+  - {name: as_of_date, type: date, nullable: false, description: "Data date"}
+  - {name: computed_at, type: datetime, nullable: false, description: "Write time UTC"}

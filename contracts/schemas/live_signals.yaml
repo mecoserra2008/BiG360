@@ -1,0 +1,23 @@
+table: live_signals
+version: 1
+zone: features
+owner: realtime (app.realtime.compact)
+description: >
+  Derived real-time signals (R1.3): live insider rescoring after a Form 4 (kind insider; rule-based score, labelled)
+  and online change points of GDELT attention (kind changepoint; model-based BOCPD). knowledge_ts = first seen (PIT).
+storage: {path: features/live_signals, format: parquet, partition_by: [date], write_mode: append, retention: "forever"}
+primary_key: [signal_key]
+pit: {knowledge_column: knowledge_ts, rule: "first seen by the real-time path"}
+columns:
+  - {name: signal_key, type: string, nullable: false, description: "insider:<accession> | cp:<series>:<slot>"}
+  - {name: date, type: date, nullable: false, description: "Partition: UTC date of knowledge_ts"}
+  - {name: kind, type: string, nullable: false, description: "insider | changepoint"}
+  - {name: issuer_id, type: string, nullable: true, description: "Issuer (insider)"}
+  - {name: security_id, type: string, nullable: true, description: "Security (insider)"}
+  - {name: series, type: string, nullable: true, description: "Change-point series (theme:<id> | _total | _linked)"}
+  - {name: score, type: float64, nullable: true, description: "insider signal_score (0-100) or change probability"}
+  - {name: source_ts, type: datetime, nullable: true, description: "Source time UTC"}
+  - {name: knowledge_ts, type: datetime, nullable: false, description: "First seen by the real-time path, UTC"}
+  - {name: bus_id, type: int64, nullable: false, description: "Hot-store message id"}
+  - {name: payload, type: json, nullable: true, description: "Full live payload"}
+  - {name: compacted_at, type: datetime, nullable: false, description: "Write time UTC"}

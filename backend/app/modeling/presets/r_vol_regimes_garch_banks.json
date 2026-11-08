@@ -1,0 +1,82 @@
+{
+ "title": "Bank volatility (GARCH)",
+ "description": "GJR-GARCH(1,1) of the daily equal-weight US financials return: persistence and leverage effect.",
+ "question": "risk",
+ "tags": [
+  "risk",
+  "volatility",
+  "banks"
+ ],
+ "method_note": "Glosten-Jagannathan-Runkle asymmetric GARCH with Student-t errors (returns scaled to percent): alpha + beta near 1 = persistent volatility; a positive leverage term = bad news raises volatility more. Caveat: the universe is today's constituents (membership history starts 2026-10), so early years carry survivorship bias; read the premium as an upper bound.",
+ "expected_outputs": [
+  "GARCH parameters",
+  "conditional volatility path",
+  "standardized residual tests"
+ ],
+ "runtime_s": 5.4,
+ "validated": "2026-11-06 on snapshot R20261106T010757G9ZB",
+ "result": {
+  "run_id": "SR20261106T0219573TG5J",
+  "n_obs": 2978,
+  "metrics": {
+   "aic": 8974.049026164099
+  },
+  "coefficients": [
+   {
+    "term": "mu",
+    "estimate": 0.07980288329238736,
+    "statistic": 4.7046591570038,
+    "p_value": 2.5429042602881733e-06
+   },
+   {
+    "term": "omega",
+    "estimate": 0.06120584111813619,
+    "statistic": 4.095036060032046,
+    "p_value": 4.2210268460865264e-05
+   },
+   {
+    "term": "alpha[1]",
+    "estimate": 0.042578679531085274,
+    "statistic": 2.749436935832951,
+    "p_value": 0.005969774920396861
+   },
+   {
+    "term": "gamma[1]",
+    "estimate": 0.2189994402142433,
+    "statistic": 5.627860212423968,
+    "p_value": 1.824588554537845e-08
+   }
+  ]
+ },
+ "study": {
+  "name": "Bank volatility (GARCH)",
+  "method": "garch",
+  "y": "fins_ret",
+  "x": [],
+  "params": {
+   "vol": "gjr",
+   "p": 1,
+   "q": 1,
+   "dist": "t"
+  },
+  "dataset": {
+   "kind": "timeseries",
+   "frequency": "D",
+   "start": "2015-01-01",
+   "variables": [
+    {
+     "name": "fins_ret",
+     "source": "prices",
+     "field": "ret",
+     "entity_agg": "mean",
+     "entities": {
+      "universe": "mvp_us",
+      "sectors": [
+       "FINS"
+      ]
+     }
+    }
+   ]
+  }
+ }
+}

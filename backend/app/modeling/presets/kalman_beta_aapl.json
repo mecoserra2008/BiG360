@@ -1,0 +1,46 @@
+{
+ "title": "Kalman time-varying beta: AAPL vs S&P 500",
+ "description": "Weekly AAPL return on the S&P 500 return (IDX:^GSPC) since 2005 with random-walk alpha and beta estimated by the Kalman smoother; compare the beta path with the static OLS beta.",
+ "tags": [
+  "state space",
+  "Kalman",
+  "beta"
+ ],
+ "study": {
+  "name": "AAPL time-varying beta",
+  "method": "tv_beta",
+  "y": "aapl",
+  "x": [
+   "spx"
+  ],
+  "params": {},
+  "dataset": {
+   "kind": "timeseries",
+   "frequency": "W",
+   "start": "2005-01-01",
+   "variables": [
+    {
+     "name": "aapl",
+     "source": "prices",
+     "field": "ret",
+     "entities": {
+      "tickers": [
+       "AAPL"
+      ]
+     }
+    },
+    {
+     "name": "spx",
+     "source": "prices",
+     "field": "ret",
+     "entities": {
+      "security_ids": [
+       "IDX:^GSPC"
+      ]
+     },
+     "transforms": []
+    }
+   ]
+  }
+ }
+}

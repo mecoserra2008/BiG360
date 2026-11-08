@@ -1,0 +1,27 @@
+table: sc_exposure
+version: 1
+zone: features
+owner: supply-chain (app.supply_chain.network, job supply_chain_network)
+description: >
+  Roadmap #9 company exposure by country and sector, point-in-time (as_of). direct: country revenue shares of the
+  latest annual geographic breakdown known at as_of (company_geo_revenue -> regions / rest-of-world spread over member
+  countries by GDP, linkage allocate_exposure), else 100% home country (source home_country); sector: own sector = 1.
+  second_order: sum over disclosed customers c with a revenue share s_c of s_c x (c's direct exposure) - where the
+  identified customers sell (end demand); sums to the disclosed customer share. look_through = (1 - sum s_c) x direct
+  + second_order (sums to 1): the part of revenue sold to identified customers is replaced by those customers' own
+  geography / sector. Customers without a share are not weighted (counted in n_unweighted of sc_metrics).
+storage: {path: features/sc_exposure, format: parquet, partition_by: [], write_mode: overwrite, retention: "latest snapshot"}
+primary_key: [as_of, issuer_id, dim, key]
+pit: {knowledge_column: as_of, rule: "geographic breakdowns and customer disclosures with knowledge_date <= as_of"}
+columns:
+  - {name: as_of, type: date, nullable: false, description: "Build date"}
+  - {name: issuer_id, type: string, nullable: false, description: "Issuer"}
+  - {name: dim, type: enum, nullable: false, values: [country, sector], description: "Exposure dimension"}
+  - {name: key, type: string, nullable: false, description: "ISO2 country or sector_id"}
+  - {name: direct, type: float64, nullable: true, description: "Direct share (own revenue geography / own sector)"}
+  - {name: second_order, type: float64, nullable: true, description: "Via identified customers: sum_c s_c x customer exposure"}
+  - {name: look_through, type: float64, nullable: true, description: "(1 - sum s_c) x direct + second_order"}
+  - {name: n_paths, type: int16, nullable: false, description: "Customers contributing to second_order"}
+  - {name: via, type: json, nullable: true, description: "Top contributing customers [{key, name, share, weight}]"}
+  - {name: source, type: enum, nullable: false, values: [geo_revenue, home_country, sector_taxonomy], description: "Source of the direct weight"}
+  - {name: computed_at, type: datetime, nullable: false, description: "Write time UTC"}

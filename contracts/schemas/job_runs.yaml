@@ -1,0 +1,33 @@
+table: job_runs
+version: 2
+zone: ops
+owner: platform (app.scheduler)
+description: One row per job execution (scheduled, manual, backfill). Written at start (status=running) and updated at end.
+storage: {path: ops/job_runs, format: parquet, partition_by: [year_month], write_mode: upsert}
+primary_key: [run_id]
+columns:
+  - {name: run_id, type: string, nullable: false, description: "R + UTC timestamp + 4 random chars"}
+  - {name: year_month, type: string, nullable: false, description: "Partition YYYY-MM of started_at"}
+  - {name: job_id, type: string, nullable: false, description: "contracts/jobs.yaml job id"}
+  - {name: dag_run_id, type: string, nullable: true, description: "Nightly/weekly DAG run grouping id"}
+  - {name: trigger, type: enum, nullable: false, values: [schedule, manual, backfill, dependency, api], description: "What started it"}
+  - {name: status, type: enum, nullable: false, values: [running, success, partial, failed, skipped], description: "Outcome (partial = some entities failed)"}
+  - {name: attempt, type: int16, nullable: false, description: "1-based attempt"}
+  - {name: started_at, type: datetime, nullable: false, description: "Start UTC"}
+  - {name: finished_at, type: datetime, nullable: true, description: "End UTC"}
+  - {name: duration_s, type: float64, nullable: true, description: "Seconds"}
+  - {name: params, type: json, nullable: true, description: "Job parameters (since, entities, as_of)"}
+  - {name: as_of_date, type: date, nullable: true, description: "Data date processed (JobContext.as_of); added v2"}
+  - {name: run_key, type: string, nullable: true, description: "Idempotency key job_id|as_of|sha1(params)[:10]; a success with the same key is not re-run unless forced; added v2"}
+  - {name: tables_written, type: list<string>, nullable: true, description: "Tables touched"}
+  - {name: rows_written, type: int64, nullable: true, description: "Total rows written"}
+  - {name: entities_ok, type: int32, nullable: true, description: "Entities processed OK"}
+  - {name: entities_failed, type: int32, nullable: true, description: "Entities failed"}
+  - {name: http_requests, type: int32, nullable: true, description: "HTTP calls made"}
+  - {name: cache_hits, type: int32, nullable: true, description: "HTTP cache hits"}
+  - {name: watermark, type: string, nullable: true, description: "New incremental watermark (ISO date/ts or cursor) committed on success"}
+  - {name: error_type, type: string, nullable: true, description: "Exception class"}
+  - {name: error_message, type: string, nullable: true, description: "Truncated message (secrets redacted)"}
+  - {name: log_path, type: string, nullable: true, description: "Relative to data/logs/"}
+  - {name: host, type: string, nullable: true, description: "Machine name"}
+  - {name: code_version, type: string, nullable: true, description: "app.__version__"}

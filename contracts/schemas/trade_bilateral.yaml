@@ -1,0 +1,24 @@
+table: trade_bilateral
+version: 1
+zone: normalized
+owner: linkage (app.linkage.trade)
+description: >
+  A2 annual bilateral merchandise trade, official sources: IMF IMTS (International Trade in Goods by partner country,
+  the DOTS successor; all reporters x partners, exports FOB / imports CIF, USD) and UN Comtrade (bilateral totals and
+  HS2 chapters vs world for the countries we cover + major partners). partner_iso2 'W0' = world total.
+  knowledge_date is a publication-lag rule (Dec 31 + 6 months), flagged as estimated.
+storage: {path: normalized/trade_bilateral, format: parquet, partition_by: [source], write_mode: upsert, retention: "forever"}
+primary_key: [source, reporter_iso2, partner_iso2, year, flow, cmd]
+pit: {knowledge_column: knowledge_date, rule: "annual bilateral totals of year Y usable from Y+1-06-30"}
+columns:
+  - {name: source, type: enum, nullable: false, values: [imf_imts, comtrade], description: "Publisher"}
+  - {name: reporter_iso2, type: string, nullable: false, description: "Reporting country ISO2"}
+  - {name: partner_iso2, type: string, nullable: false, description: "Partner country ISO2; W0 = world"}
+  - {name: year, type: int16, nullable: false, description: "Reference year"}
+  - {name: flow, type: enum, nullable: false, values: [X, M], description: "X = reporter exports to partner, M = reporter imports from partner"}
+  - {name: cmd, type: string, nullable: false, description: "TOTAL, or HS 2-digit chapter (Comtrade AG2)"}
+  - {name: value_usd, type: float64, nullable: false, unit: USD, description: "Trade value (current USD)"}
+  - {name: valuation, type: string, nullable: true, description: "FOB (exports) / CIF (imports)"}
+  - {name: knowledge_date, type: date, nullable: false, description: "Rule-based availability date (Y+1-06-30)"}
+  - {name: knowledge_date_estimated, type: bool, nullable: false, description: "true: knowledge_date from the lag rule"}
+  - {name: ingested_at, type: datetime, nullable: false, description: "Write time UTC"}

@@ -1,0 +1,30 @@
+table: company_event_exposure
+version: 1
+zone: scores
+owner: event-models (app.events_models.exposure, job event_exposure)
+description: >
+  C5 company event exposure. Country weights per issuer: geographic revenue shares (linkage company_geo_revenue,
+  point-in-time) when available, else 100% home country (w_source home_country); supply-chain partners
+  (linkage company_links) add their countries with weight 0.25 x link strength when available. Event pressure
+  per country = trailing 7-day mean of max(attention_z, 0) (all themes) + the neg-tone pressure max(-tone_z, 0);
+  exposure_score = 0-100 cross-sectional percentile of sum_c w_c x pressure_c. expected_impact = sum_c w_c x
+  mean over the country's attention shocks active in the last 7 days of the expected 5-day CAR from
+  event_study_library (cell fallback theme x country x sector -> theme x country -> theme x sector -> theme; level
+  issuer, else country_index, else sector_etf; cells need >= 3 events; each cell shrunk by n / (n + 10)), in %.
+  Model-based. One snapshot per run (as_of).
+storage: {path: scores/company_event_exposure, format: parquet, partition_by: [], write_mode: upsert, retention: "last 26 snapshots"}
+primary_key: [as_of, security_id]
+columns:
+  - {name: as_of, type: date, nullable: false, description: "Last event day used"}
+  - {name: security_id, type: string, nullable: false, description: "Security (primary security of the issuer)"}
+  - {name: issuer_id, type: string, nullable: false, description: "Issuer"}
+  - {name: country, type: string, nullable: true, description: "Home country"}
+  - {name: sector_id, type: string, nullable: true, description: "Sector"}
+  - {name: exposure_score, type: float64, nullable: true, description: "0-100 percentile of event pressure"}
+  - {name: event_pressure, type: float64, nullable: true, description: "Weighted event pressure (z units)"}
+  - {name: expected_impact, type: float64, nullable: true, description: "Expected 5-day CAR from active shocks (%)"}
+  - {name: n_countries, type: int16, nullable: false, description: "Countries with weight"}
+  - {name: top_countries, type: json, nullable: true, description: "[{iso2, weight, pressure}] top 5 by contribution"}
+  - {name: top_shocks, type: json, nullable: true, description: "[{iso2, theme, attention_z, expected_car, n}] active shocks"}
+  - {name: w_source, type: enum, nullable: false, values: [home_country, geo_revenue, geo_revenue+supply_chain, home_country+supply_chain], description: "Weight source"}
+  - {name: computed_at, type: datetime, nullable: false, description: "Write time UTC"}

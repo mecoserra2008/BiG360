@@ -1,0 +1,21 @@
+table: corporate_actions
+version: 1
+zone: normalized
+owner: ingest-market
+description: Splits, cash dividends, spin-offs, symbol changes. Drives adj_factor in prices_daily and per-share restatement.
+storage: {path: normalized/corporate_actions, format: parquet, partition_by: [region], write_mode: upsert}
+primary_key: [security_id, ex_date, action_type]
+columns:
+  - {name: security_id, type: string, nullable: false, description: "FK securities_master"}
+  - {name: region, type: string, nullable: false, description: "Partition"}
+  - {name: ex_date, type: date, nullable: false, description: "Ex date"}
+  - {name: action_type, type: enum, nullable: false, values: [split, cash_dividend, special_dividend, stock_dividend, spinoff, rights, symbol_change], description: "Action"}
+  - {name: ratio, type: float64, nullable: true, description: "Split ratio new/old (2.0 = 2-for-1)"}
+  - {name: amount, type: float64, nullable: true, description: "Cash amount per share in currency"}
+  - {name: currency, type: string, nullable: true, description: "Currency of amount"}
+  - {name: record_date, type: date, nullable: true, description: "Record date"}
+  - {name: pay_date, type: date, nullable: true, description: "Payment date"}
+  - {name: declared_date, type: date, nullable: true, description: "Declaration date (knowledge date)"}
+  - {name: details, type: json, nullable: true, description: "Extra info (old/new symbol, spun-off security)"}
+  - {name: source_id, type: string, nullable: false, description: "Source adapter"}
+  - {name: ingested_at, type: datetime, nullable: false, description: "Write time UTC"}

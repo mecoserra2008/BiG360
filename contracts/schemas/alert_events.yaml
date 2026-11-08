@@ -1,0 +1,16 @@
+table: alert_events
+version: 1
+zone: app_state
+owner: platform (job alerts_eval)
+description: Fired alerts (in-app notifications).
+storage: {path: app_state.duckdb, format: duckdb_table, partition_by: [], write_mode: append}
+primary_key: [event_id]
+columns:
+  - {name: event_id, type: string, nullable: false, description: "uuid4 hex"}
+  - {name: alert_id, type: string, nullable: false, description: "FK alerts"}
+  - {name: security_id, type: string, nullable: false, description: "Security that triggered"}
+  - {name: fired_at, type: datetime, nullable: false, description: "UTC"}
+  - {name: as_of_date, type: date, nullable: false, description: "Data date that triggered"}
+  - {name: message, type: string, nullable: false, description: "Human-readable message"}
+  - {name: payload, type: json, nullable: true, description: "Values at trigger"}
+  - {name: read, type: bool, nullable: false, description: "Seen by user"}

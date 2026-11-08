@@ -1,0 +1,43 @@
+table: issuers
+version: 2
+zone: reference
+owner: ref-identity   # app.normalize.identity
+description: >
+  One row per legal issuer (company). Current-state snapshot; identifier history lives in identifier_map.
+  Sector/subsector assignment is current-only (documented minor look-ahead; see ARCHITECTURE Decisions).
+storage: {path: reference/issuers, format: parquet, partition_by: [], write_mode: overwrite}
+primary_key: [issuer_id]
+columns:
+  - {name: issuer_id, type: string, nullable: false, description: "Internal issuer id (I + 12 base32)"}
+  - {name: name, type: string, nullable: false, description: "Legal/display name (Latin script)"}
+  - {name: name_local, type: string, nullable: true, description: "Name in local script (JP/KR/CN)"}
+  - {name: short_name, type: string, nullable: true, description: "Normalized short name used for news/GDELT matching"}
+  - {name: aliases, type: list<string>, nullable: true, description: "Alternative names/brands for entity linking"}
+  - {name: country, type: string, nullable: false, description: "Country of domicile ISO2"}
+  - {name: region, type: enum, nullable: false, values: [US, CA, LATAM, UK, EU, JP, KR, CN, HK, APAC, OTHER], description: "Region of primary listing"}
+  - {name: lei, type: string, nullable: true, description: "Legal Entity Identifier (20 chars)"}
+  - {name: cik, type: string, nullable: true, description: "SEC CIK, zero-padded 10 digits"}
+  - {name: edinet_code, type: string, nullable: true, description: "EDINET code (E + 5 digits)"}
+  - {name: dart_corp_code, type: string, nullable: true, description: "OpenDART corp_code (8 digits)"}
+  - {name: cvm_code, type: string, nullable: true, description: "Brazil CVM CD_CVM"}
+  - {name: cn_code, type: string, nullable: true, description: "China exchange code e.g. SSE:600519 / SZSE:000858"}
+  - {name: uk_company_number, type: string, nullable: true, description: "Companies House number"}
+  - {name: sector_id, type: string, nullable: true, description: "contracts/sector_taxonomy.yaml sector id"}
+  - {name: subsector_id, type: string, nullable: true, description: "contracts/sector_taxonomy.yaml subsector id"}
+  - {name: classification_source, type: enum, nullable: true, values: [override, yf_industry, sic, tse33, ksic, csrc, cvm, twse, manual, unknown], description: "Which mapping produced the subsector"}
+  - {name: sic_code, type: string, nullable: true, description: "US SIC (4 digits) if known"}
+  - {name: native_industry_code, type: string, nullable: true, description: "TSE33 / KSIC / CSRC code as given by source"}
+  - {name: yf_sector, type: string, nullable: true, description: "Raw yfinance sector string"}
+  - {name: yf_industry, type: string, nullable: true, description: "Raw yfinance industry string"}
+  - {name: reporting_gaap, type: enum, nullable: true, values: [us_gaap, ifrs, jgaap, jmis, kifrs, cas, brgaap, ukgaap, other], description: "Primary accounting framework of latest filings"}
+  - {name: reporting_currency, type: string, nullable: true, description: "ISO 4217 currency of financial statements"}
+  - {name: fiscal_year_end_mmdd, type: string, nullable: true, description: "Fiscal year end MM-DD (e.g. 09-30)"}
+  - {name: filer_category, type: enum, nullable: true, values: [domestic, foreign_private_20f, foreign_40f, non_sec], description: "SEC filer type (20-F filers with IFRS in companyfacts ifrs-full)"}
+  - {name: website, type: string, nullable: true, description: "Company website"}
+  - {name: description, type: string, nullable: true, description: "Business description (short)"}
+  - {name: employees, type: int64, nullable: true, description: "Latest employee count"}
+  - {name: is_active, type: bool, nullable: false, description: "False when delisted/merged (kept for survivorship-free history)"}
+  - {name: inactive_date, type: date, nullable: true, description: "Date became inactive"}
+  - {name: merged_into_issuer_id, type: string, nullable: true, description: "Surviving issuer if this id was merged as a duplicate"}
+  - {name: updated_at, type: datetime, nullable: false, description: "Last update UTC"}
+  - {name: run_id, type: string, nullable: true, description: "Producing job run"}

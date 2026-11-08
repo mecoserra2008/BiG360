@@ -1,0 +1,30 @@
+table: conformal_coverage
+version: 1
+zone: features
+owner: conformal (app.conformal.coverage)
+description: >
+  Coverage audit of the conformal sets: realised joint and per-horizon (per-coordinate) coverage vs target per region,
+  sector, W4 macro regime (cycle_quadrant / hmm_regime of the origin month), high-VIX flag (FRED VIXCLS > 25 at the
+  origin), earnings / gap flags and year. Rolling audit of the nightly jobs (last ~250 realised origins, full universe)
+  plus the P4 walk-forward rows (*_wf). Fed to the O1 coverage registry (contracts/coverage.yaml
+  analytics.conformal_coverage, check conformal_coverage) so under-coverage shows in Data Health.
+storage: {path: features/conformal_coverage, format: parquet, partition_by: [], write_mode: upsert}
+primary_key: [as_of_date, application, filter, segment_type, segment, horizon, level]
+columns:
+  - {name: as_of_date, type: date, nullable: false, description: "Audit date"}
+  - {name: application, type: enum, nullable: false, values: [envelope, nextbar, peer, envelope_wf, nextbar_wf, peer_wf], description: "envelope / nextbar / peer: nightly rolling audit (full universe); *_wf: P4 walk-forward validation"}
+  - {name: filter, type: string, nullable: false, description: "Filter (+ '+aci' when the ACI radius is audited)"}
+  - {name: segment_type, type: enum, nullable: false, values: [overall, region, sector, regime, vix, earnings, gap, year, group_kind], description: "Breakdown"}
+  - {name: segment, type: string, nullable: false, description: "Segment value (e.g. US, TECH, cycle_quadrant:US=slowdown, high_vix, 2022)"}
+  - {name: horizon, type: string, nullable: false, description: "joint | 1 | 5 | 10 | 20 (envelope: projection of the joint set) | m1 | m5 | m10 | m20 (envelope: marginal single-horizon radius qm) | h | l | c (nextbar) | member (peer per-coordinate)"}
+  - {name: level, type: string, nullable: false, description: "80 | 90 | 95"}
+  - {name: target, type: float64, nullable: false, description: "Target coverage 1 - alpha"}
+  - {name: n, type: int64, nullable: false, description: "Realised sets audited"}
+  - {name: covered, type: int64, nullable: false, description: "Sets that contained the outcome"}
+  - {name: coverage, type: float64, nullable: true, description: "covered / n"}
+  - {name: gap_pp, type: float64, nullable: true, description: "100 x (coverage - target)"}
+  - {name: status, type: enum, nullable: false, values: [ok, under, over, thin], description: "ok = within +-1.5 pp; under / over otherwise; thin = n < 200"}
+  - {name: window_start, type: date, nullable: true, description: "First origin audited"}
+  - {name: window_end, type: date, nullable: true, description: "Last origin audited"}
+  - {name: model_based, type: bool, nullable: false, description: "Always true"}
+  - {name: computed_at, type: datetime, nullable: false, description: "Write time UTC"}

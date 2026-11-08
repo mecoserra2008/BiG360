@@ -1,0 +1,22 @@
+table: conformal_touch_curves
+version: 1
+zone: features
+owner: conformal (app.conformal.envelope_job)
+description: >
+  Empirical calibration of touch probabilities (a PATH event): per pool, horizon and side the distribution of the
+  standardised running maximum of highs (minimum of lows) over the last 500 realised origins. P(touch a level within
+  h sessions) = share of calibration origins whose standardised extreme reached the level's standardised distance
+  (app.conformal.envelope.touch_probability). MODEL-BASED, marginal over history, not a Gaussian probability.
+storage: {path: features/conformal_touch_curves, format: parquet, partition_by: [], write_mode: overwrite}
+primary_key: [as_of_date, pool_key, horizon, side, kind]
+columns:
+  - {name: as_of_date, type: date, nullable: false, description: "Calibration date"}
+  - {name: pool_key, type: string, nullable: false, description: "Calibration pool"}
+  - {name: region, type: string, nullable: false, description: "Region"}
+  - {name: horizon, type: int16, nullable: false, description: "Sessions"}
+  - {name: side, type: enum, nullable: false, values: [up, down], description: "up = highs reach the level, down = lows reach the level"}
+  - {name: kind, type: enum, nullable: false, values: [normal, event], description: "Origins without / with an earnings day in the window"}
+  - {name: n, type: int32, nullable: false, description: "Calibration origins"}
+  - {name: probs, type: list<float64>, nullable: false, description: "CDF levels 0.01..0.99"}
+  - {name: u, type: list<float64>, nullable: false, description: "Quantiles of the standardised running extreme max_{k<=h} log(H_{t+k}/C_t) / sqrt(V(h)) (lows for side=down)"}
+  - {name: computed_at, type: datetime, nullable: false, description: "Write time UTC"}

@@ -1,0 +1,460 @@
+{
+"list": {
+"data": {
+"messages": [
+{
+"id": 668028,
+"messageId": 668028,
+"newsId": 620388,
+"title": "DNB's Annual Report for 2025 is published today",
+"category": [
+{
+"id": 1001,
+"category_no": "ÅRSRAPPORT",
+"category_en": "ANNUAL FINANCIAL REPORT"
+}
+],
+"markets": [
+"XOSL"
+],
+"issuerId": 1772,
+"correctionForMessageId": 0,
+"correctedByMessageId": 0,
+"issuerSign": "DNB",
+"issuerName": "DNB Bank ASA",
+"instrId": 0,
+"instrumentName": "",
+"instrumentFullName": "",
+"publishedTime": "2026-03-11T13:00:28.907Z",
+"test": false,
+"numbAttachments": 3,
+"clientAnnouncementId": "eb354cfe-e290-4eb6-bf4a-311cf7cb71ee",
+"infoRequired": 0,
+"oamMandatory": 0
+},
+{
+"id": 668027,
+"messageId": 668027,
+"newsId": 620387,
+"title": "DNBs årsrapport for 2025 er publisert i dag",
+"category": [
+{
+"id": 1001,
+"category_no": "ÅRSRAPPORT",
+"category_en": "ANNUAL FINANCIAL REPORT"
+}
+],
+"markets": [
+"XOSL"
+],
+"issuerId": 1772,
+"correctionForMessageId": 0,
+"correctedByMessageId": 0,
+"issuerSign": "DNB",
+"issuerName": "DNB Bank ASA",
+"instrId": 0,
+"instrumentName": "",
+"instrumentFullName": "",
+"publishedTime": "2026-03-11T13:00:25.656Z",
+"test": false,
+"numbAttachments": 3,
+"clientAnnouncementId": "c7cac709-5eb9-4965-8670-55494316e421",
+"infoRequired": 0,
+"oamMandatory": 0
+},
+{
+"id": 641656,
+"messageId": 641656,
+"newsId": 593840,
+"title": "DNB's Annual Report for 2024 is published today",
+"category": [
+{
+"id": 1001,
+"category_no": "ÅRSRAPPORT",
+"category_en": "ANNUAL FINANCIAL REPORT"
+}
+],
+"markets": [
+"XOSL"
+],
+"issuerId": 1772,
+"correctionForMessageId": 0,
+"correctedByMessageId": 0,
+"issuerSign": "DNB",
+"issuerName": "DNB Bank ASA",
+"instrId": 0,
+"instrumentName": "",
+"instrumentFullName": "",
+"publishedTime": "2025-03-19T13:00:29.137Z",
+"test": false,
+"numbAttachments": 3,
+"clientAnnouncementId": "0427118b-2bbd-4be4-866e-8bd630b0b9f9",
+"infoRequired": 0,
+"oamMandatory": 0
+},
+{
+"id": 641655,
+"messageId": 641655,
+"newsId": 593839,
+"title": "DNBs årsrapport for 2024 er publisert i dag",
+"category": [
+{
+"id": 1001,
+"category_no": "ÅRSRAPPORT",
+"category_en": "ANNUAL FINANCIAL REPORT"
+}
+],
+"markets": [
+"XOSL"
+],
+"issuerId": 1772,
+"correctionForMessageId": 0,
+"correctedByMessageId": 0,
+"issuerSign": "DNB",
+"issuerName": "DNB Bank ASA",
+"instrId": 0,
+"instrumentName": "",
+"instrumentFullName": "",
+"publishedTime": "2025-03-19T13:00:28.769Z",
+"test": false,
+"numbAttachments": 3,
+"clientAnnouncementId": "934fd87a-3c9c-4593-9a91-17c51d044280",
+"infoRequired": 0,
+"oamMandatory": 0
+},
+{
+"id": 613384,
+"messageId": 613384,
+"newsId": 565361,
+"title": "DNB's Annual Report for 2023 is published today",
+"category": [
+{
+"id": 1001,
+"category_no": "ÅRSRAPPORT",
+"category_en": "ANNUAL FINANCIAL REPORT"
+}
+],
+"markets": [
+"XOSL"
+],
+"issuerId": 1772,
+"correctionForMessageId": 0,
+"correctedByMessageId": 0,
+"issuerSign": "DNB",
+"issuerName": "DNB Bank ASA",
+"instrId": 0,
+"instrumentName": "",
+"instrumentFullName": "",
+"publishedTime": "2024-03-14T07:01:22.704Z",
+"test": false,
+"numbAttachments": 3,
+"clientAnnouncementId": "47bfe7dd-14ee-42e0-a8a3-20102c7f00fc",
+"infoRequired": 0,
+"oamMandatory": 0
+},
+{
+"id": 613383,
+"messageId": 613383,
+"newsId": 565360,
+"title": "DNBs årsrapport for 2023 er publisert i dag",
+"category": [
+{
+"id": 1001,
+"category_no": "ÅRSRAPPORT",
+"category_en": "ANNUAL FINANCIAL REPORT"
+}
+],
+"markets": [
+"XOSL"
+],
+"issuerId": 1772,
+"correctionForMessageId": 0,
+"correctedByMessageId": 0,
+"issuerSign": "DNB",
+"issuerName": "DNB Bank ASA",
+"instrId": 0,
+"instrumentName": "",
+"instrumentFullName": "",
+"publishedTime": "2024-03-14T07:01:19.329Z",
+"test": false,
+"numbAttachments": 3,
+"clientAnnouncementId": "be9960f9-638c-409a-bc97-f7cac3fdea70",
+"infoRequired": 0,
+"oamMandatory": 0
+}
+]
+}
+},
+"messages": {
+"668028": {
+"id": 668028,
+"messageId": 668028,
+"newsId": 620388,
+"title": "DNB's Annual Report for 2025 is published today",
+"body": "The DNB Group's Annual Report, including Sustainability report and Pillar 3\nreport for 2025, are published today on DNB'",
+"category": [
+{
+"id": 1001,
+"category_no": "ÅRSRAPPORT",
+"category_en": "ANNUAL FINANCIAL REPORT"
+}
+],
+"markets": [
+"XOSL"
+],
+"issuerId": 1772,
+"correctionForMessageId": 0,
+"correctedByMessageId": 0,
+"issuerSign": "DNB",
+"issuerName": "DNB Bank ASA",
+"instrId": 0,
+"instrumentName": "",
+"instrumentFullName": "",
+"publishedTime": "2026-03-11T13:00:28.907Z",
+"test": false,
+"numbAttachments": 3,
+"attachments": [
+{
+"id": 320974,
+"name": "annual_report_2025_DNB_group.pdf"
+},
+{
+"id": 320976,
+"name": "dnbbankasa_2025_12_31_1_nb_1_.zip"
+},
+{
+"id": 320977,
+"name": "Risk_and_capital_management_Pillar_3_report_2025.pdf"
+}
+],
+"clientAnnouncementId": "eb354cfe-e290-4eb6-bf4a-311cf7cb71ee",
+"infoRequired": 1,
+"oamMandatory": 1
+},
+"668027": {
+"id": 668027,
+"messageId": 668027,
+"newsId": 620387,
+"title": "DNBs årsrapport for 2025 er publisert i dag",
+"body": "DNB-konsernets årsrapport, inkludert bærekraftsrapport og Pilar 3-rapport for\n2025, er publisert i dag på DNBs nettside ",
+"category": [
+{
+"id": 1001,
+"category_no": "ÅRSRAPPORT",
+"category_en": "ANNUAL FINANCIAL REPORT"
+}
+],
+"markets": [
+"XOSL"
+],
+"issuerId": 1772,
+"correctionForMessageId": 0,
+"correctedByMessageId": 0,
+"issuerSign": "DNB",
+"issuerName": "DNB Bank ASA",
+"instrId": 0,
+"instrumentName": "",
+"instrumentFullName": "",
+"publishedTime": "2026-03-11T13:00:25.656Z",
+"test": false,
+"numbAttachments": 3,
+"attachments": [
+{
+"id": 320972,
+"name": "arsrapport_2025_DNB_konsernet.pdf"
+},
+{
+"id": 320973,
+"name": "dnbbankasa_2025_12_31_1_nb_1_.zip"
+},
+{
+"id": 320975,
+"name": "Risiko_og_kapitalstyring_pilar_3_rapport_2025_pdf.pdf"
+}
+],
+"clientAnnouncementId": "c7cac709-5eb9-4965-8670-55494316e421",
+"infoRequired": 1,
+"oamMandatory": 1
+},
+"641656": {
+"id": 641656,
+"messageId": 641656,
+"newsId": 593840,
+"title": "DNB's Annual Report for 2024 is published today",
+"body": "The DNB Group's Annual Report, including Sustainability report and Pillar 3\nreport for 2024, are published today on DNB'",
+"category": [
+{
+"id": 1001,
+"category_no": "ÅRSRAPPORT",
+"category_en": "ANNUAL FINANCIAL REPORT"
+}
+],
+"markets": [
+"XOSL"
+],
+"issuerId": 1772,
+"correctionForMessageId": 0,
+"correctedByMessageId": 0,
+"issuerSign": "DNB",
+"issuerName": "DNB Bank ASA",
+"instrId": 0,
+"instrumentName": "",
+"instrumentFullName": "",
+"publishedTime": "2025-03-19T13:00:29.137Z",
+"test": false,
+"numbAttachments": 3,
+"attachments": [
+{
+"id": 300236,
+"name": "dnbbankasa_2024_12_31_0_nb.zip"
+},
+{
+"id": 300238,
+"name": "Annual_report_2024_DNB_Group.pdf"
+},
+{
+"id": 300240,
+"name": "Risk_and_capital_management_Pillar_3_report_2024.pdf"
+}
+],
+"clientAnnouncementId": "0427118b-2bbd-4be4-866e-8bd630b0b9f9",
+"infoRequired": 1,
+"oamMandatory": 1
+},
+"641655": {
+"id": 641655,
+"messageId": 641655,
+"newsId": 593839,
+"title": "DNBs årsrapport for 2024 er publisert i dag",
+"body": "DNB-konsernets årsrapport, inkludert bærekraftsrapport og Pilar 3-rapport for\n2024, er publisert i dag på DNBs nettside ",
+"category": [
+{
+"id": 1001,
+"category_no": "ÅRSRAPPORT",
+"category_en": "ANNUAL FINANCIAL REPORT"
+}
+],
+"markets": [
+"XOSL"
+],
+"issuerId": 1772,
+"correctionForMessageId": 0,
+"correctedByMessageId": 0,
+"issuerSign": "DNB",
+"issuerName": "DNB Bank ASA",
+"instrId": 0,
+"instrumentName": "",
+"instrumentFullName": "",
+"publishedTime": "2025-03-19T13:00:28.769Z",
+"test": false,
+"numbAttachments": 3,
+"attachments": [
+{
+"id": 300235,
+"name": "dnbbankasa_2024_12_31_0_nb.zip"
+},
+{
+"id": 300237,
+"name": "Arsrapport_2024_DNB_konsernet.pdf"
+},
+{
+"id": 300239,
+"name": "Risiko_og_kapitalstyring_pilar_3_rapport_2024.pdf"
+}
+],
+"clientAnnouncementId": "934fd87a-3c9c-4593-9a91-17c51d044280",
+"infoRequired": 1,
+"oamMandatory": 1
+},
+"613384": {
+"id": 613384,
+"messageId": 613384,
+"newsId": 565361,
+"title": "DNB's Annual Report for 2023 is published today",
+"body": "The DNB Group's Annual Report, including Sustainability report and Pillar 3\nreport for 2023, are published today on DNB'",
+"category": [
+{
+"id": 1001,
+"category_no": "ÅRSRAPPORT",
+"category_en": "ANNUAL FINANCIAL REPORT"
+}
+],
+"markets": [
+"XOSL"
+],
+"issuerId": 1772,
+"correctionForMessageId": 0,
+"correctedByMessageId": 0,
+"issuerSign": "DNB",
+"issuerName": "DNB Bank ASA",
+"instrId": 0,
+"instrumentName": "",
+"instrumentFullName": "",
+"publishedTime": "2024-03-14T07:01:22.704Z",
+"test": false,
+"numbAttachments": 3,
+"attachments": [
+{
+"id": 278267,
+"name": "Annual_report_2023_DNB_Group.pdf"
+},
+{
+"id": 278268,
+"name": "dnbbankasa_2023_12_31_nb.zip"
+},
+{
+"id": 278269,
+"name": "Risk_and_capital_management_Pillar_3_report_2023.pdf"
+}
+],
+"clientAnnouncementId": "47bfe7dd-14ee-42e0-a8a3-20102c7f00fc",
+"infoRequired": 1,
+"oamMandatory": 1
+},
+"613383": {
+"id": 613383,
+"messageId": 613383,
+"newsId": 565360,
+"title": "DNBs årsrapport for 2023 er publisert i dag",
+"body": "DNB-konsernets årsrapport, inkludert bærekraftsrapport og Pilar 3-rapport for\n2023, er publisert i dag på DNBs nettside ",
+"category": [
+{
+"id": 1001,
+"category_no": "ÅRSRAPPORT",
+"category_en": "ANNUAL FINANCIAL REPORT"
+}
+],
+"markets": [
+"XOSL"
+],
+"issuerId": 1772,
+"correctionForMessageId": 0,
+"correctedByMessageId": 0,
+"issuerSign": "DNB",
+"issuerName": "DNB Bank ASA",
+"instrId": 0,
+"instrumentName": "",
+"instrumentFullName": "",
+"publishedTime": "2024-03-14T07:01:19.329Z",
+"test": false,
+"numbAttachments": 3,
+"attachments": [
+{
+"id": 278264,
+"name": "Arsrapport_2023_DNB_konsernet.pdf"
+},
+{
+"id": 278265,
+"name": "dnbbankasa_2023_12_31_nb.zip"
+},
+{
+"id": 278266,
+"name": "Risiko_og_kapitalstyring_pilar_3_rapport_2023.pdf"
+}
+],
+"clientAnnouncementId": "be9960f9-638c-409a-bc97-f7cac3fdea70",
+"infoRequired": 1,
+"oamMandatory": 1
+}
+}
+}

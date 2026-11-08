@@ -1,0 +1,36 @@
+table: prices_daily
+version: 2
+zone: normalized
+owner: ingest-market
+description: >
+  Daily OHLCV for each security's PRIMARY listing, in trading_currency (GBp converted to GBP).
+  US: Polygon grouped-daily (unadjusted) is primary for recent ~2y, yfinance for long history; other regions yfinance.
+  adj_close = close adjusted for splits and cash dividends (total-return style) as of the last rebuild.
+  v2 (price-history): OHLC/vwap stored as float32 (read back rounded to 7 significant digits), adj_close / close_usd /
+  dollar_volume_usd derived on read (app.core.storage), rows sorted by (security_id, date), zstd level 9. Region FX holds
+  Yahoo FX pairs (market instruments; conversions always use fx_rates).
+storage: {path: normalized/prices_daily, format: parquet, partition_by: [region, year], write_mode: upsert, sort_by: [security_id, date], compression_level: 9}
+primary_key: [security_id, date]
+columns:
+  - {name: security_id, type: string, nullable: false, description: "FK securities_master"}
+  - {name: listing_id, type: string, nullable: false, description: "Primary listing used"}
+  - {name: date, type: date, nullable: false, description: "Trading date (exchange-local)"}
+  - {name: region, type: string, nullable: false, description: "Partition: region of listing"}
+  - {name: year, type: int16, nullable: false, description: "Partition: year(date)"}
+  - {name: open, type: float64, storage: float32, nullable: true, description: "Unadjusted open (stored float32, read back as float64 rounded to 7 significant digits, v2)"}
+  - {name: high, type: float64, storage: float32, nullable: true, description: "Unadjusted high (stored float32, read back as float64 rounded to 7 significant digits, v2)"}
+  - {name: low, type: float64, storage: float32, nullable: true, description: "Unadjusted low (stored float32, read back as float64 rounded to 7 significant digits, v2)"}
+  - {name: close, type: float64, storage: float32, nullable: false, description: "Unadjusted close (stored float32, read back as float64 rounded to 7 significant digits, v2)"}
+  - {name: volume, type: float64, nullable: true, description: "Shares traded (split-unadjusted)"}
+  - {name: vwap, type: float64, storage: float32, nullable: true, description: "Daily VWAP if source provides (Polygon vw; stored float32, v2)"}
+  - {name: trades, type: int64, nullable: true, description: "Number of trades (Polygon n)"}
+  - {name: adj_factor, type: float64, nullable: false, description: "Cumulative split+dividend factor: adj_price = price * adj_factor"}
+  - {name: split_factor, type: float64, nullable: false, description: "Cumulative split-only factor (for share counts, volume)"}
+  - {name: adj_close, type: float64, nullable: false, derived: [close, adj_factor], description: "close * adj_factor (derived on read, not stored, v2)"}
+  - {name: currency, type: string, nullable: false, description: "Trading currency ISO 4217"}
+  - {name: close_usd, type: float64, nullable: true, derived: [close, usd_per_unit], description: "close converted at fx_rates(date) = close * usd_per_unit (derived on read, not stored, v2)"}
+  - {name: dollar_volume_usd, type: float64, nullable: true, derived: [close, usd_per_unit, volume], description: "close_usd * volume (derived on read, not stored, v2)"}
+  - {name: source_id, type: enum, nullable: false, values: [polygon, yfinance, stooq, other], description: "Winning source for this bar"}
+  - {name: dq_flags, type: list<string>, nullable: true, description: "e.g. [ohlc_inconsistent, zero_volume, gap_filled, source_disagreement, unit_rescaled]. unit_rescaled (O2.2a): a 10^k unit flip repaired by app.normalize.price_integrity. prices_finalize also drops Yahoo bars ingested before their session closed and splits ticker-reuse histories per source (overrides: reference/seeds/price_identity_breaks.csv)"}
+  - {name: ingested_at, type: datetime, nullable: false, description: "Write time UTC"}
+  - {name: usd_per_unit, type: float64, nullable: true, description: "USD per unit of currency from the OFFICIAL fx_rates table (as-of, <= 5 days stale) used for close_usd; 1.0 for USD (v2)"}

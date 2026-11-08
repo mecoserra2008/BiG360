@@ -1,0 +1,272 @@
+{
+"documentInfo": {
+"documentType": "https://xbrl.org/2021/xbrl-json",
+"namespaces": {
+"ifrs-full": "https://xbrl.ifrs.org/taxonomy/2024-03-27/ifrs-full",
+"iso4217": "http://www.xbrl.org/2003/iso4217",
+"scheme": "http://standards.iso.org/iso/17442",
+"xbrl": "https://xbrl.org/2021",
+"xbrli": "http://www.xbrl.org/2003/instance"
+}
+},
+"facts": {
+"f-1": {
+"value": "34257000000.0",
+"decimals": -6,
+"dimensions": {
+"concept": "ifrs-full:Revenue",
+"entity": "scheme:724500K5PTPSST86UQ23",
+"period": "2025-01-01T00:00:00/2026-01-01T00:00:00",
+"unit": "iso4217:EUR"
+}
+},
+"f-2": {
+"value": "35955000000.0",
+"decimals": -6,
+"dimensions": {
+"concept": "ifrs-full:Revenue",
+"entity": "scheme:724500K5PTPSST86UQ23",
+"period": "2024-01-01T00:00:00/2025-01-01T00:00:00",
+"unit": "iso4217:EUR"
+}
+},
+"f-33": {
+"value": "2138000000.0",
+"decimals": -6,
+"dimensions": {
+"concept": "ifrs-full:ProfitLoss",
+"entity": "scheme:724500K5PTPSST86UQ23",
+"period": "2025-01-01T00:00:00/2026-01-01T00:00:00",
+"unit": "iso4217:EUR"
+}
+},
+"f-34": {
+"value": "1161000000.0",
+"decimals": -6,
+"dimensions": {
+"concept": "ifrs-full:ProfitLoss",
+"entity": "scheme:724500K5PTPSST86UQ23",
+"period": "2024-01-01T00:00:00/2025-01-01T00:00:00",
+"unit": "iso4217:EUR"
+}
+},
+"f-35": {
+"value": "1885000000.0",
+"decimals": -6,
+"dimensions": {
+"concept": "ifrs-full:ProfitLossAttributableToOwnersOfParent",
+"entity": "scheme:724500K5PTPSST86UQ23",
+"period": "2025-01-01T00:00:00/2026-01-01T00:00:00",
+"unit": "iso4217:EUR"
+}
+},
+"f-36": {
+"value": "978000000.0",
+"decimals": -6,
+"dimensions": {
+"concept": "ifrs-full:ProfitLossAttributableToOwnersOfParent",
+"entity": "scheme:724500K5PTPSST86UQ23",
+"period": "2024-01-01T00:00:00/2025-01-01T00:00:00",
+"unit": "iso4217:EUR"
+}
+},
+"f-39": {
+"value": "2138000000.0",
+"decimals": -6,
+"dimensions": {
+"concept": "ifrs-full:ProfitLoss",
+"entity": "scheme:724500K5PTPSST86UQ23",
+"period": "2025-01-01T00:00:00/2026-01-01T00:00:00",
+"unit": "iso4217:EUR"
+}
+},
+"f-40": {
+"value": "1161000000.0",
+"decimals": -6,
+"dimensions": {
+"concept": "ifrs-full:ProfitLoss",
+"entity": "scheme:724500K5PTPSST86UQ23",
+"period": "2024-01-01T00:00:00/2025-01-01T00:00:00",
+"unit": "iso4217:EUR"
+}
+},
+"f-49": {
+"value": "2138000000.0",
+"decimals": -6,
+"dimensions": {
+"concept": "ifrs-full:ProfitLoss",
+"entity": "scheme:724500K5PTPSST86UQ23",
+"period": "2025-01-01T00:00:00/2026-01-01T00:00:00",
+"unit": "iso4217:EUR"
+}
+},
+"f-50": {
+"value": "1161000000.0",
+"decimals": -6,
+"dimensions": {
+"concept": "ifrs-full:ProfitLoss",
+"entity": "scheme:724500K5PTPSST86UQ23",
+"period": "2024-01-01T00:00:00/2025-01-01T00:00:00",
+"unit": "iso4217:EUR"
+}
+},
+"f-141": {
+"value": "53753000000.0",
+"decimals": -6,
+"dimensions": {
+"concept": "ifrs-full:Assets",
+"entity": "scheme:724500K5PTPSST86UQ23",
+"period": "2026-01-01T00:00:00",
+"unit": "iso4217:EUR"
+}
+},
+"f-142": {
+"value": "53773000000.0",
+"decimals": -6,
+"dimensions": {
+"concept": "ifrs-full:Assets",
+"entity": "scheme:724500K5PTPSST86UQ23",
+"period": "2025-01-01T00:00:00",
+"unit": "iso4217:EUR"
+}
+},
+"f-145": {
+"value": "2138000000.0",
+"decimals": -6,
+"dimensions": {
+"concept": "ifrs-full:ProfitLoss",
+"entity": "scheme:724500K5PTPSST86UQ23",
+"period": "2025-01-01T00:00:00/2026-01-01T00:00:00",
+"unit": "iso4217:EUR"
+}
+},
+"f-146": {
+"value": "1161000000.0",
+"decimals": -6,
+"dimensions": {
+"concept": "ifrs-full:ProfitLoss",
+"entity": "scheme:724500K5PTPSST86UQ23",
+"period": "2024-01-01T00:00:00/2025-01-01T00:00:00",
+"unit": "iso4217:EUR"
+}
+},
+"f-245": {
+"value": "-8000000.0",
+"decimals": -6,
+"dimensions": {
+"concept": "ifrs-full:ProfitLoss",
+"entity": "scheme:724500K5PTPSST86UQ23",
+"period": "2024-01-01T00:00:00/2025-01-01T00:00:00",
+"ifrs-full:ComponentsOfEquityAxis": "ifrs-full:StatutoryReserveMember",
+"unit": "iso4217:EUR"
+}
+},
+"f-246": {
+"value": "986000000.0",
+"decimals": -6,
+"dimensions": {
+"concept": "ifrs-full:ProfitLoss",
+"entity": "scheme:724500K5PTPSST86UQ23",
+"period": "2024-01-01T00:00:00/2025-01-01T00:00:00",
+"ifrs-full:ComponentsOfEquityAxis": "ifrs-full:RetainedEarningsMember",
+"unit": "iso4217:EUR"
+}
+},
+"f-247": {
+"value": "978000000.0",
+"decimals": -6,
+"dimensions": {
+"concept": "ifrs-full:ProfitLoss",
+"entity": "scheme:724500K5PTPSST86UQ23",
+"period": "2024-01-01T00:00:00/2025-01-01T00:00:00",
+"ifrs-full:ComponentsOfEquityAxis": "ifrs-full:EquityAttributableToOwnersOfParentMember",
+"unit": "iso4217:EUR"
+}
+},
+"f-248": {
+"value": "183000000.0",
+"decimals": -6,
+"dimensions": {
+"concept": "ifrs-full:ProfitLoss",
+"entity": "scheme:724500K5PTPSST86UQ23",
+"period": "2024-01-01T00:00:00/2025-01-01T00:00:00",
+"ifrs-full:ComponentsOfEquityAxis": "ifrs-full:NoncontrollingInterestsMember",
+"unit": "iso4217:EUR"
+}
+},
+"f-249": {
+"value": "1161000000.0",
+"decimals": -6,
+"dimensions": {
+"concept": "ifrs-full:ProfitLoss",
+"entity": "scheme:724500K5PTPSST86UQ23",
+"period": "2024-01-01T00:00:00/2025-01-01T00:00:00",
+"unit": "iso4217:EUR"
+}
+},
+"f-336": {
+"value": "132000000.0",
+"decimals": -6,
+"dimensions": {
+"concept": "ifrs-full:ProfitLoss",
+"entity": "scheme:724500K5PTPSST86UQ23",
+"period": "2025-01-01T00:00:00/2026-01-01T00:00:00",
+"ifrs-full:ComponentsOfEquityAxis": "ifrs-full:StatutoryReserveMember",
+"unit": "iso4217:EUR"
+}
+},
+"f-337": {
+"value": "1753000000.0",
+"decimals": -6,
+"dimensions": {
+"concept": "ifrs-full:ProfitLoss",
+"entity": "scheme:724500K5PTPSST86UQ23",
+"period": "2025-01-01T00:00:00/2026-01-01T00:00:00",
+"ifrs-full:ComponentsOfEquityAxis": "ifrs-full:RetainedEarningsMember",
+"unit": "iso4217:EUR"
+}
+},
+"f-338": {
+"value": "1885000000.0",
+"decimals": -6,
+"dimensions": {
+"concept": "ifrs-full:ProfitLoss",
+"entity": "scheme:724500K5PTPSST86UQ23",
+"period": "2025-01-01T00:00:00/2026-01-01T00:00:00",
+"ifrs-full:ComponentsOfEquityAxis": "ifrs-full:EquityAttributableToOwnersOfParentMember",
+"unit": "iso4217:EUR"
+}
+},
+"f-339": {
+"value": "253000000.0",
+"decimals": -6,
+"dimensions": {
+"concept": "ifrs-full:ProfitLoss",
+"entity": "scheme:724500K5PTPSST86UQ23",
+"period": "2025-01-01T00:00:00/2026-01-01T00:00:00",
+"ifrs-full:ComponentsOfEquityAxis": "ifrs-full:NoncontrollingInterestsMember",
+"unit": "iso4217:EUR"
+}
+},
+"f-340": {
+"value": "2138000000.0",
+"decimals": -6,
+"dimensions": {
+"concept": "ifrs-full:ProfitLoss",
+"entity": "scheme:724500K5PTPSST86UQ23",
+"period": "2025-01-01T00:00:00/2026-01-01T00:00:00",
+"unit": "iso4217:EUR"
+}
+},
+"f-518": {
+"value": "1885000000.0",
+"decimals": -6,
+"dimensions": {
+"concept": "ifrs-full:ProfitLossAttributableToOwnersOfParent",
+"entity": "scheme:724500K5PTPSST86UQ23",
+"period": "2025-01-01T00:00:00/2026-01-01T00:00:00",
+"unit": "iso4217:EUR"
+}
+}
+}
+}

@@ -1,0 +1,59 @@
+table: tech_breakouts
+version: 1
+zone: features
+owner: technicals (app.techv3.job:run_breakouts, nightly tech_breakouts)
+description: >
+  Technicals v3 #5 breakout events, point-in-time (known at the close of the event date): a fresh close beyond the
+  prior N-session high (up) / low (down), N = 20 / 55, deduplicated over 10 sessions. Features at the close (relative
+  volume vs 20 / 50 sessions, close location in the range, Chaikin money flow, OBV slope / confirmation, Amihud
+  illiquidity change, opening gap, day return / range, trend, prior run-up; dir-signed), the pre-registered
+  confirmation flag (relvol50 >= 1.5 and close location >= 0.5), the fixed 0..100 confirmation score, the calibrated
+  P(follow-through) (model-based; app.techv3.bo_model) and the first-passage outcome labels for H = 10 / 20 sessions:
+  success = the high (low) reaches close x exp(dir x sigma sqrt(H)) before a close back inside the level, fail = a
+  close back inside first, neither = neither by H, open = window not complete yet (labels are OUTCOMES, filled later).
+  Liquid equities (20-day ADV >= $1M, close >= $1) of every price region; history 2004 -> (research build seed).
+storage: {path: features/tech_breakouts, format: parquet, partition_by: [region, year], write_mode: upsert, sort_by: [security_id, date]}
+primary_key: [date, security_id, lookback, direction]
+pit: {knowledge_column: date, rule: "features use bars <= date; out_* / tau_* / ret_* are forward outcome labels (bars after date)"}
+columns:
+  - {name: date, type: date, nullable: false, description: "Breakout session"}
+  - {name: security_id, type: string, nullable: false, description: "FK securities_master"}
+  - {name: region, type: string, nullable: false, description: "Partition: prices_daily region"}
+  - {name: year, type: int16, nullable: false, description: "Partition"}
+  - {name: sector_id, type: string, nullable: true, description: "Sector"}
+  - {name: lookback, type: int16, nullable: false, description: "N (20 / 55 sessions)"}
+  - {name: direction, type: int8, nullable: false, description: "+1 up (above the prior high) / -1 down"}
+  - {name: level, type: float32, nullable: false, description: "Breakout level: prior N-session high (up) / low (down), adjusted price"}
+  - {name: close, type: float32, nullable: false, description: "Breakout close (adjusted)"}
+  - {name: sigma_d, type: float32, nullable: false, description: "EWMA (0.94) daily log-return vol at t - 1"}
+  - {name: b_10, type: float32, nullable: true, description: "dir log(close / level) / (sigma sqrt 10)"}
+  - {name: b_20, type: float32, nullable: true, description: "dir log(close / level) / (sigma sqrt 20)"}
+  - {name: relvol20, type: float32, nullable: true, description: "Volume / mean volume of the previous 20 sessions"}
+  - {name: relvol50, type: float32, nullable: true, description: "Volume / mean volume of the previous 50 sessions"}
+  - {name: clv, type: float32, nullable: true, description: "dir x close location (2C - H - L) / (H - L), -1..1"}
+  - {name: cmf20, type: float32, nullable: true, description: "dir x Chaikin money flow (20 sessions)"}
+  - {name: obv_slope20, type: float32, nullable: true, description: "dir x (OBV[t] - OBV[t-20]) / volume(20)"}
+  - {name: obv_confirm, type: int8, nullable: true, description: "1 when OBV is at its own N-session extreme in the breakout direction"}
+  - {name: d_illiq, type: float32, nullable: true, description: "log(Amihud 20 sessions / previous 60)"}
+  - {name: gap_z, type: float32, nullable: true, description: "dir x log(open / previous close) / sigma"}
+  - {name: gap_beyond, type: int8, nullable: true, description: "1 when the open was already beyond the level"}
+  - {name: ret_z, type: float32, nullable: true, description: "dir x breakout-day log return / sigma"}
+  - {name: range_z, type: float32, nullable: true, description: "log(high / low) / sigma"}
+  - {name: trend200, type: float32, nullable: true, description: "dir x log(close / SMA200)"}
+  - {name: prior20_z, type: float32, nullable: true, description: "dir x 20-session return before the breakout / (sigma sqrt 20)"}
+  - {name: vol_ratio, type: float32, nullable: true, description: "sigma / trailing 252-session median sigma"}
+  - {name: confirmed, type: bool, nullable: false, description: "Pre-registered volume confirmation: relvol50 >= 1.5 and clv >= 0.5"}
+  - {name: confirm_score, type: float32, nullable: true, description: "Fixed 0..100 confirmation score (relvol50 log scale, clv, cmf20, OBV slope)"}
+  - {name: p_follow_10, type: float32, nullable: true, description: "Calibrated P(follow-through within 10 sessions) at the event (model-based)"}
+  - {name: p_follow_20, type: float32, nullable: true, description: "Calibrated P(follow-through within 20 sessions) at the event (model-based)"}
+  - {name: p_geo_20, type: float32, nullable: true, description: "Geometry-only baseline P (distance beyond the level, vol regime, N, direction, region), H = 20"}
+  - {name: target_10, type: float32, nullable: true, description: "Follow-through target, H = 10"}
+  - {name: target_20, type: float32, nullable: true, description: "Follow-through target, H = 20"}
+  - {name: out_10, type: enum, nullable: true, values: [success, fail, neither, open], description: "Outcome label H = 10"}
+  - {name: out_20, type: enum, nullable: true, values: [success, fail, neither, open], description: "Outcome label H = 20"}
+  - {name: tau_10, type: int16, nullable: true, description: "Sessions to the resolving bar (0 = unresolved)"}
+  - {name: tau_20, type: int16, nullable: true, description: "Sessions to the resolving bar (0 = unresolved)"}
+  - {name: ret_20, type: float32, nullable: true, description: "dir x log return close(t) -> close(t + 20) (label)"}
+  - {name: adv20_usd, type: float32, nullable: true, description: "20-session ADV USD"}
+  - {name: model_fit, type: string, nullable: true, description: "Fit date of the P(follow-through) model"}
+  - {name: computed_at, type: datetime, nullable: false, description: "Write time UTC"}

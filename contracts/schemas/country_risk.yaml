@@ -1,0 +1,36 @@
+table: country_risk
+version: 1
+zone: scores
+owner: supply-chain (app.supply_chain.network, job supply_chain_network)
+description: >
+  Roadmap #9 MODEL-BASED country risk overlay used for exposure-weighted company risk, one row per country and as_of.
+  Components (latest values known at as_of): event_pressure = trailing 7-day mean of max(attention_z, 0) + max(-tone_z,
+  0) (events_v2 T1, all themes; same as event_exposure); p_escalation_30d (event_escalation, theme group all); hotspot
+  class of the latest week (event_hotspots, all themes, intensity); gpr (our model-based geopolitical-risk index);
+  recession_prob (macro_recession: official NY Fed for US, else our yield-curve probit, else HMM P(contraction); EA
+  value used for euro-area members without their own); surprise_index (macro_surprise_index theme all; negative =
+  data missing model expectations); cycle quadrant (macro_cycle). risk_score = 0-100 weighted mean of cross-country
+  percentile ranks (events 0.30, escalation 0.20, recession 0.30, negative surprise 0.10, gpr 0.10) over available
+  components (weights re-normalised), then shrunk toward 50 by the share of the total weight covered:
+  risk_score = 50 + (raw - 50) x covered_weight (n_components shown).
+storage: {path: scores/country_risk, format: parquet, partition_by: [], write_mode: upsert, retention: "daily snapshots, last 400 days"}
+primary_key: [as_of, iso2]
+pit: {knowledge_column: as_of, rule: "component values dated <= as_of"}
+columns:
+  - {name: as_of, type: date, nullable: false, description: "Build date"}
+  - {name: iso2, type: string, nullable: false, description: "Country ISO2"}
+  - {name: event_pressure, type: float64, nullable: true, description: "Event pressure (z units, model-based)"}
+  - {name: event_date, type: date, nullable: true, description: "Last event day used"}
+  - {name: p_escalation_30d, type: float64, nullable: true, description: "P(30-day event count above its 90th percentile), Hawkes model"}
+  - {name: hotspot, type: string, nullable: true, description: "Gi* hotspot bin of the latest week (hot99 ... ns)"}
+  - {name: emerging_class, type: string, nullable: true, description: "Emerging hotspot class"}
+  - {name: gpr, type: float64, nullable: true, description: "Model-based geopolitical-risk index (latest)"}
+  - {name: recession_prob, type: float64, nullable: true, description: "Recession probability 0-1"}
+  - {name: recession_method, type: string, nullable: true, description: "Method label of recession_prob (official vs model-based)"}
+  - {name: recession_official, type: bool, nullable: true, description: "Recession probability published by an official institution"}
+  - {name: surprise_index, type: float64, nullable: true, description: "Macro surprise index (theme all; z x 100)"}
+  - {name: cycle_quadrant, type: string, nullable: true, description: "Macro cycle quadrant"}
+  - {name: risk_score, type: float64, nullable: true, description: "0-100 model-based composite (higher = riskier)"}
+  - {name: n_components, type: int8, nullable: false, description: "Components available for risk_score"}
+  - {name: components, type: json, nullable: true, description: "{component: percentile} used in risk_score"}
+  - {name: computed_at, type: datetime, nullable: false, description: "Write time UTC"}

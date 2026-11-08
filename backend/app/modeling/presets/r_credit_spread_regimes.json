@@ -1,0 +1,96 @@
+{
+ "title": "Credit-spread regimes (Markov switching)",
+ "description": "Two-regime switching regression of the US equity return on the change in the Baa-Treasury spread.",
+ "question": "macro",
+ "tags": [
+  "macro",
+  "credit",
+  "regimes"
+ ],
+ "method_note": "Hamilton (1989) Markov switching with regime-specific intercept, credit beta and variance: a calm regime with a small credit beta and a stress regime (2001, 2008, 2020) with a large negative one (returns in percent). The smoothed regime probabilities date the stress episodes. Baa-10Y is Moody's via FRED (long history; ICE BofA OAS start 2023 in our lake). Caveat: the universe is today's constituents (membership history starts 2026-10), so early years carry survivorship bias; read the premium as an upper bound.",
+ "expected_outputs": [
+  "regime-specific coefficients and variances",
+  "smoothed regime probabilities",
+  "expected durations"
+ ],
+ "runtime_s": 14.7,
+ "validated": "2026-11-06 on snapshot R20261106T010757G9ZB",
+ "result": {
+  "run_id": "SR20261106T014754SYQP9",
+  "n_obs": 382,
+  "metrics": {
+   "aic": 2153.1757410831083
+  },
+  "coefficients": [
+   {
+    "term": "p[0->0]",
+    "estimate": 0.9563203022789648,
+    "statistic": 23.726832326333152,
+    "p_value": 1.9061757069893886e-124
+   },
+   {
+    "term": "p[1->0]",
+    "estimate": 0.18411481157444226,
+    "statistic": 1.700111653911688,
+    "p_value": 0.0891099256154462
+   },
+   {
+    "term": "const[0]",
+    "estimate": 1.6915591531386138,
+    "statistic": 8.146356693556735,
+    "p_value": 3.7505275346291715e-16
+   },
+   {
+    "term": "const[1]",
+    "estimate": 1.887899031724942,
+    "statistic": 2.128724949723613,
+    "p_value": 0.033277023366481986
+   }
+  ]
+ },
+ "study": {
+  "name": "Credit-spread regimes (Markov switching)",
+  "method": "markov_switching",
+  "y": "mkt_ret",
+  "x": [
+   "d_baa"
+  ],
+  "params": {
+   "k_regimes": 2,
+   "switching_variance": true
+  },
+  "dataset": {
+   "kind": "timeseries",
+   "frequency": "M",
+   "start": "1995-01-01",
+   "variables": [
+    {
+     "name": "mkt_ret",
+     "source": "prices",
+     "field": "ret",
+     "transforms": [
+      {
+       "op": "scale",
+       "factor": 100.0
+      }
+     ],
+     "entity_agg": "mean",
+     "entities": {
+      "universe": "mvp_us"
+     }
+    },
+    {
+     "name": "d_baa",
+     "source": "macro",
+     "field": "fred:BAA10Y",
+     "transforms": [
+      {
+       "op": "diff"
+      }
+     ],
+     "agg": "last"
+    }
+   ]
+  }
+ }
+}

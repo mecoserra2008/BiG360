@@ -1,0 +1,39 @@
+table: cost_of_capital
+version: 1
+zone: scores
+owner: analytics-valuation (app.analytics.cost_of_capital; written by the moat and forecast jobs)
+description: >
+  Point-in-time cost of capital per issuer (spec: scoring.yaml cost_of_capital): risk-free of the reporting currency,
+  ERP + country risk premium, Blume-adjusted beta vs the local benchmark, synthetic-rating floored cost of debt,
+  normalized tax rate, market-value weights, WACC (financials: cost of equity) and the DCF terminal growth cap.
+storage: {path: scores/cost_of_capital, format: parquet, partition_by: [], write_mode: upsert}
+primary_key: [as_of_date, issuer_id]
+pit: {knowledge_column: as_of_date, rule: "inputs knowledge_date <= as_of_date (fundamentals, macro), prices <= as_of_date"}
+columns:
+  - {name: as_of_date, type: date, nullable: false, description: "Evaluation date"}
+  - {name: issuer_id, type: string, nullable: false, description: "FK issuers"}
+  - {name: security_id, type: string, nullable: true, description: "Primary security used for price / beta"}
+  - {name: currency, type: string, nullable: false, description: "Reporting currency the rates apply to"}
+  - {name: rf, type: float64, nullable: false, description: "Risk-free used (fraction; EM local yields net of default spread)"}
+  - {name: rf_source, type: string, nullable: false, description: "macro series_id or 'fallback:<assumption date>'"}
+  - {name: erp, type: float64, nullable: false, description: "Mature-market equity risk premium"}
+  - {name: crp, type: float64, nullable: false, description: "Country risk premium add-on"}
+  - {name: beta_raw, type: float64, nullable: true, description: "OLS beta of weekly log returns vs local benchmark (3y)"}
+  - {name: beta, type: float64, nullable: false, description: "Blume-adjusted, clipped [0.4, 2.0] (or fallback)"}
+  - {name: beta_source, type: enum, nullable: false, values: [regression, subsector_median, default_1.0], description: "Beta provenance"}
+  - {name: n_weeks, type: int32, nullable: true, description: "Weekly observations in the beta regression"}
+  - {name: cost_of_equity, type: float64, nullable: false, description: "rf + beta * (erp + crp)"}
+  - {name: kd_pre, type: float64, nullable: false, description: "Pre-tax cost of debt"}
+  - {name: kd_post, type: float64, nullable: false, description: "After-tax cost of debt"}
+  - {name: tax_rate, type: float64, nullable: false, description: "Normalized tax rate"}
+  - {name: tax_source, type: enum, nullable: false, values: [effective_3y, statutory], description: "Tax provenance"}
+  - {name: interest_coverage, type: float64, nullable: true, description: "EBIT / interest expense (synthetic rating input)"}
+  - {name: market_cap, type: float64, nullable: true, description: "Market cap in reporting currency"}
+  - {name: total_debt, type: float64, nullable: true, description: "Book total debt (reporting currency)"}
+  - {name: weight_equity, type: float64, nullable: false, description: "E / (E + D); 1.0 for financials"}
+  - {name: wacc, type: float64, nullable: false, description: "WACC (financials: cost of equity)"}
+  - {name: terminal_growth, type: float64, nullable: false, description: "DCF terminal growth cap for the currency"}
+  - {name: is_financial, type: bool, nullable: false, description: "Bank / insurer / consumer finance / holdings (equity models)"}
+  - {name: flags, type: list<string>, nullable: true, description: "rf_fallback, beta_fallback, fx_missing"}
+  - {name: computed_at, type: datetime, nullable: false, description: "Write time UTC"}
+  - {name: run_id, type: string, nullable: true, description: "Producing run"}

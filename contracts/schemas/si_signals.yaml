@@ -1,0 +1,42 @@
+table: si_signals
+version: 1
+zone: scores
+owner: smart-money (app.analytics.smart_money)
+description: >
+  Short-interest analytics per security x FINRA settlement date (FINRA short interest and SEC fails-to-deliver are
+  official), PIT on the FINRA publication date (knowledge_date). si_pct_out uses shares OUTSTANDING as the float proxy
+  (float is not published): valuation_daily on / before the settlement, else fundamentals shares_outstanding known by
+  the publication date; null if unknown or > 150%. si_z_1y = z of the shares short vs the previous 24 settlements (>= 8).
+  FTD = largest daily fail of the latest SEC half-month file published by the SI publication date (fails ending within
+  31 days of the settlement). squeeze_flag / squeeze_score / ftd_spike are MODEL-BASED: squeeze = si_pct_out >= 15%,
+  days_to_cover >= 5, ret_20d >= +10% and shares_out <= 150M or market cap <= $2B; ftd_spike = fails >= 0.5% of shares
+  outstanding or z >= 3 with >= 100k shares. Only rows resolved to a security_id (not the provisional finra keys).
+storage: {path: scores/si_signals, format: parquet, partition_by: [year], write_mode: overwrite, sort_by: [security_id, settlement_date], compression_level: 9}
+primary_key: [security_id, settlement_date]
+pit: {knowledge_column: knowledge_date, rule: "usable from the FINRA publication date"}
+columns:
+  - {name: security_id, type: string, nullable: false, description: "FK securities_master"}
+  - {name: settlement_date, type: date, nullable: false, description: "FINRA settlement date"}
+  - {name: year, type: int16, nullable: false, description: "Partition: year(settlement_date)"}
+  - {name: knowledge_date, type: date, nullable: false, description: "FINRA publication date"}
+  - {name: knowledge_date_estimated, type: bool, nullable: false, description: "Publication date imputed"}
+  - {name: si_shares, type: float64, nullable: false, description: "Shares short"}
+  - {name: avg_daily_volume, type: float64, nullable: true, description: "FINRA average daily volume"}
+  - {name: days_to_cover, type: float64, nullable: true, description: "FINRA days to cover"}
+  - {name: shares_out, type: float64, nullable: true, description: "Shares outstanding (float proxy)"}
+  - {name: shares_out_source, type: enum, nullable: true, values: [valuation_daily, fundamentals], description: "Source of shares_out"}
+  - {name: market_cap_usd, type: float64, nullable: true, description: "valuation_daily market cap on / before settlement"}
+  - {name: si_pct_out, type: float64, nullable: true, description: "si_shares / shares_out (fraction; float proxy)"}
+  - {name: si_chg_pct, type: float64, nullable: true, description: "si_shares / previous settlement - 1"}
+  - {name: si_z_1y, type: float64, nullable: true, description: "z of si_shares vs the previous 24 settlements (>= 8)"}
+  - {name: si_pct_rank, type: float64, nullable: true, description: "Cross-sectional percentile of si_pct_out at the settlement (0..1)"}
+  - {name: ret_20d, type: float64, nullable: true, description: "adj_close at settlement / about 20 trading days before - 1"}
+  - {name: squeeze_score, type: float64, nullable: true, description: "MODEL-BASED mean percentile of SI %, days to cover, ret_20d, small share count (0..1)"}
+  - {name: squeeze_flag, type: bool, nullable: false, description: "MODEL-BASED squeeze-risk rule (description)"}
+  - {name: ftd_max_shares, type: float64, nullable: true, description: "Largest daily fails-to-deliver in the latest file"}
+  - {name: ftd_pct_out, type: float64, nullable: true, description: "ftd_max_shares / shares_out"}
+  - {name: ftd_z, type: float64, nullable: true, description: "z of ftd_max_shares vs the previous 12 files (>= 4)"}
+  - {name: ftd_knowledge_date, type: date, nullable: true, description: "Publication date of the FTD file used"}
+  - {name: ftd_spike, type: bool, nullable: false, description: "MODEL-BASED FTD spike rule"}
+  - {name: computed_at, type: datetime, nullable: false, description: "Write time UTC"}
+  - {name: run_id, type: string, nullable: true, description: "job_runs.run_id"}

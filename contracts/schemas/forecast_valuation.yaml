@@ -1,0 +1,39 @@
+table: forecast_valuation
+version: 2
+zone: scores
+owner: analytics-valuation (app.analytics.forecast)
+description: DCF outputs per scenario plus reverse-DCF (market-implied) results per issuer and as_of_date.
+storage: {path: scores/forecast_valuation, format: parquet, partition_by: [], write_mode: upsert}
+primary_key: [issuer_id, as_of_date, scenario]
+columns:
+  - {name: issuer_id, type: string, nullable: false, description: "FK issuers"}
+  - {name: security_id, type: string, nullable: false, description: "Primary security (price used)"}
+  - {name: as_of_date, type: date, nullable: false, description: "Valuation date"}
+  - {name: scenario, type: enum, nullable: false, values: [bear, base, bull, market_implied], description: "market_implied = reverse DCF row"}
+  - {name: probability, type: float64, nullable: true, description: "Scenario weight (default bear .25 base .5 bull .25)"}
+  - {name: wacc, type: float64, nullable: false, description: "Discount rate"}
+  - {name: terminal_growth, type: float64, nullable: false, description: "Terminal growth"}
+  - {name: enterprise_value, type: float64, nullable: true, description: "Reporting currency"}
+  - {name: equity_value, type: float64, nullable: true, description: "Reporting currency"}
+  - {name: fair_value_per_share, type: float64, nullable: true, description: "In trading currency (FX-converted if reporting != trading)"}
+  - {name: price, type: float64, nullable: false, description: "Close used"}
+  - {name: upside_pct, type: float64, nullable: true, description: "fair_value/price - 1 (fair_value_per_share is the DCF x multiples blend since 2026-10-11)"}
+  - {name: implied_revenue_cagr_5y, type: float64, nullable: true, description: "Reverse DCF: revenue CAGR that justifies price at base margins"}
+  - {name: implied_fcf_margin, type: float64, nullable: true, description: "Reverse DCF: steady-state FCF margin justifying price at base growth"}
+  - {name: implied_vs_hist_growth_pct, type: float64, nullable: true, description: "Percentile of implied CAGR vs own 10y revenue growth distribution"}
+  - {name: currency, type: string, nullable: false, description: "Reporting currency"}
+  - {name: assumptions, type: json, nullable: false, description: "Full driver assumptions"}
+  - {name: model, type: enum, nullable: true, values: [fcff_dcf, excess_return], description: "Added (analytics-valuation): valuation model (excess_return = banks/insurers/consumer finance/holdings/levered FINS; wacc column then holds the cost of equity)"}
+  - {name: cost_of_equity, type: float64, nullable: true, description: "Added: cost of equity used"}
+  - {name: target_price_12m, type: float64, nullable: true, description: "Added: 12-month scenario price target = fair_value * (1 + ke) - next-year DPS (trading currency)"}
+  - {name: sensitivity_grid, type: json, nullable: true, description: "Added: base row only - {wacc[5], terminal_growth[5], fair_value[5][5] (trading ccy), base_wacc, base_terminal_growth}; WACC +-2% x g +-1%"}
+  - {name: fair_value_dcf, type: float64, nullable: true, description: "Added: pure model value per share (DCF / excess-return) for this scenario, trading currency"}
+  - {name: fair_value_multiples, type: float64, nullable: true, description: "Added: peer-multiple value per share (geo-mean of EV/EBITA, P/E on normalized earnings, EV/Sales for loss-makers; banks P/E + P/B; peers = subsector -> sector -> family median, >= 5)"}
+  - {name: fair_value_low, type: float64, nullable: true, description: "Added: fair value range low = min(base DCF, multiples)"}
+  - {name: fair_value_high, type: float64, nullable: true, description: "Added: fair value range high = max(base DCF, multiples)"}
+  - {name: tv_share, type: float64, nullable: true, description: "Added: PV(terminal value) / EV of the DCF (flag terminal_value_dominant > 0.85)"}
+  - {name: valuation_confidence, type: float64, nullable: true, description: "Added: 0..100 = 100 x data_quality x model_stability x DCF/multiples agreement; capped at 35 when |upside| > 100% or upside < -90%"}
+  - {name: confidence_reasons, type: list<string>, nullable: true, description: "Added: data:* / model:* reasons lowering confidence, extreme_upside / extreme_downside"}
+  - {name: flags, type: list<string>, nullable: true, description: "Added: share_basis_mismatch (fair value suppressed; P/E outside 2.5..1500 AND P/B outside 0.1..50), eps_outlier (P/E outside 2.5..1500 but P/B plausible: near-zero / outsized earnings year, not a basis error), reverse_dcf_unbracketed, ..."}
+  - {name: computed_at, type: datetime, nullable: false, description: "Write time UTC"}
+  - {name: run_id, type: string, nullable: true, description: "Producing run"}

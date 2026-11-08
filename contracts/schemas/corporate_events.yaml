@@ -1,0 +1,34 @@
+table: corporate_events
+version: 1
+zone: features
+owner: earnings (app.earnings.events)
+description: >
+  Unified non-earnings corporate events per issuer: dividends (ex / pay date, amount; corporate_actions), splits,
+  stock dividends, spin-offs, rights; SEC 8-K items (1.01 material agreement, 2.01 acquisition / disposal completed,
+  5.02 executive / director change, 2.03 financing obligation, 3.02 unregistered equity sale, 8.01 other events,
+  5.07 shareholder-meeting vote results) with acceptance times; proxy statements (DEF 14A = AGM notice); TDnet
+  buybacks and forecast revisions; HKEX buyback / board-meeting / general-meeting announcements. Future-dated rows
+  (declared dividends, announced splits) are included. PIT: knowledge_date = declaration / filing date (ex date when
+  the declaration date is unknown).
+storage: {path: features/corporate_events, format: parquet, partition_by: [year], write_mode: overwrite, sort_by: [issuer_id, event_date]}
+primary_key: [event_id]
+pit: {knowledge_column: knowledge_date, rule: "known from knowledge_date"}
+columns:
+  - {name: event_id, type: string, nullable: false, description: "{event_type}:{source key}"}
+  - {name: year, type: int16, nullable: false, description: "Partition: year(event_date)"}
+  - {name: issuer_id, type: string, nullable: true, description: "FK issuers"}
+  - {name: security_id, type: string, nullable: true, description: "Security (corporate actions) or primary security"}
+  - {name: event_date, type: date, nullable: false, description: "Event date (ex date / pay date / filing date)"}
+  - {name: event_ts, type: datetime, nullable: true, description: "Filing acceptance time UTC when known"}
+  - {name: event_type, type: enum, nullable: false, values: [dividend_ex, dividend_pay, special_dividend, stock_dividend, split, spinoff, rights, mna_agreement, mna_completed, exec_change, financing, equity_issue, other_material, agm_results, agm_notice, buyback, guidance_revision, board_meeting, general_meeting], description: "Event type"}
+  - {name: title, type: string, nullable: false, description: "Short label"}
+  - {name: amount, type: float64, nullable: true, description: "Dividend per share"}
+  - {name: currency, type: string, nullable: true, description: "Currency of amount"}
+  - {name: ratio, type: float64, nullable: true, description: "Split ratio new/old"}
+  - {name: source_id, type: string, nullable: false, description: "corporate_actions source (polygon / yfinance / ...) or filing source"}
+  - {name: source_label, type: string, nullable: false, description: "Human label"}
+  - {name: filing_id, type: string, nullable: true, description: "Filing id when from a filing"}
+  - {name: url, type: string, nullable: true, description: "Document URL"}
+  - {name: items, type: list<string>, nullable: true, description: "8-K items of the filing"}
+  - {name: knowledge_date, type: date, nullable: false, description: "Declaration / filing date"}
+  - {name: computed_at, type: datetime, nullable: false, description: "Write time UTC"}

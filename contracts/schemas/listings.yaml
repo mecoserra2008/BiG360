@@ -1,0 +1,25 @@
+table: listings
+version: 1
+zone: reference
+owner: ref-identity
+description: >
+  Exchange listings of a security, with source-specific ticker formats. Ticker changes produce a new row
+  (valid_from/valid_to) with the same listing_id.
+storage: {path: reference/listings, format: parquet, partition_by: [], write_mode: overwrite}
+primary_key: [listing_id, valid_from]
+columns:
+  - {name: listing_id, type: string, nullable: false, description: "Internal listing id (L + 12 base32)"}
+  - {name: security_id, type: string, nullable: false, description: "FK securities_master"}
+  - {name: mic, type: string, nullable: false, description: "ISO 10383 operating MIC (XNAS, XNYS, XTKS, XKRX, XHKG, XSHG, XSHE, BVMF, XLON, XPAR, XETR...)"}
+  - {name: exchange_country, type: string, nullable: false, description: "ISO2 country of exchange"}
+  - {name: local_symbol, type: string, nullable: false, description: "Ticker as on the exchange (AAPL, 7203, 005930, 0700, PETR4, VOD)"}
+  - {name: yf_ticker, type: string, nullable: true, description: "yfinance symbol with suffix (7203.T, 005930.KS, 0700.HK, 600519.SS, PETR4.SA, VOD.L, AIR.PA)"}
+  - {name: polygon_ticker, type: string, nullable: true, description: "Polygon/Massive ticker (US only), e.g. BRK.B"}
+  - {name: quote_currency, type: string, nullable: false, description: "Currency of quotes as delivered by source (may be GBp, ZAc)"}
+  - {name: price_divisor, type: float64, nullable: false, description: "Divide source prices by this to get trading_currency units (100 for GBp)"}
+  - {name: is_primary, type: bool, nullable: false, description: "True if this is the security's primary listing"}
+  - {name: lot_size, type: int32, nullable: true, description: "Board lot (JP 100, HK varies)"}
+  - {name: timezone, type: string, nullable: false, description: "IANA tz of exchange (America/New_York, Asia/Tokyo...)"}
+  - {name: valid_from, type: date, nullable: false, description: "First date this symbol was valid"}
+  - {name: valid_to, type: date, nullable: true, description: "Last valid date (null = current)"}
+  - {name: updated_at, type: datetime, nullable: false, description: "Last update UTC"}

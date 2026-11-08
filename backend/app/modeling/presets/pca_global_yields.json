@@ -1,0 +1,187 @@
+{
+ "title": "PCA of global yield curves",
+ "description": "Monthly changes of the US Treasury curve (3M, 2Y, 5Y, 10Y, 30Y) and 10Y government yields of Germany, France, Italy, Spain, the UK, Switzerland, Japan, Canada and Australia since 1992; standardized PCA. PC1 is the global level factor; later components separate slope and regional spreads.",
+ "tags": [
+  "PCA",
+  "rates",
+  "yield curve",
+  "global"
+ ],
+ "study": {
+  "name": "Global yield-curve PCA",
+  "method": "pca",
+  "x": [
+   "us_3m",
+   "us_2y",
+   "us_5y",
+   "us_10y",
+   "us_30y",
+   "de_10y",
+   "fr_10y",
+   "it_10y",
+   "es_10y",
+   "gb_10y",
+   "ch_10y",
+   "jp_10y",
+   "ca_10y",
+   "au_10y"
+  ],
+  "params": {
+   "standardize": true,
+   "n_components": 5
+  },
+  "dataset": {
+   "kind": "timeseries",
+   "frequency": "M",
+   "start": "1992-01-01",
+   "macro_alignment": "period",
+   "variables": [
+    {
+     "name": "us_3m",
+     "source": "macro",
+     "field": "fred:DGS3MO",
+     "transforms": [
+      {
+       "op": "diff"
+      }
+     ],
+     "agg": "mean"
+    },
+    {
+     "name": "us_2y",
+     "source": "macro",
+     "field": "fred:DGS2",
+     "transforms": [
+      {
+       "op": "diff"
+      }
+     ],
+     "agg": "mean"
+    },
+    {
+     "name": "us_5y",
+     "source": "macro",
+     "field": "fred:DGS5",
+     "transforms": [
+      {
+       "op": "diff"
+      }
+     ],
+     "agg": "mean"
+    },
+    {
+     "name": "us_10y",
+     "source": "macro",
+     "field": "fred:DGS10",
+     "transforms": [
+      {
+       "op": "diff"
+      }
+     ],
+     "agg": "mean"
+    },
+    {
+     "name": "us_30y",
+     "source": "macro",
+     "field": "fred:DGS30",
+     "transforms": [
+      {
+       "op": "diff"
+      }
+     ],
+     "agg": "mean"
+    },
+    {
+     "name": "de_10y",
+     "source": "macro",
+     "field": "fred:IRLTLT01DEM156N",
+     "transforms": [
+      {
+       "op": "diff"
+      }
+     ]
+    },
+    {
+     "name": "fr_10y",
+     "source": "macro",
+     "field": "fred:IRLTLT01FRM156N",
+     "transforms": [
+      {
+       "op": "diff"
+      }
+     ]
+    },
+    {
+     "name": "it_10y",
+     "source": "macro",
+     "field": "fred:IRLTLT01ITM156N",
+     "transforms": [
+      {
+       "op": "diff"
+      }
+     ]
+    },
+    {
+     "name": "es_10y",
+     "source": "macro",
+     "field": "fred:IRLTLT01ESM156N",
+     "transforms": [
+      {
+       "op": "diff"
+      }
+     ]
+    },
+    {
+     "name": "gb_10y",
+     "source": "macro",
+     "field": "fred:IRLTLT01GBM156N",
+     "transforms": [
+      {
+       "op": "diff"
+      }
+     ]
+    },
+    {
+     "name": "ch_10y",
+     "source": "macro",
+     "field": "fred:IRLTLT01CHM156N",
+     "transforms": [
+      {
+       "op": "diff"
+      }
+     ]
+    },
+    {
+     "name": "jp_10y",
+     "source": "macro",
+     "field": "fred:IRLTLT01JPM156N",
+     "transforms": [
+      {
+       "op": "diff"
+      }
+     ]
+    },
+    {
+     "name": "ca_10y",
+     "source": "macro",
+     "field": "fred:IRLTLT01CAM156N",
+     "transforms": [
+      {
+       "op": "diff"
+      }
+     ]
+    },
+    {
+     "name": "au_10y",
+     "source": "macro",
+     "field": "fred:IRLTLT01AUM156N",
+     "transforms": [
+      {
+       "op": "diff"
+      }
+     ]
+    }
+   ]
+  }
+ }
+}

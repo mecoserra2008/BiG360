@@ -1,0 +1,43 @@
+table: sovereign_auctions
+version: 1
+zone: normalized
+owner: rates-w3 (app.rates.auctions, job rates_auctions)
+description: >
+  Government securities auctions / issuance: announced and scheduled auctions plus results. US Treasury from the
+  official Fiscal Data API (auctions_query: every marketable auction since 1979 with offering / tendered / accepted
+  amounts, high yield or discount rate, bid-to-cover and allotment by bidder type; upcoming_auctions: the announced
+  calendar); UK gilts from the DMO data reports (D2.1E gilt issuance history: auctions, syndications and tenders with
+  nominal amount and issue yield). Yields / rates are integer bp x 100. Amounts in currency units (USD / GBP).
+  An announced auction becomes a results row (same key) when the results are published.
+storage: {path: normalized/sovereign_auctions, format: parquet, partition_by: [year], write_mode: upsert, sort_by: [agency, auction_date, security_key]}
+primary_key: [agency, auction_date, security_key]
+pit: {knowledge_column: knowledge_date, rule: "announced rows from announcement_date; results rows from the auction date (results are public the same afternoon)"}
+columns:
+  - {name: year, type: int16, nullable: false, description: "Partition: year of auction_date"}
+  - {name: country, type: string, nullable: false, description: "ISO2 issuer country (US, GB)"}
+  - {name: agency, type: enum, nullable: false, values: [us_treasury, uk_dmo], description: "Issuing debt agency"}
+  - {name: auction_date, type: date, nullable: false, description: "Auction / issuance operation date"}
+  - {name: security_key, type: string, nullable: false, description: "CUSIP / ISIN, or '{security_type}-{term}' when the identifier is not yet announced"}
+  - {name: security_id, type: string, nullable: true, description: "CUSIP (US) or ISIN (UK)"}
+  - {name: security_type, type: string, nullable: false, description: "Bill, Note, Bond, TIPS, FRN, CMB, Conventional gilt, Index-linked gilt ..."}
+  - {name: security_term, type: string, nullable: true, description: "Term as published (e.g. 13-Week, 10-Year) or the gilt name"}
+  - {name: term_months, type: int16, nullable: true, unit: months, description: "Original term in months (weeks / 4.345 rounded)"}
+  - {name: method, type: string, nullable: true, description: "Single-Price / Multiple-Price auction, Syndication, Tender, Auction"}
+  - {name: status, type: enum, nullable: false, values: [announced, results], description: "announced = calendar row without results"}
+  - {name: announcement_date, type: date, nullable: true, description: "Announcement date"}
+  - {name: issue_date, type: date, nullable: true, description: "Settlement / issue date"}
+  - {name: maturity_date, type: date, nullable: true, description: "Maturity date"}
+  - {name: reopening, type: bool, nullable: true, description: "Reopening of an existing security"}
+  - {name: coupon_bp_x100, type: int32, nullable: true, unit: bp_x100, description: "Coupon / interest rate (bp x 100)"}
+  - {name: high_yield_bp_x100, type: int32, nullable: true, unit: bp_x100, description: "Stop-out yield: high yield (notes / bonds / TIPS), high discount rate (bills), high discount margin (FRN), issue yield (gilts)"}
+  - {name: offering_amount, type: float64, nullable: true, unit: currency, description: "Offering amount / nominal offered"}
+  - {name: tendered_amount, type: float64, nullable: true, unit: currency, description: "Total tendered"}
+  - {name: accepted_amount, type: float64, nullable: true, unit: currency, description: "Total accepted / nominal issued"}
+  - {name: bid_to_cover, type: float32, nullable: true, unit: x, description: "Bid-to-cover ratio"}
+  - {name: indirect_share, type: float32, nullable: true, unit: fraction, description: "Indirect bidders accepted / competitive accepted"}
+  - {name: direct_share, type: float32, nullable: true, unit: fraction, description: "Direct bidders accepted / competitive accepted"}
+  - {name: dealer_share, type: float32, nullable: true, unit: fraction, description: "Primary dealers accepted / competitive accepted"}
+  - {name: currency, type: string, nullable: false, description: "ISO currency of the amounts"}
+  - {name: source, type: string, nullable: false, description: "fiscaldata | dmo"}
+  - {name: knowledge_date, type: date, nullable: false, description: "Date public (see pit)"}
+  - {name: ingested_at, type: datetime, nullable: false, description: "Write time UTC"}

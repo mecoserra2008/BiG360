@@ -1,0 +1,26 @@
+table: macro_episode_replay
+version: 1
+zone: scores
+owner: macro-w4 (app.macro.markets.scenarios, job macro_exposures)
+description: >
+  Historical episode replay (W4.4). For each episode window (app.macro.markets.scenarios.EPISODES, windows chosen on
+  official data) the official factor moves over the window (sum of weekly changes) are applied to the CURRENT
+  joint-model betas: model_implied = exp(b'f + b_u u) - 1 (u = the S&P 500 move not explained by the macro block
+  through gamma), with a 90% band from the beta HAC covariance; model_implied_macro omits u (pure macro channel).
+  realized = total return over the same window from the price lake (null when prices do not cover it).
+  Rows with entity_type = macro_factor (entity_id = d2y, d10y, dcurve, dbe10, dreal10, dcredit, usd, oil, equity) hold
+  the episode's official factor move in `realized` (pp; log change for usd / oil / equity; null = not covered by the
+  official series) and null model columns.
+storage: {path: scores/macro_episode_replay, format: parquet, partition_by: [], write_mode: overwrite}
+primary_key: [episode_id, entity_type, entity_id, weighting]
+columns:
+  - {name: episode_id, type: string, nullable: false, description: "e.g. hiking_2022"}
+  - {name: entity_type, type: string, nullable: false, description: "As macro_exposures"}
+  - {name: entity_id, type: string, nullable: false, description: "As macro_exposures"}
+  - {name: weighting, type: string, nullable: false, description: "cw | ew | none"}
+  - {name: model_implied, type: float64, nullable: true, description: "Model-implied total return incl. the equity residual"}
+  - {name: model_implied_macro, type: float64, nullable: true, description: "Model-implied return from the macro factors only"}
+  - {name: model_lo, type: float64, nullable: true, description: "5th percentile (beta uncertainty)"}
+  - {name: model_hi, type: float64, nullable: true, description: "95th percentile"}
+  - {name: realized, type: float64, nullable: true, description: "Realized total return over the window (null when not covered)"}
+  - {name: computed_at, type: datetime, nullable: false, description: "Write time UTC"}

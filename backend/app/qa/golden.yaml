@@ -1,0 +1,98 @@
+# Golden data checks (docs/OPERATIONS_ROADMAP.md O2.3). Owner: platform (app.qa.golden).
+#
+# Only facts that are STABLE (reported historical figures) or BOUNDED (levels that cannot plausibly leave the range
+# within years) belong here; a failure means the served data path is broken (units, FX, period mapping, stitching),
+# not that the market moved. Every check reads the app's own API, so it tests the full served path.
+#
+# kind:
+#   fin_line       /companies/{security_id}/financials: line `item` of fiscal year `fiscal_year` (statement, period)
+#   overview       /companies/{security_id}/overview: dotted `field`
+#   index_last     /market/overview: `indices[id == index].last`
+#   macro_last     /macro/series/{series_id}: last observation
+#   macro_yoy      /macro/series/{series_id}: last observation / observation 12 months earlier - 1 (monthly series)
+# expect: {value, rel_tol} | {min, max}; optional max_age_days on the observation date (macro_*).
+# severity: error (default) | warn
+version: 1
+checks:
+  - id: aapl_revenue_fy2024
+    description: Apple FY2024 revenue (10-K, fiscal year ended 2024-09-28) = USD 391.035bn
+    kind: fin_line
+    ticker: AAPL
+    statement: IS
+    item: revenue
+    fiscal_year: 2024
+    expect: {value: 391035000000, rel_tol: 0.005}
+  - id: aapl_revenue_fy2023
+    description: Apple FY2023 revenue (10-K) = USD 383.285bn
+    kind: fin_line
+    ticker: AAPL
+    statement: IS
+    item: revenue
+    fiscal_year: 2023
+    expect: {value: 383285000000, rel_tol: 0.005}
+  - id: msft_revenue_fy2024
+    description: Microsoft FY2024 revenue (10-K, fiscal year ended 2024-06-30) = USD 245.122bn
+    kind: fin_line
+    ticker: MSFT
+    statement: IS
+    item: revenue
+    fiscal_year: 2024
+    expect: {value: 245122000000, rel_tol: 0.005}
+  - id: msft_shares_outstanding
+    description: Microsoft shares outstanding between 7.0bn and 7.8bn (7.43bn in 2025-26; slow buyback drift)
+    kind: overview
+    ticker: MSFT
+    field: shares_outstanding
+    expect: {min: 7000000000, max: 7800000000}
+  - id: aapl_market_cap_bounded
+    description: Apple market cap (USD) between 1.5tn and 8tn (catches unit / FX / share-count errors)
+    kind: overview
+    ticker: AAPL
+    field: quote.market_cap_usd
+    expect: {min: 1500000000000, max: 8000000000000}
+    severity: warn
+  - id: spx_level
+    description: S&P 500 level between 4,000 and 12,000
+    kind: index_last
+    region: US
+    index: "^GSPC"
+    expect: {min: 4000, max: 12000}
+  - id: nikkei_level
+    description: Nikkei 225 level between 25,000 and 80,000
+    kind: index_last
+    region: JP
+    index: "^N225"
+    expect: {min: 25000, max: 80000}
+    severity: warn
+  - id: us_cpi_yoy
+    description: US CPI-U y/y between -1% and +8% (sign / scale of the headline inflation path)
+    kind: macro_yoy
+    series_id: "fred:CPIAUCSL"
+    expect: {min: -0.01, max: 0.08}
+    max_age_days: 75
+  - id: eurusd
+    description: EUR/USD (Fed H.10, USD per EUR) between 0.90 and 1.40
+    kind: macro_last
+    series_id: "fred:DEXUSEU"
+    expect: {min: 0.90, max: 1.40}
+    max_age_days: 21
+  - id: usdjpy
+    description: USD/JPY (Fed H.10, JPY per USD) between 100 and 200
+    kind: macro_last
+    series_id: "fred:DEXJPUS"
+    expect: {min: 100, max: 200}
+    max_age_days: 21
+    severity: warn
+  - id: us_10y_yield
+    description: US 10Y Treasury constant-maturity yield between 1% and 7% (percent units)
+    kind: macro_last
+    series_id: "fred:DGS10"
+    expect: {min: 1.0, max: 7.0}
+    max_age_days: 14
+  - id: us_unemployment
+    description: US unemployment rate between 2% and 12% (percent units)
+    kind: macro_last
+    series_id: "fred:UNRATE"
+    expect: {min: 2.0, max: 12.0}
+    max_age_days: 75
+    severity: warn

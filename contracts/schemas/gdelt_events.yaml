@@ -1,0 +1,38 @@
+table: gdelt_events
+version: 2
+zone: normalized
+owner: ingest-market (app.ingestion.gdelt)
+description: >
+  Filtered GDELT 2.0 Events (export files, 15-min). Kept: events with NumArticles >= 3 OR |Goldstein| >= 5,
+  plus all events whose source articles were linked (via GKG organizations) to a universe issuer.
+  FIPS country codes converted to ISO2. Sectors tagged via CAMEO root code + GKG themes mapping.
+storage: {path: normalized/gdelt_events, format: parquet, partition_by: [year_month], write_mode: upsert, retention: "5 years"}
+primary_key: [global_event_id]
+pit: {knowledge_column: knowledge_date, rule: "DATEADDED (UTC) date"}
+columns:
+  - {name: global_event_id, type: int64, nullable: false, description: "GLOBALEVENTID"}
+  - {name: year_month, type: string, nullable: false, description: "Partition YYYY-MM of date_added"}
+  - {name: event_date, type: date, nullable: false, description: "SQLDATE"}
+  - {name: date_added, type: datetime, nullable: false, description: "DATEADDED UTC"}
+  - {name: knowledge_date, type: date, nullable: false, description: "date(date_added)"}
+  - {name: event_code, type: string, nullable: false, description: "CAMEO EventCode"}
+  - {name: event_root_code, type: string, nullable: false, description: "CAMEO root (01..20)"}
+  - {name: quad_class, type: int8, nullable: false, description: "1 verbal coop, 2 material coop, 3 verbal conflict, 4 material conflict"}
+  - {name: goldstein, type: float64, nullable: true, description: "GoldsteinScale -10..10"}
+  - {name: num_mentions, type: int32, nullable: false, description: "NumMentions"}
+  - {name: num_sources, type: int32, nullable: false, description: "NumSources"}
+  - {name: num_articles, type: int32, nullable: false, description: "NumArticles"}
+  - {name: avg_tone, type: float64, nullable: true, description: "AvgTone"}
+  - {name: actor1_name, type: string, nullable: true, description: "Actor1Name"}
+  - {name: actor1_country, type: string, nullable: true, description: "ISO2 from Actor1CountryCode (CAMEO ISO3 -> ISO2)"}
+  - {name: actor2_name, type: string, nullable: true, description: "Actor2Name"}
+  - {name: actor2_country, type: string, nullable: true, description: "ISO2"}
+  - {name: action_country, type: string, nullable: true, description: "ISO2 from ActionGeo_CountryCode (FIPS)"}
+  - {name: action_lat, type: float64, nullable: true, description: "ActionGeo_Lat"}
+  - {name: action_lon, type: float64, nullable: true, description: "ActionGeo_Long"}
+  - {name: source_url, type: string, nullable: true, description: "SOURCEURL"}
+  - {name: sector_ids, type: list<string>, nullable: true, description: "Sectors affected (taxonomy sector ids)"}
+  - {name: issuer_ids, type: list<string>, nullable: true, description: "Linked issuers"}
+  - {name: event_category, type: enum, nullable: true, values: [conflict, protest, sanctions_trade, diplomacy, economy, disaster, legal_regulatory, health, other], description: "Simplified category"}
+  - {name: ingested_at, type: datetime, nullable: false, description: "Write time UTC"}
+  - {name: headline, type: string, nullable: true, description: "Article title of SOURCEURL from GKG PAGE_TITLE when the article was seen in GKG, else derived from the URL slug; filled by signals-alt gdelt_company_daily (added v2)"}

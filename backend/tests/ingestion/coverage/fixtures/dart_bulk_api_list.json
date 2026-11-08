@@ -1,0 +1,7 @@
+{"status": "000", "message": "정상", "page_no": 1, "page_count": 100, "total_count": 5, "total_page": 1, "list": [
+  {"corp_code": "00126380", "corp_name": "삼성전자", "stock_code": "005930", "corp_cls": "Y", "report_nm": "반기보고서 (2026.06)", "rcept_no": "20260814003699", "flr_nm": "삼성전자", "rcept_dt": "20260814", "rm": ""},
+  {"corp_code": "00126362", "corp_name": "삼성SDI", "stock_code": "006400", "corp_cls": "Y", "report_nm": "반기보고서 (2026.06)", "rcept_no": "20260814003578", "flr_nm": "삼성SDI", "rcept_dt": "20260814", "rm": "정"},
+  {"corp_code": "00126362", "corp_name": "삼성SDI", "stock_code": "006400", "corp_cls": "Y", "report_nm": "[기재정정]반기보고서 (2026.06)", "rcept_no": "20260902000111", "flr_nm": "삼성SDI", "rcept_dt": "20260902", "rm": ""},
+  {"corp_code": "00688996", "corp_name": "KB금융", "stock_code": "105560", "corp_cls": "Y", "report_nm": "반기보고서 (2026.06)", "rcept_no": "20260814004200", "flr_nm": "KB금융", "rcept_dt": "20260814", "rm": ""},
+  {"corp_code": "00999999", "corp_name": "철회테스트", "stock_code": "999999", "corp_cls": "Y", "report_nm": "반기보고서 (2026.06)", "rcept_no": "20260814009999", "flr_nm": "철회테스트", "rcept_dt": "20260814", "rm": "철"}
+]}

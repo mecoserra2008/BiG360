@@ -1,0 +1,18 @@
+table: macro_observations
+version: 1
+zone: normalized
+owner: ingest-market (app.ingestion.macro_*)
+description: >
+  Macro observations with vintages. FRED: use ALFRED realtime_start as knowledge_date where available
+  (vintage rows); other sources: knowledge_date = obs date + release_lag_days (estimated) unless the source gives a release date.
+storage: {path: normalized/macro_observations, format: parquet, partition_by: [source_id], write_mode: upsert}
+primary_key: [series_id, date, knowledge_date]
+pit: {knowledge_column: knowledge_date, rule: "as-of value = max(knowledge_date) <= D per (series_id, date)"}
+columns:
+  - {name: series_id, type: string, nullable: false, description: "FK macro_series"}
+  - {name: source_id, type: string, nullable: false, description: "Partition"}
+  - {name: date, type: date, nullable: false, description: "Observation period date (period start for M/Q per FRED convention)"}
+  - {name: value, type: float64, nullable: true, description: "Value (null for '.' missing)"}
+  - {name: knowledge_date, type: date, nullable: false, description: "Vintage/release date"}
+  - {name: knowledge_date_estimated, type: bool, nullable: false, description: "Imputed from release_lag_days"}
+  - {name: ingested_at, type: datetime, nullable: false, description: "Write time UTC"}

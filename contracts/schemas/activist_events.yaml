@@ -1,0 +1,33 @@
+table: activist_events
+version: 1
+zone: scores
+owner: smart-money (app.analytics.smart_money)
+description: >
+  Activism / large-holder event feed from activist_filings (SEC Schedule 13D / 13G, official), one row per filing:
+  new_13d (original 13D = more than 5% with active / control intent), amend_13d, switch_13g_to_13d (a 13D whose
+  filer's previous filing on the same subject within 3 years was a passive 13G), new_13g, amend_13g. PIT on the
+  filing date.
+storage: {path: scores/activist_events, format: parquet, partition_by: [year], write_mode: overwrite, sort_by: [event_date, filing_id]}
+primary_key: [filing_id]
+pit: {knowledge_column: knowledge_date, rule: "usable from the filing date"}
+columns:
+  - {name: filing_id, type: string, nullable: false, description: "FK activist_filings"}
+  - {name: year, type: int16, nullable: false, description: "Partition: year(event_date)"}
+  - {name: event_date, type: date, nullable: false, description: "Filing (knowledge) date"}
+  - {name: knowledge_date, type: date, nullable: false, description: "PIT date"}
+  - {name: event_type, type: enum, nullable: false, values: [new_13d, amend_13d, switch_13g_to_13d, new_13g, amend_13g], description: "Event classification"}
+  - {name: form_type, type: string, nullable: false, description: "EDGAR form"}
+  - {name: schedule, type: enum, nullable: false, values: ["13D", "13G"], description: "Schedule family"}
+  - {name: is_amendment, type: bool, nullable: false, description: "Amendment"}
+  - {name: subject_cik, type: string, nullable: false, description: "Subject company CIK"}
+  - {name: subject_name, type: string, nullable: true, description: "Subject company"}
+  - {name: filer_cik, type: string, nullable: true, description: "Filer CIK"}
+  - {name: filer_name, type: string, nullable: true, description: "Filer"}
+  - {name: n_filers, type: int32, nullable: false, description: "Joint filers"}
+  - {name: issuer_id, type: string, nullable: true, description: "Subject issuer"}
+  - {name: security_id, type: string, nullable: true, description: "Subject primary security"}
+  - {name: prior_13g_date, type: date, nullable: true, description: "Latest earlier 13G by this filer on the subject"}
+  - {name: n_prior_13d, type: int32, nullable: true, description: "Earlier 13D filings by this filer on the subject"}
+  - {name: role_source, type: enum, nullable: false, values: [ticker_map, header, name_heuristic, unresolved], description: "Subject / filer assignment"}
+  - {name: url, type: string, nullable: false, description: "EDGAR filing index"}
+  - {name: computed_at, type: datetime, nullable: false, description: "Write time UTC"}

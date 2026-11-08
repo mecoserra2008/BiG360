@@ -1,0 +1,53 @@
+table: tech_setups
+version: 1
+zone: scores
+owner: technicals (app.technicals.confluence)
+description: >
+  One row per security and as_of_date: trend/structure context, the trade setup derived from confluence_zones
+  (nearest strong support/resistance, entry zone, invalidation, targets, R:R) and an explainable 0..100 technical score
+  for scoring/ML. Long setup: entry = top of the nearest strong support zone, invalidation = zone_low - 0.5 ATR,
+  target1/target2 = next resistance zone centers. Short setup mirrors it. technical_score = weighted blend of
+  trend (25%), structure (20%), location vs zones (35%), reward/risk (10%), momentum (10%); components in score_components.
+storage: {path: scores/tech_setups, format: parquet, partition_by: [], write_mode: overwrite, retention: "latest + month-end snapshots"}
+primary_key: [as_of_date, security_id]
+columns:
+  - {name: as_of_date, type: date, nullable: false, description: "Date of last bar used"}
+  - {name: security_id, type: string, nullable: false, description: "FK securities_master"}
+  - {name: last_close, type: float64, nullable: false, description: "Close (adjusted) at as_of_date"}
+  - {name: atr14, type: float64, nullable: false, description: "Wilder ATR(14)"}
+  - {name: rsi14, type: float64, nullable: true, description: "Wilder RSI(14)"}
+  - {name: sma50, type: float64, nullable: true, description: "50-session simple moving average"}
+  - {name: sma200, type: float64, nullable: true, description: "200-session simple moving average"}
+  - {name: trend, type: enum, nullable: false, values: [up, down, sideways], description: "From close vs SMA50/SMA200 and SMA50 slope"}
+  - {name: structure_state, type: enum, nullable: false, values: [bullish, bearish, range], description: "Market structure from ZigZag(3 ATR) breaks (last BOS/CHoCH direction)"}
+  - {name: last_break_kind, type: enum, nullable: true, values: [bos, choch], description: "Last structure break type"}
+  - {name: last_break_dir, type: enum, nullable: true, values: [up, down], description: "Last structure break direction"}
+  - {name: last_break_date, type: date, nullable: true, description: "Session of the last structure break"}
+  - {name: last_break_price, type: float64, nullable: true, description: "Pivot price that was broken"}
+  - {name: bias, type: enum, nullable: false, values: [long, short, neutral], description: "Setup direction"}
+  - {name: support_zone_id, type: int16, nullable: true, description: "confluence_zones.zone_id of the nearest strong support"}
+  - {name: resistance_zone_id, type: int16, nullable: true, description: "confluence_zones.zone_id of the nearest strong resistance"}
+  - {name: support_low, type: float64, nullable: true, description: "Nearest strong support zone bounds"}
+  - {name: support_high, type: float64, nullable: true, description: "Nearest strong support zone bounds"}
+  - {name: resistance_low, type: float64, nullable: true, description: "Nearest strong resistance zone bounds"}
+  - {name: resistance_high, type: float64, nullable: true, description: "Nearest strong resistance zone bounds"}
+  - {name: dist_support_atr, type: float64, nullable: true, description: "(close - support_high)/ATR (0 when inside)"}
+  - {name: dist_resistance_atr, type: float64, nullable: true, description: "(resistance_low - close)/ATR (0 when inside)"}
+  - {name: dist_support_pct, type: float64, nullable: true, description: "support_high/close - 1"}
+  - {name: dist_resistance_pct, type: float64, nullable: true, description: "resistance_low/close - 1"}
+  - {name: entry_low, type: float64, nullable: true, description: "Proposed entry zone low"}
+  - {name: entry_high, type: float64, nullable: true, description: "Proposed entry zone high"}
+  - {name: entry, type: float64, nullable: true, description: "Proposed entry (zone edge nearest price)"}
+  - {name: invalidation, type: float64, nullable: true, description: "Stop/invalidation (beyond the zone + 0.5 ATR buffer)"}
+  - {name: target1, type: float64, nullable: true, description: "First target (next opposing zone center)"}
+  - {name: target2, type: float64, nullable: true, description: "Second target (the opposing zone after target1)"}
+  - {name: reward_risk, type: float64, nullable: true, description: "|target1 - entry| / |entry - invalidation|"}
+  - {name: technical_score, type: float64, nullable: false, description: "0..100 long-side technical attractiveness"}
+  - {name: score_trend, type: float64, nullable: true, description: "Component 0..100"}
+  - {name: score_structure, type: float64, nullable: true, description: "Component 0..100"}
+  - {name: score_location, type: float64, nullable: true, description: "Component 0..100"}
+  - {name: score_rr, type: float64, nullable: true, description: "Component 0..100"}
+  - {name: score_momentum, type: float64, nullable: true, description: "Component 0..100"}
+  - {name: score_components, type: json, nullable: true, description: "Explainability: inputs and weights of the score"}
+  - {name: note, type: string, nullable: true, description: "Human-readable setup summary"}
+  - {name: computed_at, type: datetime, nullable: false, description: "Write time UTC"}

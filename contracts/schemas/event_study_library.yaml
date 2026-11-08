@@ -1,0 +1,37 @@
+table: event_study_library
+version: 1
+zone: scores
+owner: event-models (app.events_models.event_study, job event_study_library)
+description: >
+  C4 event-study library: cumulative abnormal returns (market model, estimation window [-250, -30] trading days,
+  app.modeling._algos.car_study) after labelled event shocks. A shock is a (label, theme) day with attention_z >=
+  2.5 (kind attention) or tone_z <= -2.5 (kind neg_tone) and no shock of the same kind in the previous 10 days;
+  day 0 = the first trading day on or after the (UTC) event day. Levels: country_index (country shocks -> the
+  country's equity index vs the world benchmark ACWI), sector_etf (sector shocks -> US sector SPDR vs SPY,
+  iso2 ALL), issuer (issuer shocks -> the issuer's primary security vs its country benchmark; aggregated by
+  theme x issuer country x issuer sector, with ALL roll-ups). Statistics per window: n events, mean / median CAR,
+  cross-sectional SE and 95% CI, t, p, mean BHAR, share negative. "Expected reaction" lookups fall back from
+  (theme, country, sector) to coarser cells (API). Model-based; recomputed from all available history each run.
+storage: {path: scores/event_study_library, format: parquet, partition_by: [], write_mode: overwrite, retention: "latest"}
+primary_key: [shock_kind, level, theme, iso2, sector, window]
+columns:
+  - {name: shock_kind, type: enum, nullable: false, values: [attention, neg_tone], description: "Shock definition"}
+  - {name: level, type: enum, nullable: false, values: [country_index, sector_etf, issuer], description: "Response asset level"}
+  - {name: theme, type: string, nullable: false, description: "Theme id or 'all'"}
+  - {name: iso2, type: string, nullable: false, description: "Country ISO2 or ALL"}
+  - {name: sector, type: string, nullable: false, description: "Sector id or ALL"}
+  - {name: window, type: string, nullable: false, description: "Event window in trading days, e.g. '0,1' / '0,5' / '-1,5' / '0,10'"}
+  - {name: n_events, type: int32, nullable: false, description: "Events with full estimation and event windows"}
+  - {name: mean_car, type: float64, nullable: true, description: "Mean CAR (%)"}
+  - {name: median_car, type: float64, nullable: true, description: "Median CAR (%)"}
+  - {name: std_error, type: float64, nullable: true, description: "Cross-sectional SE of the mean CAR (%)"}
+  - {name: ci_low, type: float64, nullable: true, description: "95% lower (%)"}
+  - {name: ci_high, type: float64, nullable: true, description: "95% upper (%)"}
+  - {name: t_stat, type: float64, nullable: true, description: "Cross-sectional t"}
+  - {name: p_value, type: float64, nullable: true, description: "Two-sided p"}
+  - {name: mean_bhar, type: float64, nullable: true, description: "Mean buy-and-hold abnormal return (%)"}
+  - {name: share_negative, type: float64, nullable: true, description: "Share of events with CAR < 0"}
+  - {name: first_event, type: date, nullable: true, description: "Earliest event day"}
+  - {name: last_event, type: date, nullable: true, description: "Latest event day"}
+  - {name: benchmark, type: string, nullable: true, description: "Benchmark series"}
+  - {name: computed_at, type: datetime, nullable: false, description: "Write time UTC"}

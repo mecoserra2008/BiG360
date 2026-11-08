@@ -1,0 +1,47 @@
+table: company_links
+version: 1
+zone: normalized
+owner: linkage (app.linkage.customers)
+description: >
+  A6 company -> company links. customer: major-customer disclosures (customers >= ~10% of revenue) from XBRL
+  MajorCustomers axis members in the SEC Financial Statement Data Sets and from rule-based extraction of 10-K / 20-F
+  text (no LLM); counterparty names resolved to issuers with OrgLinker (unresolved names kept, dst_key 'name:<norm>').
+  co_mention: issuer pairs linked in the same GDELT article (events_v2 gdelt_article_labels), monthly, stored once per
+  unordered pair (src < dst), weight = n_ij / sqrt(n_i n_j).
+  Roadmap #9 (additive): link extraction v2 (app.linkage.textrules, rules only, no LLM) over compact candidate units of
+  10-K / 20-F / 40-F text (app.linkage.textunits): customer patterns ("sales to X accounted for 12% of net sales",
+  "X and Y accounted for 15% and 11% ... respectively", customer tables, "our largest customers include ...") and
+  supplier edges disclosed by the customer (link_type supplier: "X is our sole supplier", "purchases from X accounted
+  for 30% of purchases", "we rely on X to manufacture ..."). Provenance per edge: filing_id, form_type, rule,
+  snippet (<= 200 chars), knowledge_date (PIT = filing date); confidence = rule prior x name match confidence.
+storage: {path: normalized/company_links, format: parquet, partition_by: [link_type], write_mode: overwrite, retention: "rebuilt each run"}
+primary_key: [link_type, source, src_entity_id, dst_key, period_end, filing_id]
+pit: {knowledge_column: knowledge_date, rule: "filing date (customer) / month end (co_mention)"}
+columns:
+  - {name: link_type, type: enum, nullable: false, values: [customer, supplier, co_mention], description: "Edge type (customer: dst is a customer of src; supplier: dst is a supplier of src, disclosed by src = the customer)"}
+  - {name: source, type: enum, nullable: false, values: [xbrl_fsds, text_10k, gdelt], description: "Extraction source"}
+  - {name: src_entity_id, type: string, nullable: false, description: "CIK10 (customer) or issuer_id (co_mention)"}
+  - {name: src_issuer_id, type: string, nullable: true, description: "Disclosing / first issuer"}
+  - {name: src_name, type: string, nullable: true, description: "Filer name"}
+  - {name: dst_key, type: string, nullable: false, description: "dst_issuer_id, else 'name:<normalized name>'"}
+  - {name: dst_issuer_id, type: string, nullable: true, description: "Resolved counterparty issuer"}
+  - {name: dst_name, type: string, nullable: true, description: "Counterparty name as disclosed (de-camel-cased member)"}
+  - {name: dst_norm, type: string, nullable: true, description: "Normalized counterparty name (OrgLinker key)"}
+  - {name: dst_kind, type: enum, nullable: false, values: [company, government], description: "Counterparty kind"}
+  - {name: share, type: float64, nullable: true, description: "Fraction of src revenue from dst (customer links)"}
+  - {name: n_mentions, type: int32, nullable: true, description: "Articles co-mentioning the pair in the month (co_mention)"}
+  - {name: weight, type: float64, nullable: true, description: "Edge weight: share (customer) / cosine co-mention strength"}
+  - {name: confidence, type: float64, nullable: false, description: "Edge confidence = rule prior (rule_conf) x name -> issuer match confidence (0 when unresolved)"}
+  - {name: period_end, type: date, nullable: false, description: "Fiscal period end (customer) / month end (co_mention)"}
+  - {name: knowledge_date, type: date, nullable: false, description: "Filing date / month end"}
+  - {name: filing_id, type: string, nullable: false, description: "sec_edgar:<adsh> ('' for co_mention)"}
+  - {name: evidence, type: string, nullable: true, description: "XBRL tag + member, or the matched sentence (<= 400 chars)"}
+  - {name: form_type, type: string, nullable: true, description: "Disclosing filing form (10-K, 20-F, 40-F ...); roadmap #9"}
+  - {name: rule, type: string, nullable: true, description: "Extraction rule id (app.linkage.textrules.RULES, xbrl_major_customers, gdelt_comention, text_v1)"}
+  - {name: rule_conf, type: float64, nullable: true, description: "Prior precision of the rule (0-1)"}
+  - {name: match_method, type: string, nullable: true, description: "Name -> issuer match: exact | fuzzy | ambiguous_multi_issuer | none"}
+  - {name: match_confidence, type: float64, nullable: true, description: "Name -> issuer match confidence (OrgLinker)"}
+  - {name: metric, type: string, nullable: true, description: "What share measures: revenue (customer) | purchases (supplier) | null"}
+  - {name: snippet, type: string, nullable: true, description: "Provenance: sentence / table row around the match (<= 200 chars)"}
+  - {name: rules_version, type: string, nullable: true, description: "Text rules version (app.linkage.textrules.RULES_VERSION)"}
+  - {name: ingested_at, type: datetime, nullable: false, description: "Write time UTC"}

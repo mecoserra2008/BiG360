@@ -1,0 +1,97 @@
+<?xml version="1.0" encoding="windows-1252"?>
+<rss version="2.0">
+  <channel>
+    <title>All XBRL Filings Submitted to the SEC.</title>
+    <link>https://www.sec.gov/spotlight/xbrl/filings-and-feeds.shtml</link>
+    <atom:link href="https://www.sec.gov/Archives/edgar/xbrlrss.all.xml" rel="self" type="application/rss+xml" xmlns:atom="https://www.w3.org/2005/Atom"/>
+    <description>This is a list of up to 200 of the latest XBRL filings, updated every 10 minutes.</description>
+    <language>en-us</language>
+    <pubDate>Fri, 6 Nov 2026 21:50:03 EST</pubDate>
+    <lastBuildDate>Fri, 6 Nov 2026 21:50:03 EST</lastBuildDate>
+    <item>
+      <title>Pono Capital Four, Inc. (0002108164) (Filer)</title>
+      <link>https://www.sec.gov/Archives/edgar/data/2108164/000149315226050548/0001493152-26-050548-index.htm</link>
+      <guid>https://www.sec.gov/Archives/edgar/data/2108164/000149315226050548/0001493152-26-050548-xbrl.zip</guid>
+      <enclosure url="https://www.sec.gov/Archives/edgar/data/2108164/000149315226050548/0001493152-26-050548-xbrl.zip" length="62714" type="application/zip" />
+      <description>8-K</description>
+      <pubDate>Fri, 6 Nov 2026 17:30:10 EST</pubDate>
+      <edgar:xbrlFiling xmlns:edgar="https://www.sec.gov/Archives/edgar">
+        <edgar:companyName>Pono Capital Four, Inc.</edgar:companyName>
+        <edgar:formType>8-K</edgar:formType>
+        <edgar:filingDate>11/06/2026</edgar:filingDate>
+        <edgar:cikNumber>0002108164</edgar:cikNumber>
+        <edgar:accessionNumber>0001493152-26-050548</edgar:accessionNumber>
+        <edgar:fileNumber>001-43191</edgar:fileNumber>
+        <edgar:acceptanceDatetime>20261106173010</edgar:acceptanceDatetime>
+        <edgar:period>20261105</edgar:period>
+        <edgar:assistantDirector>Office of Real Estate &amp; Construction</edgar:assistantDirector>
+        <edgar:assignedSic>6770</edgar:assignedSic>
+        <edgar:fiscalYearEnd>1231</edgar:fiscalYearEnd>
+      </edgar:xbrlFiling>
+    </item>
+    <item>
+      <title>SUI Group Holdings Ltd. (0001425355) (Filer)</title>
+      <link>https://www.sec.gov/Archives/edgar/data/1425355/000119312526452129/0001193125-26-452129-index.htm</link>
+      <guid>https://www.sec.gov/Archives/edgar/data/1425355/000119312526452129/0001193125-26-452129-xbrl.zip</guid>
+      <enclosure url="https://www.sec.gov/Archives/edgar/data/1425355/000119312526452129/0001193125-26-452129-xbrl.zip" length="2591988" type="application/zip" />
+      <description>10-Q</description>
+      <pubDate>Fri, 6 Nov 2026 17:30:32 EST</pubDate>
+      <edgar:xbrlFiling xmlns:edgar="https://www.sec.gov/Archives/edgar">
+        <edgar:companyName>SUI Group Holdings Ltd.</edgar:companyName>
+        <edgar:formType>10-Q</edgar:formType>
+        <edgar:filingDate>11/06/2026</edgar:filingDate>
+        <edgar:cikNumber>0001425355</edgar:cikNumber>
+        <edgar:accessionNumber>0001193125-26-452129</edgar:accessionNumber>
+        <edgar:fileNumber>001-41472</edgar:fileNumber>
+        <edgar:acceptanceDatetime>20261106173032</edgar:acceptanceDatetime>
+        <edgar:period>20260930</edgar:period>
+        <edgar:assistantDirector>Office of Finance</edgar:assistantDirector>
+        <edgar:assignedSic>6199</edgar:assignedSic>
+        <edgar:fiscalYearEnd>1231</edgar:fiscalYearEnd>
+      </edgar:xbrlFiling>
+    </item>
+    <item>
+      <title>CITIGROUP INC (0000831001) (Filer)</title>
+      <link>https://www.sec.gov/Archives/edgar/data/831001/000095010326017117/0000950103-26-017117-index.htm</link>
+      <guid>https://www.sec.gov/Archives/edgar/data/831001/000095010326017117/0000950103-26-017117-xbrl.zip</guid>
+      <enclosure url="https://www.sec.gov/Archives/edgar/data/831001/000095010326017117/0000950103-26-017117-xbrl.zip" length="163780" type="application/zip" />
+      <description>424B2</description>
+      <pubDate>Fri, 6 Nov 2026 17:30:07 EST</pubDate>
+      <edgar:xbrlFiling xmlns:edgar="https://www.sec.gov/Archives/edgar">
+        <edgar:companyName>CITIGROUP INC</edgar:companyName>
+        <edgar:formType>424B2</edgar:formType>
+        <edgar:filingDate>11/06/2026</edgar:filingDate>
+        <edgar:cikNumber>0000831001</edgar:cikNumber>
+        <edgar:accessionNumber>0000950103-26-017117</edgar:accessionNumber>
+        <edgar:fileNumber>333-293732</edgar:fileNumber>
+        <edgar:acceptanceDatetime>20261106173007</edgar:acceptanceDatetime>
+        <edgar:period>19691231</edgar:period>
+        <edgar:otherCikNumbers>0000200245</edgar:otherCikNumbers>
+        <edgar:assistantDirector>Office of Finance</edgar:assistantDirector>
+        <edgar:assignedSic>6211</edgar:assignedSic>
+        <edgar:fiscalYearEnd>1231</edgar:fiscalYearEnd>
+      </edgar:xbrlFiling>
+    </item>
+    <item>
+      <title>Avricore Health Inc. (0001355736) (Filer)</title>
+      <link>https://www.sec.gov/Archives/edgar/data/1355736/000149315226050516/0001493152-26-050516-index.htm</link>
+      <guid>https://www.sec.gov/Archives/edgar/data/1355736/000149315226050516/0001493152-26-050516-xbrl.zip</guid>
+      <enclosure url="https://www.sec.gov/Archives/edgar/data/1355736/000149315226050516/0001493152-26-050516-xbrl.zip" length="2260657" type="application/zip" />
+      <description>20-F</description>
+      <pubDate>Fri, 6 Nov 2026 17:03:27 EST</pubDate>
+      <edgar:xbrlFiling xmlns:edgar="https://www.sec.gov/Archives/edgar">
+        <edgar:companyName>Avricore Health Inc.</edgar:companyName>
+        <edgar:formType>20-F</edgar:formType>
+        <edgar:filingDate>11/06/2026</edgar:filingDate>
+        <edgar:cikNumber>0001355736</edgar:cikNumber>
+        <edgar:accessionNumber>0001493152-26-050516</edgar:accessionNumber>
+        <edgar:fileNumber>000-51848</edgar:fileNumber>
+        <edgar:acceptanceDatetime>20261106170327</edgar:acceptanceDatetime>
+        <edgar:period>20251231</edgar:period>
+        <edgar:assistantDirector>Office of Life Sciences</edgar:assistantDirector>
+        <edgar:assignedSic>2834</edgar:assignedSic>
+        <edgar:fiscalYearEnd>1231</edgar:fiscalYearEnd>
+      </edgar:xbrlFiling>
+    </item>
+  </channel>
+</rss>

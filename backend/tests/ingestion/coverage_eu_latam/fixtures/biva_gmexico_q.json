@@ -1,0 +1,113 @@
+{
+"content": [
+{
+"docType": "XBRL",
+"id": 204180,
+"idEmisora": 1693,
+"idDocumento": 204180,
+"clave": "GMEXICO",
+"fechaPublicacion": 1784626354000,
+"fileName": null,
+"archivosXbrl": [
+{
+"url": "/storage/data-rs-cnbv/ReporteTrimestral_GMEXICO_2026_2_119500-260721-248a14ae_1784669711415.pdf",
+"extension": "PDF"
+},
+{
+"url": "/storage/data-rs-cnbv/ReporteTrimestral_GMEXICO_2026_2_119500-260721-248a14ae.xbrl",
+"extension": "XBRL"
+}
+],
+"nombreArchivo": "/storage/data-rs-cnbv/ReporteTrimestral_GMEXICO_2026_2_119500-260721-248a14ae.xbrl",
+"tipoDocumento": "Información trimestral 2-2026"
+},
+{
+"docType": "XBRL",
+"id": 203350,
+"idEmisora": 1693,
+"idDocumento": 203350,
+"clave": "GMEXICO",
+"fechaPublicacion": 1777977568000,
+"fileName": null,
+"archivosXbrl": [
+{
+"url": "/storage/data-rs-cnbv/ReporteTrimestral_GMEXICO_2025_4D_117413-260505-125cffcf_1778020855685.pdf",
+"extension": "PDF"
+},
+{
+"url": "/storage/data-rs-cnbv/ReporteTrimestral_GMEXICO_2025_4D_117413-260505-125cffcf.xbrl",
+"extension": "XBRL"
+}
+],
+"nombreArchivo": "/storage/data-rs-cnbv/ReporteTrimestral_GMEXICO_2025_4D_117413-260505-125cffcf.xbrl",
+"tipoDocumento": "Información trimestral 4D-2025"
+},
+{
+"docType": "XBRL",
+"id": 202971,
+"idEmisora": 1693,
+"idDocumento": 202971,
+"clave": "GMEXICO",
+"fechaPublicacion": 1777368450000,
+"fileName": null,
+"archivosXbrl": [
+{
+"url": "/storage/data-rs-cnbv/ReporteTrimestral_GMEXICO_2026_1_112897-260428-a1af13df_1777411823043.pdf",
+"extension": "PDF"
+},
+{
+"url": "/storage/data-rs-cnbv/ReporteTrimestral_GMEXICO_2026_1_112897-260428-a1af13df.xbrl",
+"extension": "XBRL"
+}
+],
+"nombreArchivo": "/storage/data-rs-cnbv/ReporteTrimestral_GMEXICO_2026_1_112897-260428-a1af13df.xbrl",
+"tipoDocumento": "Información trimestral 1-2026"
+},
+{
+"docType": "XBRL",
+"id": 26370,
+"idEmisora": 1693,
+"idDocumento": 26370,
+"clave": "GMEXICO",
+"fechaPublicacion": 1540811820000,
+"fileName": null,
+"archivosXbrl": [
+{
+"url": "/storage/data-maintenance/rs_982.pdf",
+"extension": "PDF"
+},
+{
+"url": "/storage/data-maintenance/rs_982.xbrl",
+"extension": "XBRL"
+}
+],
+"nombreArchivo": "/visorxbrl/index.html?docins=/storage/data-maintenance/rs_982.json&documentPath=/storage/data-maintenance/rs_982.pdf&documentPathHtml=/storage/data-maintenance/rs_982.html&documentPathWord=/storage/data-maintenance/rs_982.docx&documentPathExcel=/storage/data-maintenance/rs_982.xlsx&documentPathXbrl=/storage/data-maintenance/rs_982.xbrl",
+"tipoDocumento": "Información financiera 3 - 2018"
+},
+{
+"docType": "XBRL",
+"id": 25845,
+"idEmisora": 1693,
+"idDocumento": 25845,
+"clave": "GMEXICO",
+"fechaPublicacion": 1540296960000,
+"fileName": null,
+"archivosXbrl": [
+{
+"url": "/storage/data-maintenance/rs_391.pdf",
+"extension": "PDF"
+},
+{
+"url": "/storage/data-maintenance/rs_391.xbrl",
+"extension": "XBRL"
+}
+],
+"nombreArchivo": "/visorxbrl/index.html?docins=/storage/data-maintenance/rs_391.json&documentPath=/storage/data-maintenance/rs_391.pdf&documentPathHtml=/storage/data-maintenance/rs_391.html&documentPathWord=/storage/data-maintenance/rs_391.docx&documentPathExcel=/storage/data-maintenance/rs_391.xlsx&documentPathXbrl=/storage/data-maintenance/rs_391.xbrl",
+"tipoDocumento": "Información financiera 1 - 2018"
+}
+],
+"number": 0,
+"size": 100,
+"totalElements": 5,
+"totalPages": 1
+}

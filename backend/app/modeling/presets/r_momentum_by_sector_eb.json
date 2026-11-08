@@ -1,0 +1,104 @@
+{
+ "title": "Momentum premium by sector (empirical Bayes pooling)",
+ "description": "Sector-specific momentum slopes with empirical-Bayes shrinkage (fast), compared with complete and no pooling.",
+ "question": "factors",
+ "tags": [
+  "probabilistic",
+  "hierarchical",
+  "momentum"
+ ],
+ "method_note": "Normal-normal empirical Bayes: the population mean and between-sector variance are estimated by EM on the marginal likelihood; each sector's slope is a precision-weighted mix of its own OLS and the mean. Caveat: the universe is today's constituents (membership history starts 2026-10), so early years carry survivorship bias; read the premium as an upper bound.",
+ "expected_outputs": [
+  "shrinkage weights",
+  "forest plot",
+  "OOS: partial vs no pooling (DM)"
+ ],
+ "runtime_s": 3.5,
+ "validated": "2026-11-06 on snapshot R20261106T010757G9ZB",
+ "result": {
+  "run_id": "SR20261106T02363032KZQ",
+  "beats_baseline": false,
+  "beats_linear": false,
+  "verdict": "partial pooling is worse than linear-Gaussian baseline on CRPS (mean 0.04871 vs 0.04871); point forecast: partial pooling does not significantly beat linear baseline (DM p = 0.777)",
+  "n_obs": 86515,
+  "metrics": {
+   "oos_rmse": 0.09055435943393018,
+   "oos_r2_oos": -0.0006284552416453426,
+   "oos_rank_ic": 0.012510016590077281,
+   "crps": 0.04870777904909391,
+   "crps_linear": 0.04870514087974802,
+   "crps_skill_vs_linear": -5.4166137254396673e-05,
+   "coverage_90": 0.9078310119632433,
+   "dm_p_crps_vs_linear": 0.7112460142115204,
+   "dm_p_vs_linear": 0.7773638483004693
+  },
+  "coefficients": [
+   {
+    "term": "mu[const]",
+    "estimate": 0.015027743513016887,
+    "statistic": null,
+    "p_value": null
+   },
+   {
+    "term": "mu[mom_12_1]",
+    "estimate": 0.0007871017174089497,
+    "statistic": null,
+    "p_value": null
+   }
+  ]
+ },
+ "study": {
+  "name": "Momentum premium by sector (empirical Bayes pooling)",
+  "method": "hier_pool",
+  "y": "fwd_ret_1m",
+  "x": [
+   "mom_12_1"
+  ],
+  "params": {
+   "group": "sector_id",
+   "estimator": "empirical_bayes",
+   "cv": {
+    "folds": 5,
+    "scheme": "purged_kfold",
+    "purge": 1
+   }
+  },
+  "dataset": {
+   "kind": "panel",
+   "frequency": "M",
+   "start": "2010-01-01",
+   "entities": {
+    "universe": "mvp_us"
+   },
+   "variables": [
+    {
+     "name": "fwd_ret_1m",
+     "source": "prices",
+     "field": "ret",
+     "transforms": [
+      {
+       "op": "fwd_compound",
+       "k": 1
+      },
+      {
+       "op": "winsorize"
+      }
+     ]
+    },
+    {
+     "name": "mom_12_1",
+     "source": "tech_factors",
+     "field": "mom",
+     "transforms": [
+      {
+       "op": "winsorize"
+      },
+      {
+       "op": "cs_zscore"
+      }
+     ]
+    }
+   ]
+  }
+ }
+}

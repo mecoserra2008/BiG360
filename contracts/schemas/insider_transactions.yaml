@@ -1,0 +1,54 @@
+table: insider_transactions
+version: 2
+zone: normalized
+owner: ingest-us (sec_form4) / ingest-global (opendart exec holdings, EU PDMR best-effort)
+description: >
+  Normalized insider transactions. US: SEC Form 4/4A non-derivative + derivative tables (Forms 3/5 optional).
+  KR: DART executive/major shareholder holding reports (elestock / majorstock). EU: PDMR notifications (MAR art.19) best-effort.
+storage: {path: normalized/insider_transactions, format: parquet, partition_by: [region, year], write_mode: upsert}
+primary_key: [txn_id]
+pit: {knowledge_column: knowledge_date, rule: "usable from filing date, never transaction_date"}
+columns:
+  - {name: txn_id, type: string, nullable: false, description: "{filing_id}:{table}:{line}"}
+  - {name: region, type: string, nullable: false, description: "Partition"}
+  - {name: year, type: int16, nullable: false, description: "Partition: year(knowledge_date)"}
+  - {name: filing_id, type: string, nullable: false, description: "FK filings_index"}
+  - {name: source_id, type: string, nullable: false, description: "sec_edgar | opendart | eu_pdmr_*"}
+  - {name: source_entity_id, type: string, nullable: false, description: "Issuer native id (CIK, corp_code...)"}
+  - {name: issuer_id, type: string, nullable: true, description: "Resolved issuer"}
+  - {name: security_id, type: string, nullable: true, description: "Resolved security"}
+  - {name: insider_id, type: string, nullable: false, description: "Reporting owner key: '{source_id}:{owner CIK or normalized name}'"}
+  - {name: insider_name, type: string, nullable: false, description: "Reporting owner name"}
+  - {name: is_director, type: bool, nullable: false, description: "Director"}
+  - {name: is_officer, type: bool, nullable: false, description: "Officer"}
+  - {name: is_ten_pct_owner, type: bool, nullable: false, description: "10% owner (KR: major shareholder 5%+)"}
+  - {name: officer_title, type: string, nullable: true, description: "Raw title"}
+  - {name: role_norm, type: enum, nullable: true, values: [ceo, cfo, coo, chair, president, director, officer_other, owner, other], description: "Normalized role"}
+  - {name: transaction_date, type: date, nullable: false, description: "Trade date"}
+  - {name: knowledge_date, type: date, nullable: false, description: "Filing date"}
+  - {name: knowledge_ts, type: datetime, nullable: true, description: "Acceptance timestamp UTC"}
+  - {name: txn_code, type: string, nullable: true, description: "Native code (Form 4: P,S,A,M,F,G,D,C,X,J...)"}
+  - {name: txn_type, type: enum, nullable: false, values: [buy, sell, grant, option_exercise, tax_withholding, gift, conversion, other], description: "Normalized type; only buy/sell are open-market discretionary"}
+  - {name: is_open_market, type: bool, nullable: false, description: "True for P/S codes or equivalent"}
+  - {name: is_derivative, type: bool, nullable: false, description: "From derivative table"}
+  - {name: is_10b5_1, type: bool, nullable: true, description: "Rule 10b5-1 plan checkbox/footnote (2023+ forms)"}
+  - {name: shares, type: float64, nullable: false, description: "Shares transacted (positive)"}
+  - {name: price, type: float64, nullable: true, description: "Price per share"}
+  - {name: currency, type: string, nullable: true, description: "Price currency"}
+  - {name: value_local, type: float64, nullable: true, description: "shares * price"}
+  - {name: value_usd, type: float64, nullable: true, description: "USD value at fx(transaction_date)"}
+  - {name: shares_owned_after, type: float64, nullable: true, description: "Holdings after txn"}
+  - {name: holding_change_pct, type: float64, nullable: true, description: "shares / holdings before the trade (shares_owned_after -/+ shares); signed: + acquisitions, - disposals (v2 clarification)"}
+  - {name: ownership_nature, type: enum, nullable: true, values: [direct, indirect], description: "D/I"}
+  - {name: is_amendment, type: bool, nullable: false, description: "From 4/A"}
+  - {name: ingested_at, type: datetime, nullable: false, description: "Write time UTC"}
+  - {name: form_type, type: string, nullable: true, description: "Native form: 3, 4, 5, 4/A ... (added v2)"}
+  - {name: security_title, type: string, nullable: true, description: "Security title as reported (Common Stock, RSU, Stock Option ...) (added v2)"}
+  - {name: acquired_disposed, type: enum, nullable: true, values: [A, D], description: "Form 4 acquired (A) / disposed (D) code — direction of the transaction (added v2)"}
+  - {name: issuer_ticker, type: string, nullable: true, description: "Issuer trading symbol as reported on the form (helps identity resolution) (added v2)"}
+  - {name: underlying_shares, type: float64, nullable: true, description: "Derivative rows: underlying security shares (added v2)"}
+  - {name: exercise_price, type: float64, nullable: true, description: "Derivative rows: conversion/exercise price (added v2)"}
+  - {name: n_reporting_owners, type: int16, nullable: true, description: "Number of reporting owners on a joint filing; insider_* columns describe the first owner, role flags are OR-ed across owners (added v2)"}
+  - {name: superseded_by_filing_id, type: string, nullable: true, description: "Set when a later amendment (4/A) restates this transaction (same issuer, owner, date, code, table, security). PIT readers: ignore the row only from that amendment knowledge_date on (added v2)"}
+  - {name: transaction_date_as_filed, type: date, nullable: true, description: "The transaction date exactly as filed, set only when the parser changed transaction_date because the filed date was certainly wrong (a filer typo such as 2047-06-07 or 0024-02-01); null = transaction_date is as filed (added A5 2026-11, additive)"}
+  - {name: transaction_date_fix, type: enum, nullable: true, values: [century, year, period_of_report], description: "How transaction_date was changed from the filed date (sec_form4.plausible_txn_date): century = two-digit year read as 19xx/20xx; year = the one same-month-and-day date in the form's window; period_of_report = APPROXIMATION, the form's period of report (its earliest transaction) for a Form 3/4 filed at most 10 days after it. Every changed date is <= knowledge_date + 1 day; knowledge_date is never changed. Null = as filed (added A5 2026-11, additive)"}

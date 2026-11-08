@@ -1,0 +1,18 @@
+table: cb_curves
+version: 1
+zone: scores
+owner: macro-w3 (app.macro.cb.implied, job cb_curves_implied)
+description: >
+  Display curves behind the implied paths: continuously-compounded zero and instantaneous forward rates on a monthly
+  (to 2y) / quarterly grid, for the latest curve date and ~1 week / 1 month / 3 months / 6 months / 1 year earlier. Official inputs per bank
+  (cb_implied_meta.source). Overwritten nightly.
+storage: {path: scores/cb_curves, format: parquet, partition_by: [], write_mode: overwrite}
+primary_key: [bank, snapshot, tenor_years]
+columns:
+  - {name: bank, type: string, nullable: false, description: "Bank code"}
+  - {name: as_of, type: date, nullable: false, description: "Curve date"}
+  - {name: snapshot, type: enum, nullable: false, values: [latest, 1w, 1m, 3m, 6m, 1y], description: "Which snapshot"}
+  - {name: tenor_years, type: float64, nullable: false, description: "Maturity in years"}
+  - {name: zero_rate, type: float64, nullable: true, unit: percent, description: "Zero rate (continuous)"}
+  - {name: forward_rate, type: float64, nullable: true, unit: percent, description: "Instantaneous forward (1-day forward for bootstrapped curves)"}
+  - {name: computed_at, type: datetime, nullable: false, description: "Write time UTC"}

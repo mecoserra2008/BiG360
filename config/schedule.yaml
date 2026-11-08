@@ -1,0 +1,104 @@
+# Schedule profiles (docs/OPERATIONS_ROADMAP.md O3.4). Owner: platform (app.ops.schedule).
+#
+# The worker maps the ACTIVE profile to APScheduler triggers. Switch profile without a code change:
+#   * PUT /api/v1/system/schedule {"profile": "daily"}   (System page > Settings; persisted in data/state/schedule.json)
+#   * or env BIG360_SCHEDULE_PROFILE=daily               (wins over the stored choice)
+# The running worker picks a change up within one queue poll (hot reload, no restart needed).
+#
+# Entry kinds
+#   dag    one DAG of contracts/jobs.yaml on `cron` (cron: jobs.yaml = take the DAG's cron from jobs.yaml)
+#   chain  several DAGs back to back in one run (steps; monthly_if_due runs the monthly DAG only when its last
+#          completed run is older than monthly_min_days)
+# Optional per entry: notify (tray toast per run, default true), wake (wake timer, default true), force (bypass the
+# runner's run-key idempotency, default false). hourly_news (roadmap v3 N3) is in every profile (intraday inherits
+# daily) and runs independently of the refresh entries.
+# Crons use standard crontab weekday numbering (0 = Sunday) in the entry `timezone` (default: `timezone` below).
+#
+# Catch-up rule (PC asleep / off at the scheduled time): an entry is due when its most recent scheduled time has
+# passed and no completed run of its DAG(s) finished after it (any trigger counts, so a manual catch-up satisfies
+# it). The worker checks at start and every catchup_check_min; APScheduler misfire grace covers short sleeps.
+# Runs older than max_catchup_days are not replayed (the next scheduled run covers them).
+version: 1
+default_profile: weekly
+timezone: Europe/Lisbon
+catchup_check_min: 15
+monthly_min_days: 28
+
+profiles:
+  weekly:
+    label: Weekly
+    description: >-
+      Saturday 02:00 Lisbon: nightly DAG for the latest session (all ingestion catches up from its watermarks, GDELT
+      up to 10 days), then the weekly DAG, then the monthly DAG when due. CFTC runs Friday after the 15:30 ET
+      release; the gap filler runs between refreshes. 02:00 (refresh-pipeline fixes 2026-10-26, was 08:00): the
+      refresh no longer competes with daytime use; Friday's sessions are closed everywhere (US close 21:00 Lisbon),
+      Friday's GDELT day is finalised by ~00:40 and CFTC (Fri 19:00 ET = Sat 00:00 Lisbon) has run. A PC that sleeps
+      or is off at 02:00 catches up at the next start / wake (catch-up rule above; wake timer set by the worker).
+    period_days: 7
+    sla_days: 9            # a dataset is stale when its data lags its latest expected date by more than this
+    max_catchup_days: 6
+    misfire_grace_h: 144
+    entries:
+      - id: weekly_refresh
+        kind: chain
+        steps: [nightly, weekly, monthly_if_due]
+        cron: "0 2 * * 6"
+        timezone: Europe/Lisbon
+        params: {nightly: {max_days: 10}}
+        description: Saturday 02:00 Lisbon - nightly -> weekly -> monthly (if due)
+      - id: cftc_weekly
+        kind: dag
+        dag: cftc_weekly
+        cron: "0 19 * * 5"
+        timezone: America/New_York
+        description: Friday 19:00 ET - CFTC Commitments of Traders (released 15:30 ET)
+      - id: hourly_news
+        kind: dag
+        dag: hourly
+        cron: "10 * * * *"
+        timezone: UTC
+        notify: false          # no tray toast per run (failures surface in Data Health)
+        wake: false            # never wakes the PC
+        force: true            # each run is a new hour: bypass the runner's run-key idempotency
+        catch_up: false        # a missed hour is folded by the next run (no catch-up, no missed-run alert)
+        misfire_grace_h: 0.5
+        description: Every hour at :10 UTC - live news hourly fold, daily finalise, intraday serving DuckDB (roadmap v3 N3)
+
+  daily:
+    label: Daily
+    description: >-
+      The jobs.yaml crons: nightly Tue-Sat 01:30, weekly Saturday 06:00, monthly first Sunday 08:00 (Lisbon);
+      CFTC Friday 19:00 ET.
+    period_days: 1
+    sla_days: 3
+    max_catchup_days: 2
+    misfire_grace_h: 20
+    entries:
+      - {id: nightly, kind: dag, dag: nightly, cron: jobs.yaml, description: "jobs.yaml nightly cron (Tue-Sat 01:30)"}
+      - {id: weekly, kind: dag, dag: weekly, cron: jobs.yaml, description: "jobs.yaml weekly cron (Sat 06:00, waits for nightly)"}
+      - {id: monthly, kind: dag, dag: monthly, cron: jobs.yaml, max_catchup_days: 20, description: "jobs.yaml monthly cron (first Sunday 08:00)"}
+      - id: cftc_weekly
+        kind: dag
+        dag: cftc_weekly
+        cron: "0 19 * * 5"
+        timezone: America/New_York
+        description: Friday 19:00 ET - CFTC Commitments of Traders (released 15:30 ET)
+      - id: hourly_news
+        kind: dag
+        dag: hourly
+        cron: "10 * * * *"
+        timezone: UTC
+        notify: false          # no tray toast per run (failures surface in Data Health)
+        wake: false            # never wakes the PC
+        force: true            # each run is a new hour: bypass the runner's run-key idempotency
+        catch_up: false        # a missed hour is folded by the next run (no catch-up, no missed-run alert)
+        misfire_grace_h: 0.5
+        description: Every hour at :10 UTC - live news hourly fold, daily finalise, intraday serving DuckDB (roadmap v3 N3)
+
+  intraday:
+    label: Intraday (placeholder)
+    placeholder: true
+    description: >-
+      Placeholder for O3: behaves like `daily` today. Later it turns on the real-time layer (R1 bus built; R2 live
+      prices deferred) and adds intraday pulls.
+    base: daily

@@ -1,0 +1,27 @@
+table: tech_prob_surfaces
+version: 1
+zone: features
+owner: technicals (app.techprob.job:run_fit_job, weekly technicals_probabilities_fit)
+description: >
+  T2 two-barrier first-passage probability surfaces (docs/TECHNICALS_V2_PLAN.md T2). MODEL-BASED, empirical: for every
+  historical origin of the gate universe (mvp_us + mvp_global EU/UK/JP, own print sessions, 2003 ->) the realised
+  outcome of every barrier pair on a log grid of standardised distances (a = log(upper/close)/sigma_H, b =
+  log(close/lower)/sigma_H, sigma_H = sqrt(V(H)) of the conformal EWMA filter incl. the earnings jump) within H
+  sessions: up first / down first / tie (same bar) / neither. Pools region x vol regime x earnings window, shrunk
+  toward the region and the all-region pool (m = 500), monotone-smoothed. region ALL = all-region fallback. Lists are
+  row-major (ia, ib) over grid x grid.
+storage: {path: features/tech_prob_surfaces, format: parquet, partition_by: [], write_mode: overwrite, retention: "last 8 fits"}
+primary_key: [fit_date, region, vol_regime, earn_window, horizon]
+columns:
+  - {name: fit_date, type: date, nullable: false, description: "Fit date (weekly)"}
+  - {name: region, type: enum, nullable: false, values: [US, EU, UK, JP, OTHER, ALL], description: "Region pool (ALL = all-region fallback)"}
+  - {name: vol_regime, type: enum, nullable: false, values: [low, mid, high], description: "sigma_d / median sigma_d of the previous 252 sessions: low < 0.85 <= mid <= 1.2 < high"}
+  - {name: earn_window, type: bool, nullable: false, description: "An earnings reaction day falls within the H sessions"}
+  - {name: horizon, type: int16, nullable: false, description: "H sessions (5, 10, 20, 40, 60)"}
+  - {name: n_origins, type: int64, nullable: false, description: "Origins behind the pool (before shrinkage)"}
+  - {name: grid, type: list<float64>, nullable: false, description: "Standardised distance grid (both axes)"}
+  - {name: p_up, type: list<float64>, nullable: false, description: "P(upper barrier first within H), grid x grid row-major (a, b)"}
+  - {name: p_down, type: list<float64>, nullable: false, description: "P(lower barrier first within H)"}
+  - {name: p_tie, type: list<float64>, nullable: false, description: "P(both first reached on the same bar)"}
+  - {name: mtm_neither_z, type: list<float64>, nullable: false, description: "Mean terminal log move / sigma_H of the paths that reached neither barrier"}
+  - {name: computed_at, type: datetime, nullable: false, description: "Write time UTC"}

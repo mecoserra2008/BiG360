@@ -1,0 +1,55 @@
+{
+ "meta": {
+  "title": "29.利率 A.中央銀行利率依期間",
+  "sender": "中央銀行",
+  "prepared": "2026/10/11 下午 09:34:37",
+  "filename": "EG2AM01.px",
+  "links": "https://cpx.cbc.gov.tw/api/DataAPI/Get?FileName=EG2AM01",
+  "note": "上述利率係指期底值，詳細請參閱各期本行出版之「金融統計月報」。",
+  "refperiod": "各項資料發布請參照本行<a href='https://www.stat.gov.tw/News_NoticeCalendar.aspx?n=3717&IsControl=0&_Hide=1&Dept=A59000000N'>「預告統計資料發布時間表」</a>",
+  "last_updated": "2026-09-24",
+  "units": "年息百分比率",
+  "matrix": "EG2A"
+ },
+ "data": {
+  "dataSets": [
+   [
+    "2026M05",
+    "2.000",
+    "2.375",
+    "4.250"
+   ],
+   [
+    "2026M06",
+    "2.000",
+    "2.375",
+    "-"
+   ],
+   [
+    "2026M07",
+    "2.000",
+    "2.375",
+    "-"
+   ],
+   [
+    "2026M08",
+    "2.000",
+    "2.375",
+    "-"
+   ]
+  ],
+  "structure": {
+   "Table1": [
+    {
+     "data": "重貼現率"
+    },
+    {
+     "data": "擔保放款融通利率"
+    },
+    {
+     "data": "短期融通"
+    }
+   ]
+  }
+ }
+}

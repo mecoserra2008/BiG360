@@ -1,0 +1,43 @@
+{
+"config":
+{
+"title":"Tasas de interés del Banco Central de Reserva",
+"series":
+[
+{
+"name":"Tasas de interés del Banco Central de Reserva - Tasa de Referencia de la Política Monetaria",
+"dec":"2"
+},
+{
+"name":"Índice de precios Lima Metropolitana (var% 12 meses) - IPC",
+"dec":"2"
+},
+{
+"name":"Índice de precios Lima Metropolitana (var% 12 meses) - IPC Sin Alimentos y Energía",
+"dec":"2"
+},
+{
+"name":"Empleo Mensual en Lima Metropolitana - Promedio móvil tres meses (porcentaje) - Tasa de Desempleo (%)",
+"dec":"1"
+}]
+},
+"periods":
+[
+{
+"name":"Jun.2026",
+"values":["4.25","4.00890965651766","4.4638296190724","4.91312664821157"]
+},
+{
+"name":"Jul.2026",
+"values":["4.25","4.06515256208199","4.56510355827558","4.68136660632325"]
+},
+{
+"name":"Ago.2026",
+"values":["4.25","4.43780929778608","4.4992409271019","4.80377918575145"]
+},
+{
+"name":"Sep.2026",
+"values":["4.25","4.54865469481509","4.51359798883213","n.d."]
+}
+]
+}

@@ -1,0 +1,23 @@
+FREQ,BORROWERS_CTY,TC_BORROWERS,TC_LENDERS,VALUATION,UNIT_TYPE,TC_ADJUST,COLLECTION,DECIMALS,UNIT_MULT,UNIT_MEASURE,TITLE_TS,TIME_PERIOD,OBS_VALUE,OBS_STATUS,OBS_PRE_BREAK,OBS_CONF
+Q,XM,P,A,M,770,A,E,1,0,367,Euro area - Credit to Private non-financial sector from All sectors at Market value - Percentage of GDP - Adjusted for breaks,2025-Q4,153.3,A,,F
+Q,US,G,A,M,770,A,E,1,0,367,United States - Credit to General government from All sectors at Market value - Percentage of GDP - Adjusted for breaks,2025-Q4,110.9,A,,F
+Q,CN,H,A,M,770,A,E,1,0,367,China - Credit to Households and NPISHs from All sectors at Market value - Percentage of GDP - Adjusted for breaks,2025-Q4,58,A,,F
+Q,US,H,A,M,770,A,E,1,0,367,United States - Credit to Households and NPISHs from All sectors at Market value - Percentage of GDP - Adjusted for breaks,2025-Q4,68.1,A,,F
+Q,CN,P,A,M,770,A,E,1,0,367,China - Credit to Private non-financial sector from All sectors at Market value - Percentage of GDP - Adjusted for breaks,2025-Q4,200.8,A,,F
+Q,US,P,A,M,770,A,E,1,0,367,United States - Credit to Private non-financial sector from All sectors at Market value - Percentage of GDP - Adjusted for breaks,2025-Q4,140.2,A,,F
+Q,US,N,A,M,770,A,E,1,0,367,United States - Credit to Non-financial corporations from All sectors at Market value - Percentage of GDP - Adjusted for breaks,2025-Q4,72.2,A,,F
+Q,CN,N,A,M,770,A,E,1,0,367,China - Credit to Non-financial corporations from All sectors at Market value - Percentage of GDP - Adjusted for breaks,2025-Q4,142.8,A,,F
+Q,XM,N,A,M,770,A,E,1,0,367,Euro area - Credit to Non-financial corporations from All sectors at Market value - Percentage of GDP - Adjusted for breaks,2025-Q4,103,A,,F
+Q,XM,H,A,M,770,A,E,1,0,367,Euro area - Credit to Households and NPISHs from All sectors at Market value - Percentage of GDP - Adjusted for breaks,2025-Q4,50.4,A,,F
+Q,XM,G,A,M,770,A,E,1,0,367,Euro area - Credit to General government from All sectors at Market value - Percentage of GDP - Adjusted for breaks,2025-Q4,85,A,,F
+Q,US,N,A,M,770,A,E,1,0,367,United States - Credit to Non-financial corporations from All sectors at Market value - Percentage of GDP - Adjusted for breaks,2026-Q1,72.5,A,,F
+Q,XM,N,A,M,770,A,E,1,0,367,Euro area - Credit to Non-financial corporations from All sectors at Market value - Percentage of GDP - Adjusted for breaks,2026-Q1,103.3,A,,F
+Q,CN,P,A,M,770,A,E,1,0,367,China - Credit to Private non-financial sector from All sectors at Market value - Percentage of GDP - Adjusted for breaks,2026-Q1,204.1,A,,F
+Q,US,H,A,M,770,A,E,1,0,367,United States - Credit to Households and NPISHs from All sectors at Market value - Percentage of GDP - Adjusted for breaks,2026-Q1,67.2,A,,F
+Q,XM,H,A,M,770,A,E,1,0,367,Euro area - Credit to Households and NPISHs from All sectors at Market value - Percentage of GDP - Adjusted for breaks,2026-Q1,50.2,A,,F
+Q,CN,H,A,M,770,A,E,1,0,367,China - Credit to Households and NPISHs from All sectors at Market value - Percentage of GDP - Adjusted for breaks,2026-Q1,57.5,A,,F
+Q,US,G,A,M,770,A,E,1,0,367,United States - Credit to General government from All sectors at Market value - Percentage of GDP - Adjusted for breaks,2026-Q1,110.8,A,,F
+Q,XM,G,A,M,770,A,E,1,0,367,Euro area - Credit to General government from All sectors at Market value - Percentage of GDP - Adjusted for breaks,2026-Q1,85.6,A,,F
+Q,XM,P,A,M,770,A,E,1,0,367,Euro area - Credit to Private non-financial sector from All sectors at Market value - Percentage of GDP - Adjusted for breaks,2026-Q1,153.5,A,,F
+Q,CN,N,A,M,770,A,E,1,0,367,China - Credit to Non-financial corporations from All sectors at Market value - Percentage of GDP - Adjusted for breaks,2026-Q1,146.6,A,,F
+Q,US,P,A,M,770,A,E,1,0,367,United States - Credit to Private non-financial sector from All sectors at Market value - Percentage of GDP - Adjusted for breaks,2026-Q1,139.7,A,,F

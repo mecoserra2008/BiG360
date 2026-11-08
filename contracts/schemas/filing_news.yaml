@@ -1,0 +1,35 @@
+table: filing_news
+version: 1
+zone: normalized
+owner: events-v2 historical news (app.events_v2.filing_news)
+description: >
+  N1 official corporate news: one row per regulatory announcement mapped into the story layer. SEC 8-K current
+  reports back to 2001 (EDGAR submissions history: items, acceptance time; source `sec_8k`) and, where the lake
+  already holds titled announcements, TDnet and HKEXnews (source `exchange_ann`). Issuer-linked (identity layer),
+  theme by item type / headline rules, sentiment = item-based polarity where defensible (1.03 bankruptcy, 2.04
+  acceleration, 2.06 impairment, 3.01 delisting notice, 4.02 non-reliance, 1.05 cyber incident -> negative; all other
+  items neutral 0; no model). story_id points at the news_stories row (one story per filing).
+storage: {path: normalized/filing_news, format: parquet, partition_by: [year], write_mode: upsert}
+primary_key: [filing_id]
+pit: {knowledge_column: date, rule: "UTC date of the acceptance / publication time"}
+columns:
+  - {name: filing_id, type: string, nullable: false, description: "{source_id}:{native key} (filings_index id)"}
+  - {name: year, type: int16, nullable: false, description: "Partition: year(date)"}
+  - {name: date, type: date, nullable: false, description: "UTC date of ts"}
+  - {name: ts, type: datetime, nullable: false, description: "Acceptance / publication time UTC (filing date 00:00 when unknown)"}
+  - {name: source_id, type: string, nullable: false, description: "sec_8k | tdnet | hkex"}
+  - {name: issuer_id, type: string, nullable: true, description: "FK issuers"}
+  - {name: iid, type: int32, nullable: true, description: "event_labels issuer id"}
+  - {name: form_type, type: string, nullable: false, description: "8-K, TANSHIN, BUYBACK, ANNOUNCEMENT, ..."}
+  - {name: items, type: list<string>, nullable: true, description: "8-K item numbers (pre-2004 numbering kept as filed)"}
+  - {name: title, type: string, nullable: false, description: "Story headline, e.g. 'Apple Inc. 8-K: Results of operations and financial condition (2.02)'"}
+  - {name: url, type: string, nullable: true, description: "Document URL"}
+  - {name: url_hash, type: int64, nullable: true, description: "blake2b-64 of the normalised URL"}
+  - {name: theme_mask, type: int64, nullable: false, description: "Market-theme bitmask (item map / headline rules)"}
+  - {name: sector_mask, type: int16, nullable: false, description: "Issuer sector bits"}
+  - {name: countries, type: list<int16>, nullable: false, description: "Issuer country label id (else US for SEC)"}
+  - {name: sentiment_x100, type: int8, nullable: false, description: "Item-based polarity x 100 (0 = neutral)"}
+  - {name: polarity_rule, type: string, nullable: true, description: "Item rule that set a non-zero polarity"}
+  - {name: story_id, type: int64, nullable: false, description: "news_stories story id"}
+  - {name: story_layer, type: enum, nullable: false, values: [merged, pending_gdelt], description: "merged into news_stories, or waiting for the GDELT day"}
+  - {name: ingested_at, type: datetime, nullable: false, description: "Write time UTC"}

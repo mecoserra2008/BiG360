@@ -1,0 +1,106 @@
+{
+ "title": "Conditional market VaR (quantile GBM)",
+ "description": "5 % / 25 % / 50 % / 75 % / 95 % quantiles of the next-month equity return given VIX, credit and financial conditions.",
+ "question": "forecasting",
+ "tags": [
+  "probabilistic",
+  "quantile",
+  "VaR"
+ ],
+ "method_note": "Adrian-Boyarchenko-Giannone (2019) 'vulnerable growth' applied to equities: financial conditions move the left tail more than the median. The 5 % quantile is a conditional VaR; pinball loss vs climatology and CQR coverage check it. Caveat: the universe is today's constituents (membership history starts 2026-10), so early years carry survivorship bias; read the premium as an upper bound.",
+ "expected_outputs": [
+  "fan chart",
+  "pinball per level vs climatology",
+  "PIT / calibration",
+  "CQR coverage"
+ ],
+ "runtime_s": 0.8,
+ "validated": "2026-11-06 on snapshot R20261106T010757G9ZB",
+ "result": {
+  "run_id": "SR20261106T015453060E3",
+  "beats_baseline": true,
+  "beats_linear": false,
+  "verdict": "quantile GBM beats linear-Gaussian baseline on CRPS (DM p = 0.00238); point forecast: quantile GBM (median) is worse than linear baseline out of sample (mean loss 0.002813 vs 0.002615)",
+  "n_obs": 369,
+  "metrics": {
+   "oos_rmse": 0.0530335644155048,
+   "oos_r2_oos": -0.055680483611980414,
+   "crps": 0.02552711146392553,
+   "crps_linear": 0.027965887295654395,
+   "crps_skill_vs_linear": 0.08720538010992496,
+   "coverage_90": 0.7837837837837838,
+   "dm_p_crps_vs_linear": 0.002378024698646188,
+   "conformal_coverage": 0.9157303370786517,
+   "dm_p_vs_linear": 0.3229244492505152
+  },
+  "coefficients": []
+ },
+ "study": {
+  "name": "Conditional market VaR (quantile GBM)",
+  "method": "quantile_gbm",
+  "y": "fwd_mkt_1m",
+  "x": [
+   "vix",
+   "baa_spread",
+   "nfci",
+   "term_spread"
+  ],
+  "params": {
+   "n_estimators": 150,
+   "num_leaves": 7,
+   "min_child_samples": 20,
+   "cv": {
+    "folds": 5,
+    "scheme": "expanding",
+    "purge": 1,
+    "conformal_alpha": 0.1
+   }
+  },
+  "dataset": {
+   "kind": "timeseries",
+   "frequency": "M",
+   "start": "1996-01-01",
+   "variables": [
+    {
+     "name": "fwd_mkt_1m",
+     "source": "prices",
+     "field": "ret",
+     "transforms": [
+      {
+       "op": "fwd_compound",
+       "k": 1
+      }
+     ],
+     "entity_agg": "mean",
+     "entities": {
+      "universe": "mvp_us"
+     }
+    },
+    {
+     "name": "term_spread",
+     "source": "macro",
+     "field": "fred:T10Y3M",
+     "agg": "last"
+    },
+    {
+     "name": "baa_spread",
+     "source": "macro",
+     "field": "fred:BAA10Y",
+     "agg": "last"
+    },
+    {
+     "name": "vix",
+     "source": "macro",
+     "field": "fred:VIXCLS",
+     "agg": "last"
+    },
+    {
+     "name": "nfci",
+     "source": "macro",
+     "field": "fred:NFCI",
+     "agg": "last"
+    }
+   ]
+  }
+ }
+}

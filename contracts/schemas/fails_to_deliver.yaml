@@ -1,0 +1,25 @@
+table: fails_to_deliver
+version: 1
+zone: normalized
+owner: ingest-us (finra_si)
+description: >
+  SEC Fails-to-Deliver data (CNS fails, twice monthly files 'a' = 1st half, 'b' = 2nd half of a month), one row per
+  CUSIP and settlement date. knowledge_date = publication date of the half-month file (Last-Modified of the SEC zip,
+  else period end + 14 days estimated). Companion of short_interest for squeeze/borrow-stress signals.
+storage: {path: normalized/fails_to_deliver, format: parquet, partition_by: [year], write_mode: upsert}
+primary_key: [cusip, settlement_date]
+pit: {knowledge_column: knowledge_date, rule: "usable from publication date of the half-month file"}
+columns:
+  - {name: cusip, type: string, nullable: false, description: "CUSIP"}
+  - {name: settlement_date, type: date, nullable: false, description: "Settlement date of the fail"}
+  - {name: year, type: int16, nullable: false, description: "Partition: year(settlement_date)"}
+  - {name: symbol, type: string, nullable: true, description: "Ticker as published by SEC"}
+  - {name: description, type: string, nullable: true, description: "Issue description"}
+  - {name: quantity_fails, type: float64, nullable: false, description: "Aggregate net balance of shares that failed to be delivered"}
+  - {name: price, type: float64, nullable: true, description: "Prior-day closing price (USD)"}
+  - {name: security_id, type: string, nullable: true, description: "Resolved security (via identifier_map cusip) if available"}
+  - {name: file_name, type: string, nullable: false, description: "Source file (cnsfailsYYYYMMa/b)"}
+  - {name: knowledge_date, type: date, nullable: false, description: "Publication date"}
+  - {name: knowledge_date_estimated, type: bool, nullable: false, description: "True if imputed"}
+  - {name: source_id, type: string, nullable: false, description: "sec_ftd"}
+  - {name: ingested_at, type: datetime, nullable: false, description: "Write time UTC"}

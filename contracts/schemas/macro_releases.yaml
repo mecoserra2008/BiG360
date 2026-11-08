@@ -1,0 +1,36 @@
+table: macro_releases
+version: 1
+zone: normalized
+owner: macro-w2 (app.macro.calendar, job macro_calendar)
+description: >
+  Official macro release calendar (past 3 years + 90 days ahead). One row per scheduled release / policy meeting from
+  OFFICIAL publishers only: FRED/ALFRED release dates (St. Louis Fed; US BLS/BEA/Census/Fed releases), BLS, BEA, Federal
+  Reserve (FOMC), Eurostat, ECB, ONS, Bank of England, Bank of Japan, Statistics Canada, Bank of Canada, ABS, RBA, IBGE,
+  BCB and national EU offices where machine-readable (app.macro.calendar_sources). Rows with schedule_source=inferred
+  are NOT from a calendar: they are past release dates reconstructed from observation vintages (first-seen knowledge
+  date) for tracked series that no official calendar covers; they are flagged and never shown as upcoming.
+  Importance tier rule (app.macro.calendar.importance_tier): 1 = GDP, CPI/core CPI/HICP, payrolls/employment,
+  unemployment, policy-rate decisions; 2 = industrial production, retail sales, PPI, PCE prices, PMI proxies/business
+  confidence, jobless claims, JOLTS; 3 = everything else.
+storage: {path: normalized/macro_releases, format: parquet, partition_by: [], write_mode: upsert}
+primary_key: [release_event_id]
+columns:
+  - {name: release_event_id, type: string, nullable: false, description: "RE + 16 hex of sha1(source_id|release_key|release_date)"}
+  - {name: source_id, type: string, nullable: false, description: "Calendar source: fred_releases, bls_cal, bea_cal, fomc, eurostat_cal, ecb_gc, ons_cal, boe_mpc, boj_mpm, statcan_cal, boc_rate, abs_cal, rba_board, ibge_cal, bcb_copom, ... or inferred"}
+  - {name: release_key, type: string, nullable: false, description: "Native release key within the source (e.g. FRED release_id fred:10)"}
+  - {name: release_name, type: string, nullable: false, description: "Release / event title as published"}
+  - {name: publisher, type: string, nullable: false, description: "Official publisher (BLS, BEA, Eurostat, ECB, ONS, ...)"}
+  - {name: country, type: string, nullable: false, description: "ISO2 or EA"}
+  - {name: kind, type: enum, nullable: false, values: [data, policy_meeting], description: "Data release or central-bank policy decision"}
+  - {name: scheduled_at, type: datetime, nullable: false, description: "Scheduled release time, UTC"}
+  - {name: scheduled_tz, type: string, nullable: false, description: "Publisher IANA timezone"}
+  - {name: scheduled_local, type: string, nullable: false, description: "Scheduled local time ISO 8601 with offset"}
+  - {name: release_date, type: date, nullable: false, description: "Local release date"}
+  - {name: time_known, type: bool, nullable: false, description: "True when the time came from the source; false = publisher's documented default time"}
+  - {name: schedule_source, type: enum, nullable: false, values: [official_calendar, inferred], description: "official_calendar = from a publisher calendar/API; inferred = reconstructed from observation vintages (past only)"}
+  - {name: importance, type: int8, nullable: false, description: "Tier 1 (high) - 3 (low); rule in the table description"}
+  - {name: series_ids, type: list<string>, nullable: false, description: "Linked macro_series ids (tracked core series published by this release)"}
+  - {name: reference_period, type: string, nullable: true, description: "Reference period when the source states it"}
+  - {name: url, type: string, nullable: true, description: "Source page"}
+  - {name: first_seen_at, type: datetime, nullable: false, description: "When this schedule entry was first ingested (UTC)"}
+  - {name: updated_at, type: datetime, nullable: false, description: "Write time UTC"}

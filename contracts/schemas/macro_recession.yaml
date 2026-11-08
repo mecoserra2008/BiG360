@@ -1,0 +1,28 @@
+table: macro_recession
+version: 1
+zone: scores
+owner: macro-w2 (app.macro.recession, job macro_recession)
+description: >
+  Recession-risk panel, one row per (method, country, date), each with a method label.
+  nyfed_yield_curve_official = NY Fed published probit probability of a US recession 12 months ahead (allmonth.xls),
+  dated at the spread observation month; yield_curve_probit = our re-estimate of the same 3m10y probit per country
+  with official spreads (target = recession 12 months ahead: NBER USREC for the US, two consecutive quarters of
+  negative official real GDP q/q elsewhere); sahm_realtime = FRED SAHMREALTIME (signal >= 0.5); hmm_regime =
+  P(contraction) from macro_regimes (ours); oecd_cli_turning_point = turning points of the OECD CLI (peak/trough with
+  a 6-month confirmation; signal while the latest turning point is a peak).
+storage: {path: scores/macro_recession, format: parquet, partition_by: [], write_mode: overwrite}
+primary_key: [method, country, date]
+columns:
+  - {name: method, type: enum, nullable: false, values: [nyfed_yield_curve_official, yield_curve_probit, sahm_realtime, hmm_regime, oecd_cli_turning_point], description: "Method"}
+  - {name: country, type: string, nullable: false, description: "ISO2, EA or GLOBAL"}
+  - {name: date, type: date, nullable: false, description: "Observation month (first day) or date"}
+  - {name: probability, type: float64, nullable: true, description: "Recession probability 0-1 (null for indicator-only methods)"}
+  - {name: value, type: float64, nullable: true, description: "Underlying indicator (spread, Sahm gap, CLI level...)"}
+  - {name: signal, type: bool, nullable: true, description: "Threshold / turning-point signal on"}
+  - {name: threshold, type: float64, nullable: true, description: "Threshold used for signal"}
+  - {name: horizon_months, type: int16, nullable: true, description: "Forecast horizon (12 for probits)"}
+  - {name: method_label, type: string, nullable: false, description: "Display label incl. official vs model-based"}
+  - {name: official, type: bool, nullable: false, description: "Published by an official institution (vs our model)"}
+  - {name: source, type: string, nullable: false, description: "Source / series ids"}
+  - {name: details, type: json, nullable: true, description: "Coefficients, turning-point type, state probabilities..."}
+  - {name: computed_at, type: datetime, nullable: false, description: "Write time UTC"}

@@ -1,0 +1,122 @@
+<?xml version='1.0' encoding='utf-8'?>
+<xbrli:xbrl xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:ipp_en="http://www.cnmv.es/xbrl/ipp/en/2019-01-01" xmlns:link="http://www.xbrl.org/2003/linkbase" xmlns:ipp_en_dim="http://www.cnmv.es/xbrl/ipp/en/dim/2019-01-01" xmlns:nonnum="http://www.xbrl.org/dtr/type/non-numeric" xmlns:xbrldt="http://xbrl.org/2005/xbrldt" xmlns:xbrldi="http://xbrl.org/2006/xbrldi" xmlns:xbrli="http://www.xbrl.org/2003/instance" xmlns:iso4217="http://www.xbrl.org/2003/iso4217" xmlns:xlink="http://www.w3.org/1999/xlink" xsi:schemaLocation="http://xbrl.org/2006/xbrldi http://www.xbrl.org/2006/xbrldi-2006.xsd">
+  <link:schemaRef xlink:type="simple" xlink:href="http://www.cnmv.es/xbrl/ipp/en/2019-01-01/ipp_en_2019-01-01.xsd"/>
+  <xbrli:context id="Icur_PeriodoActualBalanceMiembro">
+    <xbrli:entity>
+      <xbrli:identifier scheme="http://www.cnmv.es/xbrl/ipp/A39000013">BANCO SANTANDER, S.A.</xbrli:identifier>
+    </xbrli:entity>
+    <xbrli:period>
+      <xbrli:instant>2019-12-31</xbrli:instant>
+    </xbrli:period>
+    <xbrli:scenario>
+      <xbrldi:explicitMember dimension="ipp_en_dim:PeriodoBalanceEje">ipp_en_dim:PeriodoActualMiembro</xbrldi:explicitMember>
+    </xbrli:scenario>
+  </xbrli:context>
+  <xbrli:context id="Ipre_PeriodoCierreAnteriorBalanceMiembro">
+    <xbrli:entity>
+      <xbrli:identifier scheme="http://www.cnmv.es/xbrl/ipp/A39000013">BANCO SANTANDER, S.A.</xbrli:identifier>
+    </xbrli:entity>
+    <xbrli:period>
+      <xbrli:instant>2018-12-31</xbrli:instant>
+    </xbrli:period>
+    <xbrli:scenario>
+      <xbrldi:explicitMember dimension="ipp_en_dim:PeriodoBalanceEje">ipp_en_dim:PeriodoCierreAnteriorMiembro</xbrldi:explicitMember>
+    </xbrli:scenario>
+  </xbrli:context>
+  <xbrli:context id="Dcur_PeriodoCorrienteActualMiembro">
+    <xbrli:entity>
+      <xbrli:identifier scheme="http://www.cnmv.es/xbrl/ipp/A39000013">BANCO SANTANDER, S.A.</xbrli:identifier>
+    </xbrli:entity>
+    <xbrli:period>
+      <xbrli:startDate>2019-07-01</xbrli:startDate>
+      <xbrli:endDate>2019-12-31</xbrli:endDate>
+    </xbrli:period>
+    <xbrli:scenario>
+      <xbrldi:explicitMember dimension="ipp_en_dim:CuentaPerdidasGananciasEje">ipp_en_dim:PeriodoCorrienteActualMiembro</xbrldi:explicitMember>
+    </xbrli:scenario>
+  </xbrli:context>
+  <xbrli:context id="Dpre_PeriodoCorrienteAnteriorMiembro">
+    <xbrli:entity>
+      <xbrli:identifier scheme="http://www.cnmv.es/xbrl/ipp/A39000013">BANCO SANTANDER, S.A.</xbrli:identifier>
+    </xbrli:entity>
+    <xbrli:period>
+      <xbrli:startDate>2018-07-01</xbrli:startDate>
+      <xbrli:endDate>2018-12-31</xbrli:endDate>
+    </xbrli:period>
+    <xbrli:scenario>
+      <xbrldi:explicitMember dimension="ipp_en_dim:CuentaPerdidasGananciasEje">ipp_en_dim:PeriodoCorrienteAnteriorMiembro</xbrldi:explicitMember>
+    </xbrli:scenario>
+  </xbrli:context>
+  <xbrli:context id="Dcur_AcumuladoActualMiembro">
+    <xbrli:entity>
+      <xbrli:identifier scheme="http://www.cnmv.es/xbrl/ipp/A39000013">BANCO SANTANDER, S.A.</xbrli:identifier>
+    </xbrli:entity>
+    <xbrli:period>
+      <xbrli:startDate>2019-01-01</xbrli:startDate>
+      <xbrli:endDate>2019-12-31</xbrli:endDate>
+    </xbrli:period>
+    <xbrli:scenario>
+      <xbrldi:explicitMember dimension="ipp_en_dim:CuentaPerdidasGananciasEje">ipp_en_dim:AcumuladoActualMiembro</xbrldi:explicitMember>
+    </xbrli:scenario>
+  </xbrli:context>
+  <xbrli:context id="Dpre_AcumuladoAnteriorMiembro">
+    <xbrli:entity>
+      <xbrli:identifier scheme="http://www.cnmv.es/xbrl/ipp/A39000013">BANCO SANTANDER, S.A.</xbrli:identifier>
+    </xbrli:entity>
+    <xbrli:period>
+      <xbrli:startDate>2018-01-01</xbrli:startDate>
+      <xbrli:endDate>2018-12-31</xbrli:endDate>
+    </xbrli:period>
+    <xbrli:scenario>
+      <xbrldi:explicitMember dimension="ipp_en_dim:CuentaPerdidasGananciasEje">ipp_en_dim:AcumuladoAnteriorMiembro</xbrldi:explicitMember>
+    </xbrli:scenario>
+  </xbrli:context>
+  <xbrli:context id="Dcur_PeriodoActualMiembro">
+    <xbrli:entity>
+      <xbrli:identifier scheme="http://www.cnmv.es/xbrl/ipp/A39000013">BANCO SANTANDER, S.A.</xbrli:identifier>
+    </xbrli:entity>
+    <xbrli:period>
+      <xbrli:startDate>2019-01-01</xbrli:startDate>
+      <xbrli:endDate>2019-12-31</xbrli:endDate>
+    </xbrli:period>
+    <xbrli:scenario>
+      <xbrldi:explicitMember dimension="ipp_en_dim:PeriodoEje">ipp_en_dim:PeriodoActualMiembro</xbrldi:explicitMember>
+    </xbrli:scenario>
+  </xbrli:context>
+  <xbrli:context id="Dpre_PeriodoAnteriorMiembro">
+    <xbrli:entity>
+      <xbrli:identifier scheme="http://www.cnmv.es/xbrl/ipp/A39000013">BANCO SANTANDER, S.A.</xbrli:identifier>
+    </xbrli:entity>
+    <xbrli:period>
+      <xbrli:startDate>2018-01-01</xbrli:startDate>
+      <xbrli:endDate>2018-12-31</xbrli:endDate>
+    </xbrli:period>
+    <xbrli:scenario>
+      <xbrldi:explicitMember dimension="ipp_en_dim:PeriodoEje">ipp_en_dim:PeriodoAnteriorMiembro</xbrldi:explicitMember>
+    </xbrli:scenario>
+  </xbrli:context>
+  <xbrli:unit id="euro">
+    <xbrli:measure>iso4217:EUR</xbrli:measure>
+  </xbrli:unit>
+  <!--Periodo E2-->
+  <ipp_en:I1150 unitRef="euro" decimals="-3" contextRef="Icur_PeriodoActualBalanceMiembro">1522695732000</ipp_en:I1150>
+  <ipp_en:I1150 unitRef="euro" decimals="-3" contextRef="Ipre_PeriodoCierreAnteriorBalanceMiembro">1459270333000</ipp_en:I1150>
+  <ipp_en:I1260 unitRef="euro" decimals="-3" contextRef="Icur_PeriodoActualBalanceMiembro">1412035331000</ipp_en:I1260>
+  <ipp_en:I1260 unitRef="euro" decimals="-3" contextRef="Ipre_PeriodoCierreAnteriorBalanceMiembro">1351908875000</ipp_en:I1260>
+  <ipp_en:I1450 unitRef="euro" decimals="-3" contextRef="Icur_PeriodoActualBalanceMiembro">110660401000</ipp_en:I1450>
+  <ipp_en:I1450 unitRef="euro" decimals="-3" contextRef="Ipre_PeriodoCierreAnteriorBalanceMiembro">107361458000</ipp_en:I1450>
+  <ipp_en:I1570 unitRef="euro" decimals="-3" contextRef="Dcur_PeriodoCorrienteActualMiembro">4033846000</ipp_en:I1570>
+  <ipp_en:I1570 unitRef="euro" decimals="-3" contextRef="Dpre_PeriodoCorrienteAnteriorMiembro">4793559000</ipp_en:I1570>
+  <ipp_en:I1570 unitRef="euro" decimals="-3" contextRef="Dcur_AcumuladoActualMiembro">8115441000</ipp_en:I1570>
+  <ipp_en:I1570 unitRef="euro" decimals="-3" contextRef="Dpre_AcumuladoAnteriorMiembro">9314348000</ipp_en:I1570>
+  <ipp_en:I1572 unitRef="euro" decimals="-3" contextRef="Dcur_PeriodoCorrienteActualMiembro">3284422000</ipp_en:I1572>
+  <ipp_en:I1572 unitRef="euro" decimals="-3" contextRef="Dpre_PeriodoCorrienteAnteriorMiembro">4057930000</ipp_en:I1572>
+  <ipp_en:I1572 unitRef="euro" decimals="-3" contextRef="Dcur_AcumuladoActualMiembro">6515309000</ipp_en:I1572>
+  <ipp_en:I1572 unitRef="euro" decimals="-3" contextRef="Dpre_AcumuladoAnteriorMiembro">7809879000</ipp_en:I1572>
+  <ipp_en:I1580 unitRef="euro" decimals="3" contextRef="Dcur_PeriodoCorrienteActualMiembro">0.182</ipp_en:I1580>
+  <ipp_en:I1580 unitRef="euro" decimals="3" contextRef="Dpre_PeriodoCorrienteAnteriorMiembro">0.233</ipp_en:I1580>
+  <ipp_en:I1580 unitRef="euro" decimals="3" contextRef="Dcur_AcumuladoActualMiembro">0.362</ipp_en:I1580>
+  <ipp_en:I1580 unitRef="euro" decimals="3" contextRef="Dpre_AcumuladoAnteriorMiembro">0.449</ipp_en:I1580>
+  <ipp_en:I1800 unitRef="euro" decimals="-3" contextRef="Dcur_PeriodoActualMiembro">3390397000</ipp_en:I1800>
+  <ipp_en:I1800 unitRef="euro" decimals="-3" contextRef="Dpre_PeriodoAnteriorMiembro">3417845000</ipp_en:I1800>
+  </xbrli:xbrl>

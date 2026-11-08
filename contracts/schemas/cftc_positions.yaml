@@ -1,0 +1,49 @@
+table: cftc_positions
+version: 1
+zone: normalized
+owner: cftc (app.ingestion.cftc)
+description: >
+  CFTC Commitments of Traders positions, long format: one row per report type x market x report date (Tuesday
+  as-of) x trader category. Official CFTC Public Reporting Environment datasets (Socrata): Legacy futures-only
+  6dca-aqww (1986+) / combined jun7-fc8e (1995+), Disaggregated 72hh-3qpy / kh3c-gbw2 (2006-06+), Traders in Financial
+  Futures gpe5-46if / yw9f-hn96 (2006-06+), Supplemental (CIT, futures+options combined) 4zgm-a668 (2006+). Values are
+  the 'All' crop-year columns. Market-level fields (open interest, total traders, concentration) repeat on every
+  category row of a market-date. PIT: knowledge_ts = observed first publication (Socrata row :created_at, rows loaded
+  live since 2022-09) else the scheduled release (report Tuesday + 3 days, 15:30 ET; Wed-Fri federal holiday -> next
+  business day; 2013 / 2018-19 shutdown backlogs conservative), knowledge_date_estimated = true for the latter.
+storage: {path: normalized/cftc_positions, format: parquet, partition_by: [report_type], write_mode: upsert, sort_by: [market_code, report_date, category], compression_level: 9}
+primary_key: [report_type, market_code, report_date, category]
+pit: {knowledge_column: knowledge_date, rule: "usable from the release (Friday 15:30 ET for the Tuesday as-of date)"}
+columns:
+  - {name: report_type, type: enum, nullable: false, values: [legacy_fut, legacy_comb, disagg_fut, disagg_comb, tff_fut, tff_comb, cit_comb], description: "Report family x futures-only (fut) / futures-and-options combined (comb); cit_comb = Supplemental commodity index traders"}
+  - {name: market_code, type: string, nullable: false, description: "FK cftc_markets.market_code"}
+  - {name: report_date, type: date, nullable: false, description: "As-of date of the positions (normally Tuesday)"}
+  - {name: category, type: enum, nullable: false, values: [noncomm, comm, prod_merc, swap, m_money, other_rept, dealer, asset_mgr, lev_money, cit, tot_rept, nonrept], description: "Trader category. legacy: noncomm, comm; disagg: prod_merc, swap, m_money, other_rept; tff: dealer, asset_mgr, lev_money, other_rept; cit: noncomm / comm (excl. CIT), cit; all: tot_rept (all reportable), nonrept (non-reportable)"}
+  - {name: long_pos, type: int64, nullable: true, description: "Long positions (contracts)"}
+  - {name: short_pos, type: int64, nullable: true, description: "Short positions (contracts)"}
+  - {name: spread_pos, type: int64, nullable: true, description: "Spreading positions (null where the category has none)"}
+  - {name: chg_long, type: int64, nullable: true, description: "Change in long vs previous report (as published)"}
+  - {name: chg_short, type: int64, nullable: true, description: "Change in short vs previous report"}
+  - {name: chg_spread, type: int64, nullable: true, description: "Change in spreading"}
+  - {name: pct_oi_long, type: float32, nullable: true, description: "Long as fraction of open interest (published percent / 100)"}
+  - {name: pct_oi_short, type: float32, nullable: true, description: "Short as fraction of open interest"}
+  - {name: pct_oi_spread, type: float32, nullable: true, description: "Spreading as fraction of open interest"}
+  - {name: traders_long, type: int32, nullable: true, description: "Number of traders long"}
+  - {name: traders_short, type: int32, nullable: true, description: "Number of traders short"}
+  - {name: traders_spread, type: int32, nullable: true, description: "Number of traders spreading"}
+  - {name: open_interest, type: int64, nullable: true, description: "Market open interest (contracts)"}
+  - {name: chg_open_interest, type: int64, nullable: true, description: "Change in open interest"}
+  - {name: traders_total, type: int32, nullable: true, description: "Total reportable traders"}
+  - {name: conc_gross_4_long, type: float32, nullable: true, description: "Share of OI held long by the 4 largest traders, gross (fraction)"}
+  - {name: conc_gross_4_short, type: float32, nullable: true, description: "Share of OI held short by the 4 largest traders, gross"}
+  - {name: conc_gross_8_long, type: float32, nullable: true, description: "8 largest traders long, gross"}
+  - {name: conc_gross_8_short, type: float32, nullable: true, description: "8 largest traders short, gross"}
+  - {name: conc_net_4_long, type: float32, nullable: true, description: "4 largest traders long, net of spreading"}
+  - {name: conc_net_4_short, type: float32, nullable: true, description: "4 largest traders short, net"}
+  - {name: conc_net_8_long, type: float32, nullable: true, description: "8 largest traders long, net"}
+  - {name: conc_net_8_short, type: float32, nullable: true, description: "8 largest traders short, net"}
+  - {name: knowledge_date, type: date, nullable: false, description: "Release date (America/New_York)"}
+  - {name: knowledge_ts, type: datetime, nullable: false, description: "Release timestamp UTC (observed :created_at or scheduled 15:30 ET)"}
+  - {name: knowledge_date_estimated, type: bool, nullable: false, description: "True when knowledge_ts is the scheduled release rule, not observed"}
+  - {name: source_id, type: string, nullable: false, description: "cftc"}
+  - {name: ingested_at, type: datetime, nullable: false, description: "Write time UTC"}

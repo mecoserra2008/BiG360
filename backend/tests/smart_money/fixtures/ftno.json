@@ -1,0 +1,213 @@
+[
+{
+"isin": "BMG9156K1018",
+"issuerName": "2020 BULKERS",
+"events": [
+{
+"date": "2026-10-01",
+"shortPercent": 0.0,
+"shares": 0,
+"activePositions": []
+},
+{
+"date": "2026-09-30",
+"shortPercent": 1.8,
+"shares": 413635,
+"activePositions": [
+{
+"date": "2026-09-30",
+"shortPercent": 1.8,
+"shares": 413635,
+"positionHolder": "GSA CAPITAL PARTNERS LLP"
+}
+]
+},
+{
+"date": "2026-09-29",
+"shortPercent": 1.64,
+"shares": 377008,
+"activePositions": [
+{
+"date": "2026-09-29",
+"shortPercent": 1.64,
+"shares": 377008,
+"positionHolder": "GSA CAPITAL PARTNERS LLP"
+}
+]
+},
+{
+"date": "2026-09-25",
+"shortPercent": 1.43,
+"shares": 329408,
+"activePositions": [
+{
+"date": "2026-09-25",
+"shortPercent": 1.43,
+"shares": 329408,
+"positionHolder": "GSA CAPITAL PARTNERS LLP"
+}
+]
+},
+{
+"date": "2026-09-24",
+"shortPercent": 1.09,
+"shares": 249963,
+"activePositions": [
+{
+"date": "2026-09-24",
+"shortPercent": 1.09,
+"shares": 249963,
+"positionHolder": "GSA CAPITAL PARTNERS LLP"
+}
+]
+},
+{
+"date": "2026-09-23",
+"shortPercent": 0.94,
+"shares": 215588,
+"activePositions": [
+{
+"date": "2026-09-23",
+"shortPercent": 0.94,
+"shares": 215588,
+"positionHolder": "GSA CAPITAL PARTNERS LLP"
+}
+]
+}
+]
+},
+{
+"isin": "NO0010955917",
+"issuerName": "3030 DVD AS",
+"events": [
+{
+"date": "2026-10-15",
+"shortPercent": 0.75,
+"shares": 703238,
+"activePositions": [
+{
+"date": "2026-10-15",
+"shortPercent": 0.75,
+"shares": 703238,
+"positionHolder": "CITADEL SECURITIES (EUROPE) LIMITED"
+}
+]
+},
+{
+"date": "2026-10-14",
+"shortPercent": 0.56,
+"shares": 525427,
+"activePositions": [
+{
+"date": "2026-10-14",
+"shortPercent": 0.56,
+"shares": 525427,
+"positionHolder": "CITADEL SECURITIES (EUROPE) LIMITED"
+}
+]
+}
+]
+},
+{
+"isin": "NO0010345853",
+"issuerName": "AKER BP",
+"events": [
+{
+"date": "2026-07-14",
+"shortPercent": 0.71,
+"shares": 4505000,
+"activePositions": [
+{
+"date": "2025-04-08",
+"shortPercent": 0.71,
+"shares": 4505000,
+"positionHolder": "KGH Ltd"
+}
+]
+},
+{
+"date": "2026-07-07",
+"shortPercent": 1.21,
+"shares": 7669209,
+"activePositions": [
+{
+"date": "2026-07-07",
+"shortPercent": 0.5,
+"shares": 3164209,
+"positionHolder": "AQR CAPITAL MANAGEMENT, LLC"
+},
+{
+"date": "2025-04-08",
+"shortPercent": 0.71,
+"shares": 4505000,
+"positionHolder": "KGH Ltd"
+}
+]
+},
+{
+"date": "2026-07-02",
+"shortPercent": 0.71,
+"shares": 4505000,
+"activePositions": [
+{
+"date": "2025-04-08",
+"shortPercent": 0.71,
+"shares": 4505000,
+"positionHolder": "KGH Ltd"
+}
+]
+},
+{
+"date": "2026-07-01",
+"shortPercent": 1.21,
+"shares": 7678629,
+"activePositions": [
+{
+"date": "2026-07-01",
+"shortPercent": 0.5,
+"shares": 3173629,
+"positionHolder": "AQR CAPITAL MANAGEMENT, LLC"
+},
+{
+"date": "2025-04-08",
+"shortPercent": 0.71,
+"shares": 4505000,
+"positionHolder": "KGH Ltd"
+}
+]
+},
+{
+"date": "2026-05-20",
+"shortPercent": 0.71,
+"shares": 4505000,
+"activePositions": [
+{
+"date": "2025-04-08",
+"shortPercent": 0.71,
+"shares": 4505000,
+"positionHolder": "KGH Ltd"
+}
+]
+},
+{
+"date": "2026-05-15",
+"shortPercent": 1.21,
+"shares": 7683303,
+"activePositions": [
+{
+"date": "2026-05-15",
+"shortPercent": 0.5,
+"shares": 3178303,
+"positionHolder": "AQR CAPITAL MANAGEMENT, LLC"
+},
+{
+"date": "2025-04-08",
+"shortPercent": 0.71,
+"shares": 4505000,
+"positionHolder": "KGH Ltd"
+}
+]
+}
+]
+}
+]

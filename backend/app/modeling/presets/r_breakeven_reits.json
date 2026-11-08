@@ -1,0 +1,94 @@
+{
+ "title": "Inflation expectations -> REITs",
+ "description": "Equal-weight real-estate return on changes in the 10Y breakeven inflation rate and the 10Y yield.",
+ "question": "macro",
+ "tags": [
+  "macro",
+  "inflation",
+  "real estate"
+ ],
+ "method_note": "Holding nominal yields fixed, a breakeven rise is a fall in real yields: REITs (real-asset cash flows) should benefit. HAC (Newey-West) errors. Caveat: the universe is today's constituents (membership history starts 2026-10), so early years carry survivorship bias; read the premium as an upper bound.",
+ "expected_outputs": [
+  "betas with HAC SEs",
+  "residual diagnostics"
+ ],
+ "runtime_s": 4.5,
+ "validated": "2026-11-06 on snapshot R20261106T010757G9ZB",
+ "result": {
+  "run_id": "SR20261106T013240P4ABN",
+  "n_obs": 274,
+  "metrics": {
+   "r2": 0.16207062915814763,
+   "adj_r2": 0.1558866485615289,
+   "aic": -854.2599581475436,
+   "oos_rmse": 0.04335581825582055
+  },
+  "coefficients": [
+   {
+    "term": "d_bei10",
+    "estimate": 0.14130308152038973,
+    "statistic": 4.843146231291487,
+    "p_value": 1.2779916169296912e-06
+   },
+   {
+    "term": "d_10y",
+    "estimate": -0.0789104473690983,
+    "statistic": -4.409427264238128,
+    "p_value": 1.0364436128617691e-05
+   }
+  ]
+ },
+ "study": {
+  "name": "Inflation expectations -> REITs",
+  "method": "ols",
+  "y": "reit_ret",
+  "x": [
+   "d_bei10",
+   "d_10y"
+  ],
+  "params": {
+   "cov_type": "HAC"
+  },
+  "dataset": {
+   "kind": "timeseries",
+   "frequency": "M",
+   "start": "2004-01-01",
+   "variables": [
+    {
+     "name": "reit_ret",
+     "source": "prices",
+     "field": "ret",
+     "entity_agg": "mean",
+     "entities": {
+      "universe": "mvp_us",
+      "sectors": [
+       "REAL"
+      ]
+     }
+    },
+    {
+     "name": "d_bei10",
+     "source": "macro",
+     "field": "fred:T10YIE",
+     "transforms": [
+      {
+       "op": "diff"
+      }
+     ],
+     "agg": "last"
+    },
+    {
+     "name": "d_10y",
+     "source": "macro",
+     "field": "ust:10Y",
+     "transforms": [
+      {
+       "op": "diff"
+      }
+     ],
+     "agg": "last"
+    }
+   ]
+  }
+ }
+}

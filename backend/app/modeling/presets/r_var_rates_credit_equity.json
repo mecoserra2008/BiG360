@@ -1,0 +1,103 @@
+{
+ "title": "Rates, credit and equities (VAR + impulse responses)",
+ "description": "Monthly VAR of 10Y yield changes, Baa spread changes and the US equity return; orthogonalized IRFs and FEVD.",
+ "question": "macro",
+ "tags": [
+  "macro",
+  "VAR",
+  "credit"
+ ],
+ "method_note": "Sims (1980) VAR with Cholesky ordering rates -> credit -> equities (equities react within the month to both). IRFs show how a credit-spread shock propagates to equities and back; FEVD measures each shock's share. Caveat: the universe is today's constituents (membership history starts 2026-10), so early years carry survivorship bias; read the premium as an upper bound.",
+ "expected_outputs": [
+  "IRF grid",
+  "FEVD",
+  "Granger causality"
+ ],
+ "runtime_s": 4.7,
+ "validated": "2026-11-06 on snapshot R20261106T010757G9ZB",
+ "result": {
+  "run_id": "SR20261106T0218523D7RR",
+  "n_obs": 380,
+  "metrics": {
+   "aic": -12.522693944737759
+  },
+  "coefficients": [
+   {
+    "term": "d_10y: const",
+    "estimate": -0.0321313780113423,
+    "statistic": -2.1110173427659524,
+    "p_value": 0.034770821222605025
+   },
+   {
+    "term": "d_10y: L1.d_10y",
+    "estimate": 0.030017503875031992,
+    "statistic": 0.5253530938591817,
+    "p_value": 0.599337754659629
+   },
+   {
+    "term": "d_10y: L1.d_baa",
+    "estimate": 0.005944116629198901,
+    "statistic": 0.0695960242327706,
+    "p_value": 0.9445152014719541
+   },
+   {
+    "term": "d_10y: L1.mkt_ret",
+    "estimate": 1.0771624050806548,
+    "statistic": 3.406799042880426,
+    "p_value": 0.0006572950225838687
+   }
+  ]
+ },
+ "study": {
+  "name": "Rates, credit and equities (VAR + impulse responses)",
+  "method": "var",
+  "y": null,
+  "x": [
+   "d_10y",
+   "d_baa",
+   "mkt_ret"
+  ],
+  "params": {
+   "lags": 2,
+   "irf_periods": 12
+  },
+  "dataset": {
+   "kind": "timeseries",
+   "frequency": "M",
+   "start": "1995-01-01",
+   "variables": [
+    {
+     "name": "d_10y",
+     "source": "macro",
+     "field": "ust:10Y",
+     "transforms": [
+      {
+       "op": "diff"
+      }
+     ],
+     "agg": "last"
+    },
+    {
+     "name": "d_baa",
+     "source": "macro",
+     "field": "fred:BAA10Y",
+     "transforms": [
+      {
+       "op": "diff"
+      }
+     ],
+     "agg": "last"
+    },
+    {
+     "name": "mkt_ret",
+     "source": "prices",
+     "field": "ret",
+     "entity_agg": "mean",
+     "entities": {
+      "universe": "mvp_us"
+     }
+    }
+   ]
+  }
+ }
+}

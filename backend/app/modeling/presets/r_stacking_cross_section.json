@@ -1,0 +1,133 @@
+{
+ "title": "Stacked ensemble for next-month returns (DM vs best base)",
+ "description": "Stack ridge, random forest and LightGBM forecasts of next-month returns; is the stack better than its best member?",
+ "question": "factors",
+ "tags": [
+  "ML",
+  "ensemble"
+ ],
+ "method_note": "Inner out-of-fold base forecasts feed a non-negative meta-learner; a Diebold-Mariano test against the best base model decides whether the ensemble earns its complexity. Caveat: the universe is today's constituents (membership history starts 2026-10), so early years carry survivorship bias; read the premium as an upper bound.",
+ "expected_outputs": [
+  "meta weights",
+  "OOS metrics per base and stack",
+  "DM vs best base"
+ ],
+ "runtime_s": 186.6,
+ "validated": "2026-11-06 on snapshot R20261106T010757G9ZB",
+ "result": {
+  "run_id": "SR20261106T022739PJH0P",
+  "verdict": "stack does not significantly beat best base (ridge) (DM p = 0.275)",
+  "metrics": {
+   "oos_rmse": 0.09676226577244351,
+   "oos_r2_oos": 0.0006944918479333539,
+   "oos_rank_ic": 0.02960106283616658
+  },
+  "coefficients": []
+ },
+ "study": {
+  "name": "Stacked ensemble for next-month returns (DM vs best base)",
+  "method": "stacking",
+  "y": "fwd_ret_1m",
+  "x": [
+   "earnings_yield",
+   "gross_prof",
+   "mom_12_1",
+   "ivol",
+   "log_mcap"
+  ],
+  "params": {
+   "cv": {
+    "folds": 4,
+    "scheme": "purged_kfold",
+    "purge": 1,
+    "embargo": 1
+   }
+  },
+  "dataset": {
+   "kind": "panel",
+   "frequency": "M",
+   "start": "2014-01-01",
+   "entities": {
+    "universe": "mvp_us"
+   },
+   "variables": [
+    {
+     "name": "fwd_ret_1m",
+     "source": "prices",
+     "field": "ret",
+     "transforms": [
+      {
+       "op": "fwd_compound",
+       "k": 1
+      },
+      {
+       "op": "winsorize"
+      }
+     ]
+    },
+    {
+     "name": "earnings_yield",
+     "source": "valuation",
+     "field": "earnings_yield",
+     "transforms": [
+      {
+       "op": "cs_rank"
+      }
+     ]
+    },
+    {
+     "name": "gross_prof",
+     "source": "ratios",
+     "field": "gross_profitability",
+     "transforms": [
+      {
+       "op": "winsorize"
+      },
+      {
+       "op": "cs_zscore"
+      }
+     ]
+    },
+    {
+     "name": "mom_12_1",
+     "source": "tech_factors",
+     "field": "mom",
+     "transforms": [
+      {
+       "op": "winsorize"
+      },
+      {
+       "op": "cs_zscore"
+      }
+     ]
+    },
+    {
+     "name": "ivol",
+     "source": "tech_factors",
+     "field": "ivol",
+     "transforms": [
+      {
+       "op": "winsorize"
+      },
+      {
+       "op": "cs_zscore"
+      }
+     ]
+    },
+    {
+     "name": "log_mcap",
+     "source": "valuation",
+     "field": "market_cap_usd",
+     "transforms": [
+      {
+       "op": "log"
+      },
+      {
+       "op": "cs_zscore"
+      }
+     ]
+    }
+   ]
+  }
+ }
+}

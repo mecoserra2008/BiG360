@@ -1,0 +1,36 @@
+table: tech_levels
+version: 2
+zone: features
+owner: technicals (app.technicals.levels)
+description: >
+  Candidate price levels per security computed from daily bars up to as_of_date (adjusted prices).
+  level_key = "{level_type}@{timeframe}" is the unit ranked by level_type_stats.
+  Only the latest as_of_date is persisted daily; history of levels is recomputed on the fly by the backtester.
+  v2: levels are those ACTIVE for the next session after as_of_date (prior-period levels roll when as_of_date is the
+  last session of its week/month/quarter/year). Taxonomy + families: app/technicals/taxonomy.py.
+  swing_*_k{N} = fractal pivot with N bars each side; ms_* = ZigZag(3xATR14) pivots labelled HH/HL/LH/LL and
+  Break-of-Structure / Change-of-Character levels; fibp_* = Fibonacci pivots; or_* = opening range of the period.
+storage: {path: features/tech_levels, format: parquet, partition_by: [], write_mode: overwrite, retention: "latest as_of_date + month-end snapshots"}
+primary_key: [as_of_date, security_id, level_key, anchor_date]
+columns:
+  - {name: as_of_date, type: date, nullable: false, description: "Date of last bar used"}
+  - {name: security_id, type: string, nullable: false, description: "FK securities_master"}
+  - {name: level_type, type: enum, nullable: false, description: "Level family", values: [swing_high, swing_low, prev_open, prev_high, prev_low, prev_close, cur_open, floor_p, floor_r1, floor_r2, floor_r3, floor_s1, floor_s2, floor_s3, cam_h3, cam_h4, cam_h5, cam_l3, cam_l4, cam_l5, fib_236, fib_382, fib_500, fib_618, fib_786, fib_ext_1272, fib_ext_1618, avwap_ytd, avwap_qtd, avwap_swing_high, avwap_swing_low, avwap_earnings, avwap_52w_high, avwap_52w_low, high_52w, low_52w, all_time_high, round_number, vp_poc_1y, prev_mid, or_high, or_low, fibp_r1, fibp_r2, fibp_r3, fibp_s1, fibp_s2, fibp_s3, swing_high_k2, swing_low_k2, swing_high_k3, swing_low_k3, swing_high_k5, swing_low_k5, swing_high_k10, swing_low_k10, ms_hh, ms_lh, ms_hl, ms_ll, ms_bos, ms_choch, vp_poc_6m, vp_hvn_1y, vp_hvn_6m, vp_vah_1y, vp_val_1y, round_major, round_minor, sma_50, sma_200, gap_up, gap_down]}
+  - {name: timeframe, type: enum, nullable: false, values: [D, W, M, Q, Y, NA], description: "Period the level derives from (prev_high@W = prior week high); NA for swing/avwap/fib/52w"}
+  - {name: level_key, type: string, nullable: false, description: "{level_type}@{timeframe}"}
+  - {name: price, type: float64, nullable: false, description: "Level price (adjusted, trading currency)"}
+  - {name: anchor_date, type: date, nullable: false, description: "Date that defines the level (pivot bar, period start, AVWAP anchor)"}
+  - {name: swing_order, type: int16, nullable: true, description: "Pivot lookback k (bars each side) for swing levels"}
+  - {name: touches, type: int16, nullable: true, description: "Times price came within 0.25 ATR since anchor"}
+  - {name: distance_atr, type: float64, nullable: false, description: "(price - close)/ATR14; negative = below"}
+  - {name: distance_pct, type: float64, nullable: false, description: "price/close - 1"}
+  - {name: side, type: enum, nullable: false, values: [support, resistance], description: "Below close = support"}
+  - {name: type_rank_score, type: float64, nullable: true, description: "From level_type_stats for this security/level_key (0..1), fallback universe prior"}
+  - {name: computed_at, type: datetime, nullable: false, description: "Write time UTC"}
+  - {name: family, type: string, nullable: true, description: "v2: level family (app.technicals.taxonomy), e.g. period_ohlc, swing_pivot, market_structure, anchored_vwap, volume_profile"}
+  - {name: known_from, type: date, nullable: true, description: "v2: first session on which the level was usable (point-in-time)"}
+  - {name: still_valid, type: bool, nullable: true, description: "v2: false when a directional level (swing/structure/extreme/gap) has been closed through by > 0.5 ATR since formation (role flipped)"}
+  - {name: last_touch, type: date, nullable: true, description: "v2: last session whose range came within 0.25 ATR of the level since known_from"}
+  - {name: structure_label, type: enum, nullable: true, values: [HH, HL, LH, LL], description: "v2: market-structure label of ms_* pivots (vs the previous pivot of the same kind)"}
+  - {name: node_strength, type: float64, nullable: true, description: "v2: volume-profile node volume / POC volume (0..1); null for other families"}
+  - {name: weight, type: float64, nullable: true, description: "v2: confluence weight = reliability x recency x touches x timeframe x volume-node strength"}

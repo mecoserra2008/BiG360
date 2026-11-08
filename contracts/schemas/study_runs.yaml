@@ -1,0 +1,33 @@
+table: study_runs
+version: 2
+zone: app_state
+owner: model-studio (app.modeling.store via app.api.routers.studio)
+description: >
+  One row per Model Studio run (sync or async). The run directory data/modeling/runs/<run_id>/ (spec.json,
+  status.json, result.json, dataset.parquet) is the source of truth while a run is in flight; the API syncs this row
+  from status.json (the worker never opens app_state). metrics holds the flat numeric metrics used by /studio/compare.
+storage: {path: app_state.duckdb, format: duckdb_table, partition_by: [], write_mode: upsert}
+primary_key: [run_id]
+columns:
+  - {name: run_id, type: string, nullable: false, description: "SR + UTC timestamp + 5 random base32 chars"}
+  - {name: study_id, type: string, nullable: true, description: "FK studies (null for ad-hoc runs)"}
+  - {name: name, type: string, nullable: true, description: "StudySpec.name"}
+  - {name: method, type: string, nullable: false, description: "Method id"}
+  - {name: status, type: enum, nullable: false, values: [queued, running, completed, failed, cancelled], description: "Lifecycle"}
+  - {name: mode, type: enum, nullable: false, values: [sync, async], description: "sync = executed inside the API request; async = studio_run job on the worker"}
+  - {name: spec, type: json, nullable: false, description: "StudySpec JSON"}
+  - {name: spec_hash, type: string, nullable: false, description: "sha1 of the normalized StudySpec (without name/timeout)"}
+  - {name: dataset_key, type: string, nullable: true, description: "Dataset cache key (sha1 of dataset spec + snapshot id + core version)"}
+  - {name: snapshot_id, type: string, nullable: true, description: "Serving snapshot run id at build time (data version)"}
+  - {name: seed, type: int64, nullable: false, description: "Random seed"}
+  - {name: metrics, type: json, nullable: true, description: "Flat numeric metrics (r2, aic, oos_rmse, silhouette, ...)"}
+  - {name: warnings_count, type: int32, nullable: true, description: "Number of result warnings"}
+  - {name: error, type: string, nullable: true, description: "Error message when failed/cancelled"}
+  - {name: error_code, type: string, nullable: true, description: "Guardrail / failure code (lookahead, too_few_obs, singular, timeout, cancelled, dataset, internal, ...)"}
+  - {name: estimate_s, type: float64, nullable: true, description: "Estimated cost used for the sync/async decision"}
+  - {name: title, type: string, nullable: true, description: "Result title (e.g. ARIMA(2, 0, 0)); v2"}
+  - {name: n_obs, type: int64, nullable: true, description: "Observations used by the fit; v2"}
+  - {name: created_at, type: datetime, nullable: false, description: "UTC"}
+  - {name: started_at, type: datetime, nullable: true, description: "UTC"}
+  - {name: finished_at, type: datetime, nullable: true, description: "UTC"}
+  - {name: duration_s, type: float64, nullable: true, description: "Wall time"}

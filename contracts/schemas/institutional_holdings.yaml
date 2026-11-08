@@ -1,0 +1,25 @@
+table: institutional_holdings
+version: 2
+zone: normalized
+owner: ingest-us (sec_13f)
+description: SEC 13F-HR holdings (quarterly), mapped to security_id via CUSIP. Used for 13F flow metrics.
+storage: {path: normalized/institutional_holdings, format: parquet, partition_by: [period_end_year], write_mode: upsert}
+primary_key: [filer_cik, period_end, cusip, put_call]
+pit: {knowledge_column: knowledge_date, rule: "13F filed up to 45d after quarter end"}
+columns:
+  - {name: filer_cik, type: string, nullable: false, description: "Manager CIK"}
+  - {name: filer_name, type: string, nullable: false, description: "Manager name"}
+  - {name: period_end, type: date, nullable: false, description: "Quarter end"}
+  - {name: period_end_year, type: int16, nullable: false, description: "Partition"}
+  - {name: cusip, type: string, nullable: false, description: "CUSIP of holding"}
+  - {name: security_id, type: string, nullable: true, description: "Resolved security"}
+  - {name: put_call, type: enum, nullable: false, values: [none, put, call], description: "Option flag"}
+  - {name: shares, type: float64, nullable: false, description: "Shares/principal"}
+  - {name: value_usd, type: float64, nullable: false, description: "Market value USD (normalized for the 2022 thousands->dollars change)"}
+  - {name: filing_id, type: string, nullable: false, description: "FK filings_index"}
+  - {name: knowledge_date, type: date, nullable: false, description: "Filing date"}
+  - {name: ingested_at, type: datetime, nullable: false, description: "Write time UTC"}
+  - {name: issuer_name, type: string, nullable: true, description: "13F nameOfIssuer as reported (added v2)"}
+  - {name: title_of_class, type: string, nullable: true, description: "13F titleOfClass (COM, CL A, SPONSORED ADR ...) (added v2)"}
+  - {name: figi, type: string, nullable: true, description: "FIGI if the filer reported one (added v2)"}
+  - {name: amount_type, type: string, nullable: true, description: "SH (shares) or PRN (principal amount) (added v2)"}

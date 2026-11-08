@@ -1,0 +1,37 @@
+table: sc_edges
+version: 1
+zone: features
+owner: supply-chain (app.supply_chain.network, job supply_chain_network)
+description: >
+  Roadmap #9 disclosed supply-chain edges, one row per (supplier, customer) pair, directed supplier -> customer, built
+  point-in-time from company_links (knowledge_date <= as_of; disclosures for fiscal periods ending within the last 3
+  years): customer links (the supplier disclosed the customer; share_of_supplier_revenue) and supplier links (the
+  customer disclosed the supplier; share_of_customer_purchases). edge_type disclosed_customer / disclosed_supplier /
+  both. Nodes are issuer ids or 'name:<normalized name>' for unresolved counterparties (government counterparties
+  excluded). Provenance of the strongest (highest-confidence, latest) disclosure is kept.
+storage: {path: features/sc_edges, format: parquet, partition_by: [], write_mode: overwrite, retention: "latest snapshot"}
+primary_key: [as_of, supplier_key, customer_key]
+pit: {knowledge_column: knowledge_date, rule: "company_links rows with knowledge_date <= as_of"}
+columns:
+  - {name: as_of, type: date, nullable: false, description: "Build date"}
+  - {name: supplier_key, type: string, nullable: false, description: "Supplier issuer_id or name:<normalized>"}
+  - {name: customer_key, type: string, nullable: false, description: "Customer issuer_id or name:<normalized>"}
+  - {name: supplier_issuer_id, type: string, nullable: true, description: "Supplier issuer (resolved)"}
+  - {name: customer_issuer_id, type: string, nullable: true, description: "Customer issuer (resolved)"}
+  - {name: supplier_name, type: string, nullable: true, description: "Supplier name (issuer name or as disclosed)"}
+  - {name: customer_name, type: string, nullable: true, description: "Customer name (issuer name or as disclosed)"}
+  - {name: edge_type, type: enum, nullable: false, values: [disclosed_customer, disclosed_supplier, both], description: "Who disclosed the edge"}
+  - {name: share_of_supplier_revenue, type: float64, nullable: true, description: "Fraction of the supplier's revenue from the customer (customer disclosures)"}
+  - {name: share_of_customer_purchases, type: float64, nullable: true, description: "Fraction of the customer's purchases / cost of sales from the supplier (supplier disclosures)"}
+  - {name: confidence, type: float64, nullable: false, description: "Max edge confidence (rule prior x name match; unresolved names: 0.4 x rule prior)"}
+  - {name: n_disclosures, type: int16, nullable: false, description: "Disclosures (filings x rules) supporting the edge in the window"}
+  - {name: sources, type: list<string>, nullable: true, description: "Extraction sources (xbrl_fsds, text_10k)"}
+  - {name: rules, type: list<string>, nullable: true, description: "Extraction rules"}
+  - {name: filing_id, type: string, nullable: true, description: "Filing of the best disclosure"}
+  - {name: form_type, type: string, nullable: true, description: "Form of the best disclosure"}
+  - {name: snippet, type: string, nullable: true, description: "Provenance snippet (<= 200 chars)"}
+  - {name: period_end, type: date, nullable: true, description: "Fiscal period end of the latest disclosure"}
+  - {name: knowledge_date, type: date, nullable: false, description: "Filing date of the latest disclosure"}
+  - {name: first_knowledge_date, type: date, nullable: true, description: "First filing date disclosing the pair"}
+  - {name: stale, type: bool, nullable: false, description: "Latest disclosure period ends more than 2 years before as_of"}
+  - {name: computed_at, type: datetime, nullable: false, description: "Write time UTC"}

@@ -1,0 +1,151 @@
+{
+ "title": "Leaderboard: OLS / ElasticNet / GBM / ARIMAX for US IP growth",
+ "description": "One-month-ahead US industrial-production growth (100 x log change) from its own two lags, the 10Y-3M slope (12-month lag) and the Baa spread (1-month lag): OLS, ElasticNet, HistGradientBoosting, ARIMAX(1,0,1) and the historical mean on identical expanding-window folds, ranked by OOS RMSE with Diebold-Mariano tests vs the best.",
+ "tags": [
+  "ML",
+  "leaderboard",
+  "macro",
+  "forecasting"
+ ],
+ "study": {
+  "name": "US IP growth leaderboard",
+  "method": "leaderboard",
+  "y": "ip_g",
+  "x": [
+   "ip_l1",
+   "ip_l2",
+   "slope_l12",
+   "baa_l1"
+  ],
+  "params": {
+   "metric": "rmse",
+   "cv": {
+    "folds": 6,
+    "scheme": "expanding"
+   },
+   "candidates": [
+    {
+     "name": "mean",
+     "method": "mean"
+    },
+    {
+     "name": "OLS",
+     "method": "ols"
+    },
+    {
+     "name": "ElasticNet",
+     "method": "elasticnet",
+     "params": {
+      "l1_ratio": 0.5
+     }
+    },
+    {
+     "name": "GBM",
+     "method": "hgb",
+     "params": {
+      "n_estimators": 200,
+      "max_depth": 3,
+      "min_samples_leaf": 20
+     }
+    },
+    {
+     "name": "ARIMAX(1,0,1)",
+     "method": "arima",
+     "params": {
+      "order": [
+       1,
+       0,
+       1
+      ]
+     },
+     "x": [
+      "slope_l12",
+      "baa_l1"
+     ]
+    }
+   ]
+  },
+  "dataset": {
+   "kind": "timeseries",
+   "frequency": "M",
+   "start": "1990-01-01",
+   "macro_alignment": "period",
+   "variables": [
+    {
+     "name": "ip_g",
+     "source": "macro",
+     "field": "fred:INDPRO",
+     "transforms": [
+      {
+       "op": "log_diff"
+      },
+      {
+       "op": "scale",
+       "factor": 100
+      }
+     ]
+    },
+    {
+     "name": "ip_l1",
+     "source": "macro",
+     "field": "fred:INDPRO",
+     "transforms": [
+      {
+       "op": "log_diff"
+      },
+      {
+       "op": "scale",
+       "factor": 100
+      },
+      {
+       "op": "lag",
+       "k": 1
+      }
+     ]
+    },
+    {
+     "name": "ip_l2",
+     "source": "macro",
+     "field": "fred:INDPRO",
+     "transforms": [
+      {
+       "op": "log_diff"
+      },
+      {
+       "op": "scale",
+       "factor": 100
+      },
+      {
+       "op": "lag",
+       "k": 2
+      }
+     ]
+    },
+    {
+     "name": "slope_l12",
+     "source": "macro",
+     "field": "fred:T10Y3M",
+     "transforms": [
+      {
+       "op": "lag",
+       "k": 12
+      }
+     ],
+     "agg": "mean"
+    },
+    {
+     "name": "baa_l1",
+     "source": "macro",
+     "field": "fred:BAA10Y",
+     "transforms": [
+      {
+       "op": "lag",
+       "k": 1
+      }
+     ],
+     "agg": "mean"
+    }
+   ]
+  }
+ }
+}

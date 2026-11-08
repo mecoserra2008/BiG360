@@ -1,0 +1,1643 @@
+{
+ "dml": {
+  "id": "dml",
+  "family": "causal",
+  "title": "Double / debiased machine learning (DML)",
+  "description": "Effect of a treatment D on y controlling flexibly for x (Chernozhukov et al. 2018): cross-fitted nuisance models (Lasso, random forest, XGBoost or LightGBM) on purged date blocks, partially linear (PLR) or interactive (IRM, binary D) score, cluster-robust SE, comparison with naive OLS.",
+  "shapes": [
+   "timeseries",
+   "panel",
+   "cross_section"
+  ],
+  "needs_y": true,
+  "min_x": 1,
+  "max_x": null,
+  "uses_weights": false,
+  "outputs": [
+   "\u03b8 with SE / CI",
+   "naive OLS vs DML",
+   "nuisance fit (R2 / AUC)",
+   "overlap (irm)",
+   "residual scatter (plr)"
+  ],
+  "diagnostics": [
+   "nuisance out-of-fold fit",
+   "propensity overlap",
+   "learner sensitivity"
+  ],
+  "params_schema": {
+   "$defs": {
+    "CrossFit": {
+     "additionalProperties": false,
+     "properties": {
+      "folds": {
+       "default": 5,
+       "maximum": 10,
+       "minimum": 2,
+       "title": "Folds",
+       "type": "integer"
+      },
+      "scheme": {
+       "default": "auto",
+       "description": "auto: purged K-fold on date blocks (time series / panel), shuffled K-fold (cross-section)",
+       "enum": [
+        "auto",
+        "purged_kfold",
+        "kfold"
+       ],
+       "title": "Scheme",
+       "type": "string"
+      },
+      "purge": {
+       "anyOf": [
+        {
+         "maximum": 60,
+         "minimum": 0,
+         "type": "integer"
+        },
+        {
+         "type": "null"
+        }
+       ],
+       "default": null,
+       "description": "periods dropped around each test block (default: target horizon, >= 1)",
+       "title": "Purge"
+      },
+      "embargo": {
+       "default": 0,
+       "maximum": 60,
+       "minimum": 0,
+       "title": "Embargo",
+       "type": "integer"
+      }
+     },
+     "title": "CrossFit",
+     "type": "object"
+    }
+   },
+   "additionalProperties": false,
+   "properties": {
+    "treatment": {
+     "description": "treatment / variable of interest D (dataset column); x = controls",
+     "title": "Treatment",
+     "type": "string"
+    },
+    "model": {
+     "default": "plr",
+     "description": "plr: partially linear Y = \u03b8D + g(X) + e; irm: binary D, AIPW score",
+     "enum": [
+      "plr",
+      "irm"
+     ],
+     "title": "Model",
+     "type": "string"
+    },
+    "estimand": {
+     "default": "ate",
+     "description": "irm only",
+     "enum": [
+      "ate",
+      "att"
+     ],
+     "title": "Estimand",
+     "type": "string"
+    },
+    "learner_y": {
+     "default": "lasso",
+     "description": "nuisance learner for E[Y|X] (and E[Y|X,D] for irm)",
+     "enum": [
+      "lasso",
+      "rf",
+      "xgb",
+      "lgbm"
+     ],
+     "title": "Learner Y",
+     "type": "string"
+    },
+    "learner_d": {
+     "default": "lasso",
+     "description": "nuisance learner for E[D|X] / P(D=1|X)",
+     "enum": [
+      "lasso",
+      "rf",
+      "xgb",
+      "lgbm"
+     ],
+     "title": "Learner D",
+     "type": "string"
+    },
+    "crossfit": {
+     "$ref": "#/$defs/CrossFit"
+    },
+    "n_rep": {
+     "default": 1,
+     "description": "repeated cross-fitting (shuffled K-fold only); median aggregation",
+     "maximum": 10,
+     "minimum": 1,
+     "title": "N Rep",
+     "type": "integer"
+    },
+    "trim": {
+     "default": 0.01,
+     "description": "irm: clip propensity scores to [trim, 1 - trim]",
+     "maximum": 0.2,
+     "minimum": 0,
+     "title": "Trim",
+     "type": "number"
+    },
+    "cluster": {
+     "default": "auto",
+     "description": "auto: entity for panels",
+     "enum": [
+      "auto",
+      "none",
+      "entity",
+      "date"
+     ],
+     "title": "Cluster",
+     "type": "string"
+    },
+    "compare_learners": {
+     "default": false,
+     "description": "re-estimate \u03b8 with every learner (sensitivity table; slower)",
+     "title": "Compare Learners",
+     "type": "boolean"
+    }
+   },
+   "required": [
+    "treatment"
+   ],
+   "title": "DMLParams",
+   "type": "object"
+  }
+ },
+ "propensity": {
+  "id": "propensity",
+  "family": "causal",
+  "title": "Propensity scores: IPW, AIPW and matching",
+  "description": "Effect of a 0/1 treatment adjusting for observed covariates: cross-fitted propensity score (logit or ML), normalized inverse-probability weighting, doubly robust AIPW and nearest-neighbour matching on the logit score with a caliper; balance table (standardized mean differences before / after) and overlap plot.",
+  "shapes": [
+   "timeseries",
+   "panel",
+   "cross_section"
+  ],
+  "needs_y": true,
+  "min_x": 1,
+  "max_x": null,
+  "uses_weights": false,
+  "outputs": [
+   "ATE / ATT by estimator",
+   "balance table (SMD, variance ratio)",
+   "overlap plot",
+   "love plot"
+  ],
+  "diagnostics": [
+   "max |SMD| after weighting / matching",
+   "effective sample size",
+   "common support"
+  ],
+  "params_schema": {
+   "$defs": {
+    "CrossFit": {
+     "additionalProperties": false,
+     "properties": {
+      "folds": {
+       "default": 5,
+       "maximum": 10,
+       "minimum": 2,
+       "title": "Folds",
+       "type": "integer"
+      },
+      "scheme": {
+       "default": "auto",
+       "description": "auto: purged K-fold on date blocks (time series / panel), shuffled K-fold (cross-section)",
+       "enum": [
+        "auto",
+        "purged_kfold",
+        "kfold"
+       ],
+       "title": "Scheme",
+       "type": "string"
+      },
+      "purge": {
+       "anyOf": [
+        {
+         "maximum": 60,
+         "minimum": 0,
+         "type": "integer"
+        },
+        {
+         "type": "null"
+        }
+       ],
+       "default": null,
+       "description": "periods dropped around each test block (default: target horizon, >= 1)",
+       "title": "Purge"
+      },
+      "embargo": {
+       "default": 0,
+       "maximum": 60,
+       "minimum": 0,
+       "title": "Embargo",
+       "type": "integer"
+      }
+     },
+     "title": "CrossFit",
+     "type": "object"
+    }
+   },
+   "additionalProperties": false,
+   "properties": {
+    "treatment": {
+     "description": "0/1 treatment column; x = covariates of the propensity model",
+     "title": "Treatment",
+     "type": "string"
+    },
+    "estimator": {
+     "default": "all",
+     "enum": [
+      "all",
+      "ipw",
+      "aipw",
+      "matching"
+     ],
+     "title": "Estimator",
+     "type": "string"
+    },
+    "estimand": {
+     "default": "ate",
+     "description": "IPW / AIPW; matching always estimates the ATT",
+     "enum": [
+      "ate",
+      "att"
+     ],
+     "title": "Estimand",
+     "type": "string"
+    },
+    "ps_model": {
+     "default": "logit",
+     "enum": [
+      "logit",
+      "lasso",
+      "rf",
+      "xgb",
+      "lgbm"
+     ],
+     "title": "Ps Model",
+     "type": "string"
+    },
+    "outcome_model": {
+     "default": "ols",
+     "description": "AIPW outcome regressions",
+     "enum": [
+      "ols",
+      "lasso",
+      "rf",
+      "xgb",
+      "lgbm"
+     ],
+     "title": "Outcome Model",
+     "type": "string"
+    },
+    "trim": {
+     "default": 0.01,
+     "description": "clip propensity scores to [trim, 1 - trim]",
+     "maximum": 0.2,
+     "minimum": 0,
+     "title": "Trim",
+     "type": "number"
+    },
+    "k_neighbors": {
+     "default": 1,
+     "maximum": 10,
+     "minimum": 1,
+     "title": "K Neighbors",
+     "type": "integer"
+    },
+    "caliper": {
+     "default": 0.2,
+     "description": "matching caliper in SDs of the logit propensity (0 = none)",
+     "maximum": 2,
+     "minimum": 0,
+     "title": "Caliper",
+     "type": "number"
+    },
+    "crossfit": {
+     "$ref": "#/$defs/CrossFit"
+    },
+    "cluster": {
+     "default": "auto",
+     "enum": [
+      "auto",
+      "none",
+      "entity",
+      "date"
+     ],
+     "title": "Cluster",
+     "type": "string"
+    }
+   },
+   "required": [
+    "treatment"
+   ],
+   "title": "PSParams",
+   "type": "object"
+  }
+ },
+ "rdd": {
+  "id": "rdd",
+  "family": "causal",
+  "title": "Regression discontinuity (sharp / fuzzy)",
+  "description": "Jump in y at a cutoff of a running variable: local-linear fits on each side with a triangular kernel, Imbens-Kalyanaraman bandwidth, CCT-style robust bias-corrected CI (local quadratic at h = b), fuzzy design by the Wald ratio; McCrary density test, covariate continuity (x), placebo cutoffs and bandwidth sensitivity.",
+  "shapes": [
+   "timeseries",
+   "panel",
+   "cross_section"
+  ],
+  "needs_y": true,
+  "min_x": 0,
+  "max_x": null,
+  "uses_weights": false,
+  "outputs": [
+   "RD estimate (conventional + robust)",
+   "RD plot (bin means + local fits)",
+   "bandwidth sensitivity",
+   "covariate continuity",
+   "placebo cutoffs"
+  ],
+  "diagnostics": [
+   "McCrary density test",
+   "covariate jumps at the cutoff",
+   "placebo cutoffs",
+   "first-stage F (fuzzy)"
+  ],
+  "params_schema": {
+   "additionalProperties": false,
+   "properties": {
+    "running": {
+     "description": "running (forcing) variable column; treatment switches at the cutoff",
+     "title": "Running",
+     "type": "string"
+    },
+    "cutoff": {
+     "default": 0.0,
+     "title": "Cutoff",
+     "type": "number"
+    },
+    "design": {
+     "default": "sharp",
+     "enum": [
+      "sharp",
+      "fuzzy"
+     ],
+     "title": "Design",
+     "type": "string"
+    },
+    "treatment": {
+     "anyOf": [
+      {
+       "type": "string"
+      },
+      {
+       "type": "null"
+      }
+     ],
+     "default": null,
+     "description": "fuzzy: 0/1 (or take-up share) treatment column",
+     "title": "Treatment"
+    },
+    "bandwidth": {
+     "default": "ik",
+     "description": "ik: Imbens-Kalyanaraman MSE-optimal; cct: same h with CCT robust bias-corrected inference as headline; fixed: h",
+     "enum": [
+      "ik",
+      "cct",
+      "fixed"
+     ],
+     "title": "Bandwidth",
+     "type": "string"
+    },
+    "h": {
+     "anyOf": [
+      {
+       "exclusiveMinimum": 0,
+       "type": "number"
+      },
+      {
+       "type": "null"
+      }
+     ],
+     "default": null,
+     "description": "fixed bandwidth (running-variable units)",
+     "title": "H"
+    },
+    "kernel": {
+     "default": "triangular",
+     "enum": [
+      "triangular",
+      "epanechnikov",
+      "uniform"
+     ],
+     "title": "Kernel",
+     "type": "string"
+    },
+    "cluster": {
+     "default": "auto",
+     "enum": [
+      "auto",
+      "none",
+      "entity",
+      "date"
+     ],
+     "title": "Cluster",
+     "type": "string"
+    },
+    "n_bins": {
+     "default": 20,
+     "description": "bins per side in the RD plot",
+     "maximum": 100,
+     "minimum": 5,
+     "title": "N Bins",
+     "type": "integer"
+    },
+    "placebo": {
+     "default": true,
+     "description": "placebo cutoffs at the median of each side",
+     "title": "Placebo",
+     "type": "boolean"
+    }
+   },
+   "required": [
+    "running"
+   ],
+   "title": "RDParams",
+   "type": "object"
+  }
+ },
+ "coef_stability": {
+  "id": "coef_stability",
+  "family": "causal",
+  "title": "Coefficient stability (controls stepwise, Oster \u03b4)",
+  "description": "How the coefficient of a variable of interest moves as controls are added one at a time, with R\u00b2; Oster (2019) bias-adjusted \u03b2* for a given \u03b4 and R_max, the \u03b4 that would drive the effect to zero, and the Altonji-Elder-Taber ratio.",
+  "shapes": [
+   "timeseries",
+   "panel",
+   "cross_section"
+  ],
+  "needs_y": true,
+  "min_x": 1,
+  "max_x": null,
+  "uses_weights": false,
+  "outputs": [
+   "stepwise table (\u03b2, SE, R\u00b2)",
+   "\u03b2 path with CI",
+   "Oster \u03b2*, \u03b4 for \u03b2 = 0, AET ratio"
+  ],
+  "diagnostics": [
+   "Oster \u03b4 > 1 = robust (rule of thumb)",
+   "identified set [\u03b2\u0303, \u03b2*] excludes 0"
+  ],
+  "params_schema": {
+   "additionalProperties": false,
+   "properties": {
+    "treatment": {
+     "description": "variable of interest; x = controls, added one at a time in the order given",
+     "title": "Treatment",
+     "type": "string"
+    },
+    "r_max_mult": {
+     "default": 1.3,
+     "description": "Oster R_max = min(1, mult \u00d7 R\u00b2 of the full model)",
+     "maximum": 3,
+     "minimum": 1,
+     "title": "R Max Mult",
+     "type": "number"
+    },
+    "r_max": {
+     "anyOf": [
+      {
+       "exclusiveMinimum": 0,
+       "maximum": 1,
+       "type": "number"
+      },
+      {
+       "type": "null"
+      }
+     ],
+     "default": null,
+     "description": "explicit R_max (overrides the multiplier)",
+     "title": "R Max"
+    },
+    "delta": {
+     "default": 1.0,
+     "description": "proportional selection \u03b4 for the bias-adjusted \u03b2*",
+     "maximum": 5,
+     "minimum": 0,
+     "title": "Delta",
+     "type": "number"
+    },
+    "cluster": {
+     "default": "auto",
+     "enum": [
+      "auto",
+      "none",
+      "entity",
+      "date"
+     ],
+     "title": "Cluster",
+     "type": "string"
+    }
+   },
+   "required": [
+    "treatment"
+   ],
+   "title": "StabParams",
+   "type": "object"
+  }
+ },
+ "lightgbm": {
+  "id": "lightgbm",
+  "family": "ml",
+  "title": "LightGBM (gradient boosting)",
+  "description": "LightGBM regression or classification with purged / walk-forward CV; early stopping on a time-ordered validation block inside each training fold; gain / split importance, TreeSHAP, learning curve, and a Diebold-Mariano test against a linear baseline on the same folds.",
+  "shapes": [
+   "timeseries",
+   "panel",
+   "cross_section"
+  ],
+  "needs_y": true,
+  "min_x": 1,
+  "max_x": null,
+  "uses_weights": false,
+  "outputs": [
+   "OOS metrics vs linear baseline",
+   "importance (gain / split)",
+   "shap_beeswarm",
+   "learning curve"
+  ],
+  "diagnostics": [
+   "DM test vs linear",
+   "best iteration per fold",
+   "train vs OOS gap"
+  ],
+  "params_schema": {
+   "$defs": {
+    "CVParams": {
+     "additionalProperties": false,
+     "properties": {
+      "folds": {
+       "default": 5,
+       "maximum": 20,
+       "minimum": 2,
+       "title": "Folds",
+       "type": "integer"
+      },
+      "scheme": {
+       "default": "auto",
+       "description": "auto: expanding (time series), purged_kfold (panel), kfold (cross-section)",
+       "enum": [
+        "auto",
+        "expanding",
+        "purged_kfold",
+        "kfold"
+       ],
+       "title": "Scheme",
+       "type": "string"
+      },
+      "purge": {
+       "anyOf": [
+        {
+         "maximum": 60,
+         "minimum": 0,
+         "type": "integer"
+        },
+        {
+         "type": "null"
+        }
+       ],
+       "default": null,
+       "description": "periods dropped between train and test (default: target horizon, >= 1)",
+       "title": "Purge"
+      },
+      "embargo": {
+       "default": 0,
+       "maximum": 60,
+       "minimum": 0,
+       "title": "Embargo",
+       "type": "integer"
+      }
+     },
+     "title": "CVParams",
+     "type": "object"
+    }
+   },
+   "additionalProperties": false,
+   "properties": {
+    "task": {
+     "default": "auto",
+     "enum": [
+      "auto",
+      "regression",
+      "classification"
+     ],
+     "title": "Task",
+     "type": "string"
+    },
+    "n_estimators": {
+     "default": 500,
+     "description": "maximum boosting rounds (early stopping picks fewer)",
+     "maximum": 5000,
+     "minimum": 10,
+     "title": "N Estimators",
+     "type": "integer"
+    },
+    "learning_rate": {
+     "default": 0.05,
+     "exclusiveMinimum": 0,
+     "maximum": 1,
+     "title": "Learning Rate",
+     "type": "number"
+    },
+    "num_leaves": {
+     "default": 31,
+     "maximum": 1024,
+     "minimum": 2,
+     "title": "Num Leaves",
+     "type": "integer"
+    },
+    "max_depth": {
+     "anyOf": [
+      {
+       "maximum": 32,
+       "minimum": 1,
+       "type": "integer"
+      },
+      {
+       "type": "null"
+      }
+     ],
+     "default": null,
+     "title": "Max Depth"
+    },
+    "min_child_samples": {
+     "default": 20,
+     "maximum": 10000,
+     "minimum": 1,
+     "title": "Min Child Samples",
+     "type": "integer"
+    },
+    "subsample": {
+     "default": 0.8,
+     "exclusiveMinimum": 0,
+     "maximum": 1,
+     "title": "Subsample",
+     "type": "number"
+    },
+    "colsample_bytree": {
+     "default": 0.8,
+     "exclusiveMinimum": 0,
+     "maximum": 1,
+     "title": "Colsample Bytree",
+     "type": "number"
+    },
+    "reg_lambda": {
+     "default": 0.0,
+     "maximum": 100,
+     "minimum": 0,
+     "title": "Reg Lambda",
+     "type": "number"
+    },
+    "early_stopping": {
+     "default": true,
+     "description": "time-ordered validation block inside each training fold",
+     "title": "Early Stopping",
+     "type": "boolean"
+    },
+    "val_frac": {
+     "default": 0.2,
+     "exclusiveMaximum": 0.5,
+     "exclusiveMinimum": 0,
+     "title": "Val Frac",
+     "type": "number"
+    },
+    "stopping_rounds": {
+     "default": 50,
+     "maximum": 500,
+     "minimum": 5,
+     "title": "Stopping Rounds",
+     "type": "integer"
+    },
+    "cv": {
+     "$ref": "#/$defs/CVParams"
+    },
+    "shap": {
+     "default": true,
+     "title": "Shap",
+     "type": "boolean"
+    },
+    "shap_sample": {
+     "default": 2000,
+     "maximum": 20000,
+     "minimum": 100,
+     "title": "Shap Sample",
+     "type": "integer"
+    }
+   },
+   "title": "LGBMParams",
+   "type": "object"
+  }
+ },
+ "optuna_tune": {
+  "id": "optuna_tune",
+  "family": "ml",
+  "title": "Hyper-parameter tuning (Optuna)",
+  "description": "Seeded TPE search with median pruning over a model's hyper-parameters, scored by purged / embargoed walk-forward CV on the tuning window; the best configuration is then refitted and judged on an untouched final hold-out against the default configuration and a linear baseline (DM tests).",
+  "shapes": [
+   "timeseries",
+   "panel",
+   "cross_section"
+  ],
+  "needs_y": true,
+  "min_x": 1,
+  "max_x": null,
+  "uses_weights": false,
+  "outputs": [
+   "best parameters",
+   "optimization history",
+   "parameter importance",
+   "hold-out: tuned vs default vs linear"
+  ],
+  "diagnostics": [
+   "DM tuned vs default",
+   "DM tuned vs linear",
+   "CV-to-hold-out gap (selection optimism)"
+  ],
+  "params_schema": {
+   "$defs": {
+    "CVParams": {
+     "additionalProperties": false,
+     "properties": {
+      "folds": {
+       "default": 5,
+       "maximum": 20,
+       "minimum": 2,
+       "title": "Folds",
+       "type": "integer"
+      },
+      "scheme": {
+       "default": "auto",
+       "description": "auto: expanding (time series), purged_kfold (panel), kfold (cross-section)",
+       "enum": [
+        "auto",
+        "expanding",
+        "purged_kfold",
+        "kfold"
+       ],
+       "title": "Scheme",
+       "type": "string"
+      },
+      "purge": {
+       "anyOf": [
+        {
+         "maximum": 60,
+         "minimum": 0,
+         "type": "integer"
+        },
+        {
+         "type": "null"
+        }
+       ],
+       "default": null,
+       "description": "periods dropped between train and test (default: target horizon, >= 1)",
+       "title": "Purge"
+      },
+      "embargo": {
+       "default": 0,
+       "maximum": 60,
+       "minimum": 0,
+       "title": "Embargo",
+       "type": "integer"
+      }
+     },
+     "title": "CVParams",
+     "type": "object"
+    }
+   },
+   "additionalProperties": false,
+   "properties": {
+    "model": {
+     "default": "lgbm",
+     "enum": [
+      "lgbm",
+      "xgb",
+      "rf",
+      "hgb",
+      "elasticnet"
+     ],
+     "title": "Model",
+     "type": "string"
+    },
+    "task": {
+     "default": "auto",
+     "enum": [
+      "auto",
+      "regression",
+      "classification"
+     ],
+     "title": "Task",
+     "type": "string"
+    },
+    "n_trials": {
+     "default": 30,
+     "description": "trial budget",
+     "maximum": 500,
+     "minimum": 2,
+     "title": "N Trials",
+     "type": "integer"
+    },
+    "timeout_s": {
+     "default": 120,
+     "description": "search stops after this many seconds (fewer trials)",
+     "maximum": 3000,
+     "minimum": 5,
+     "title": "Timeout S",
+     "type": "integer"
+    },
+    "holdout_frac": {
+     "default": 0.2,
+     "description": "last share of dates never seen by the search",
+     "exclusiveMaximum": 0.5,
+     "exclusiveMinimum": 0.05,
+     "title": "Holdout Frac",
+     "type": "number"
+    },
+    "cv": {
+     "$ref": "#/$defs/CVParams",
+     "description": "inner purged / walk-forward CV on the tuning window"
+    }
+   },
+   "title": "OptunaParams",
+   "type": "object"
+  }
+ },
+ "stacking": {
+  "id": "stacking",
+  "family": "ml",
+  "title": "Stacking ensemble",
+  "description": "Base models combined by a meta-learner fitted on inner out-of-fold predictions inside each training fold (no test-fold leakage); OOS metrics of every base, the equal-weight average and the stack, with Diebold-Mariano tests of the stack against the best base model and the average.",
+  "shapes": [
+   "timeseries",
+   "panel",
+   "cross_section"
+  ],
+  "needs_y": true,
+  "min_x": 1,
+  "max_x": null,
+  "uses_weights": false,
+  "outputs": [
+   "OOS metrics per base / average / stack",
+   "meta weights",
+   "cumulative loss difference"
+  ],
+  "diagnostics": [
+   "DM stack vs best base",
+   "DM stack vs equal weights"
+  ],
+  "params_schema": {
+   "$defs": {
+    "CVParams": {
+     "additionalProperties": false,
+     "properties": {
+      "folds": {
+       "default": 5,
+       "maximum": 20,
+       "minimum": 2,
+       "title": "Folds",
+       "type": "integer"
+      },
+      "scheme": {
+       "default": "auto",
+       "description": "auto: expanding (time series), purged_kfold (panel), kfold (cross-section)",
+       "enum": [
+        "auto",
+        "expanding",
+        "purged_kfold",
+        "kfold"
+       ],
+       "title": "Scheme",
+       "type": "string"
+      },
+      "purge": {
+       "anyOf": [
+        {
+         "maximum": 60,
+         "minimum": 0,
+         "type": "integer"
+        },
+        {
+         "type": "null"
+        }
+       ],
+       "default": null,
+       "description": "periods dropped between train and test (default: target horizon, >= 1)",
+       "title": "Purge"
+      },
+      "embargo": {
+       "default": 0,
+       "maximum": 60,
+       "minimum": 0,
+       "title": "Embargo",
+       "type": "integer"
+      }
+     },
+     "title": "CVParams",
+     "type": "object"
+    }
+   },
+   "additionalProperties": false,
+   "properties": {
+    "bases": {
+     "items": {
+      "enum": [
+       "mean",
+       "ols",
+       "ridge",
+       "lasso",
+       "elasticnet",
+       "rf",
+       "hgb",
+       "xgb",
+       "lgbm"
+      ],
+      "type": "string"
+     },
+     "maxItems": 8,
+     "minItems": 2,
+     "title": "Bases",
+     "type": "array"
+    },
+    "meta": {
+     "default": "nnls",
+     "description": "nnls: non-negative weights; classification uses a logistic meta-learner on logits",
+     "enum": [
+      "nnls",
+      "ridge",
+      "mean"
+     ],
+     "title": "Meta",
+     "type": "string"
+    },
+    "inner_folds": {
+     "default": 3,
+     "maximum": 10,
+     "minimum": 2,
+     "title": "Inner Folds",
+     "type": "integer"
+    },
+    "task": {
+     "default": "auto",
+     "enum": [
+      "auto",
+      "regression",
+      "classification"
+     ],
+     "title": "Task",
+     "type": "string"
+    },
+    "cv": {
+     "$ref": "#/$defs/CVParams"
+    }
+   },
+   "title": "StackParams",
+   "type": "object"
+  }
+ },
+ "ltr": {
+  "id": "ltr",
+  "family": "ml",
+  "title": "Learning to rank (LightGBM LambdaRank)",
+  "description": "Cross-sectional ranking model for panels: LambdaRank with one query group per date and graded relevance from y quantiles; scored out of sample by per-date rank IC, NDCG@k and the top-minus-bottom spread, against a pointwise LightGBM regressor and OLS on identical folds.",
+  "shapes": [
+   "panel"
+  ],
+  "needs_y": true,
+  "min_x": 1,
+  "max_x": null,
+  "uses_weights": false,
+  "outputs": [
+   "rank IC / NDCG / spread vs baselines",
+   "IC by date",
+   "cumulative top-minus-bottom spread"
+  ],
+  "diagnostics": [
+   "DM on per-date IC vs pointwise and OLS",
+   "IC t-stat"
+  ],
+  "params_schema": {
+   "$defs": {
+    "CVParams": {
+     "additionalProperties": false,
+     "properties": {
+      "folds": {
+       "default": 5,
+       "maximum": 20,
+       "minimum": 2,
+       "title": "Folds",
+       "type": "integer"
+      },
+      "scheme": {
+       "default": "auto",
+       "description": "auto: expanding (time series), purged_kfold (panel), kfold (cross-section)",
+       "enum": [
+        "auto",
+        "expanding",
+        "purged_kfold",
+        "kfold"
+       ],
+       "title": "Scheme",
+       "type": "string"
+      },
+      "purge": {
+       "anyOf": [
+        {
+         "maximum": 60,
+         "minimum": 0,
+         "type": "integer"
+        },
+        {
+         "type": "null"
+        }
+       ],
+       "default": null,
+       "description": "periods dropped between train and test (default: target horizon, >= 1)",
+       "title": "Purge"
+      },
+      "embargo": {
+       "default": 0,
+       "maximum": 60,
+       "minimum": 0,
+       "title": "Embargo",
+       "type": "integer"
+      }
+     },
+     "title": "CVParams",
+     "type": "object"
+    }
+   },
+   "additionalProperties": false,
+   "properties": {
+    "n_grades": {
+     "default": 5,
+     "description": "relevance grades = quantile buckets of y per date",
+     "maximum": 20,
+     "minimum": 2,
+     "title": "N Grades",
+     "type": "integer"
+    },
+    "ndcg_k": {
+     "default": 10,
+     "maximum": 500,
+     "minimum": 1,
+     "title": "Ndcg K",
+     "type": "integer"
+    },
+    "n_estimators": {
+     "default": 300,
+     "maximum": 3000,
+     "minimum": 10,
+     "title": "N Estimators",
+     "type": "integer"
+    },
+    "learning_rate": {
+     "default": 0.05,
+     "exclusiveMinimum": 0,
+     "maximum": 1,
+     "title": "Learning Rate",
+     "type": "number"
+    },
+    "num_leaves": {
+     "default": 31,
+     "maximum": 1024,
+     "minimum": 2,
+     "title": "Num Leaves",
+     "type": "integer"
+    },
+    "min_child_samples": {
+     "default": 20,
+     "maximum": 10000,
+     "minimum": 1,
+     "title": "Min Child Samples",
+     "type": "integer"
+    },
+    "subsample": {
+     "default": 0.8,
+     "exclusiveMinimum": 0,
+     "maximum": 1,
+     "title": "Subsample",
+     "type": "number"
+    },
+    "colsample_bytree": {
+     "default": 0.8,
+     "exclusiveMinimum": 0,
+     "maximum": 1,
+     "title": "Colsample Bytree",
+     "type": "number"
+    },
+    "quantiles": {
+     "default": 5,
+     "description": "top-minus-bottom spread buckets",
+     "maximum": 10,
+     "minimum": 2,
+     "title": "Quantiles",
+     "type": "integer"
+    },
+    "cv": {
+     "$ref": "#/$defs/CVParams"
+    }
+   },
+   "title": "LTRParams",
+   "type": "object"
+  }
+ },
+ "mlp": {
+  "id": "mlp",
+  "family": "neural",
+  "title": "Neural network: multilayer perceptron (MLP)",
+  "description": "Feed-forward network for regression or classification on standardized features, purged / walk-forward CV, early stopping on a time-ordered validation block, seed averaging; always compared with OLS / logit on the same folds (Diebold-Mariano).",
+  "shapes": [
+   "timeseries",
+   "panel",
+   "cross_section"
+  ],
+  "needs_y": true,
+  "min_x": 1,
+  "max_x": null,
+  "uses_weights": false,
+  "outputs": [
+   "OOS metrics vs linear baseline",
+   "training / validation curves",
+   "permutation importance (last fold)"
+  ],
+  "diagnostics": [
+   "DM test vs linear (mandatory)",
+   "best epoch per fold"
+  ],
+  "params_schema": {
+   "$defs": {
+    "CVParams": {
+     "additionalProperties": false,
+     "properties": {
+      "folds": {
+       "default": 5,
+       "maximum": 20,
+       "minimum": 2,
+       "title": "Folds",
+       "type": "integer"
+      },
+      "scheme": {
+       "default": "auto",
+       "description": "auto: expanding (time series), purged_kfold (panel), kfold (cross-section)",
+       "enum": [
+        "auto",
+        "expanding",
+        "purged_kfold",
+        "kfold"
+       ],
+       "title": "Scheme",
+       "type": "string"
+      },
+      "purge": {
+       "anyOf": [
+        {
+         "maximum": 60,
+         "minimum": 0,
+         "type": "integer"
+        },
+        {
+         "type": "null"
+        }
+       ],
+       "default": null,
+       "description": "periods dropped between train and test (default: target horizon, >= 1)",
+       "title": "Purge"
+      },
+      "embargo": {
+       "default": 0,
+       "maximum": 60,
+       "minimum": 0,
+       "title": "Embargo",
+       "type": "integer"
+      }
+     },
+     "title": "CVParams",
+     "type": "object"
+    }
+   },
+   "additionalProperties": false,
+   "properties": {
+    "lr": {
+     "default": 0.001,
+     "description": "Adam learning rate",
+     "exclusiveMinimum": 0,
+     "maximum": 1,
+     "title": "Lr",
+     "type": "number"
+    },
+    "weight_decay": {
+     "default": 0.0001,
+     "maximum": 1,
+     "minimum": 0,
+     "title": "Weight Decay",
+     "type": "number"
+    },
+    "batch_size": {
+     "default": 256,
+     "maximum": 8192,
+     "minimum": 8,
+     "title": "Batch Size",
+     "type": "integer"
+    },
+    "max_epochs": {
+     "default": 200,
+     "maximum": 2000,
+     "minimum": 1,
+     "title": "Max Epochs",
+     "type": "integer"
+    },
+    "patience": {
+     "default": 15,
+     "description": "early stopping: epochs without validation improvement",
+     "maximum": 200,
+     "minimum": 1,
+     "title": "Patience",
+     "type": "integer"
+    },
+    "val_frac": {
+     "default": 0.2,
+     "description": "last share of each training fold's dates used for early stopping",
+     "exclusiveMaximum": 0.5,
+     "exclusiveMinimum": 0,
+     "title": "Val Frac",
+     "type": "number"
+    },
+    "n_seeds": {
+     "default": 3,
+     "description": "networks averaged (seeds seed, seed+1, ...)",
+     "maximum": 10,
+     "minimum": 1,
+     "title": "N Seeds",
+     "type": "integer"
+    },
+    "task": {
+     "default": "auto",
+     "enum": [
+      "auto",
+      "regression",
+      "classification"
+     ],
+     "title": "Task",
+     "type": "string"
+    },
+    "hidden": {
+     "description": "units per hidden layer",
+     "items": {
+      "type": "integer"
+     },
+     "maxItems": 4,
+     "minItems": 1,
+     "title": "Hidden",
+     "type": "array"
+    },
+    "dropout": {
+     "default": 0.1,
+     "exclusiveMaximum": 0.9,
+     "minimum": 0,
+     "title": "Dropout",
+     "type": "number"
+    },
+    "activation": {
+     "default": "relu",
+     "enum": [
+      "relu",
+      "tanh",
+      "gelu"
+     ],
+     "title": "Activation",
+     "type": "string"
+    },
+    "cv": {
+     "$ref": "#/$defs/CVParams"
+    }
+   },
+   "title": "MLPParams",
+   "type": "object"
+  }
+ },
+ "rnn": {
+  "id": "rnn",
+  "family": "neural",
+  "title": "Neural network: small GRU / LSTM",
+  "description": "Recurrent network on look-back windows of the features (and of y lagged by the target horizon, so no label overlaps the target), per entity on panels; walk-forward / purged CV on the window end dates, early stopping and seed averaging; compared with ridge on the same flattened window (DM).",
+  "shapes": [
+   "timeseries",
+   "panel"
+  ],
+  "needs_y": true,
+  "min_x": 0,
+  "max_x": null,
+  "uses_weights": false,
+  "outputs": [
+   "OOS metrics vs linear baseline (same window)",
+   "training / validation curves",
+   "OOS fit"
+  ],
+  "diagnostics": [
+   "DM test vs linear (mandatory)",
+   "best epoch per fold"
+  ],
+  "params_schema": {
+   "$defs": {
+    "CVParams": {
+     "additionalProperties": false,
+     "properties": {
+      "folds": {
+       "default": 5,
+       "maximum": 20,
+       "minimum": 2,
+       "title": "Folds",
+       "type": "integer"
+      },
+      "scheme": {
+       "default": "auto",
+       "description": "auto: expanding (time series), purged_kfold (panel), kfold (cross-section)",
+       "enum": [
+        "auto",
+        "expanding",
+        "purged_kfold",
+        "kfold"
+       ],
+       "title": "Scheme",
+       "type": "string"
+      },
+      "purge": {
+       "anyOf": [
+        {
+         "maximum": 60,
+         "minimum": 0,
+         "type": "integer"
+        },
+        {
+         "type": "null"
+        }
+       ],
+       "default": null,
+       "description": "periods dropped between train and test (default: target horizon, >= 1)",
+       "title": "Purge"
+      },
+      "embargo": {
+       "default": 0,
+       "maximum": 60,
+       "minimum": 0,
+       "title": "Embargo",
+       "type": "integer"
+      }
+     },
+     "title": "CVParams",
+     "type": "object"
+    }
+   },
+   "additionalProperties": false,
+   "properties": {
+    "lr": {
+     "default": 0.003,
+     "exclusiveMinimum": 0,
+     "maximum": 1,
+     "title": "Lr",
+     "type": "number"
+    },
+    "weight_decay": {
+     "default": 0.0001,
+     "maximum": 1,
+     "minimum": 0,
+     "title": "Weight Decay",
+     "type": "number"
+    },
+    "batch_size": {
+     "default": 128,
+     "maximum": 8192,
+     "minimum": 8,
+     "title": "Batch Size",
+     "type": "integer"
+    },
+    "max_epochs": {
+     "default": 150,
+     "maximum": 2000,
+     "minimum": 1,
+     "title": "Max Epochs",
+     "type": "integer"
+    },
+    "patience": {
+     "default": 15,
+     "description": "early stopping: epochs without validation improvement",
+     "maximum": 200,
+     "minimum": 1,
+     "title": "Patience",
+     "type": "integer"
+    },
+    "val_frac": {
+     "default": 0.2,
+     "description": "last share of each training fold's dates used for early stopping",
+     "exclusiveMaximum": 0.5,
+     "exclusiveMinimum": 0,
+     "title": "Val Frac",
+     "type": "number"
+    },
+    "n_seeds": {
+     "default": 3,
+     "description": "networks averaged (seeds seed, seed+1, ...)",
+     "maximum": 10,
+     "minimum": 1,
+     "title": "N Seeds",
+     "type": "integer"
+    },
+    "cell": {
+     "default": "gru",
+     "enum": [
+      "gru",
+      "lstm"
+     ],
+     "title": "Cell",
+     "type": "string"
+    },
+    "task": {
+     "default": "auto",
+     "enum": [
+      "auto",
+      "regression",
+      "classification"
+     ],
+     "title": "Task",
+     "type": "string"
+    },
+    "window": {
+     "default": 12,
+     "description": "look-back length in rows (periods)",
+     "maximum": 120,
+     "minimum": 2,
+     "title": "Window",
+     "type": "integer"
+    },
+    "hidden_size": {
+     "default": 16,
+     "maximum": 256,
+     "minimum": 2,
+     "title": "Hidden Size",
+     "type": "integer"
+    },
+    "layers": {
+     "default": 1,
+     "maximum": 3,
+     "minimum": 1,
+     "title": "Layers",
+     "type": "integer"
+    },
+    "dropout": {
+     "default": 0.0,
+     "description": "between stacked layers",
+     "exclusiveMaximum": 0.9,
+     "minimum": 0,
+     "title": "Dropout",
+     "type": "number"
+    },
+    "include_y_lags": {
+     "default": true,
+     "description": "add y lagged by max(1, horizon) rows as an input (no overlap with the target)",
+     "title": "Include Y Lags",
+     "type": "boolean"
+    },
+    "cv": {
+     "$ref": "#/$defs/CVParams"
+    }
+   },
+   "title": "RNNParams",
+   "type": "object"
+  }
+ },
+ "autoencoder": {
+  "id": "autoencoder",
+  "family": "neural",
+  "title": "Autoencoder factors",
+  "description": "Non-linear latent factors: a one-hidden-layer autoencoder compresses the x columns into k factors; compared with PCA using the same k (the linear autoencoder) on held-out dates by reconstruction R\u00b2 and a Diebold-Mariano test on per-row reconstruction error.",
+  "shapes": [
+   "timeseries",
+   "panel",
+   "cross_section"
+  ],
+  "needs_y": false,
+  "min_x": 2,
+  "max_x": null,
+  "uses_weights": false,
+  "outputs": [
+   "hold-out reconstruction R\u00b2 vs PCA",
+   "factor paths",
+   "factor-feature correlations",
+   "training curve"
+  ],
+  "diagnostics": [
+   "DM test vs PCA (mandatory)",
+   "per-feature R\u00b2"
+  ],
+  "params_schema": {
+   "additionalProperties": false,
+   "properties": {
+    "lr": {
+     "default": 0.001,
+     "description": "Adam learning rate",
+     "exclusiveMinimum": 0,
+     "maximum": 1,
+     "title": "Lr",
+     "type": "number"
+    },
+    "weight_decay": {
+     "default": 0.0001,
+     "maximum": 1,
+     "minimum": 0,
+     "title": "Weight Decay",
+     "type": "number"
+    },
+    "batch_size": {
+     "default": 256,
+     "maximum": 8192,
+     "minimum": 8,
+     "title": "Batch Size",
+     "type": "integer"
+    },
+    "max_epochs": {
+     "default": 200,
+     "maximum": 2000,
+     "minimum": 1,
+     "title": "Max Epochs",
+     "type": "integer"
+    },
+    "patience": {
+     "default": 15,
+     "description": "early stopping: epochs without validation improvement",
+     "maximum": 200,
+     "minimum": 1,
+     "title": "Patience",
+     "type": "integer"
+    },
+    "val_frac": {
+     "default": 0.2,
+     "description": "last share of each training fold's dates used for early stopping",
+     "exclusiveMaximum": 0.5,
+     "exclusiveMinimum": 0,
+     "title": "Val Frac",
+     "type": "number"
+    },
+    "n_seeds": {
+     "default": 3,
+     "description": "networks averaged (seeds seed, seed+1, ...)",
+     "maximum": 10,
+     "minimum": 1,
+     "title": "N Seeds",
+     "type": "integer"
+    },
+    "n_factors": {
+     "default": 3,
+     "maximum": 20,
+     "minimum": 1,
+     "title": "N Factors",
+     "type": "integer"
+    },
+    "hidden": {
+     "default": 32,
+     "maximum": 512,
+     "minimum": 2,
+     "title": "Hidden",
+     "type": "integer"
+    },
+    "activation": {
+     "default": "tanh",
+     "enum": [
+      "relu",
+      "tanh",
+      "gelu"
+     ],
+     "title": "Activation",
+     "type": "string"
+    },
+    "holdout_frac": {
+     "default": 0.2,
+     "description": "last share of dates kept out to compare with PCA",
+     "exclusiveMaximum": 0.5,
+     "exclusiveMinimum": 0.05,
+     "title": "Holdout Frac",
+     "type": "number"
+    }
+   },
+   "title": "AEParams",
+   "type": "object"
+  }
+ }
+}

@@ -1,0 +1,71 @@
+table: tech_prob_setup_events
+version: 1
+zone: features
+owner: technicals (app.techprob.job:run_fit_job, weekly technicals_probabilities_fit)
+description: >
+  Point-in-time weekly history of the technical setup and score for the T6 gate universe (app.techprob.history):
+  levels from one build_levels per security viewed with levels.snapshot(at=i+1), the live confluence code (find_zones,
+  build_setup) on bars <= origin, neutral level-type reliability (documented deviation). Realised two-barrier outcomes
+  per horizon and forward returns (T2 validation / economics, T4 score buckets). Seeded from the walk-forward build,
+  extended weekly.
+storage: {path: features/tech_prob_setup_events, format: parquet, partition_by: [region], write_mode: overwrite_partition}
+primary_key: [security_id, date]
+columns:
+  - {name: security_id, type: string, nullable: false, description: "FK securities_master"}
+  - {name: date, type: date, nullable: false, description: "Weekly origin (last own session of the ISO week)"}
+  - {name: region, type: string, nullable: false, description: "prices_daily region partition (US / EU / UK / JP)"}
+  - {name: sector_id, type: string, nullable: true, description: "Sector (current classification)"}
+  - {name: close, type: float64, nullable: false, description: "Adjusted close at the origin"}
+  - {name: atr, type: float64, nullable: true, description: "Wilder ATR(14)"}
+  - {name: sigma_d, type: float64, nullable: true, description: "EWMA daily volatility (conformal filter, earnings days excluded)"}
+  - {name: vol_regime, type: int8, nullable: true, description: "0 low / 1 mid / 2 high / -1 unknown"}
+  - {name: vix_high, type: bool, nullable: true, description: "FRED VIXCLS > 25 at the origin"}
+  - {name: earn_days_ahead, type: int16, nullable: true, description: "Sessions to the next earnings day (0 = none within 60)"}
+  - {name: adv_usd, type: float64, nullable: true, description: "20-session mean USD traded value"}
+  - {name: bias, type: enum, nullable: false, values: [long, short, neutral], description: "Setup bias (confluence.build_setup)"}
+  - {name: trend, type: enum, nullable: true, values: [up, down, sideways], description: "Trend state"}
+  - {name: structure_state, type: enum, nullable: true, values: [bullish, bearish, range], description: "Market structure"}
+  - {name: entry, type: float64, nullable: true, description: "Setup entry"}
+  - {name: invalidation, type: float64, nullable: true, description: "Setup invalidation"}
+  - {name: target1, type: float64, nullable: true, description: "Setup T1"}
+  - {name: reward_risk, type: float64, nullable: true, description: "Setup R:R from the entry"}
+  - {name: technical_score, type: float64, nullable: true, description: "Composite technical score 0..100"}
+  - {name: score_trend, type: float64, nullable: true, description: "Sub-score 0..100"}
+  - {name: score_structure, type: float64, nullable: true, description: "Sub-score 0..100"}
+  - {name: score_location, type: float64, nullable: true, description: "Sub-score 0..100"}
+  - {name: score_rr, type: float64, nullable: true, description: "Sub-score 0..100"}
+  - {name: score_momentum, type: float64, nullable: true, description: "Sub-score 0..100"}
+  - {name: n_zones, type: int16, nullable: true, description: "Confluence zones at the origin"}
+  - {name: v_5, type: float64, nullable: true, description: "V(5) = 5 s2 + J 1[earnings within 5]"}
+  - {name: earn_5, type: bool, nullable: true, description: "Earnings day within 5 sessions"}
+  - {name: v_10, type: float64, nullable: true, description: "V(10) = 10 s2 + J 1[earnings within 10]"}
+  - {name: earn_10, type: bool, nullable: true, description: "Earnings day within 10 sessions"}
+  - {name: v_20, type: float64, nullable: true, description: "V(20) = 20 s2 + J 1[earnings within 20]"}
+  - {name: earn_20, type: bool, nullable: true, description: "Earnings day within 20 sessions"}
+  - {name: v_40, type: float64, nullable: true, description: "V(40) = 40 s2 + J 1[earnings within 40]"}
+  - {name: earn_40, type: bool, nullable: true, description: "Earnings day within 40 sessions"}
+  - {name: v_60, type: float64, nullable: true, description: "V(60) = 60 s2 + J 1[earnings within 60]"}
+  - {name: earn_60, type: bool, nullable: true, description: "Earnings day within 60 sessions"}
+  - {name: fwd_5, type: float64, nullable: true, description: "Forward 5-session log return (null when not yet realised)"}
+  - {name: fwd_20, type: float64, nullable: true, description: "Forward 20-session log return (null when not yet realised)"}
+  - {name: fwd_60, type: float64, nullable: true, description: "Forward 60-session log return (null when not yet realised)"}
+  - {name: direction, type: int8, nullable: false, description: "+1 long setup, -1 short, 0 none"}
+  - {name: x_up, type: float64, nullable: true, description: "log(upper barrier / close)"}
+  - {name: x_dn, type: float64, nullable: true, description: "log(close / lower barrier)"}
+  - {name: rr_close, type: float64, nullable: true, description: "Reward / risk from the close"}
+  - {name: out_5, type: int8, nullable: true, description: "Outcome within 5: 0 neither, 1 up first, 2 down first, 3 tie, -1 not yet realised"}
+  - {name: tau_5, type: int16, nullable: true, description: "First passage bar (H + 1 = none)"}
+  - {name: z_5, type: float64, nullable: true, description: "log(C_t+5 / C_t)"}
+  - {name: out_10, type: int8, nullable: true, description: "Outcome within 10: 0 neither, 1 up first, 2 down first, 3 tie, -1 not yet realised"}
+  - {name: tau_10, type: int16, nullable: true, description: "First passage bar (H + 1 = none)"}
+  - {name: z_10, type: float64, nullable: true, description: "log(C_t+10 / C_t)"}
+  - {name: out_20, type: int8, nullable: true, description: "Outcome within 20: 0 neither, 1 up first, 2 down first, 3 tie, -1 not yet realised"}
+  - {name: tau_20, type: int16, nullable: true, description: "First passage bar (H + 1 = none)"}
+  - {name: z_20, type: float64, nullable: true, description: "log(C_t+20 / C_t)"}
+  - {name: out_40, type: int8, nullable: true, description: "Outcome within 40: 0 neither, 1 up first, 2 down first, 3 tie, -1 not yet realised"}
+  - {name: tau_40, type: int16, nullable: true, description: "First passage bar (H + 1 = none)"}
+  - {name: z_40, type: float64, nullable: true, description: "log(C_t+40 / C_t)"}
+  - {name: out_60, type: int8, nullable: true, description: "Outcome within 60: 0 neither, 1 up first, 2 down first, 3 tie, -1 not yet realised"}
+  - {name: tau_60, type: int16, nullable: true, description: "First passage bar (H + 1 = none)"}
+  - {name: z_60, type: float64, nullable: true, description: "log(C_t+60 / C_t)"}
+  - {name: computed_at, type: datetime, nullable: false, description: "Write time UTC"}

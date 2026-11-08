@@ -1,0 +1,283 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<!--Documento XBRL generado por AbaxXBRL 2.0 - 2H Software--><xbrli:xbrl xmlns:link="http://www.xbrl.org/2003/linkbase" xmlns:xlink="http://www.w3.org/1999/xlink" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xbrli="http://www.xbrl.org/2003/instance" xmlns:ISO4217="http://www.xbrl.org/2003/iso4217" xmlns:xbrldi="http://xbrl.org/2006/xbrldi" xmlns:ifrs-full="http://xbrl.ifrs.org/taxonomy/2017-03-09/ifrs-full" xmlns:ifrs_mx-cor_20141205="http://bmv.com.mx/ifrs_mx-cor_20141205/full_ifrs_mx-cor_2014-12-05" xmlns:ifrs-mc="http://xbrl.ifrs.org/taxonomy/2017-03-09/ifrs-mc" xmlns:mc_mx-cor_20141205="http://bmv.com.mx/mc_mx-cor_20141205/mc_mx-cor_2014-12-05">
+  <link:schemaRef xlink:type="simple" xlink:href="https://taxonomiasxbrl.cnbv.gob.mx/taxonomy/mx-ifrs-2019-01-01/full_ifrs_mc_mx_ics_entry_point_2019-01-01.xsd"/>
+  <xbrli:context id="HH6BBE13C7E5CEAE3CF2F7E92007DC5DA2">
+    <xbrli:entity>
+      <xbrli:identifier scheme="http://www.bmv.com.mx/id">GMEXICO</xbrli:identifier>
+    </xbrli:entity>
+    <xbrli:period>
+      <xbrli:startDate>2025-01-01</xbrli:startDate>
+      <xbrli:endDate>2025-12-31</xbrli:endDate>
+    </xbrli:period>
+    <xbrli:scenario>
+      <xbrldi:explicitMember dimension="ifrs-full:ComponentsOfEquityAxis">ifrs-full:AmountRecognisedInOtherComprehensiveIncomeAndAccumulatedInEquityRelatingToNoncurrentAssetsOrDisposalGroupsHeldForSaleMember</xbrldi:explicitMember>
+    </xbrli:scenario>
+  </xbrli:context>
+  <xbrli:context id="HHB748188BFFA79F5E8C125213B7A28A09">
+    <xbrli:entity>
+      <xbrli:identifier scheme="http://www.bmv.com.mx/id">GMEXICO</xbrli:identifier>
+    </xbrli:entity>
+    <xbrli:period>
+      <xbrli:startDate>2024-01-01</xbrli:startDate>
+      <xbrli:endDate>2024-12-31</xbrli:endDate>
+    </xbrli:period>
+    <xbrli:scenario>
+      <xbrldi:explicitMember dimension="ifrs-full:ComponentsOfEquityAxis">ifrs-full:AmountRecognisedInOtherComprehensiveIncomeAndAccumulatedInEquityRelatingToNoncurrentAssetsOrDisposalGroupsHeldForSaleMember</xbrldi:explicitMember>
+    </xbrli:scenario>
+  </xbrli:context>
+  <xbrli:context id="HHE35803FFA41B13A0D0ED474592F1344B">
+    <xbrli:entity>
+      <xbrli:identifier scheme="http://www.bmv.com.mx/id">GMEXICO</xbrli:identifier>
+    </xbrli:entity>
+    <xbrli:period>
+      <xbrli:instant>2024-12-31</xbrli:instant>
+    </xbrli:period>
+    <xbrli:scenario>
+      <xbrldi:explicitMember dimension="ifrs-full:ComponentsOfEquityAxis">ifrs-full:AmountRecognisedInOtherComprehensiveIncomeAndAccumulatedInEquityRelatingToNoncurrentAssetsOrDisposalGroupsHeldForSaleMember</xbrldi:explicitMember>
+    </xbrli:scenario>
+  </xbrli:context>
+  <xbrli:context id="HH3D277D728456996EE9E4721EB249FEC4">
+    <xbrli:entity>
+      <xbrli:identifier scheme="http://www.bmv.com.mx/id">GMEXICO</xbrli:identifier>
+    </xbrli:entity>
+    <xbrli:period>
+      <xbrli:instant>2025-12-31</xbrli:instant>
+    </xbrli:period>
+    <xbrli:scenario>
+      <xbrldi:explicitMember dimension="ifrs-full:ComponentsOfEquityAxis">ifrs-full:AmountRecognisedInOtherComprehensiveIncomeAndAccumulatedInEquityRelatingToNoncurrentAssetsOrDisposalGroupsHeldForSaleMember</xbrldi:explicitMember>
+    </xbrli:scenario>
+  </xbrli:context>
+  <xbrli:context id="HHF4480CBACA9C34021F80DDB45F09AF4E">
+    <xbrli:entity>
+      <xbrli:identifier scheme="http://www.bmv.com.mx/id">GMEXICO</xbrli:identifier>
+    </xbrli:entity>
+    <xbrli:period>
+      <xbrli:instant>2023-12-31</xbrli:instant>
+    </xbrli:period>
+    <xbrli:scenario>
+      <xbrldi:explicitMember dimension="ifrs-full:ComponentsOfEquityAxis">ifrs-full:AmountRecognisedInOtherComprehensiveIncomeAndAccumulatedInEquityRelatingToNoncurrentAssetsOrDisposalGroupsHeldForSaleMember</xbrldi:explicitMember>
+    </xbrli:scenario>
+  </xbrli:context>
+  <xbrli:context id="HH8EEC3123AEE66DD1E590C626B0AB10ED">
+    <xbrli:entity>
+      <xbrli:identifier scheme="http://www.bmv.com.mx/id">GMEXICO</xbrli:identifier>
+    </xbrli:entity>
+    <xbrli:period>
+      <xbrli:startDate>2025-01-01</xbrli:startDate>
+      <xbrli:endDate>2025-12-31</xbrli:endDate>
+    </xbrli:period>
+    <xbrli:scenario>
+      <xbrldi:explicitMember dimension="ifrs-full:ComponentsOfEquityAxis">ifrs-full:EquityAttributableToOwnersOfParentMember</xbrldi:explicitMember>
+    </xbrli:scenario>
+  </xbrli:context>
+  <xbrli:context id="HHCF49A8AB5C6002E1E85B3001D804E5A6">
+    <xbrli:entity>
+      <xbrli:identifier scheme="http://www.bmv.com.mx/id">GMEXICO</xbrli:identifier>
+    </xbrli:entity>
+    <xbrli:period>
+      <xbrli:startDate>2024-01-01</xbrli:startDate>
+      <xbrli:endDate>2024-12-31</xbrli:endDate>
+    </xbrli:period>
+    <xbrli:scenario>
+      <xbrldi:explicitMember dimension="ifrs-full:ComponentsOfEquityAxis">ifrs-full:EquityAttributableToOwnersOfParentMember</xbrldi:explicitMember>
+    </xbrli:scenario>
+  </xbrli:context>
+  <xbrli:context id="HH67EF7939B9A07C44C5B7EAE91F80ADDB">
+    <xbrli:entity>
+      <xbrli:identifier scheme="http://www.bmv.com.mx/id">GMEXICO</xbrli:identifier>
+    </xbrli:entity>
+    <xbrli:period>
+      <xbrli:instant>2024-12-31</xbrli:instant>
+    </xbrli:period>
+    <xbrli:scenario>
+      <xbrldi:explicitMember dimension="ifrs-full:ComponentsOfEquityAxis">ifrs-full:EquityAttributableToOwnersOfParentMember</xbrldi:explicitMember>
+    </xbrli:scenario>
+  </xbrli:context>
+  <xbrli:context id="HH86DE714A41371F6FFBA4A17F86FCAB76">
+    <xbrli:entity>
+      <xbrli:identifier scheme="http://www.bmv.com.mx/id">GMEXICO</xbrli:identifier>
+    </xbrli:entity>
+    <xbrli:period>
+      <xbrli:instant>2025-12-31</xbrli:instant>
+    </xbrli:period>
+    <xbrli:scenario>
+      <xbrldi:explicitMember dimension="ifrs-full:ComponentsOfEquityAxis">ifrs-full:EquityAttributableToOwnersOfParentMember</xbrldi:explicitMember>
+    </xbrli:scenario>
+  </xbrli:context>
+  <xbrli:context id="HHD42AAFE6A8944218E93D39B803198840">
+    <xbrli:entity>
+      <xbrli:identifier scheme="http://www.bmv.com.mx/id">GMEXICO</xbrli:identifier>
+    </xbrli:entity>
+    <xbrli:period>
+      <xbrli:instant>2023-12-31</xbrli:instant>
+    </xbrli:period>
+    <xbrli:scenario>
+      <xbrldi:explicitMember dimension="ifrs-full:ComponentsOfEquityAxis">ifrs-full:EquityAttributableToOwnersOfParentMember</xbrldi:explicitMember>
+    </xbrli:scenario>
+  </xbrli:context>
+  <xbrli:context id="HHC1927D8616374E8E72EF8528458A6E61">
+    <xbrli:entity>
+      <xbrli:identifier scheme="http://www.bmv.com.mx/id">GMEXICO</xbrli:identifier>
+    </xbrli:entity>
+    <xbrli:period>
+      <xbrli:startDate>2025-01-01</xbrli:startDate>
+      <xbrli:endDate>2025-12-31</xbrli:endDate>
+    </xbrli:period>
+    <xbrli:scenario>
+      <xbrldi:explicitMember dimension="ifrs-full:ComponentsOfEquityAxis">ifrs-full:IssuedCapitalMember</xbrldi:explicitMember>
+    </xbrli:scenario>
+  </xbrli:context>
+  <xbrli:context id="HH94C0B903FA97A700B732C8458DA6B24D">
+    <xbrli:entity>
+      <xbrli:identifier scheme="http://www.bmv.com.mx/id">GMEXICO</xbrli:identifier>
+    </xbrli:entity>
+    <xbrli:period>
+      <xbrli:startDate>2024-01-01</xbrli:startDate>
+      <xbrli:endDate>2024-12-31</xbrli:endDate>
+    </xbrli:period>
+    <xbrli:scenario>
+      <xbrldi:explicitMember dimension="ifrs-full:ComponentsOfEquityAxis">ifrs-full:IssuedCapitalMember</xbrldi:explicitMember>
+    </xbrli:scenario>
+  </xbrli:context>
+  <xbrli:context id="HHBA7F35B1990F91AF9A59458A540C454F">
+    <xbrli:entity>
+      <xbrli:identifier scheme="http://www.bmv.com.mx/id">GMEXICO</xbrli:identifier>
+    </xbrli:entity>
+    <xbrli:period>
+      <xbrli:instant>2024-12-31</xbrli:instant>
+    </xbrli:period>
+    <xbrli:scenario>
+      <xbrldi:explicitMember dimension="ifrs-full:ComponentsOfEquityAxis">ifrs-full:IssuedCapitalMember</xbrldi:explicitMember>
+    </xbrli:scenario>
+  </xbrli:context>
+  <xbrli:context id="HH58D88816652744DBF1E69774C277C382">
+    <xbrli:entity>
+      <xbrli:identifier scheme="http://www.bmv.com.mx/id">GMEXICO</xbrli:identifier>
+    </xbrli:entity>
+    <xbrli:period>
+      <xbrli:instant>2025-12-31</xbrli:instant>
+    </xbrli:period>
+    <xbrli:scenario>
+      <xbrldi:explicitMember dimension="ifrs-full:ComponentsOfEquityAxis">ifrs-full:IssuedCapitalMember</xbrldi:explicitMember>
+    </xbrli:scenario>
+  </xbrli:context>
+  <xbrli:context id="HHD3E23A9EF65B1B198E1B5EFAEDFF5A86">
+    <xbrli:entity>
+      <xbrli:identifier scheme="http://www.bmv.com.mx/id">GMEXICO</xbrli:identifier>
+    </xbrli:entity>
+    <xbrli:period>
+      <xbrli:startDate>2025-01-01</xbrli:startDate>
+      <xbrli:endDate>2025-12-31</xbrli:endDate>
+    </xbrli:period>
+    <xbrli:scenario>
+      <xbrldi:explicitMember dimension="ifrs-full:ComponentsOfEquityAxis">ifrs-full:NoncontrollingInterestsMember</xbrldi:explicitMember>
+    </xbrli:scenario>
+  </xbrli:context>
+  <xbrli:context id="HHA7C2588CF4590375CAEC90F1B5B5726B">
+    <xbrli:entity>
+      <xbrli:identifier scheme="http://www.bmv.com.mx/id">GMEXICO</xbrli:identifier>
+    </xbrli:entity>
+    <xbrli:period>
+      <xbrli:startDate>2024-01-01</xbrli:startDate>
+      <xbrli:endDate>2024-12-31</xbrli:endDate>
+    </xbrli:period>
+    <xbrli:scenario>
+      <xbrldi:explicitMember dimension="ifrs-full:ComponentsOfEquityAxis">ifrs-full:NoncontrollingInterestsMember</xbrldi:explicitMember>
+    </xbrli:scenario>
+  </xbrli:context>
+  <xbrli:context id="HH9FA3A3FFE14A1E6D5C7FC530EDEF1F97">
+    <xbrli:entity>
+      <xbrli:identifier scheme="http://www.bmv.com.mx/id">GMEXICO</xbrli:identifier>
+    </xbrli:entity>
+    <xbrli:period>
+      <xbrli:instant>2025-12-31</xbrli:instant>
+    </xbrli:period>
+  </xbrli:context>
+  <xbrli:context id="HHE7F2E3EED65FF01419D5D4A7DA081F74">
+    <xbrli:entity>
+      <xbrli:identifier scheme="http://www.bmv.com.mx/id">GMEXICO</xbrli:identifier>
+    </xbrli:entity>
+    <xbrli:period>
+      <xbrli:instant>2024-12-31</xbrli:instant>
+    </xbrli:period>
+  </xbrli:context>
+  <xbrli:context id="HHA26EDC5F417B03AAD7BEF2FE77902763">
+    <xbrli:entity>
+      <xbrli:identifier scheme="http://www.bmv.com.mx/id">GMEXICO</xbrli:identifier>
+    </xbrli:entity>
+    <xbrli:period>
+      <xbrli:startDate>2025-10-01</xbrli:startDate>
+      <xbrli:endDate>2025-12-31</xbrli:endDate>
+    </xbrli:period>
+  </xbrli:context>
+  <xbrli:context id="HH2D1D3053A7E20C12144CDF18BBE1900D">
+    <xbrli:entity>
+      <xbrli:identifier scheme="http://www.bmv.com.mx/id">GMEXICO</xbrli:identifier>
+    </xbrli:entity>
+    <xbrli:period>
+      <xbrli:startDate>2024-10-01</xbrli:startDate>
+      <xbrli:endDate>2024-12-31</xbrli:endDate>
+    </xbrli:period>
+  </xbrli:context>
+  <xbrli:context id="HH530CE40EE413325AF7F621D0A449A146">
+    <xbrli:entity>
+      <xbrli:identifier scheme="http://www.bmv.com.mx/id">GMEXICO</xbrli:identifier>
+    </xbrli:entity>
+    <xbrli:period>
+      <xbrli:startDate>2025-01-01</xbrli:startDate>
+      <xbrli:endDate>2025-12-31</xbrli:endDate>
+    </xbrli:period>
+  </xbrli:context>
+  <xbrli:context id="HH932B146DAF28D0D08B1993F940E92C87">
+    <xbrli:entity>
+      <xbrli:identifier scheme="http://www.bmv.com.mx/id">GMEXICO</xbrli:identifier>
+    </xbrli:entity>
+    <xbrli:period>
+      <xbrli:startDate>2024-01-01</xbrli:startDate>
+      <xbrli:endDate>2024-12-31</xbrli:endDate>
+    </xbrli:period>
+  </xbrli:context>
+  <xbrli:unit id="HHifrs_mx_EarningsPerShare">
+    <xbrli:divide>
+      <xbrli:unitNumerator>
+        <xbrli:measure>ISO4217:USD</xbrli:measure>
+      </xbrli:unitNumerator>
+      <xbrli:unitDenominator>
+        <xbrli:measure>xbrli:shares</xbrli:measure>
+      </xbrli:unitDenominator>
+    </xbrli:divide>
+  </xbrli:unit>
+  <xbrli:unit id="HHifrs_mx_Currency">
+    <xbrli:measure>ISO4217:USD</xbrli:measure>
+  </xbrli:unit>
+  <ifrs-full:ProfitLoss id="HH3753200DC46EEE8B3ED025D1F7EFF238" contextRef="HH6BBE13C7E5CEAE3CF2F7E92007DC5DA2" decimals="-3" unitRef="HHifrs_mx_Currency">0</ifrs-full:ProfitLoss>
+  <ifrs-full:ProfitLoss id="HHDD7BE5D06EA7E098D4FBB62BF6439DD1" contextRef="HHB748188BFFA79F5E8C125213B7A28A09" decimals="-3" unitRef="HHifrs_mx_Currency">0</ifrs-full:ProfitLoss>
+  <ifrs-full:Equity id="HH4FC98E50F670D3D9F0E5FED05BC6F5D0" contextRef="HHE35803FFA41B13A0D0ED474592F1344B" decimals="-3" unitRef="HHifrs_mx_Currency">0</ifrs-full:Equity>
+  <ifrs-full:Equity id="HH20438ABD90FA36F91318439A558BD9B7" contextRef="HH3D277D728456996EE9E4721EB249FEC4" decimals="-3" unitRef="HHifrs_mx_Currency">0</ifrs-full:Equity>
+  <ifrs-full:Equity id="HH640FECC451149B9FA96E95438979C694" contextRef="HHF4480CBACA9C34021F80DDB45F09AF4E" decimals="-3" unitRef="HHifrs_mx_Currency">0</ifrs-full:Equity>
+  <ifrs-full:ProfitLoss id="HHC0D511753E15A654D18226DF189279EE" contextRef="HH8EEC3123AEE66DD1E590C626B0AB10ED" decimals="-3" unitRef="HHifrs_mx_Currency">4922774000</ifrs-full:ProfitLoss>
+  <ifrs-full:ProfitLoss id="HH623F6943BDA84D5FFE7280C8AE2CEBBC" contextRef="HHCF49A8AB5C6002E1E85B3001D804E5A6" decimals="-3" unitRef="HHifrs_mx_Currency">3615325000</ifrs-full:ProfitLoss>
+  <ifrs-full:Equity id="HH7C6A5534CC4BA37BFE6312A8D1BAA716" contextRef="HH67EF7939B9A07C44C5B7EAE91F80ADDB" decimals="-3" unitRef="HHifrs_mx_Currency">20523819000</ifrs-full:Equity>
+  <ifrs-full:Equity id="HHED7EC28DB3B616150D799B69B2DCC83C" contextRef="HH86DE714A41371F6FFBA4A17F86FCAB76" decimals="-3" unitRef="HHifrs_mx_Currency">23173195000</ifrs-full:Equity>
+  <ifrs-full:Equity id="HH99B2D59B077570ED2BD02C29BF1746A1" contextRef="HHD42AAFE6A8944218E93D39B803198840" decimals="-3" unitRef="HHifrs_mx_Currency">18912391000</ifrs-full:Equity>
+  <ifrs-full:ProfitLoss id="HH3E73114D1B4FF3CD1578A28340289F0A" contextRef="HHC1927D8616374E8E72EF8528458A6E61" decimals="-3" unitRef="HHifrs_mx_Currency">0</ifrs-full:ProfitLoss>
+  <ifrs-full:ProfitLoss id="HHBF7C44932838736C56456D0CA5510A11" contextRef="HH94C0B903FA97A700B732C8458DA6B24D" decimals="-3" unitRef="HHifrs_mx_Currency">0</ifrs-full:ProfitLoss>
+  <ifrs-full:Equity id="HH9F0B80F6C4EECEF05D7D3C0DD3E97982" contextRef="HHBA7F35B1990F91AF9A59458A540C454F" decimals="-3" unitRef="HHifrs_mx_Currency">2003496000</ifrs-full:Equity>
+  <ifrs-full:Equity id="HH9637CC3E204DFDA39ECAB2A4AE939973" contextRef="HH58D88816652744DBF1E69774C277C382" decimals="-3" unitRef="HHifrs_mx_Currency">2003496000</ifrs-full:Equity>
+  <ifrs-full:ProfitLoss id="HH1BF0E25B9D8E8FE72C68D7C1C2E5CA27" contextRef="HHD3E23A9EF65B1B198E1B5EFAEDFF5A86" decimals="-3" unitRef="HHifrs_mx_Currency">794286000</ifrs-full:ProfitLoss>
+  <ifrs-full:ProfitLoss id="HH21DDBB521FC4FC22DE7156EE6F332B4A" contextRef="HHA7C2588CF4590375CAEC90F1B5B5726B" decimals="-3" unitRef="HHifrs_mx_Currency">616151000</ifrs-full:ProfitLoss>
+  <ifrs-full:Assets id="HH713E31996E4A6207AD2A21DB6538E58D" contextRef="HH9FA3A3FFE14A1E6D5C7FC530EDEF1F97" decimals="-3" unitRef="HHifrs_mx_Currency">42115838000</ifrs-full:Assets>
+  <ifrs-full:Assets id="HHBD94316FE4F09911D013913CD1AD84AC" contextRef="HHE7F2E3EED65FF01419D5D4A7DA081F74" decimals="-3" unitRef="HHifrs_mx_Currency">36887831000</ifrs-full:Assets>
+  <ifrs-full:BasicEarningsLossPerShare id="HHA26758AA94DBD6B0B1C5F853F511F17C" contextRef="HHA26EDC5F417B03AAD7BEF2FE77902763" decimals="2" unitRef="HHifrs_mx_EarningsPerShare">0.17</ifrs-full:BasicEarningsLossPerShare>
+  <ifrs-full:BasicEarningsLossPerShare id="HH981E4C4D5FF6D7C17A97432F445A83D0" contextRef="HH2D1D3053A7E20C12144CDF18BBE1900D" decimals="2" unitRef="HHifrs_mx_EarningsPerShare">0.1</ifrs-full:BasicEarningsLossPerShare>
+  <ifrs-full:BasicEarningsLossPerShare id="HH28A7D4B846759A6D1FCEE21E6CE0929D" contextRef="HH530CE40EE413325AF7F621D0A449A146" decimals="2" unitRef="HHifrs_mx_EarningsPerShare">0.63</ifrs-full:BasicEarningsLossPerShare>
+  <ifrs-full:BasicEarningsLossPerShare id="HH9E18C7FBB1A3396C06DBE619A4B37E48" contextRef="HH932B146DAF28D0D08B1993F940E92C87" decimals="2" unitRef="HHifrs_mx_EarningsPerShare">0.46</ifrs-full:BasicEarningsLossPerShare>
+  <ifrs-full:ProfitLossAttributableToOwnersOfParent id="HH6EAFE6CDC34A63B99096F391B7C62E01" contextRef="HHA26EDC5F417B03AAD7BEF2FE77902763" decimals="-3" unitRef="HHifrs_mx_Currency">1314171000</ifrs-full:ProfitLossAttributableToOwnersOfParent>
+  <ifrs-full:ProfitLossAttributableToOwnersOfParent id="HHE10B8865CD5266A4DCAEA0C9B59F444B" contextRef="HH2D1D3053A7E20C12144CDF18BBE1900D" decimals="-3" unitRef="HHifrs_mx_Currency">744322000</ifrs-full:ProfitLossAttributableToOwnersOfParent>
+  <ifrs-full:ProfitLossAttributableToOwnersOfParent id="HH95534717AD3384AD68B68504862928B0" contextRef="HH530CE40EE413325AF7F621D0A449A146" decimals="-3" unitRef="HHifrs_mx_Currency">4922774000</ifrs-full:ProfitLossAttributableToOwnersOfParent>
+  <ifrs-full:ProfitLossAttributableToOwnersOfParent id="HH92F76B33D974B15C7C8FD7422AA20D57" contextRef="HH932B146DAF28D0D08B1993F940E92C87" decimals="-3" unitRef="HHifrs_mx_Currency">3615325000</ifrs-full:ProfitLossAttributableToOwnersOfParent>
+  <ifrs-full:Revenue id="HHA60B3253FDD2F221AC6E45013AC3AF94" contextRef="HHA26EDC5F417B03AAD7BEF2FE77902763" decimals="-3" unitRef="HHifrs_mx_Currency">5152532000</ifrs-full:Revenue>
+  <ifrs-full:Revenue id="HHDC0D4AC0F85331A995E3960E7BBAB16C" contextRef="HH2D1D3053A7E20C12144CDF18BBE1900D" decimals="-3" unitRef="HHifrs_mx_Currency">3846788000</ifrs-full:Revenue>
+  <ifrs-full:Revenue id="HHB138C09E5B5EC289B82BEB77751C38B3" contextRef="HH530CE40EE413325AF7F621D0A449A146" decimals="-3" unitRef="HHifrs_mx_Currency">18176711000</ifrs-full:Revenue>
+  <ifrs-full:Revenue id="HHBE828A28EFCA77A60064BE4CDFD9411A" contextRef="HH932B146DAF28D0D08B1993F940E92C87" decimals="-3" unitRef="HHifrs_mx_Currency">16169447000</ifrs-full:Revenue>
+  </xbrli:xbrl>

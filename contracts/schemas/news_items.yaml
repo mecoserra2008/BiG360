@@ -1,0 +1,37 @@
+table: news_items
+version: 3
+zone: normalized
+owner: ingest-market (raw items) ; signals-alt (fills sentiment_* columns via app.nlp.sentiment)
+description: >
+  Headlines/articles linked to issuers (GDELT DOC/GKG article lists, yfinance news, SEC 8-K press releases,
+  company/exchange RSS). Full text not stored; title + snippet only. Sentiment columns null until scored.
+  Two-writer exception: ingestion appends rows; the NLP job rewrites the same partitions adding sentiment
+  (it is scheduled strictly after ingestion — no concurrent writes).
+storage: {path: normalized/news_items, format: parquet, partition_by: [year_month], write_mode: upsert}
+primary_key: [item_id]
+pit: {knowledge_column: knowledge_date, rule: "published_at converted to exchange-local date of the primary issuer"}
+columns:
+  - {name: item_id, type: string, nullable: false, description: "sha1(url normalized) first 16 hex"}
+  - {name: year_month, type: string, nullable: false, description: "Partition YYYY-MM of published_at"}
+  - {name: published_at, type: datetime, nullable: false, description: "Publication time UTC"}
+  - {name: knowledge_date, type: date, nullable: false, description: "Local date public"}
+  - {name: source_id, type: string, nullable: false, description: "gdelt_doc | gdelt_gkg | yfinance_news | sec_8k | rss_*"}
+  - {name: publisher, type: string, nullable: true, description: "Domain/outlet"}
+  - {name: url, type: string, nullable: false, description: "Article URL"}
+  - {name: title, type: string, nullable: false, description: "Headline"}
+  - {name: snippet, type: string, nullable: true, description: "First ~500 chars / summary"}
+  - {name: language, type: string, nullable: true, description: "ISO 639-1"}
+  - {name: issuer_ids, type: list<string>, nullable: false, description: "Linked issuers (may be empty for macro/country news)"}
+  - {name: link_confidence, type: list<float64>, nullable: true, description: "Confidence per issuer_ids element"}
+  - {name: countries, type: list<string>, nullable: true, description: "ISO2 countries mentioned"}
+  - {name: themes, type: list<string>, nullable: true, description: "GDELT GKG themes or keyword tags"}
+  - {name: tickers, type: list<string>, nullable: true, description: "Source-provided ticker symbols (e.g. Polygon tickers[]) for later identity back-fill (added v2, ingest-market)"}
+  - {name: entities, type: list<string>, nullable: true, description: "Matched organisation names / query terms that linked the item (GKG V1Organizations match, DOC query) (added v2)"}
+  - {name: provider_sentiment, type: json, nullable: true, description: "Provider-supplied sentiment, e.g. Polygon insights [{ticker, sentiment, sentiment_reasoning}] (added v2)"}
+  - {name: gdelt_tone, type: float64, nullable: true, description: "GDELT tone if available"}
+  - {name: sentiment_label, type: enum, nullable: true, values: [positive, neutral, negative], description: "Model label"}
+  - {name: sentiment_score, type: float64, nullable: true, description: "P(pos) - P(neg) in [-1,1]"}
+  - {name: sentiment_model, type: string, nullable: true, description: "Model id, e.g. ProsusAI/finbert, multilingual model id"}
+  - {name: ingested_at, type: datetime, nullable: false, description: "Write time UTC"}
+  - {name: relevance, type: float64, nullable: true, description: "Max over issuer_relevance (API NewsItem.relevance); written by signals-alt nlp_sentiment (added v3)"}
+  - {name: issuer_relevance, type: list<float64>, nullable: true, description: "Relevance 0..1 per issuer_ids element: ticker/name in title 1.0, provider ticker tag 0.85, name in snippet 0.7, org mention only 0.5 x org-link confidence; x sqrt(3/n) when n > 3 issuers (added v3, signals-alt)"}

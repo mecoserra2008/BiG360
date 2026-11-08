@@ -1,0 +1,78 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<!--Documento XBRL generado por AbaxXBRL 2.0 - 2H Software--><xbrli:xbrl xmlns:link="http://www.xbrl.org/2003/linkbase" xmlns:xlink="http://www.w3.org/1999/xlink" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xbrli="http://www.xbrl.org/2003/instance" xmlns:ISO4217="http://www.xbrl.org/2003/iso4217" xmlns:xbrldi="http://xbrl.org/2006/xbrldi" xmlns:ar_pros="http://www.cnbv.gob.mx/2016-08-22/ar_prospectus" xmlns:ifrs-full="http://xbrl.ifrs.org/taxonomy/2014-03-05/ifrs-full" xmlns:ifrs_mx-cor_20141205="http://bmv.com.mx/ifrs_mx-cor_20141205/full_ifrs_mx-cor_2014-12-05">
+  <link:schemaRef xlink:type="simple" xlink:href="https://taxonomiasxbrl.cnbv.gob.mx/taxonomy/ra-prospecto-2016-08-22/ar_N_entry_point_2016-08-22.xsd"/>
+  <xbrli:context id="HH2C104619B408042F225F5B3E042B366C">
+    <xbrli:entity>
+      <xbrli:identifier scheme="http://www.bmv.com.mx/id">GFNORTE</xbrli:identifier>
+    </xbrli:entity>
+    <xbrli:period>
+      <xbrli:instant>2025-12-31</xbrli:instant>
+    </xbrli:period>
+  </xbrli:context>
+  <xbrli:context id="HHEA515CB624A8847030A4E0FA714E6408">
+    <xbrli:entity>
+      <xbrli:identifier scheme="http://www.bmv.com.mx/id">GFNORTE</xbrli:identifier>
+    </xbrli:entity>
+    <xbrli:period>
+      <xbrli:instant>2023-12-31</xbrli:instant>
+    </xbrli:period>
+  </xbrli:context>
+  <xbrli:context id="HHA2285B23407EAD01E255549A3B5075F6">
+    <xbrli:entity>
+      <xbrli:identifier scheme="http://www.bmv.com.mx/id">GFNORTE</xbrli:identifier>
+    </xbrli:entity>
+    <xbrli:period>
+      <xbrli:instant>2024-12-31</xbrli:instant>
+    </xbrli:period>
+  </xbrli:context>
+  <xbrli:context id="HH4D93714FB30A4330E464EBF43DDCB13D">
+    <xbrli:entity>
+      <xbrli:identifier scheme="http://www.bmv.com.mx/id">GFNORTE</xbrli:identifier>
+    </xbrli:entity>
+    <xbrli:period>
+      <xbrli:startDate>2023-01-01</xbrli:startDate>
+      <xbrli:endDate>2023-12-31</xbrli:endDate>
+    </xbrli:period>
+  </xbrli:context>
+  <xbrli:context id="HH743DDD9B7E89D90C2423671F71C287CD">
+    <xbrli:entity>
+      <xbrli:identifier scheme="http://www.bmv.com.mx/id">GFNORTE</xbrli:identifier>
+    </xbrli:entity>
+    <xbrli:period>
+      <xbrli:startDate>2024-01-01</xbrli:startDate>
+      <xbrli:endDate>2024-12-31</xbrli:endDate>
+    </xbrli:period>
+  </xbrli:context>
+  <xbrli:context id="HH49E91D554F26874D5445FD2065CA1623">
+    <xbrli:entity>
+      <xbrli:identifier scheme="http://www.bmv.com.mx/id">GFNORTE</xbrli:identifier>
+    </xbrli:entity>
+    <xbrli:period>
+      <xbrli:startDate>2025-01-01</xbrli:startDate>
+      <xbrli:endDate>2025-12-31</xbrli:endDate>
+    </xbrli:period>
+  </xbrli:context>
+  <xbrli:unit id="HHar_pros_Currency">
+    <xbrli:measure>ISO4217:MXN</xbrli:measure>
+  </xbrli:unit>
+  <xbrli:unit id="HHar_pros_Pure">
+    <xbrli:measure>xbrli:pure</xbrli:measure>
+  </xbrli:unit>
+  <ar_pros:TotalPercentageOfMenAsCounselors id="HH41DA983018FC6515C022EFA2C91433BB" contextRef="HH2C104619B408042F225F5B3E042B366C" decimals="2" unitRef="HHar_pros_Pure">81</ar_pros:TotalPercentageOfMenAsCounselors>
+  <ar_pros:TotalPercentageOfMenAsRelevantDirectors id="HH7EEC68E90DCB050305854FB22F42B08F" contextRef="HH2C104619B408042F225F5B3E042B366C" decimals="2" unitRef="HHar_pros_Pure">100</ar_pros:TotalPercentageOfMenAsRelevantDirectors>
+  <ifrs-full:Assets id="HHE33F42D4C8F9F53CA6E3695FA1431CDC" contextRef="HH2C104619B408042F225F5B3E042B366C" decimals="-3" unitRef="HHar_pros_Currency">2598662991095.6</ifrs-full:Assets>
+  <ifrs-full:Assets id="HH839E303F12194D9F1102252DE6A0DAAD" contextRef="HHEA515CB624A8847030A4E0FA714E6408" decimals="-3" unitRef="HHar_pros_Currency">2274859309846.7</ifrs-full:Assets>
+  <ifrs-full:Assets id="HH2168FA9C6205B3D4BF923B28C5ADFDA2" contextRef="HHA2285B23407EAD01E255549A3B5075F6" decimals="-3" unitRef="HHar_pros_Currency">2471208809452.9</ifrs-full:Assets>
+  <ifrs-full:BasicEarningsLossPerShare id="HH5696DF8CC3E804FDB7155A45175C5F9C" contextRef="HH4D93714FB30A4330E464EBF43DDCB13D" decimals="-3" unitRef="HHar_pros_Currency">18.31</ifrs-full:BasicEarningsLossPerShare>
+  <ifrs-full:BasicEarningsLossPerShare id="HHA7C457E488306BCBD05B44CDB2971173" contextRef="HH743DDD9B7E89D90C2423671F71C287CD" decimals="-3" unitRef="HHar_pros_Currency">19.72</ifrs-full:BasicEarningsLossPerShare>
+  <ifrs-full:BasicEarningsLossPerShare id="HH2F82C78E291EB3817243BDAD6C2F2E21" contextRef="HH49E91D554F26874D5445FD2065CA1623" decimals="-3" unitRef="HHar_pros_Currency">20.79</ifrs-full:BasicEarningsLossPerShare>
+  <ifrs-full:Equity id="HHB65DA0B32840DD1DD2E0796F95F0363E" contextRef="HH2C104619B408042F225F5B3E042B366C" decimals="-3" unitRef="HHar_pros_Currency">252213067711.22</ifrs-full:Equity>
+  <ifrs-full:Equity id="HH73690653492C1B9DF9A588EA200A02A9" contextRef="HHEA515CB624A8847030A4E0FA714E6408" decimals="-3" unitRef="HHar_pros_Currency">249205618382.82</ifrs-full:Equity>
+  <ifrs-full:Equity id="HHC5BECFBE3F0A3AF8428AAAF6BDC89E1F" contextRef="HHA2285B23407EAD01E255549A3B5075F6" decimals="-3" unitRef="HHar_pros_Currency">248427826937.8</ifrs-full:Equity>
+  <ifrs-full:ProfitLoss id="HH4727A6E8D8471347F20DF2185F3C05A6" contextRef="HH4D93714FB30A4330E464EBF43DDCB13D" decimals="-3" unitRef="HHar_pros_Currency">52418229549.028</ifrs-full:ProfitLoss>
+  <ifrs-full:ProfitLoss id="HH4D3F00E6C01B8EF1BFE0A55F89A4AB8B" contextRef="HH743DDD9B7E89D90C2423671F71C287CD" decimals="-3" unitRef="HHar_pros_Currency">56188287348.201</ifrs-full:ProfitLoss>
+  <ifrs-full:ProfitLoss id="HHA684DE0179905E5E924489A5BF2FF7A6" contextRef="HH49E91D554F26874D5445FD2065CA1623" decimals="-3" unitRef="HHar_pros_Currency">58788385250.224</ifrs-full:ProfitLoss>
+  <ifrs-full:Revenue id="HHD2A78A8A527515216BAED7C48B9C8933" contextRef="HH4D93714FB30A4330E464EBF43DDCB13D" decimals="-3" unitRef="HHar_pros_Currency">134085256001.134</ifrs-full:Revenue>
+  <ifrs-full:Revenue id="HH5A5FC899D583C7AAAD3102C444306877" contextRef="HH743DDD9B7E89D90C2423671F71C287CD" decimals="-3" unitRef="HHar_pros_Currency">146219615028.695</ifrs-full:Revenue>
+  <ifrs-full:Revenue id="HH172666D1C88298E7F49F8F6CE22C8D5A" contextRef="HH49E91D554F26874D5445FD2065CA1623" decimals="-3" unitRef="HHar_pros_Currency">161262017757.949</ifrs-full:Revenue>
+  </xbrli:xbrl>

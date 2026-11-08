@@ -1,0 +1,13 @@
+﻿"";BBSIS.D.I.ZST.B0.EUR.S1311.B.A604._Z.R.A.A._Z._Z.A;BBSIS.D.I.ZST.B0.EUR.S1311.B.A604._Z.R.A.A._Z._Z.A_FLAGS;BBSIS.D.I.ZST.B1.EUR.S1311.B.A604._Z.R.A.A._Z._Z.A;BBSIS.D.I.ZST.B1.EUR.S1311.B.A604._Z.R.A.A._Z._Z.A_FLAGS;BBSIS.D.I.ZST.B2.EUR.S1311.B.A604._Z.R.A.A._Z._Z.A;BBSIS.D.I.ZST.B2.EUR.S1311.B.A604._Z.R.A.A._Z._Z.A_FLAGS;BBSIS.D.I.ZST.B3.EUR.S1311.B.A604._Z.R.A.A._Z._Z.A;BBSIS.D.I.ZST.B3.EUR.S1311.B.A604._Z.R.A.A._Z._Z.A_FLAGS;BBSIS.D.I.ZST.T1.EUR.S1311.B.A604._Z.R.A.A._Z._Z.A;BBSIS.D.I.ZST.T1.EUR.S1311.B.A604._Z.R.A.A._Z._Z.A_FLAGS;BBSIS.D.I.ZST.T2.EUR.S1311.B.A604._Z.R.A.A._Z._Z.A;BBSIS.D.I.ZST.T2.EUR.S1311.B.A604._Z.R.A.A._Z._Z.A_FLAGS
+"";Zinsstrukturkurve / Parameter Beta0 (Svensson-Methode) /          Börsennotierte Bundeswertpapiere / Tageswerte;;Zinsstrukturkurve / Parameter Beta1 (Svensson-Methode) /          Börsennotierte Bundeswertpapiere / Tageswerte;;Zinsstrukturkurve / Parameter Beta2 (Svensson-Methode) /          Börsennotierte Bundeswertpapiere / Tageswerte;;Zinsstrukturkurve / Parameter Beta3 (Svensson-Methode) /          Börsennotierte Bundeswertpapiere / Tageswerte;;Zinsstrukturkurve / Parameter Tau1 (Svensson-Methode) /           Börsennotierte Bundeswertpapiere / Tageswerte;;Zinsstrukturkurve / Parameter Tau2 (Svensson-Methode) /           Börsennotierte Bundeswertpapiere / Tageswerte;
+Dezimalstellen;5;;5;;5;;5;;5;;5;
+Dimension;Eins;;Eins;;Eins;;Eins;;Eins;;Eins;
+Einheit;;;;;;;;;;;;
+Format der Zeitangabe;P1D;;P1D;;P1D;;P1D;;P1D;;P1D;
+Kategorie;ZRZS;;ZRZS;;ZRZS;;ZRZS;;ZRZS;;ZRZS;
+Kommentar;Monatsreihe siehe WZ9801. Bis Juli 1997 liegen lediglich Ultimowerte vor.;;Monatsreihe siehe WZ9802. Bis Juli 1997 liegen lediglich Ultimowerte vor.;;Monatsreihe siehe WZ9803. Bis Juli 1997 liegen lediglich Ultimowerte vor.;;Monatsreihe siehe WZ9805. Bis Juli 1997 liegen lediglich Ultimowerte vor.;;Monatsreihe siehe WZ9804. Bis Juli 1997 liegen lediglich Ultimowerte vor.;;Monatsreihe siehe WZ9806. Bis Juli 1997 liegen lediglich Ultimowerte vor.;
+Kommentar (englisch);;;;;;;;;;;;
+Stand vom;30.10.2026 12:24:20 Uhr;;30.10.2026 12:24:20 Uhr;;30.10.2026 12:24:20 Uhr;;30.10.2026 12:24:20 Uhr;;30.10.2026 12:24:21 Uhr;;30.10.2026 12:24:21 Uhr;
+2026-10-28;3,95607;;-1,54787;;23,84380;;-24,31928;;1,44812;;1,55207;
+2026-10-29;3,96158;;-1,54764;;25,28715;;-25,80359;;1,47551;;1,57666;
+2026-10-30;3,97906;;-1,54899;;25,70580;;-26,35599;;1,48317;;1,58613;

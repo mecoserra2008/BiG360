@@ -1,0 +1,118 @@
+{
+ "title": "Rate and credit betas by sector (partial pooling)",
+ "description": "Each sector's sensitivity of monthly stock returns to 10Y yield and Baa credit-spread changes, shrunk toward the market-wide sensitivity.",
+ "question": "macro",
+ "tags": [
+  "macro",
+  "rates",
+  "credit",
+  "hierarchical"
+ ],
+ "method_note": "Stock-month panel with sector-varying intercepts and slopes on the two macro shocks (same for every stock in a month). Partial pooling regularizes sectors with few names (UTIL, ENRG). Expect positive rate betas for FINS, negative for REAL / UTIL, negative credit betas everywhere. Caveat: the universe is today's constituents (membership history starts 2026-10), so early years carry survivorship bias; read the premium as an upper bound.",
+ "expected_outputs": [
+  "rate / credit beta per sector (posterior)",
+  "forest plot",
+  "R-hat / ESS"
+ ],
+ "runtime_s": 9.8,
+ "validated": "2026-11-06 on snapshot R20261106T010757G9ZB",
+ "result": {
+  "run_id": "SR20261106T0237333Q454",
+  "beats_baseline": true,
+  "beats_linear": true,
+  "verdict": "partial pooling beats linear-Gaussian baseline on CRPS (DM p = 2.44e-07); point forecast: partial pooling beats linear baseline (DM p = 0.000104)",
+  "n_obs": 88407,
+  "metrics": {
+   "oos_rmse": 0.08796897165298125,
+   "oos_r2_oos": 0.07445193858964405,
+   "oos_rank_ic": 0.09510739138965799,
+   "crps": 0.04758466744584755,
+   "crps_linear": 0.04772399791585503,
+   "crps_skill_vs_linear": 0.0029195054080158878,
+   "coverage_90": 0.8982320404492857,
+   "dm_p_crps_vs_linear": 2.4355699254883456e-07,
+   "max_rhat": 1.0020306107011112,
+   "dm_p_vs_linear": 0.00010449288885195703
+  },
+  "coefficients": [
+   {
+    "term": "mu[const]",
+    "estimate": 0.01433607383520706,
+    "statistic": null,
+    "p_value": null
+   },
+   {
+    "term": "mu[d_10y]",
+    "estimate": -0.050263279168159,
+    "statistic": null,
+    "p_value": null
+   },
+   {
+    "term": "mu[d_baa]",
+    "estimate": -0.16629269334329128,
+    "statistic": null,
+    "p_value": null
+   }
+  ]
+ },
+ "study": {
+  "name": "Rate and credit betas by sector (partial pooling)",
+  "method": "hier_pool",
+  "y": "ret",
+  "x": [
+   "d_10y",
+   "d_baa"
+  ],
+  "params": {
+   "group": "sector_id",
+   "estimator": "gibbs",
+   "n_iter": 1500,
+   "burn": 500,
+   "cv": {
+    "folds": 4,
+    "scheme": "purged_kfold",
+    "purge": 1
+   }
+  },
+  "dataset": {
+   "kind": "panel",
+   "frequency": "M",
+   "start": "2010-01-01",
+   "entities": {
+    "universe": "mvp_us"
+   },
+   "variables": [
+    {
+     "name": "ret",
+     "source": "prices",
+     "field": "ret",
+     "transforms": [
+      {
+       "op": "winsorize"
+      }
+     ]
+    },
+    {
+     "name": "d_10y",
+     "source": "macro",
+     "field": "ust:10Y",
+     "transforms": [
+      {
+       "op": "diff"
+      }
+     ]
+    },
+    {
+     "name": "d_baa",
+     "source": "macro",
+     "field": "fred:BAA10Y",
+     "transforms": [
+      {
+       "op": "diff"
+      }
+     ]
+    }
+   ]
+  }
+ }
+}

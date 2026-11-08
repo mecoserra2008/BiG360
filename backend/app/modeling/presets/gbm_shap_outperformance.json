@@ -1,0 +1,146 @@
+{
+ "title": "GBM + SHAP: 3M outperformance from factor scores",
+ "description": "Monthly panel of mvp_us stocks: will the next-3-month return beat the cross-sectional mean? HistGradientBoosting classifier on standardized factor scores plus value / quality ratios, purged K-fold CV (3-month purge), permutation importance, SHAP beeswarm and partial dependence.",
+ "tags": [
+  "ML",
+  "gradient boosting",
+  "SHAP",
+  "factors"
+ ],
+ "study": {
+  "name": "3M outperformance GBM",
+  "method": "tree_ensemble",
+  "y": "outperf_3m",
+  "x": [
+   "quality",
+   "value",
+   "momentum",
+   "growth",
+   "profitability",
+   "roic",
+   "earnings_yield"
+  ],
+  "params": {
+   "model": "hgb",
+   "n_estimators": 200,
+   "max_depth": 4,
+   "learning_rate": 0.05,
+   "min_samples_leaf": 100,
+   "cv": {
+    "folds": 5,
+    "scheme": "purged_kfold",
+    "purge": 3
+   },
+   "shap_sample": 2000,
+   "shap": true
+  },
+  "dataset": {
+   "kind": "panel",
+   "frequency": "M",
+   "start": "2017-06-01",
+   "entities": {
+    "universe": "mvp_us"
+   },
+   "variables": [
+    {
+     "name": "outperf_3m",
+     "source": "prices",
+     "field": "ret",
+     "transforms": [
+      {
+       "op": "fwd_compound",
+       "k": 3
+      },
+      {
+       "op": "cs_demean"
+      },
+      {
+       "op": "binarize",
+       "threshold": 0
+      }
+     ]
+    },
+    {
+     "name": "quality",
+     "source": "factor_scores",
+     "field": "quality",
+     "transforms": [
+      {
+       "op": "cs_zscore"
+      }
+     ]
+    },
+    {
+     "name": "value",
+     "source": "factor_scores",
+     "field": "value",
+     "transforms": [
+      {
+       "op": "cs_zscore"
+      }
+     ]
+    },
+    {
+     "name": "momentum",
+     "source": "factor_scores",
+     "field": "momentum",
+     "transforms": [
+      {
+       "op": "cs_zscore"
+      }
+     ]
+    },
+    {
+     "name": "growth",
+     "source": "factor_scores",
+     "field": "growth",
+     "transforms": [
+      {
+       "op": "cs_zscore"
+      }
+     ]
+    },
+    {
+     "name": "profitability",
+     "source": "factor_scores",
+     "field": "profitability",
+     "transforms": [
+      {
+       "op": "cs_zscore"
+      }
+     ]
+    },
+    {
+     "name": "roic",
+     "source": "ratios",
+     "field": "roic",
+     "transforms": [
+      {
+       "op": "winsorize",
+       "lower": 0.02,
+       "upper": 0.98
+      },
+      {
+       "op": "cs_zscore"
+      }
+     ]
+    },
+    {
+     "name": "earnings_yield",
+     "source": "valuation",
+     "field": "earnings_yield",
+     "transforms": [
+      {
+       "op": "winsorize",
+       "lower": 0.02,
+       "upper": 0.98
+      },
+      {
+       "op": "cs_zscore"
+      }
+     ]
+    }
+   ]
+  }
+ }
+}

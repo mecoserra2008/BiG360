@@ -1,0 +1,47 @@
+# Feature registry for `ml_features` (dynamic columns `f_{feature_id}`). Owner: ml (app.ml.features).
+# status: live = computed now; pending = column present (all-null) until the owning upstream table has data.
+# transform is applied in the training pipeline (app.ml.train), never when writing ml_features (raw values stored).
+version: 1
+features:
+  # ---- price / momentum / volatility / liquidity (live: computable from prices_daily alone) ----
+  - {id: mom_21d,    family: price_momentum,  source_table: prices_daily, lag_days: 0, transform: cs_rank_gauss, status: live, description: "21-trading-day total return (adj_close)"}
+  - {id: mom_63d,    family: price_momentum,  source_table: prices_daily, lag_days: 0, transform: cs_rank_gauss, status: live, description: "63-trading-day total return"}
+  - {id: mom_126d,   family: price_momentum,  source_table: prices_daily, lag_days: 0, transform: cs_rank_gauss, status: live, description: "126-trading-day total return"}
+  - {id: mom_12m,    family: price_momentum,  source_table: prices_daily, lag_days: 0, transform: cs_rank_gauss, status: live, description: "252-trading-day total return"}
+  - {id: mom_12m_1m, family: price_momentum,  source_table: prices_daily, lag_days: 0, transform: cs_rank_gauss, status: live, description: "Classic 12m-1m momentum: return from t-252 to t-21 (skips most recent month to avoid short-term reversal contamination)"}
+  - {id: rev_5d,     family: price_reversal,  source_table: prices_daily, lag_days: 0, transform: cs_rank_gauss, status: live, description: "5-trading-day return (short-term reversal signal, raw sign)"}
+  - {id: vol_21d,    family: price_vol,       source_table: prices_daily, lag_days: 0, transform: cs_rank_gauss, status: live, description: "Annualized realized vol of daily returns, 21d trailing window"}
+  - {id: vol_63d,    family: price_vol,       source_table: prices_daily, lag_days: 0, transform: cs_rank_gauss, status: live, description: "Annualized realized vol of daily returns, 63d trailing window"}
+  - {id: adv_usd_20d_log, family: liquidity,  source_table: prices_daily, lag_days: 0, transform: cs_rank_gauss, status: live, description: "log(20d average dollar volume USD)"}
+  # ---- macro regime / betas (live: app.ml.macro_regime, app.ml.macro_betas; regime history is full PIT-filtered;
+  #      beta history is sparse until the weekly macro_betas job has accumulated several years of as-of snapshots
+  #      -- feature is correctly null (not leaked) for dates before the nearest <=D snapshot, see app.ml.features) ----
+  # transform: none (not zscore/cs_rank_gauss): these 6 are macro-level values broadcast identically to every
+  # security on a given date, so there is no cross-sectional variance to normalize against (cross-sectional
+  # std == 0 -> a zscore/rank transform would divide by zero and silently poison every row with NaN, which is
+  # exactly what happened in an earlier run of this pipeline -- see app.ml.train.cs_transform's "none" branch
+  # and the regression test tests/ml/test_train_smoke.py::test_cs_transform_handles_date_constant_features).
+  # Already a clean, bounded [0,1] probability, so passing it through raw is the right choice, not just a fix.
+  - {id: macro_regime_us_expansion_prob,   family: macro_regime, source_table: macro_regimes, lag_days: 0, transform: none, status: live, description: "US HMM filtered P(expansion)"}
+  - {id: macro_regime_us_slowdown_prob,    family: macro_regime, source_table: macro_regimes, lag_days: 0, transform: none, status: live, description: "US HMM filtered P(slowdown)"}
+  - {id: macro_regime_us_contraction_prob, family: macro_regime, source_table: macro_regimes, lag_days: 0, transform: none, status: live, description: "US HMM filtered P(contraction)"}
+  - {id: macro_regime_us_recovery_prob,    family: macro_regime, source_table: macro_regimes, lag_days: 0, transform: none, status: live, description: "US HMM filtered P(recovery)"}
+  - {id: macro_regime_us_stagflation_prob, family: macro_regime, source_table: macro_regimes, lag_days: 0, transform: none, status: live, description: "US HMM filtered P(stagflation) (0 if this fit found no distinct stagflation state)"}
+  - {id: macro_recession_prob_us,          family: macro_regime, source_table: macro_regimes, lag_days: 0, transform: none, status: live, description: "P(contraction)+P(stagflation), US"}
+  - {id: macro_beta_market,         family: macro_beta, source_table: macro_betas, lag_days: 0, transform: cs_rank_gauss, status: live, description: "Rolling 3y weekly beta to S&P 500"}
+  - {id: macro_beta_rates_10y,      family: macro_beta, source_table: macro_betas, lag_days: 0, transform: cs_rank_gauss, status: live, description: "Beta to Delta DGS10"}
+  - {id: macro_beta_curve_2s10s,    family: macro_beta, source_table: macro_betas, lag_days: 0, transform: cs_rank_gauss, status: live, description: "Beta to Delta 10y-2y slope"}
+  - {id: macro_beta_credit_spread,  family: macro_beta, source_table: macro_betas, lag_days: 0, transform: cs_rank_gauss, status: live, description: "Beta to Delta Baa-Treasury spread"}
+  - {id: macro_beta_usd_index,      family: macro_beta, source_table: macro_betas, lag_days: 0, transform: cs_rank_gauss, status: live, description: "Beta to broad USD index % change"}
+  - {id: macro_beta_oil,            family: macro_beta, source_table: macro_betas, lag_days: 0, transform: cs_rank_gauss, status: live, description: "Beta to WTI % change"}
+  # ---- now live: upstream tables shipped by analytics-scoring / signals-alt / technicals (2026-10-11) ----
+  - {id: factor_value,          family: fundamental_factor, source_table: factor_scores,    lag_days: 1, transform: cs_rank_gauss, status: live, description: "Value composite (analytics-scoring factor_scores.factor_id=value, 0..100)"}
+  - {id: factor_quality,        family: fundamental_factor, source_table: factor_scores,    lag_days: 1, transform: cs_rank_gauss, status: live, description: "Quality composite (factor_id=quality)"}
+  - {id: factor_growth,         family: fundamental_factor, source_table: factor_scores,    lag_days: 1, transform: cs_rank_gauss, status: live, description: "Growth composite (factor_id=growth)"}
+  - {id: factor_profitability,  family: fundamental_factor, source_table: factor_scores,    lag_days: 1, transform: cs_rank_gauss, status: live, description: "Profitability composite (factor_id=profitability)"}
+  - {id: factor_balance_sheet,  family: fundamental_factor, source_table: factor_scores,    lag_days: 1, transform: cs_rank_gauss, status: live, description: "Balance-sheet strength composite (factor_id=balance_sheet)"}
+  - {id: factor_moat,           family: fundamental_factor, source_table: factor_scores,    lag_days: 1, transform: cs_rank_gauss, status: live, description: "Moat composite (factor_id=moat)"}
+  - {id: tech_confluence_score, family: technical,          source_table: tech_setups,      lag_days: 0, transform: cs_rank_gauss, status: live, description: "(bias_numeric*2 + trend_numeric)/3 from tech_setups (long/up=+1..short/down=-1); tech_setups is a current-snapshot table (not a PIT history), so this is effectively null for historical training rows and only populated near the latest date -- documented limitation, not a bug"}
+  - {id: insider_net_buy_score, family: insider,            source_table: insider_signals,  lag_days: 1, transform: cs_rank_gauss, status: live, description: "insider_signals.signal_score, 0..100 (50=neutral)"}
+  - {id: sentiment_score,       family: sentiment,          source_table: sentiment_daily,  lag_days: 1, transform: cs_rank_gauss, status: live, description: "sentiment_daily.sentiment_score, 0..100"}
+  - {id: fundamental_quality,   family: fundamental,        source_table: factor_scores,    lag_days: 1, transform: cs_rank_gauss, status: live, description: "Repurposed as factor_scores.factor_id=profitability (fundamentals_wide line items are available but reading them directly is deferred: factor_scores already aggregates the fundamentals signal via analytics-scoring's own ratios/scoring pipeline, so a second direct read would be redundant at MVP)"}

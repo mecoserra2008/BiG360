@@ -1,0 +1,113 @@
+{
+ "title": "Momentum crashes after bear markets",
+ "description": "Does the long-short momentum factor's market beta flip after bear markets (Daniel-Moskowitz)?",
+ "question": "macro",
+ "tags": [
+  "factors",
+  "momentum",
+  "crash risk"
+ ],
+ "method_note": "Daniel & Moskowitz (2016): after a bear market (past 12-month market return < 0, known at t-1; Daniel-Moskowitz use 24 months, too few bear months since 2016) momentum is short high-beta losers, so in a rebound its beta turns sharply negative: a negative bear x market coefficient is the crash mechanism. The momentum long-short series is built from the app's momentum scores (2016-10 on), so few bear months enter: read it as a diagnostic. Caveat: the universe is today's constituents (membership history starts 2026-10), so early years carry survivorship bias; read the premium as an upper bound.",
+ "expected_outputs": [
+  "market beta in normal vs bear states (HAC)",
+  "interaction coefficient"
+ ],
+ "runtime_s": 8.2,
+ "validated": "2026-11-06 on snapshot R20261106T010757G9ZB",
+ "result": {
+  "run_id": "SR20261106T022237MY3HQ",
+  "n_obs": 120,
+  "metrics": {
+   "r2": 0.14050558884677233,
+   "adj_r2": 0.11827728511005087,
+   "aic": -418.6849447060421,
+   "oos_rmse": 0.043154147269247774
+  },
+  "coefficients": [
+   {
+    "term": "mkt_ret",
+    "estimate": -0.1945843775697114,
+    "statistic": -1.7751060934518743,
+    "p_value": 0.07588037105482978
+   },
+   {
+    "term": "bear",
+    "estimate": -0.06626414272741332,
+    "statistic": -5.058969499724516,
+    "p_value": 4.215282763250425e-07
+   },
+   {
+    "term": "bear_x_mkt_ret",
+    "estimate": 0.31931224683959525,
+    "statistic": 1.4199592861646195,
+    "p_value": 0.15561953434378245
+   }
+  ]
+ },
+ "study": {
+  "name": "Momentum crashes after bear markets",
+  "method": "ols",
+  "y": "mom_ls",
+  "x": [
+   "mkt_ret",
+   "bear",
+   "bear_x_mkt_ret"
+  ],
+  "params": {
+   "cov_type": "HAC"
+  },
+  "dataset": {
+   "kind": "timeseries",
+   "frequency": "M",
+   "start": "2016-11-01",
+   "variables": [
+    {
+     "name": "mom_ls",
+     "source": "factor_ls",
+     "field": "momentum"
+    },
+    {
+     "name": "mkt_ret",
+     "source": "prices",
+     "field": "ret",
+     "entity_agg": "mean",
+     "entities": {
+      "universe": "mvp_us"
+     }
+    },
+    {
+     "name": "bear",
+     "source": "prices",
+     "field": "ret",
+     "transforms": [
+      {
+       "op": "rolling_sum",
+       "window": 12
+      },
+      {
+       "op": "lag",
+       "k": 1
+      },
+      {
+       "op": "neg"
+      },
+      {
+       "op": "binarize",
+       "threshold": 0.0
+      }
+     ],
+     "entity_agg": "mean",
+     "entities": {
+      "universe": "mvp_us"
+     }
+    }
+   ],
+   "interactions": [
+    [
+     "bear",
+     "mkt_ret"
+    ]
+   ]
+  }
+ }
+}

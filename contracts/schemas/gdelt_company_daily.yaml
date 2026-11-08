@@ -1,0 +1,26 @@
+table: gdelt_company_daily
+version: 2
+zone: features
+owner: signals-alt (app.nlp.gdelt_link)
+description: Daily per-issuer GDELT coverage aggregates (GKG organizations matched to issuers.short_name/aliases).
+storage: {path: features/gdelt_company_daily, format: parquet, partition_by: [year], write_mode: upsert}
+primary_key: [date, issuer_id]
+pit: {knowledge_column: date, rule: "GKG DATE (UTC) date"}
+columns:
+  - {name: date, type: date, nullable: false, description: "UTC date"}
+  - {name: year, type: int16, nullable: false, description: "Partition"}
+  - {name: issuer_id, type: string, nullable: false, description: "FK issuers"}
+  - {name: mentions, type: int32, nullable: false, description: "GKG records mentioning issuer"}
+  - {name: unique_sources, type: int32, nullable: false, description: "Distinct source domains"}
+  - {name: avg_tone, type: float64, nullable: true, description: "Mean V2Tone tone"}
+  - {name: tone_std, type: float64, nullable: true, description: "Std of tone"}
+  - {name: neg_share, type: float64, nullable: true, description: "Share of records with tone < -2"}
+  - {name: attention_z, type: float64, nullable: true, description: "mentions z-score vs own 90d"}
+  - {name: top_themes, type: list<string>, nullable: true, description: "Top 5 GKG themes"}
+  - {name: linked_event_ids, type: list<string>, nullable: true, description: "Up to 20 GLOBALEVENTIDs (as strings)"}
+  - {name: headline, type: string, nullable: true, description: "Most repeated linked article title that day (GKG PAGE_TITLE, HTML-unescaped) (added v2)"}
+  - {name: country_exposure, type: list<string>, nullable: true, description: "Top 5 ISO2 countries mentioned in the linked articles (GDELT FIPS converted to ISO2 at ingest) (added v2)"}
+  - {name: event_intensity, type: float64, nullable: true, description: "log1p(sum |Goldstein| x NumArticles) of gdelt_events whose source article is linked to the issuer (added v2)"}
+  - {name: link_confidence_mean, type: float64, nullable: true, description: "Mean org->issuer link confidence of the counted mentions (>= 0.5 only are counted) (added v2)"}
+  - {name: coverage_ok, type: bool, nullable: true, description: "False when the day's total GKG mention volume < 50% of its trailing 30-day median (feed degraded; low mentions are not 'no news') (added v2)"}
+  - {name: computed_at, type: datetime, nullable: false, description: "Write time UTC"}

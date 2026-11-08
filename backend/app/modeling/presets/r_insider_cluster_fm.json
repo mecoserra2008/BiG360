@@ -1,0 +1,131 @@
+{
+ "title": "Insider cluster buying and future returns",
+ "description": "Do the insider signal score, the number of distinct buyers (90 days) and cluster buys predict 3-month returns?",
+ "question": "events",
+ "tags": [
+  "events",
+  "insiders"
+ ],
+ "method_note": "Cohen-Malloy-Pomorski (2012): opportunistic and clustered insider buys are informative. Insider signals are point-in-time on Form 4 filing dates (2017 on). Caveat: the universe is today's constituents (membership history starts 2026-10), so early years carry survivorship bias; read the premium as an upper bound.",
+ "expected_outputs": [
+  "premium per insider signal",
+  "slope time series"
+ ],
+ "runtime_s": 8.0,
+ "validated": "2026-11-06 on snapshot R20261106T010757G9ZB",
+ "result": {
+  "run_id": "SR20261106T0221295J5E3",
+  "n_obs": 39707,
+  "metrics": {
+   "avg_r2": 0.047122228629505526
+  },
+  "coefficients": [
+   {
+    "term": "insider_signal",
+    "estimate": -0.0036262852764316826,
+    "statistic": -0.9008105599444364,
+    "p_value": 0.36975056378137583
+   },
+   {
+    "term": "n_buyers",
+    "estimate": -0.0006573194172712708,
+    "statistic": -0.27806360528127533,
+    "p_value": 0.7815103417923382
+   },
+   {
+    "term": "cluster_buy",
+    "estimate": -0.014410612816348005,
+    "statistic": -1.1588835874492027,
+    "p_value": 0.24913247043420772
+   },
+   {
+    "term": "log_mcap",
+    "estimate": -0.014617237771200687,
+    "statistic": -4.099970755943621,
+    "p_value": 8.16645596722198e-05
+   }
+  ]
+ },
+ "study": {
+  "name": "Insider cluster buying and future returns",
+  "method": "fama_macbeth",
+  "y": "fwd_ret_3m",
+  "x": [
+   "insider_signal",
+   "n_buyers",
+   "cluster_buy",
+   "log_mcap"
+  ],
+  "params": {
+   "nw_lags": 4
+  },
+  "dataset": {
+   "kind": "panel",
+   "frequency": "M",
+   "start": "2017-06-01",
+   "entities": {
+    "universe": "mvp_us"
+   },
+   "variables": [
+    {
+     "name": "fwd_ret_3m",
+     "source": "prices",
+     "field": "ret",
+     "transforms": [
+      {
+       "op": "fwd_compound",
+       "k": 3
+      },
+      {
+       "op": "winsorize"
+      }
+     ]
+    },
+    {
+     "name": "insider_signal",
+     "source": "insider",
+     "field": "signal_score",
+     "transforms": [
+      {
+       "op": "winsorize"
+      },
+      {
+       "op": "cs_zscore"
+      }
+     ]
+    },
+    {
+     "name": "n_buyers",
+     "source": "insider",
+     "field": "n_buyers_90d",
+     "transforms": [
+      {
+       "op": "winsorize"
+      },
+      {
+       "op": "cs_zscore"
+      }
+     ]
+    },
+    {
+     "name": "cluster_buy",
+     "source": "insider",
+     "field": "cluster_buy"
+    },
+    {
+     "name": "log_mcap",
+     "source": "valuation",
+     "field": "market_cap_usd",
+     "transforms": [
+      {
+       "op": "log"
+      },
+      {
+       "op": "cs_zscore"
+      }
+     ]
+    }
+   ]
+  }
+ }
+}

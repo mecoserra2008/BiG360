@@ -1,0 +1,1527 @@
+# Canonical financial line items — the single vocabulary for fundamentals_canonical / fundamentals_wide.
+# Consumed by app.normalize.fundamentals (raw facts -> canonical) and by analytics (formulas reference item ids).
+version: 2
+
+conventions:
+  units: >
+    Monetary values in full units of reporting currency (never thousands). Share counts in shares.
+    Per-share items in reporting currency per share. 'pure' items are fractions (0.12 = 12%).
+  sign: >
+    sign: positive        -> magnitude stored as positive; normalizer applies abs() when the source reports it negative
+                             (CVM/AKShare/DART often report expenses and cash outflows as negatives).
+    sign: signed          -> natural sign kept (income can be negative). Losses negative.
+    sign: outflow_positive-> cash outflow stored POSITIVE (capex 100 = spent 100). Proceeds stored positive in their own item.
+    sign: negate_source   -> store -1 x source value (used where the tag's semantics are inverse, e.g. IncreaseDecreaseInOperatingCapital).
+  period: >
+    duration items: normalizer produces discrete Q (Q4 = FY - Q1 - Q2 - Q3 or FY - 9M YTD), H (H2 = FY - H1), FY and TTM.
+    instant items: one INSTANT row per balance-sheet date; ttm_rule ignored.
+    ttm_rule: sum (default for duration), average (weighted share counts), last (dps declared uses sum), none.
+  tag_selection: >
+    Per issuer and period, walk the item's tag list for the issuer's taxonomy in order; the first tag with a
+    non-dimensional, consolidated value wins (derivation = reported for first tag, fallback_tag otherwise).
+    'A + B' entries mean sum of both tags (all must exist). If no tag matches, apply 'derive' (derivation = derived_formula).
+    SEC 20-F filers report ifrs-full facts inside companyfacts -> use the 'ifrs' list.
+    If two candidate values for the same period differ by >1% across filings, the latest knowledge_date wins and is_restatement=true.
+  taxonomies:
+    us_gaap: "SEC companyfacts 'us-gaap' namespace (dei for cover facts)"
+    ifrs: "ifrs-full namespace — ESEF (filings.xbrl.org), SEC 20-F, EDINET IFRS filers via jpigp, DART K-IFRS"
+    jp: "EDINET: jppfs_cor (J-GAAP financial statements), jpigp_cor (Japanese-IFRS filers, 'IFRS' suffix), jpcrp_cor (summary of business results, cover). Verify names against the EDINET taxonomy year in use."
+    kr: "OpenDART fnlttSinglAcntAll account_id values: 'ifrs-full_*' (older filings 'ifrs_*') and DART extensions 'dart_*'. Prefer fs_div=CFS (consolidated), fallback OFS."
+    cn: "AKShare/Eastmoney/Sina statement field labels (CAS, Chinese). Matched on exact label after removing whitespace/full-width punctuation."
+    br_cvm: "CVM DFP/ITR open data CD_CONTA codes for non-financial companies (financials use different plan). ESCALA_MOEDA MIL -> x1000."
+  expression_language: >
+    'derive' formulas are Python-expression syntax over item ids, evaluated by app.normalize.formula (AST whitelist):
+    + - * / unary -, numeric literals, coalesce(a, b, ...), abs(x), max(a,b), min(a,b), nz(x) (= coalesce(x, 0)).
+    Missing input -> result null unless wrapped by nz/coalesce. Division by 0 -> null.
+  verify_flag: "verify: true marks tag names that were not confirmed against the latest taxonomy; ingestion agents must check them."
+  verification: >
+    2026-10-10 (ref-identity, contract v2): every us_gaap / us_gaap_negate / ifrs tag in every chain (343 tags, incl. the
+    49 'verify: true' items) was checked against a census of ALL SEC companyfacts (companyfacts.zip, ~19k filers,
+    us-gaap + ifrs-full + dei). 16 tags used by zero filers were replaced by the census-backed element or dropped
+    (see docs/CONTRACT_CHANGES.md). Items carrying 'verified_sec: true' have us_gaap/ifrs chains confirmed; their
+    'verify: true' flag now only concerns the jp / kr / cn / br_cvm chains (to be checked by ingest-global).
+
+items:
+  # ------------------------------------------------------------------ INCOME STATEMENT
+  - id: revenue
+    label: Revenue
+    statement: IS
+    period: duration
+    sign: positive
+    core: true
+    us_gaap: [Revenues, RevenueFromContractWithCustomerExcludingAssessedTax, RevenueFromContractWithCustomerIncludingAssessedTax, SalesRevenueNet, SalesRevenueGoodsNet, SalesRevenueServicesNet, RegulatedAndUnregulatedOperatingRevenue, OperatingLeasesIncomeStatementLeaseRevenue, RevenueMineralSales]
+    ifrs: [Revenue, RevenueFromContractsWithCustomers]
+    jp: [jppfs_cor:NetSales, jppfs_cor:OperatingRevenue1, jppfs_cor:OperatingRevenue2, jpigp_cor:RevenueIFRS, jpigp_cor:NetSalesIFRS, jpcrp_cor:NetSalesSummaryOfBusinessResults, jpcrp_cor:RevenueIFRSSummaryOfBusinessResults, jppfs_cor:Revenue, jpigp_cor:Revenue2IFRS, jppfs_cor:OperatingRevenueOILTelecommunications, jppfs_cor:NetSalesOfCompletedConstructionContractsCNS, jppfs_cor:OperatingIncomeINS, jppfs_cor:OperatingRevenueCMD, jppfs_cor:NetOperatingRevenueSEC, jpcrp_cor:OperatingRevenue1SummaryOfBusinessResults, jpcrp_cor:RevenuesUSGAAPSummaryOfBusinessResults]
+    kr: [ifrs-full_Revenue, ifrs_Revenue]
+    cn: [营业总收入, 营业收入]
+    br_cvm: ["3.01"]
+    derive: "net_interest_income + noninterest_income"
+    notes: "Derive rule is the bank definition; for banks/insurers prefer derive over 'Revenues' tag when both exist (revenue_rule in sector_kpis)."
+
+  - id: cost_of_revenue
+    label: Cost of revenue
+    statement: IS
+    period: duration
+    sign: positive
+    core: true
+    us_gaap: [CostOfRevenue, CostOfGoodsAndServicesSold, CostOfGoodsSold, CostOfServices, CostOfGoodsAndServiceExcludingDepreciationDepletionAndAmortization]
+    ifrs: [CostOfSales]
+    jp: [jppfs_cor:CostOfSales, jpigp_cor:CostOfSalesIFRS]
+    kr: [ifrs-full_CostOfSales, ifrs_CostOfSales]
+    cn: [营业成本, 营业总成本]
+    br_cvm: ["3.02"]
+    derive: "revenue - gross_profit"
+    notes: "营业总成本 (total operating costs) is a last-resort CN fallback and overstates COGS — flag dq."
+
+  - id: gross_profit
+    label: Gross profit
+    statement: IS
+    period: duration
+    sign: signed
+    core: true
+    us_gaap: [GrossProfit]
+    ifrs: [GrossProfit]
+    jp: [jppfs_cor:GrossProfit, jpigp_cor:GrossProfitIFRS]
+    kr: [ifrs-full_GrossProfit, ifrs_GrossProfit]
+    cn: []
+    br_cvm: ["3.03"]
+    derive: "revenue - cost_of_revenue"
+
+  - id: selling_marketing
+    label: Selling & marketing / distribution
+    statement: IS
+    period: duration
+    sign: positive
+    us_gaap: [SellingAndMarketingExpense, SellingExpense, MarketingAndAdvertisingExpense]
+    ifrs: [DistributionCosts, SellingExpense]
+    jp: []
+    kr: [dart_SellingExpenses]
+    cn: [销售费用]
+    br_cvm: ["3.04.01"]
+    verify: true
+    verified_sec: true
+
+  - id: general_admin
+    label: General & administrative
+    statement: IS
+    period: duration
+    sign: positive
+    us_gaap: [GeneralAndAdministrativeExpense]
+    ifrs: [AdministrativeExpense]
+    jp: []
+    kr: [dart_AdministrativeExpenses]
+    cn: [管理费用]
+    br_cvm: ["3.04.02"]
+    verify: true
+    verified_sec: true
+
+  - id: sga
+    label: SG&A
+    statement: IS
+    period: duration
+    sign: positive
+    core: true
+    us_gaap: [SellingGeneralAndAdministrativeExpense]
+    ifrs: [SellingGeneralAndAdministrativeExpense, "DistributionCosts + AdministrativeExpense"]
+    jp: [jppfs_cor:SellingGeneralAndAdministrativeExpenses, jpigp_cor:SellingGeneralAndAdministrativeExpensesIFRS]
+    kr: [dart_TotalSellingGeneralAdministrativeExpenses]
+    cn: []
+    br_cvm: []
+    derive: "nz(selling_marketing) + nz(general_admin)"
+
+  - id: rnd
+    label: Research & development
+    statement: IS
+    period: duration
+    sign: positive
+    us_gaap: [ResearchAndDevelopmentExpense, ResearchAndDevelopmentExpenseExcludingAcquiredInProcessCost, ResearchAndDevelopmentExpenseSoftwareExcludingAcquiredInProcessCost]
+    ifrs: [ResearchAndDevelopmentExpense]
+    jp: [jppfs_cor:ResearchAndDevelopmentExpensesSGA, jpcrp_cor:ResearchAndDevelopmentExpensesResearchAndDevelopmentActivities, jpigp_cor:ResearchAndDevelopmentExpensesIFRS]
+    kr: [dart_ResearchAndDevelopmentExpense]
+    cn: [研发费用]
+    br_cvm: []
+    verify: true
+    verified_sec: true
+    notes: "Absent R&D is treated as 0 only for subsectors where rnd_expected=false (sector_kpis)."
+
+  - id: sbc
+    label: Stock-based compensation
+    statement: CF
+    period: duration
+    sign: positive
+    us_gaap: [ShareBasedCompensation, AllocatedShareBasedCompensationExpense]
+    ifrs: [AdjustmentsForSharebasedPayments, ExpenseFromSharebasedPaymentTransactionsWithEmployees]
+    jp: []
+    kr: [ifrs-full_AdjustmentsForSharebasedPayments]
+    cn: [股份支付]
+    br_cvm: []
+
+  - id: depreciation_amortization
+    label: Depreciation & amortization
+    statement: CF
+    period: duration
+    sign: positive
+    core: true
+    us_gaap: [DepreciationDepletionAndAmortization, DepreciationAmortizationAndAccretionNet, DepreciationAndAmortization, "Depreciation + AmortizationOfIntangibleAssets", Depreciation]
+    ifrs: [AdjustmentsForDepreciationAndAmortisationExpense, DepreciationAndAmortisationExpense, "AdjustmentsForDepreciationExpense + AdjustmentsForAmortisationExpense"]
+    jp: [jppfs_cor:DepreciationAndAmortizationOpeCF, jppfs_cor:DepreciationOpeCF, jpigp_cor:DepreciationAndAmortizationOpeCFIFRS]
+    kr: [ifrs-full_AdjustmentsForDepreciationAndAmortisationExpense, "ifrs-full_AdjustmentsForDepreciationExpense + ifrs-full_AdjustmentsForAmortisationExpense"]
+    cn: ["固定资产折旧、油气资产折耗、生产性生物资产折旧 + 无形资产摊销"]
+    br_cvm: []
+    verify: true
+    verified_sec: true
+    notes: "BR: DFC 6.01.01.xx 'Depreciação e Amortização' — match DS_CONTA text (no fixed code)."
+
+  - id: amortization_intangibles
+    label: Amortization of acquired intangibles
+    statement: IS
+    period: duration
+    sign: positive
+    us_gaap: [AmortizationOfIntangibleAssets]
+    ifrs: [AdjustmentsForAmortisationExpense]
+    jp: []
+    kr: []
+    cn: [无形资产摊销]
+    br_cvm: []
+
+  - id: impairment
+    label: Goodwill & asset impairment
+    statement: IS
+    period: duration
+    sign: positive
+    us_gaap: ["GoodwillImpairmentLoss + ImpairmentOfLongLivedAssetsHeldForUse", AssetImpairmentCharges, GoodwillImpairmentLoss]
+    ifrs: [ImpairmentLossRecognisedInProfitOrLoss, ImpairmentLossRecognisedInProfitOrLossGoodwill]
+    jp: [jppfs_cor:ImpairmentLossEL]
+    kr: []
+    cn: [资产减值损失]
+    br_cvm: []
+    verify: true
+    verified_sec: true
+
+  - id: total_operating_expenses
+    label: Total operating expenses (incl. COGS when reported as costs and expenses)
+    statement: IS
+    period: duration
+    sign: positive
+    us_gaap: [CostsAndExpenses, OperatingExpenses]
+    ifrs: []
+    jp: []
+    kr: []
+    cn: [营业总成本]
+    br_cvm: []
+    derive: "revenue - operating_income"
+    notes: "OperatingExpenses in us-gaap usually EXCLUDES cost of revenue; CostsAndExpenses includes it. Item defined as all costs between revenue and operating income."
+
+  - id: operating_income
+    label: Operating income (reported EBIT)
+    statement: IS
+    period: duration
+    sign: signed
+    core: true
+    us_gaap: [OperatingIncomeLoss]
+    ifrs: [ProfitLossFromOperatingActivities]
+    jp: [jppfs_cor:OperatingIncome, jpigp_cor:OperatingProfitLossIFRS, jpcrp_cor:OperatingIncomeLossUSGAAPSummaryOfBusinessResults]
+    kr: [dart_OperatingIncomeLoss]
+    cn: [营业利润]
+    br_cvm: ["3.05"]
+    derive: "gross_profit - sga - nz(rnd)"
+    notes: "CN 营业利润 includes investment income/fair-value gains; dq penalty 0.1. Many IFRS filers omit an operating subtotal -> fallback ebit derivation."
+
+  - id: interest_expense
+    label: Interest expense / finance costs
+    statement: IS
+    period: duration
+    sign: positive
+    core: true
+    us_gaap: [InterestExpense, InterestExpenseNonoperating, InterestExpenseDebt, InterestAndDebtExpense]
+    ifrs: [FinanceCosts, InterestExpense]
+    jp: [jppfs_cor:InterestExpensesNOE, jpigp_cor:FinanceCostsIFRS]
+    kr: [ifrs-full_FinanceCosts]
+    cn: [利息费用, 财务费用]
+    br_cvm: ["3.06.02"]
+    notes: "Banks: use interest_expense_bank. CN 财务费用 is net finance cost (fallback only). BR 3.06.02 = Despesas Financeiras (gross)."
+
+  - id: interest_income
+    label: Interest / finance income (non-bank)
+    statement: IS
+    period: duration
+    sign: positive
+    us_gaap: [InvestmentIncomeInterest, InvestmentIncomeInterestAndDividend, InterestIncomeOther]
+    ifrs: [FinanceIncome, InterestRevenueCalculatedUsingEffectiveInterestMethod]
+    jp: [jppfs_cor:InterestIncomeNOI, jpigp_cor:FinanceIncomeIFRS]
+    kr: [ifrs-full_FinanceIncome]
+    cn: [利息收入]
+    br_cvm: ["3.06.01"]
+
+  - id: equity_method_income
+    label: Share of profit of associates
+    statement: IS
+    period: duration
+    sign: signed
+    us_gaap: [IncomeLossFromEquityMethodInvestments]
+    ifrs: [ShareOfProfitLossOfAssociatesAndJointVenturesAccountedForUsingEquityMethod]
+    jp: [jppfs_cor:EquityInEarningsOfAffiliatesNOI]
+    kr: [ifrs-full_ShareOfProfitLossOfAssociatesAndJointVenturesAccountedForUsingEquityMethod]
+    cn: [对联营企业和合营企业的投资收益]
+    br_cvm: ["3.04.06"]
+    verify: true
+    verified_sec: true
+
+  - id: other_nonoperating_income
+    label: Other non-operating income (expense)
+    statement: IS
+    period: duration
+    sign: signed
+    us_gaap: [NonoperatingIncomeExpense, OtherNonoperatingIncomeExpense]
+    ifrs: [OtherGainsLosses]
+    jp: []
+    kr: [dart_OtherGains, dart_OtherLosses]
+    cn: [营业外收入]
+    br_cvm: []
+    verify: true
+    verified_sec: true
+
+  - id: ordinary_income
+    label: Ordinary income (J-GAAP keijo rieki)
+    statement: IS
+    period: duration
+    sign: signed
+    applies_to: [jgaap]
+    us_gaap: []
+    ifrs: []
+    jp: [jppfs_cor:OrdinaryIncome, jpcrp_cor:OrdinaryIncomeLossSummaryOfBusinessResults]
+    kr: []
+    cn: []
+    br_cvm: []
+
+  - id: pretax_income
+    label: Income before tax
+    statement: IS
+    period: duration
+    sign: signed
+    core: true
+    us_gaap: [IncomeLossFromContinuingOperationsBeforeIncomeTaxesExtraordinaryItemsNoncontrollingInterest, IncomeLossFromContinuingOperationsBeforeIncomeTaxesMinorityInterestAndIncomeLossFromEquityMethodInvestments]
+    ifrs: [ProfitLossBeforeTax]
+    jp: [jppfs_cor:IncomeBeforeIncomeTaxes, jppfs_cor:IncomeBeforeIncomeTaxesAndMinorityInterests, jpigp_cor:ProfitLossBeforeTaxIFRS, jpcrp_cor:ProfitLossBeforeTaxIFRSSummaryOfBusinessResults, jpcrp_cor:ProfitLossBeforeTaxUSGAAPSummaryOfBusinessResults]
+    kr: [ifrs-full_ProfitLossBeforeTax]
+    cn: [利润总额]
+    br_cvm: ["3.07"]
+    derive: "net_income + income_tax"
+
+  - id: income_tax
+    label: Income tax expense
+    statement: IS
+    period: duration
+    sign: signed
+    core: true
+    us_gaap: [IncomeTaxExpenseBenefit]
+    ifrs: [IncomeTaxExpenseContinuingOperations]
+    jp: [jppfs_cor:IncomeTaxes, jpigp_cor:IncomeTaxExpenseIFRS]
+    kr: [ifrs-full_IncomeTaxExpenseContinuingOperations]
+    cn: [所得税费用]
+    br_cvm: ["3.08"]
+    notes: "Positive = expense. BR reports as negative expense -> negate (sign rule positive does abs only when value<0 and pretax>0; normalizer uses negate for BR)."
+
+  - id: net_income_continuing
+    label: Net income from continuing operations
+    statement: IS
+    period: duration
+    sign: signed
+    us_gaap: [IncomeLossFromContinuingOperations]
+    ifrs: [ProfitLossFromContinuingOperations]
+    jp: []
+    kr: [ifrs-full_ProfitLossFromContinuingOperations]
+    cn: [持续经营净利润]
+    br_cvm: ["3.09"]
+    derive: "pretax_income - income_tax"
+
+  - id: net_income_discontinued
+    label: Net income from discontinued operations
+    statement: IS
+    period: duration
+    sign: signed
+    us_gaap: [IncomeLossFromDiscontinuedOperationsNetOfTax]
+    ifrs: [ProfitLossFromDiscontinuedOperations]
+    jp: []
+    kr: [ifrs-full_ProfitLossFromDiscontinuedOperations]
+    cn: [终止经营净利润]
+    br_cvm: ["3.10"]
+
+  - id: net_income
+    label: Net income (consolidated, incl. minority)
+    statement: IS
+    period: duration
+    sign: signed
+    core: true
+    us_gaap: [ProfitLoss, "NetIncomeLoss + NetIncomeLossAttributableToNoncontrollingInterest"]
+    ifrs: [ProfitLoss]
+    jp: [jppfs_cor:ProfitLoss, jpigp_cor:ProfitLossIFRS, jpcrp_cor:ProfitLossIFRSSummaryOfBusinessResults]
+    kr: [ifrs-full_ProfitLoss]
+    cn: [净利润]
+    br_cvm: ["3.11"]
+    derive: "net_income_parent + nz(minority_interest_income)"
+
+  - id: minority_interest_income
+    label: Net income attributable to non-controlling interests
+    statement: IS
+    period: duration
+    sign: signed
+    us_gaap: [NetIncomeLossAttributableToNoncontrollingInterest]
+    ifrs: [ProfitLossAttributableToNoncontrollingInterests]
+    jp: [jppfs_cor:ProfitLossAttributableToNonControllingInterests]
+    kr: [ifrs-full_ProfitLossAttributableToNoncontrollingInterests]
+    cn: [少数股东损益]
+    br_cvm: ["3.11.02"]
+
+  - id: net_income_parent
+    label: Net income attributable to parent
+    statement: IS
+    period: duration
+    sign: signed
+    core: true
+    us_gaap: [NetIncomeLoss]
+    ifrs: [ProfitLossAttributableToOwnersOfParent]
+    jp: [jppfs_cor:ProfitLossAttributableToOwnersOfParent, jpigp_cor:ProfitLossAttributableToOwnersOfParentIFRS, jpcrp_cor:NetIncomeLossSummaryOfBusinessResults, jpcrp_cor:ProfitLossAttributableToOwnersOfParentSummaryOfBusinessResults, jpcrp_cor:ProfitLossAttributableToOwnersOfParentIFRSSummaryOfBusinessResults, jpcrp_cor:NetIncomeLossAttributableToOwnersOfParentUSGAAPSummaryOfBusinessResults]
+    kr: [ifrs-full_ProfitLossAttributableToOwnersOfParent]
+    cn: [归属于母公司所有者的净利润, 归属于母公司股东的净利润]
+    br_cvm: ["3.11.01"]
+    derive: "net_income - nz(minority_interest_income)"
+
+  - id: preferred_dividends
+    label: Preferred dividends
+    statement: IS
+    period: duration
+    sign: positive
+    us_gaap: [PreferredStockDividendsIncomeStatementImpact, DividendsPreferredStock]
+    ifrs: []
+    jp: []
+    kr: []
+    cn: []
+    br_cvm: []
+
+  - id: net_income_common
+    label: Net income to common shareholders
+    statement: IS
+    period: duration
+    sign: signed
+    core: true
+    us_gaap: [NetIncomeLossAvailableToCommonStockholdersBasic]
+    ifrs: []
+    jp: []
+    kr: []
+    cn: []
+    br_cvm: []
+    derive: "net_income_parent - nz(preferred_dividends)"
+
+  - id: eps_basic
+    label: EPS basic
+    statement: IS
+    period: duration
+    unit: per_share
+    sign: signed
+    ttm_rule: sum
+    us_gaap: [EarningsPerShareBasic, EarningsPerShareBasicAndDiluted]
+    ifrs: [BasicEarningsLossPerShare]
+    jp: [jppfs_cor:BasicEarningsLossPerShare, jpcrp_cor:BasicEarningsLossPerShareSummaryOfBusinessResults, jpigp_cor:BasicEarningsLossPerShareIFRS, jpcrp_cor:BasicEarningsLossPerShareIFRSSummaryOfBusinessResults, jpcrp_cor:BasicEarningsLossPerShareUSGAAPSummaryOfBusinessResults]
+    kr: [ifrs-full_BasicEarningsLossPerShare]
+    cn: [基本每股收益]
+    br_cvm: ["3.99.01.01"]
+    derive: "net_income_common / shares_basic_weighted"
+
+  - id: eps_diluted
+    label: EPS diluted
+    statement: IS
+    period: duration
+    unit: per_share
+    sign: signed
+    core: true
+    ttm_rule: sum
+    us_gaap: [EarningsPerShareDiluted, EarningsPerShareBasicAndDiluted]
+    ifrs: [DilutedEarningsLossPerShare]
+    jp: [jppfs_cor:DilutedEarningsPerShare, jpcrp_cor:DilutedEarningsPerShareSummaryOfBusinessResults, jpigp_cor:DilutedEarningsLossPerShareIFRS, jpcrp_cor:DilutedEarningsLossPerShareIFRSSummaryOfBusinessResults, jpcrp_cor:DilutedEarningsLossPerShareUSGAAPSummaryOfBusinessResults]
+    kr: [ifrs-full_DilutedEarningsLossPerShare]
+    cn: [稀释每股收益]
+    br_cvm: ["3.99.02.01"]
+    derive: "coalesce(net_income_common / shares_diluted_weighted, eps_basic)"
+    verify: true
+    verified_sec: true
+
+  - id: shares_basic_weighted
+    label: Weighted avg shares basic
+    statement: IS
+    period: duration
+    unit: shares
+    sign: positive
+    ttm_rule: average
+    us_gaap: [WeightedAverageNumberOfSharesOutstandingBasic]
+    ifrs: [WeightedAverageShares]
+    jp: [jpcrp_cor:AverageNumberOfSharesDuringPeriod]
+    kr: []
+    cn: []
+    br_cvm: []
+    verify: true
+    verified_sec: true
+
+  - id: shares_diluted_weighted
+    label: Weighted avg shares diluted
+    statement: IS
+    period: duration
+    unit: shares
+    sign: positive
+    core: true
+    ttm_rule: average
+    us_gaap: [WeightedAverageNumberOfDilutedSharesOutstanding]
+    ifrs: [AdjustedWeightedAverageShares]
+    jp: []
+    kr: []
+    cn: []
+    br_cvm: []
+    derive: "shares_basic_weighted"
+
+  - id: ebit
+    label: EBIT (analytic)
+    statement: IS
+    period: duration
+    sign: signed
+    core: true
+    us_gaap: []
+    ifrs: []
+    derive: "coalesce(operating_income, pretax_income + nz(interest_expense) - nz(interest_income))"
+    notes: "Always derived — the single EBIT used by ratios. For banks/insurers EBIT is not used."
+
+  - id: ebitda
+    label: EBITDA (analytic)
+    statement: IS
+    period: duration
+    sign: signed
+    core: true
+    derive: "ebit + depreciation_amortization"
+
+  # ------------------------------------------------------------------ BALANCE SHEET
+  - id: cash_and_equivalents
+    label: Cash & equivalents
+    statement: BS
+    period: instant
+    sign: positive
+    core: true
+    us_gaap: [CashAndCashEquivalentsAtCarryingValue, CashCashEquivalentsRestrictedCashAndRestrictedCashEquivalents, Cash, CashAndDueFromBanks]
+    ifrs: [CashAndCashEquivalents]
+    jp: [jppfs_cor:CashAndDeposits, jpigp_cor:CashAndCashEquivalentsIFRS, jppfs_cor:CashAndCashEquivalents, jpcrp_cor:CashAndCashEquivalentsIFRSSummaryOfBusinessResults, jpcrp_cor:CashAndCashEquivalentsUSGAAPSummaryOfBusinessResults]
+    kr: [ifrs-full_CashAndCashEquivalents]
+    cn: [货币资金]
+    br_cvm: ["1.01.01"]
+
+  - id: short_term_investments
+    label: Short-term investments
+    statement: BS
+    period: instant
+    sign: positive
+    us_gaap: [ShortTermInvestments, MarketableSecuritiesCurrent, AvailableForSaleSecuritiesDebtSecuritiesCurrent]
+    ifrs: [CurrentFinancialAssetsAtFairValueThroughProfitOrLoss, OtherCurrentFinancialAssets, ShorttermDepositsNotClassifiedAsCashEquivalents]
+    jp: [jppfs_cor:ShortTermInvestmentSecurities, jppfs_cor:SecuritiesCA]
+    kr: [ifrs-full_ShorttermDepositsNotClassifiedAsCashEquivalents, ifrs-full_CurrentFinancialAssetsAtFairValueThroughProfitOrLoss]
+    cn: [交易性金融资产]
+    br_cvm: ["1.01.02"]
+    verify: true
+    verified_sec: true
+
+  - id: cash_and_st_investments
+    label: Cash + short-term investments
+    statement: BS
+    period: instant
+    sign: positive
+    core: true
+    derive: "cash_and_equivalents + nz(short_term_investments)"
+
+  - id: accounts_receivable
+    label: Trade receivables
+    statement: BS
+    period: instant
+    sign: positive
+    core: true
+    us_gaap: [AccountsReceivableNetCurrent, ReceivablesNetCurrent]
+    ifrs: [CurrentTradeReceivables, TradeAndOtherCurrentReceivables]
+    jp: [jppfs_cor:NotesAndAccountsReceivableTrade, jppfs_cor:NotesAndAccountsReceivableTradeAndContractAssets, jppfs_cor:AccountsReceivableTrade, jpigp_cor:TradeAndOtherReceivablesCAIFRS]
+    kr: [ifrs-full_CurrentTradeReceivables, ifrs-full_TradeAndOtherCurrentReceivables]
+    cn: [应收账款, 应收票据及应收账款]
+    br_cvm: ["1.01.03"]
+
+  - id: inventory
+    label: Inventory
+    statement: BS
+    period: instant
+    sign: positive
+    core: true
+    us_gaap: [InventoryNet, InventoryFinishedGoodsNetOfReserves]
+    ifrs: [Inventories]
+    jp: [jppfs_cor:Inventories, "jppfs_cor:MerchandiseAndFinishedGoods + jppfs_cor:WorkInProcess + jppfs_cor:RawMaterialsAndSupplies", jpigp_cor:InventoriesCAIFRS]
+    kr: [ifrs-full_Inventories]
+    cn: [存货]
+    br_cvm: ["1.01.04"]
+
+  - id: total_current_assets
+    label: Total current assets
+    statement: BS
+    period: instant
+    sign: positive
+    core: true
+    us_gaap: [AssetsCurrent]
+    ifrs: [CurrentAssets]
+    jp: [jppfs_cor:CurrentAssets, jpigp_cor:CurrentAssetsIFRS]
+    kr: [ifrs-full_CurrentAssets]
+    cn: [流动资产合计]
+    br_cvm: ["1.01"]
+
+  - id: ppe_net
+    label: PP&E net
+    statement: BS
+    period: instant
+    sign: positive
+    core: true
+    us_gaap: [PropertyPlantAndEquipmentNet, PropertyPlantAndEquipmentAndFinanceLeaseRightOfUseAssetAfterAccumulatedDepreciationAndAmortization]
+    ifrs: [PropertyPlantAndEquipment]
+    jp: [jppfs_cor:PropertyPlantAndEquipment, jpigp_cor:PropertyPlantAndEquipmentIFRS]
+    kr: [ifrs-full_PropertyPlantAndEquipment]
+    cn: [固定资产]
+    br_cvm: ["1.02.03"]
+
+  - id: operating_lease_rou_assets
+    label: Operating lease right-of-use assets
+    statement: BS
+    period: instant
+    sign: positive
+    us_gaap: [OperatingLeaseRightOfUseAsset]
+    ifrs: [RightofuseAssets]
+    jp: [jpigp_cor:RightOfUseAssetsIFRS]
+    kr: [ifrs-full_RightofuseAssets]
+    cn: [使用权资产]
+    br_cvm: []
+    verify: true
+    verified_sec: true
+
+  - id: goodwill
+    label: Goodwill
+    statement: BS
+    period: instant
+    sign: positive
+    core: true
+    us_gaap: [Goodwill]
+    ifrs: [Goodwill]
+    jp: [jppfs_cor:Goodwill, jpigp_cor:GoodwillIFRS]
+    kr: [ifrs-full_Goodwill]
+    cn: [商誉]
+    br_cvm: []
+
+  - id: intangible_assets
+    label: Intangible assets ex goodwill
+    statement: BS
+    period: instant
+    sign: positive
+    core: true
+    us_gaap: [IntangibleAssetsNetExcludingGoodwill, "FiniteLivedIntangibleAssetsNet + IndefiniteLivedIntangibleAssetsExcludingGoodwill", FiniteLivedIntangibleAssetsNet]
+    ifrs: [IntangibleAssetsOtherThanGoodwill]
+    jp: [jpigp_cor:IntangibleAssetsIFRS, jppfs_cor:IntangibleAssets]
+    kr: [ifrs-full_IntangibleAssetsOtherThanGoodwill]
+    cn: [无形资产]
+    br_cvm: ["1.02.04"]
+    notes: "jppfs_cor:IntangibleAssets and BR 1.02.04 INCLUDE goodwill -> normalizer subtracts goodwill when both present."
+
+  - id: long_term_investments
+    label: Long-term investments (incl. associates)
+    statement: BS
+    period: instant
+    sign: positive
+    us_gaap: [LongTermInvestments, EquityMethodInvestments, MarketableSecuritiesNoncurrent]
+    ifrs: [InvestmentAccountedForUsingEquityMethod, NoncurrentFinancialAssets]
+    jp: [jppfs_cor:InvestmentSecurities]
+    kr: [ifrs-full_InvestmentsInAssociates]
+    cn: [长期股权投资]
+    br_cvm: ["1.02.02"]
+    verify: true
+    verified_sec: true
+
+  - id: total_assets
+    label: Total assets
+    statement: BS
+    period: instant
+    sign: positive
+    core: true
+    us_gaap: [Assets]
+    ifrs: [Assets]
+    jp: [jppfs_cor:Assets, jpigp_cor:AssetsIFRS, jpcrp_cor:TotalAssetsSummaryOfBusinessResults, jpcrp_cor:TotalAssetsIFRSSummaryOfBusinessResults, jpcrp_cor:TotalAssetsUSGAAPSummaryOfBusinessResults]
+    kr: [ifrs-full_Assets]
+    cn: [资产总计]
+    br_cvm: ["1"]
+    derive: "total_liabilities + total_equity"
+
+  - id: accounts_payable
+    label: Trade payables
+    statement: BS
+    period: instant
+    sign: positive
+    core: true
+    us_gaap: [AccountsPayableCurrent, AccountsPayableAndAccruedLiabilitiesCurrent]
+    ifrs: [TradeAndOtherCurrentPayablesToTradeSuppliers, TradeAndOtherCurrentPayables]
+    jp: [jppfs_cor:NotesAndAccountsPayableTrade, jppfs_cor:AccountsPayableTrade, jpigp_cor:TradeAndOtherPayablesCLIFRS]
+    kr: [ifrs-full_TradeAndOtherCurrentPayables, ifrs-full_CurrentTradePayables]
+    cn: [应付账款, 应付票据及应付账款]
+    br_cvm: ["2.01.02"]
+
+  - id: deferred_revenue
+    label: Deferred revenue / contract liabilities (current)
+    statement: BS
+    period: instant
+    sign: positive
+    us_gaap: [ContractWithCustomerLiabilityCurrent, DeferredRevenueCurrent]
+    ifrs: [CurrentContractLiabilities, ContractLiabilities]
+    jp: [jppfs_cor:ContractLiabilities, jppfs_cor:AdvancesReceived]
+    kr: [ifrs-full_CurrentContractLiabilities]
+    cn: [合同负债, 预收款项]
+    br_cvm: []
+    verify: true
+    verified_sec: true
+
+  - id: remaining_performance_obligation
+    label: Remaining performance obligations (backlog)
+    statement: NOTE
+    period: instant
+    sign: positive
+    us_gaap: [RevenueRemainingPerformanceObligation]
+    ifrs: [TransactionPriceAllocatedToRemainingPerformanceObligations]
+    jp: []
+    kr: []
+    cn: []
+    br_cvm: []
+    verify: true
+    verified_sec: true
+
+  - id: short_term_borrowings
+    label: Short-term borrowings & commercial paper
+    statement: BS
+    period: instant
+    sign: positive
+    us_gaap: [ShortTermBorrowings, "CommercialPaper + OtherShortTermBorrowings", CommercialPaper]
+    ifrs: [ShorttermBorrowings]
+    jp: ["jppfs_cor:ShortTermLoansPayable + jppfs_cor:CommercialPapersLiabilities", jppfs_cor:ShortTermLoansPayable]
+    kr: [ifrs-full_ShorttermBorrowings]
+    cn: [短期借款]
+    br_cvm: []
+
+  - id: current_portion_ltd
+    label: Current portion of long-term debt
+    statement: BS
+    period: instant
+    sign: positive
+    us_gaap: [LongTermDebtCurrent, LongTermDebtAndCapitalLeaseObligationsCurrent]
+    ifrs: [CurrentPortionOfLongtermBorrowings]
+    jp: ["jppfs_cor:CurrentPortionOfLongTermLoansPayable + jppfs_cor:CurrentPortionOfBonds", jppfs_cor:CurrentPortionOfLongTermLoansPayable]
+    kr: [ifrs-full_CurrentPortionOfLongtermBorrowings]
+    cn: [一年内到期的非流动负债]
+    br_cvm: []
+
+  - id: short_term_debt
+    label: Short-term debt incl. current portion of LTD
+    statement: BS
+    period: instant
+    sign: positive
+    core: true
+    us_gaap: [DebtCurrent]
+    ifrs: [CurrentBorrowingsAndCurrentPortionOfNoncurrentBorrowings]
+    jp: [jpigp_cor:BorrowingsCLIFRS]
+    kr: []
+    cn: []
+    br_cvm: ["2.01.04"]
+    derive: "nz(short_term_borrowings) + nz(current_portion_ltd)"
+    verify: true
+    verified_sec: true
+
+  - id: total_current_liabilities
+    label: Total current liabilities
+    statement: BS
+    period: instant
+    sign: positive
+    core: true
+    us_gaap: [LiabilitiesCurrent]
+    ifrs: [CurrentLiabilities]
+    jp: [jppfs_cor:CurrentLiabilities, jpigp_cor:TotalCurrentLiabilitiesIFRS]
+    kr: [ifrs-full_CurrentLiabilities]
+    cn: [流动负债合计]
+    br_cvm: ["2.01"]
+    verify: true
+    verified_sec: true
+
+  - id: long_term_debt
+    label: Long-term debt (non-current, ex leases)
+    statement: BS
+    period: instant
+    sign: positive
+    core: true
+    us_gaap: [LongTermDebtNoncurrent, LongTermDebtAndCapitalLeaseObligations, "LongTermDebt - nz(LongTermDebtCurrent)"]
+    ifrs: [LongtermBorrowings, NoncurrentPortionOfNoncurrentLoansReceived]
+    jp: ["jppfs_cor:LongTermLoansPayable + jppfs_cor:BondsPayable", jppfs_cor:LongTermLoansPayable, jpigp_cor:BorrowingsNCLIFRS]
+    kr: [ifrs-full_LongtermBorrowings, "ifrs-full_LongtermBorrowings + dart_BondsIssued"]
+    cn: ["长期借款 + 应付债券", 长期借款]
+    br_cvm: ["2.02.01"]
+    verify: true
+    verified_sec: true
+
+  - id: operating_lease_liabilities
+    label: Lease liabilities (total)
+    statement: BS
+    period: instant
+    sign: positive
+    us_gaap: [OperatingLeaseLiability, "OperatingLeaseLiabilityCurrent + OperatingLeaseLiabilityNoncurrent"]
+    ifrs: [LeaseLiabilities, "CurrentLeaseLiabilities + NoncurrentLeaseLiabilities"]
+    jp: [jpigp_cor:LeaseLiabilitiesIFRS]
+    kr: [ifrs-full_LeaseLiabilities]
+    cn: [租赁负债]
+    br_cvm: []
+    verify: true
+    verified_sec: true
+    notes: "Under IFRS 16 lease liabilities may already sit inside borrowings for some filers — dq check for double counting."
+
+  - id: total_debt
+    label: Total financial debt (ex leases)
+    statement: BS
+    period: instant
+    sign: positive
+    core: true
+    derive: "nz(short_term_debt) + nz(long_term_debt)"
+
+  - id: total_liabilities
+    label: Total liabilities
+    statement: BS
+    period: instant
+    sign: positive
+    core: true
+    us_gaap: [Liabilities]
+    ifrs: [Liabilities]
+    jp: [jppfs_cor:Liabilities, jpigp_cor:LiabilitiesIFRS]
+    kr: [ifrs-full_Liabilities]
+    cn: [负债合计]
+    br_cvm: []
+    derive: "total_assets - total_equity"
+    notes: "Many US filers do not tag Liabilities -> derive (BR: '1' - '2.03')."
+
+  - id: preferred_equity
+    label: Preferred equity
+    statement: BS
+    period: instant
+    sign: positive
+    us_gaap: [PreferredStockValue, PreferredStockValueOutstanding]
+    ifrs: []
+    jp: []
+    kr: []
+    cn: [优先股]
+    br_cvm: []
+
+  - id: minority_interest
+    label: Non-controlling interests (equity)
+    statement: BS
+    period: instant
+    sign: signed
+    us_gaap: [MinorityInterest, "StockholdersEquityIncludingPortionAttributableToNoncontrollingInterest - StockholdersEquity"]
+    ifrs: [NoncontrollingInterests]
+    jp: [jppfs_cor:NonControllingInterests, jpigp_cor:NonControllingInterestsIFRS]
+    kr: [ifrs-full_NoncontrollingInterests]
+    cn: [少数股东权益]
+    br_cvm: ["2.03.09"]
+
+  - id: total_equity_parent
+    label: Equity attributable to parent
+    statement: BS
+    period: instant
+    sign: signed
+    core: true
+    us_gaap: [StockholdersEquity]
+    ifrs: [EquityAttributableToOwnersOfParent]
+    jp: [jpigp_cor:EquityAttributableToOwnersOfParentIFRS, "jppfs_cor:NetAssets - nz(jppfs_cor:NonControllingInterests) - nz(jppfs_cor:SubscriptionRightsToShares)", jpcrp_cor:EquityAttributableToOwnersOfParentIFRSSummaryOfBusinessResults, jpcrp_cor:EquityAttributableToOwnersOfParentUSGAAPSummaryOfBusinessResults]
+    kr: [ifrs-full_EquityAttributableToOwnersOfParent]
+    cn: [归属于母公司股东权益合计, 归属于母公司所有者权益合计]
+    br_cvm: []
+    derive: "total_equity - nz(minority_interest)"
+    notes: "Do NOT use jppfs_cor:ShareholdersEquity (excludes accumulated OCI)."
+
+  - id: total_equity
+    label: Total equity (incl. NCI)
+    statement: BS
+    period: instant
+    sign: signed
+    core: true
+    us_gaap: [StockholdersEquityIncludingPortionAttributableToNoncontrollingInterest, "StockholdersEquity + MinorityInterest", StockholdersEquity]
+    ifrs: [Equity]
+    jp: [jppfs_cor:NetAssets, jpigp_cor:EquityIFRS, jpcrp_cor:NetAssetsSummaryOfBusinessResults, jpcrp_cor:EquityIncludingPortionAttributableToNonControllingInterestUSGAAPSummaryOfBusinessResults]
+    kr: [ifrs-full_Equity]
+    cn: [所有者权益合计, 股东权益合计]
+    br_cvm: ["2.03"]
+
+  - id: retained_earnings
+    label: Retained earnings
+    statement: BS
+    period: instant
+    sign: signed
+    us_gaap: [RetainedEarningsAccumulatedDeficit]
+    ifrs: [RetainedEarnings]
+    jp: [jppfs_cor:RetainedEarnings, jpigp_cor:RetainedEarningsIFRS]
+    kr: [ifrs-full_RetainedEarnings]
+    cn: [未分配利润]
+    br_cvm: []
+
+  - id: treasury_stock
+    label: Treasury stock (at cost, positive)
+    statement: BS
+    period: instant
+    sign: positive
+    us_gaap: [TreasuryStockValue, TreasuryStockCommonValue]
+    ifrs: [TreasuryShares]
+    jp: [jppfs_cor:TreasuryStock, jpigp_cor:TreasurySharesIFRS]
+    kr: [ifrs-full_TreasuryShares]
+    cn: [库存股]
+    br_cvm: []
+
+  - id: shares_outstanding
+    label: Common shares outstanding (period end or cover date)
+    statement: BS
+    period: instant
+    unit: shares
+    sign: positive
+    core: true
+    us_gaap: [dei:EntityCommonStockSharesOutstanding, CommonStockSharesOutstanding]
+    ifrs: [NumberOfSharesOutstanding]
+    jp: ["jpcrp_cor:TotalNumberOfIssuedSharesSummaryOfBusinessResults - nz(jpcrp_cor:NumberOfSharesHeldInOwnNameTreasurySharesEtc)", jpcrp_cor:NumberOfIssuedSharesAsOfFilingDateIssuedSharesTotalNumberOfSharesEtc]
+    kr: []
+    cn: []
+    br_cvm: []
+    verify: true
+    verified_sec: true
+    notes: >
+      dei:EntityCommonStockSharesOutstanding is dated at the cover date (after period end) and may be per class —
+      sum classes. KR: OpenDART stockTotqySttus (istc_totqy - tesstk_co). CN/BR: from source share-capital endpoints
+      (AKShare 总股本; CVM composicao_capital). Fallback: shares_diluted_weighted (dq penalty).
+
+  - id: employees
+    label: Employees
+    statement: NOTE
+    period: instant
+    unit: count
+    sign: positive
+    us_gaap: [dei:EntityNumberOfEmployees]
+    ifrs: [NumberOfEmployees]
+    jp: [jpcrp_cor:NumberOfEmployees]
+    kr: []
+    cn: []
+    br_cvm: []
+    verify: true
+    verified_sec: true
+    notes: "Fallback issuers.employees (yfinance). KR: OpenDART empSttus."
+
+  - id: net_debt
+    label: Net debt
+    statement: BS
+    period: instant
+    sign: signed
+    core: true
+    derive: "total_debt - cash_and_st_investments"
+
+  - id: working_capital
+    label: Working capital
+    statement: BS
+    period: instant
+    sign: signed
+    derive: "total_current_assets - total_current_liabilities"
+
+  - id: operating_working_capital
+    label: Operating working capital (AR + inventory - AP)
+    statement: BS
+    period: instant
+    sign: signed
+    derive: "nz(accounts_receivable) + nz(inventory) - nz(accounts_payable)"
+
+  - id: tangible_book
+    label: Tangible book value (common)
+    statement: BS
+    period: instant
+    sign: signed
+    derive: "total_equity_parent - nz(preferred_equity) - nz(goodwill) - nz(intangible_assets)"
+
+  - id: invested_capital
+    label: Invested capital (operating approach)
+    statement: BS
+    period: instant
+    sign: signed
+    core: true
+    derive: "total_debt + nz(operating_lease_liabilities) + total_equity - cash_and_st_investments"
+
+  # ------------------------------------------------------------------ CASH FLOW
+  - id: cfo
+    label: Cash from operations
+    statement: CF
+    period: duration
+    sign: signed
+    core: true
+    us_gaap: [NetCashProvidedByUsedInOperatingActivities, NetCashProvidedByUsedInOperatingActivitiesContinuingOperations]
+    ifrs: [CashFlowsFromUsedInOperatingActivities]
+    jp: [jppfs_cor:NetCashProvidedByUsedInOperatingActivities, jpigp_cor:NetCashProvidedByUsedInOperatingActivitiesIFRS, jpcrp_cor:NetCashProvidedByUsedInOperatingActivitiesSummaryOfBusinessResults, jpcrp_cor:CashFlowsFromUsedInOperatingActivitiesIFRSSummaryOfBusinessResults, jpcrp_cor:CashFlowsFromUsedInOperatingActivitiesUSGAAPSummaryOfBusinessResults]
+    kr: [ifrs-full_CashFlowsFromUsedInOperatingActivities]
+    cn: [经营活动产生的现金流量净额]
+    br_cvm: ["6.01"]
+
+  - id: capex
+    label: Capital expenditure (PP&E)
+    statement: CF
+    period: duration
+    sign: outflow_positive
+    core: true
+    us_gaap: [PaymentsToAcquirePropertyPlantAndEquipment, PaymentsToAcquireProductiveAssets, PaymentsForCapitalImprovements, PaymentsToAcquireOilAndGasPropertyAndEquipment, PaymentsToAcquireRealEstate]
+    ifrs: [PurchaseOfPropertyPlantAndEquipmentClassifiedAsInvestingActivities, PurchaseOfPropertyPlantAndEquipmentIntangibleAssetsOtherThanGoodwillInvestmentPropertyAndOtherNoncurrentAssets]
+    jp: [jppfs_cor:PurchaseOfPropertyPlantAndEquipmentInvCF, jppfs_cor:PurchaseOfNoncurrentAssetsInvCF, jpigp_cor:PurchaseOfPropertyPlantAndEquipmentInvCFIFRS]
+    kr: [ifrs-full_PurchaseOfPropertyPlantAndEquipmentClassifiedAsInvestingActivities]
+    cn: [购建固定资产、无形资产和其他长期资产支付的现金]
+    br_cvm: []
+    verify: true
+    verified_sec: true
+    notes: "BR: DFC 6.02.xx line whose DS_CONTA matches /aquisi.*imobilizado/i (sum with intangível if separate). CN line includes intangibles."
+
+  - id: capex_intangibles
+    label: Purchase of intangibles / capitalized software
+    statement: CF
+    period: duration
+    sign: outflow_positive
+    us_gaap: [PaymentsToAcquireIntangibleAssets, PaymentsToDevelopSoftware]
+    ifrs: [PurchaseOfIntangibleAssetsClassifiedAsInvestingActivities]
+    jp: [jppfs_cor:PurchaseOfIntangibleAssetsInvCF]
+    kr: [ifrs-full_PurchaseOfIntangibleAssetsClassifiedAsInvestingActivities]
+    cn: []
+    br_cvm: []
+
+  - id: cfi
+    label: Cash from investing
+    statement: CF
+    period: duration
+    sign: signed
+    us_gaap: [NetCashProvidedByUsedInInvestingActivities, NetCashProvidedByUsedInInvestingActivitiesContinuingOperations]
+    ifrs: [CashFlowsFromUsedInInvestingActivities]
+    jp: [jppfs_cor:NetCashProvidedByUsedInInvestmentActivities, jpigp_cor:NetCashProvidedByUsedInInvestingActivitiesIFRS, jpcrp_cor:NetCashProvidedByUsedInInvestingActivitiesSummaryOfBusinessResults, jpcrp_cor:CashFlowsFromUsedInInvestingActivitiesIFRSSummaryOfBusinessResults, jpcrp_cor:CashFlowsFromUsedInInvestingActivitiesUSGAAPSummaryOfBusinessResults]
+    kr: [ifrs-full_CashFlowsFromUsedInInvestingActivities]
+    cn: [投资活动产生的现金流量净额]
+    br_cvm: ["6.02"]
+
+  - id: cff
+    label: Cash from financing
+    statement: CF
+    period: duration
+    sign: signed
+    us_gaap: [NetCashProvidedByUsedInFinancingActivities, NetCashProvidedByUsedInFinancingActivitiesContinuingOperations]
+    ifrs: [CashFlowsFromUsedInFinancingActivities]
+    jp: [jppfs_cor:NetCashProvidedByUsedInFinancingActivities, jpigp_cor:NetCashProvidedByUsedInFinancingActivitiesIFRS, jpcrp_cor:NetCashProvidedByUsedInFinancingActivitiesSummaryOfBusinessResults, jpcrp_cor:CashFlowsFromUsedInFinancingActivitiesIFRSSummaryOfBusinessResults, jpcrp_cor:CashFlowsFromUsedInFinancingActivitiesUSGAAPSummaryOfBusinessResults]
+    kr: [ifrs-full_CashFlowsFromUsedInFinancingActivities]
+    cn: [筹资活动产生的现金流量净额]
+    br_cvm: ["6.03"]
+
+  - id: dividends_paid
+    label: Dividends paid (common + preferred)
+    statement: CF
+    period: duration
+    sign: outflow_positive
+    core: true
+    us_gaap: [PaymentsOfDividends, PaymentsOfDividendsCommonStock, PaymentsOfOrdinaryDividends]
+    ifrs: [DividendsPaidClassifiedAsFinancingActivities, DividendsPaid, DividendsPaidToEquityHoldersOfParentClassifiedAsFinancingActivities]
+    jp: [jppfs_cor:CashDividendsPaidFinCF, jpigp_cor:DividendsPaidFinCFIFRS]
+    kr: [ifrs-full_DividendsPaidClassifiedAsFinancingActivities]
+    cn: [分配股利、利润或偿付利息支付的现金]
+    br_cvm: []
+    notes: "CN line includes interest paid -> subtract nz(interest_paid) if available; dq penalty."
+
+  - id: buybacks
+    label: Share repurchases
+    statement: CF
+    period: duration
+    sign: outflow_positive
+    core: true
+    us_gaap: [PaymentsForRepurchaseOfCommonStock, PaymentsForRepurchaseOfEquity]
+    ifrs: [PaymentsToAcquireOrRedeemEntitysShares]
+    jp: [jppfs_cor:PurchaseOfTreasuryStockFinCF, jpigp_cor:PurchaseOfTreasurySharesFinCFIFRS]
+    kr: [ifrs-full_PaymentsToAcquireOrRedeemEntitysShares]
+    cn: []
+    br_cvm: []
+
+  - id: stock_issuance
+    label: Proceeds from share issuance
+    statement: CF
+    period: duration
+    sign: positive
+    us_gaap: [ProceedsFromIssuanceOfCommonStock, "ProceedsFromIssuanceOfCommonStock + ProceedsFromStockOptionsExercised"]
+    ifrs: [ProceedsFromIssuingShares]
+    jp: [jppfs_cor:ProceedsFromIssuanceOfCommonStockFinCF]
+    kr: [ifrs-full_ProceedsFromIssuingShares]
+    cn: [吸收投资收到的现金]
+    br_cvm: []
+
+  - id: debt_issuance
+    label: Proceeds from debt
+    statement: CF
+    period: duration
+    sign: positive
+    us_gaap: [ProceedsFromIssuanceOfLongTermDebt, ProceedsFromIssuanceOfDebt, ProceedsFromDebtNetOfIssuanceCosts]
+    ifrs: [ProceedsFromBorrowingsClassifiedAsFinancingActivities, ProceedsFromNoncurrentBorrowings]
+    jp: ["jppfs_cor:ProceedsFromLongTermLoansPayableFinCF + nz(jppfs_cor:ProceedsFromIssuanceOfBondsFinCF)"]
+    kr: [ifrs-full_ProceedsFromBorrowingsClassifiedAsFinancingActivities]
+    cn: [取得借款收到的现金]
+    br_cvm: []
+    verify: true
+    verified_sec: true
+
+  - id: debt_repayment
+    label: Repayment of debt
+    statement: CF
+    period: duration
+    sign: outflow_positive
+    us_gaap: [RepaymentsOfLongTermDebt, RepaymentsOfDebt]
+    ifrs: [RepaymentsOfBorrowingsClassifiedAsFinancingActivities, RepaymentsOfNoncurrentBorrowings]
+    jp: ["jppfs_cor:RepaymentsOfLongTermLoansPayableFinCF + nz(jppfs_cor:RedemptionOfBondsFinCF)"]
+    kr: [ifrs-full_RepaymentsOfBorrowingsClassifiedAsFinancingActivities]
+    cn: [偿还债务支付的现金]
+    br_cvm: []
+    verify: true
+    verified_sec: true
+
+  - id: acquisitions
+    label: Acquisitions net of cash
+    statement: CF
+    period: duration
+    sign: outflow_positive
+    us_gaap: [PaymentsToAcquireBusinessesNetOfCashAcquired]
+    ifrs: [CashFlowsUsedInObtainingControlOfSubsidiariesOrOtherBusinessesClassifiedAsInvestingActivities]
+    jp: [jppfs_cor:PurchaseOfInvestmentsInSubsidiariesResultingInChangeInScopeOfConsolidationInvCF]
+    kr: [ifrs-full_CashFlowsUsedInObtainingControlOfSubsidiariesOrOtherBusinessesClassifiedAsInvestingActivities]
+    cn: [取得子公司及其他营业单位支付的现金净额]
+    br_cvm: []
+    verify: true
+    verified_sec: true
+
+  - id: interest_paid
+    label: Interest paid
+    statement: CF
+    period: duration
+    sign: outflow_positive
+    us_gaap: [InterestPaidNet, InterestPaid]
+    ifrs: [InterestPaidClassifiedAsOperatingActivities, InterestPaidClassifiedAsFinancingActivities]
+    jp: [jppfs_cor:InterestExpensesPaidOpeCF]
+    kr: [ifrs-full_InterestPaidClassifiedAsOperatingActivities]
+    cn: []
+    br_cvm: []
+    verify: true
+    verified_sec: true
+
+  - id: taxes_paid
+    label: Income taxes paid
+    statement: CF
+    period: duration
+    sign: outflow_positive
+    us_gaap: [IncomeTaxesPaidNet, IncomeTaxesPaid]
+    ifrs: [IncomeTaxesPaidRefundClassifiedAsOperatingActivities]
+    jp: [jppfs_cor:IncomeTaxesPaidOpeCF]
+    kr: [ifrs-full_IncomeTaxesPaidRefundClassifiedAsOperatingActivities]
+    cn: [支付的各项税费]
+    br_cvm: []
+
+  - id: change_in_working_capital
+    label: Change in operating working capital (cash impact)
+    statement: CF
+    period: duration
+    sign: signed
+    us_gaap: []
+    us_gaap_negate: [IncreaseDecreaseInOperatingCapital]
+    ifrs: []
+    derive: "cfo - net_income - depreciation_amortization - nz(sbc)"
+    notes: "Cash impact convention: negative when working capital absorbs cash. us-gaap tag has inverse semantics -> negate_source. Derived fallback is a residual (includes other non-cash items) — dq penalty."
+
+  - id: fcf
+    label: Free cash flow
+    statement: CF
+    period: duration
+    sign: signed
+    core: true
+    derive: "cfo - capex"
+
+  - id: dividends_per_share
+    label: Dividends per share declared
+    statement: NOTE
+    period: duration
+    unit: per_share
+    sign: positive
+    ttm_rule: sum
+    us_gaap: [CommonStockDividendsPerShareDeclared, CommonStockDividendsPerShareCashPaid]
+    ifrs: [DividendsRecognisedAsDistributionsToOwnersPerShare]
+    jp: [jpcrp_cor:DividendPaidPerShareSummaryOfBusinessResults]
+    kr: []
+    cn: []
+    br_cvm: []
+    notes: "Fallback: corporate_actions cash dividends summed over the fiscal period. KR: OpenDART alotMatter."
+
+  # ------------------------------------------------------------------ BANKS
+  - id: interest_income_bank
+    label: Total interest income (banks)
+    statement: IS
+    period: duration
+    sign: positive
+    applies_to: [banks]
+    us_gaap: [InterestAndDividendIncomeOperating, InterestIncomeOperating]
+    ifrs: [RevenueFromInterest, InterestRevenueCalculatedUsingEffectiveInterestMethod]
+    jp: [jppfs_cor:InterestIncomeOIBNK]
+    kr: [ifrs-full_RevenueFromInterest]
+    cn: [利息收入]
+    br_cvm: []
+    verify: true
+    verified_sec: true
+
+  - id: interest_expense_bank
+    label: Total interest expense (banks)
+    statement: IS
+    period: duration
+    sign: positive
+    applies_to: [banks]
+    us_gaap: [InterestExpense, InterestExpenseOperating]
+    ifrs: [InterestExpense]
+    jp: [jppfs_cor:InterestExpensesOEBNK]
+    kr: [ifrs-full_InterestExpense]
+    cn: [利息支出]
+    br_cvm: []
+    verify: true
+    verified_sec: true
+
+  - id: net_interest_income
+    label: Net interest income
+    statement: IS
+    period: duration
+    sign: signed
+    applies_to: [banks, consumer_finance]
+    us_gaap: [InterestIncomeExpenseNet, InterestIncomeExpenseAfterProvisionForLoanLoss + ProvisionForLoanLeaseAndOtherLosses]
+    ifrs: [InterestRevenueExpense]
+    jp: [jppfs_cor:InterestIncomeOIBNK - jppfs_cor:InterestExpensesOEBNK]
+    kr: [ifrs-full_InterestRevenueExpense]
+    cn: [利息净收入]
+    br_cvm: []
+    derive: "interest_income_bank - interest_expense_bank"
+    verify: true
+    verified_sec: true
+
+  - id: noninterest_income
+    label: Non-interest income (fees, trading, other)
+    statement: IS
+    period: duration
+    sign: signed
+    applies_to: [banks]
+    us_gaap: [NoninterestIncome]
+    ifrs: [FeeAndCommissionIncomeExpense]
+    jp: ["jppfs_cor:FeesAndCommissionsOIBNK - nz(jppfs_cor:FeesAndCommissionsPaymentsOEBNK) + nz(jppfs_cor:TrustFeesBNK) + nz(jppfs_cor:TradingIncomeOIBNK) - nz(jppfs_cor:TradingExpensesOEBNK) + nz(jppfs_cor:OtherOrdinaryIncomeOIBNK) - nz(jppfs_cor:OtherOrdinaryExpensesOEBNK)"]
+    kr: [ifrs-full_FeeAndCommissionIncomeExpense]
+    cn: [手续费及佣金净收入]
+    br_cvm: []
+    notes: "IFRS fallback captures only net fees — dq penalty 0.2. JP (EDINET J-GAAP bank P&L, COVERAGE_V3 B1): 業務粗利益 minus 資金利益 = net fees and commissions (役務取引等収益 - 費用) + trust fees (信託報酬) + net trading (特定取引収益 - 費用) + net other business income (その他業務収益 - 費用); その他経常収益 (gains on equities, equity-method income, recoveries) is excluded, and fee expenses are netted here because the jp noninterest_expense chain (営業経費) does not hold them. So JP bank revenue (net_interest_income + noninterest_income, jp chain 資金運用収益 - 資金調達費用) = 業務粗利益, not 経常収益 (gross ordinary income). Element names verified 2026-11-07 on 4 bank filers (sum of the 経常収益 components = OrdinaryIncomeBNK within 0.03%)."
+
+  - id: noninterest_expense
+    label: Non-interest expense (opex)
+    statement: IS
+    period: duration
+    sign: positive
+    applies_to: [banks]
+    us_gaap: [NoninterestExpense]
+    ifrs: [GeneralAndAdministrativeExpense]
+    jp: [jppfs_cor:GeneralAndAdministrativeExpensesOEBNK]
+    kr: [dart_GeneralAndAdministrativeExpenses]
+    cn: [业务及管理费]
+    br_cvm: []
+    verify: true
+    verified_sec: true
+
+  - id: provision_credit_losses
+    label: Provision for credit losses
+    statement: IS
+    period: duration
+    sign: signed
+    applies_to: [banks, consumer_finance]
+    us_gaap: [ProvisionForLoanLeaseAndOtherLosses, ProvisionForLoanAndLeaseLosses, FinancingReceivableExcludingAccruedInterestCreditLossExpenseReversal]
+    ifrs: [ImpairmentLossImpairmentGainAndReversalOfImpairmentLossDeterminedInAccordanceWithIFRS9]
+    jp: []
+    kr: [ifrs-full_ImpairmentLossImpairmentGainAndReversalOfImpairmentLossDeterminedInAccordanceWithIFRS9]
+    cn: [信用减值损失]
+    br_cvm: []
+    verify: true
+    verified_sec: true
+
+  - id: loans_net
+    label: Loans net of allowance
+    statement: BS
+    period: instant
+    sign: positive
+    applies_to: [banks, consumer_finance]
+    us_gaap: [LoansAndLeasesReceivableNetReportedAmount, FinancingReceivableExcludingAccruedInterestAfterAllowanceForCreditLoss, NotesReceivableNet]
+    ifrs: [LoansAndAdvancesToCustomers]
+    jp: [jppfs_cor:LoansAndBillsDiscountedBNK, jppfs_cor:LoansAndBillsDiscountedAssetsBNK]
+    kr: [ifrs-full_LoansAndAdvancesToCustomers]
+    cn: [发放贷款和垫款]
+    br_cvm: []
+    verify: true
+    verified_sec: true
+
+  - id: allowance_loan_losses
+    label: Allowance for credit losses on loans
+    statement: BS
+    period: instant
+    sign: positive
+    applies_to: [banks, consumer_finance]
+    us_gaap: [FinancingReceivableAllowanceForCreditLossExcludingAccruedInterest, LoansAndLeasesReceivableAllowance]
+    ifrs: [AllowanceAccountForCreditLossesOfFinancialAssets, LoansAndAdvancesAtAmortisedCostAllowanceForExpectedCreditLosses]
+    jp: [jppfs_cor:AllowanceForLoanLossesAssetsBNK]
+    kr: []
+    cn: [贷款损失准备]
+    br_cvm: []
+    verify: true
+    verified_sec: true
+
+  - id: loans_gross
+    label: Loans gross
+    statement: BS
+    period: instant
+    sign: positive
+    applies_to: [banks, consumer_finance]
+    us_gaap: [FinancingReceivableExcludingAccruedInterestBeforeAllowanceForCreditLoss, LoansAndLeasesReceivableNetOfDeferredIncome]
+    ifrs: []
+    derive: "loans_net + nz(allowance_loan_losses)"
+    verify: true
+    verified_sec: true
+
+  - id: nonperforming_loans
+    label: Non-performing / non-accrual loans
+    statement: NOTE
+    period: instant
+    sign: positive
+    applies_to: [banks]
+    us_gaap: [FinancingReceivableExcludingAccruedInterestNonaccrual, FinancingReceivableRecordedInvestmentNonaccrualStatus]
+    ifrs: []
+    jp: []
+    kr: []
+    cn: [不良贷款余额]
+    br_cvm: []
+    verify: true
+    verified_sec: true
+    notes: "Sparse; CN banks disclose 不良贷款率 directly (store via kpi override)."
+
+  - id: deposits
+    label: Customer deposits
+    statement: BS
+    period: instant
+    sign: positive
+    applies_to: [banks]
+    us_gaap: [Deposits]
+    ifrs: [DepositsFromCustomers]
+    jp: [jppfs_cor:DepositsLiabilitiesBNK]
+    kr: [ifrs-full_DepositsFromCustomers]
+    cn: [吸收存款]
+    br_cvm: []
+    verify: true
+    verified_sec: true
+
+  - id: investment_securities
+    label: Investment securities (AFS + HTM + trading)
+    statement: BS
+    period: instant
+    sign: positive
+    applies_to: [banks, insurers]
+    us_gaap: ["nz(AvailableForSaleSecuritiesDebtSecurities) + nz(HeldToMaturitySecurities) + nz(TradingSecurities)", Investments]
+    ifrs: ["nz(FinancialAssetsAtFairValueThroughOtherComprehensiveIncome) + nz(FinancialAssetsAtAmortisedCost) + nz(FinancialAssetsAtFairValueThroughProfitOrLoss)"]
+    jp: [jppfs_cor:SecuritiesAssetsBNK]
+    kr: []
+    cn: []
+    br_cvm: []
+    verify: true
+    verified_sec: true
+
+  - id: cet1_ratio
+    label: CET1 ratio
+    statement: NOTE
+    period: instant
+    unit: pure
+    sign: positive
+    applies_to: [banks]
+    us_gaap: [CommonEquityTierOneCapitalRatio]
+    ifrs: []
+    verify: true
+    verified_sec: true
+    notes: "Rarely tagged; regulatory filings (FR Y-9C, Pillar 3) out of MVP scope. Null-tolerant KPI."
+
+  # ------------------------------------------------------------------ INSURERS
+  - id: premiums_earned
+    label: Net premiums earned / insurance revenue
+    statement: IS
+    period: duration
+    sign: positive
+    applies_to: [insurers]
+    us_gaap: [PremiumsEarnedNet]
+    ifrs: [InsuranceRevenue]
+    jp: [jppfs_cor:InsurancePremiumsAndOtherOIINS]
+    kr: [ifrs-full_InsuranceRevenue]
+    cn: [已赚保费]
+    br_cvm: []
+    verify: true
+    verified_sec: true
+
+  - id: premiums_written
+    label: Net premiums written
+    statement: NOTE
+    period: duration
+    sign: positive
+    applies_to: [insurers]
+    us_gaap: [PremiumsWrittenNet]
+    ifrs: []
+    verify: true
+    verified_sec: true
+
+  - id: losses_and_lae
+    label: Losses, benefits & loss adjustment expenses
+    statement: IS
+    period: duration
+    sign: positive
+    applies_to: [insurers]
+    us_gaap: [PolicyholderBenefitsAndClaimsIncurredNet, IncurredClaimsPropertyCasualtyAndLiability, BenefitsLossesAndExpenses]
+    ifrs: [InsuranceServiceExpensesFromInsuranceContractsIssued]
+    jp: [jppfs_cor:InsuranceClaimsAndOtherPaymentsOEINS]
+    kr: [ifrs-full_InsuranceServiceExpensesFromInsuranceContractsIssued]
+    cn: [赔付支出]
+    br_cvm: []
+    verify: true
+    verified_sec: true
+    notes: "BenefitsLossesAndExpenses is TOTAL expenses (last resort, dq penalty 0.3)."
+
+  - id: underwriting_expenses
+    label: Acquisition & other underwriting expenses
+    statement: IS
+    period: duration
+    sign: positive
+    applies_to: [insurers]
+    us_gaap: ["DeferredPolicyAcquisitionCostAmortizationExpense + nz(OtherUnderwritingExpense)", DeferredPolicyAcquisitionCostAmortizationExpense]
+    ifrs: []
+    verify: true
+    verified_sec: true
+    notes: "IFRS 17 bundles acquisition cash flows in insurance service expenses; combined ratio then uses losses_and_lae only."
+
+  - id: net_investment_income
+    label: Net investment income (insurers)
+    statement: IS
+    period: duration
+    sign: signed
+    applies_to: [insurers]
+    us_gaap: [NetInvestmentIncome]
+    ifrs: [InvestmentIncome]
+    jp: []
+    kr: []
+    cn: [投资收益]
+    br_cvm: []
+    verify: true
+    verified_sec: true
+
+  - id: insurance_reserves
+    label: Insurance liabilities / reserves
+    statement: BS
+    period: instant
+    sign: positive
+    applies_to: [insurers]
+    us_gaap: ["nz(LiabilityForFuturePolicyBenefits) + nz(LiabilityForClaimsAndClaimsAdjustmentExpense)"]
+    ifrs: [InsuranceContractsThatAreLiabilities, InsuranceContractsIssuedThatAreLiabilities]
+    jp: [jppfs_cor:PolicyReserveAndOtherReservesLiabilitiesINS]
+    kr: []
+    cn: []
+    br_cvm: []
+    verify: true
+    verified_sec: true
+
+  # ------------------------------------------------------------------ REITs / REAL ESTATE
+  - id: investment_property
+    label: Investment property / real estate net
+    statement: BS
+    period: instant
+    sign: positive
+    applies_to: [reits, real_estate]
+    us_gaap: [RealEstateInvestmentPropertyNet]
+    ifrs: [InvestmentProperty]
+    jp: [jppfs_cor:RealEstateForSaleCA]
+    kr: [ifrs-full_InvestmentProperty]
+    cn: [投资性房地产]
+    br_cvm: []
+    verify: true
+    verified_sec: true
+
+  - id: rental_revenue
+    label: Rental / lease revenue
+    statement: IS
+    period: duration
+    sign: positive
+    applies_to: [reits]
+    us_gaap: [OperatingLeaseLeaseIncome, OperatingLeasesIncomeStatementLeaseRevenue]
+    ifrs: [RentalIncomeFromInvestmentProperty]
+    verify: true
+    verified_sec: true
+
+  - id: real_estate_depreciation
+    label: Real estate depreciation & amortization
+    statement: IS
+    period: duration
+    sign: positive
+    applies_to: [reits]
+    us_gaap: [SECScheduleIIIRealEstateAccumulatedDepreciationDepreciationExpense, RealEstateAccumulatedDepreciationDepreciationExpense]
+    ifrs: []
+    derive: "depreciation_amortization"
+    verify: true
+    verified_sec: true
+
+  - id: gain_on_property_sales
+    label: Gains on sale of real estate
+    statement: IS
+    period: duration
+    sign: signed
+    applies_to: [reits]
+    us_gaap: [GainsLossesOnSalesOfInvestmentRealEstate]
+    ifrs: [GainsLossesOnDisposalsOfInvestmentProperties]
+    verify: true
+    verified_sec: true
+
+  - id: straight_line_rent
+    label: Straight-line rent adjustment
+    statement: CF
+    period: duration
+    sign: signed
+    applies_to: [reits]
+    us_gaap: [StraightLineRent, StraightLineRentAdjustments]
+    verify: true
+    verified_sec: true
+
+  - id: ffo
+    label: Funds from operations (NAREIT, analytic)
+    statement: IS
+    period: duration
+    sign: signed
+    applies_to: [reits]
+    derive: "net_income_common + real_estate_depreciation - nz(gain_on_property_sales) + nz(impairment)"
+    notes: "Company-reported FFO is a non-GAAP extension tag; not used to keep comparability."
+
+  - id: affo
+    label: Adjusted FFO (analytic)
+    statement: IS
+    period: duration
+    sign: signed
+    applies_to: [reits]
+    derive: "ffo - nz(straight_line_rent) - 0.15 * real_estate_depreciation"
+    notes: "Recurring capex proxied as 15% of real-estate D&A (flag inputs_complete=false)."
+
+  # ------------------------------------------------------------------ ENERGY / RESOURCES
+  - id: exploration_expense
+    label: Exploration expense
+    statement: IS
+    period: duration
+    sign: positive
+    applies_to: [energy, mining]
+    us_gaap: [ExplorationExpense, ExplorationAbandonmentAndImpairmentExpense]
+    ifrs: [ExpenseArisingFromExplorationForAndEvaluationOfMineralResources]
+    verify: true
+    verified_sec: true

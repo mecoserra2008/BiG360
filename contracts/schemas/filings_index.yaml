@@ -1,0 +1,31 @@
+table: filings_index
+version: 1
+zone: normalized
+owner: ingest-us (sec_*) / ingest-global (others) — each writes only its own source_id partitions
+description: >
+  Index of regulatory filings across all regulators. Document bodies stay in data/raw/<source_id>/docs/;
+  this table points to them. Basis for knowledge_date of all derived fundamentals.
+storage: {path: normalized/filings_index, format: parquet, partition_by: [source_id, year], write_mode: upsert}
+primary_key: [filing_id]
+pit: {knowledge_column: knowledge_date, rule: "filing is public on knowledge_date"}
+columns:
+  - {name: filing_id, type: string, nullable: false, description: "{source_id}:{native key}"}
+  - {name: source_id, type: string, nullable: false, description: "sec_edgar | esef_xbrl_org | edinet | opendart | cvm | akshare | companies_house | ..."}
+  - {name: year, type: int16, nullable: false, description: "Partition: year(knowledge_date)"}
+  - {name: source_entity_id, type: string, nullable: false, description: "Native entity key (CIK, LEI, EDINET code, corp_code, CVM code)"}
+  - {name: issuer_id, type: string, nullable: true, description: "Resolved issuer (null until identity resolution)"}
+  - {name: form_type, type: string, nullable: false, description: "Native form (10-K, 10-Q, 20-F, 40-F, 6-K, 8-K, 4, 13F-HR, AFR (ESEF annual), 有価証券報告書 code 120, DART A001, DFP, ITR ...)"}
+  - {name: form_class, type: enum, nullable: false, values: [annual, semiannual, quarterly, current_report, insider, holdings, proxy, prospectus, other], description: "Normalized class"}
+  - {name: period_end, type: date, nullable: true, description: "Report period end"}
+  - {name: fiscal_year, type: int16, nullable: true, description: "Fiscal year of report"}
+  - {name: fiscal_period, type: enum, nullable: true, values: [FY, Q1, Q2, Q3, Q4, H1, H2], description: "Fiscal period"}
+  - {name: knowledge_date, type: date, nullable: false, description: "Filing/publication date"}
+  - {name: knowledge_ts, type: datetime, nullable: true, description: "Acceptance timestamp UTC if known"}
+  - {name: is_amendment, type: bool, nullable: false, description: "10-K/A etc."}
+  - {name: amends_filing_id, type: string, nullable: true, description: "Original filing if amendment"}
+  - {name: language, type: string, nullable: true, description: "ISO 639-1 of primary document"}
+  - {name: url, type: string, nullable: true, description: "Canonical URL of the filing"}
+  - {name: doc_path, type: string, nullable: true, description: "Local path (relative to data/) of primary doc/text if downloaded"}
+  - {name: has_xbrl, type: bool, nullable: false, description: "Structured financial data available"}
+  - {name: items, type: list<string>, nullable: true, description: "8-K item numbers or section codes"}
+  - {name: ingested_at, type: datetime, nullable: false, description: "Write time UTC"}

@@ -1,0 +1,24 @@
+table: event_labels
+version: 1
+zone: reference
+owner: events-v2 (app.events_v2.dicts)
+description: >
+  Dictionary tables for the compact events-v2 tables (E1): every int label stored in gdelt_event_labels /
+  gdelt_article_labels / event_daily_agg / news_stories / story_members decodes through this table.
+  dict_type country (id 0 = GLOBAL, then ISO2), sector (id = bit in sector_mask), theme (id = bit in theme_mask;
+  sector_mask = sectors typically affected), issuer (stable int id -> issuer_id; sector_mask = issuer sector bit),
+  domain (publisher domain), lang (ISO 639-1), source (news source id; bit in news_stories.source_mask),
+  gkg_theme (GKG theme or prefix* -> theme_mask / sector_mask; the GKG-theme maps), model (sentiment model id).
+  Ids are append-only and never renumbered (taxonomy bits are fixed in app.events_v2.taxonomy).
+storage: {path: reference/event_labels, format: parquet, partition_by: [dict_type], write_mode: overwrite_partition}
+primary_key: [dict_type, id]
+columns:
+  - {name: dict_type, type: enum, nullable: false, values: [country, sector, theme, issuer, domain, lang, source, gkg_theme, model], description: "Dictionary"}
+  - {name: id, type: int32, nullable: false, description: "Stable int id (bit index for theme / sector)"}
+  - {name: code, type: string, nullable: false, description: "ISO2 | sector_id | theme id | issuer_id | domain | ISO 639-1 | source_id | GKG theme (prefix ends with *) | model id"}
+  - {name: name, type: string, nullable: true, description: "Display name"}
+  - {name: grp, type: string, nullable: true, description: "Theme group / issuer country"}
+  - {name: theme_mask, type: int64, nullable: true, description: "gkg_theme: market themes it maps to"}
+  - {name: sector_mask, type: int16, nullable: true, description: "theme: affected sectors; issuer: its sector; gkg_theme: sectors it implies"}
+  - {name: extra, type: json, nullable: true, description: "Type-specific extras (theme gkg/cameo/title rules, issuer ticker / security_id)"}
+  - {name: updated_at, type: datetime, nullable: false, description: "Write time UTC"}

@@ -1,0 +1,35 @@
+table: filing_text_changes
+version: 2
+zone: features
+owner: signals-alt (app.nlp.lazy_prices)
+description: >
+  "Lazy Prices" (Cohen, Malloy, Nguyen 2020) — similarity of each periodic filing vs the same-type prior filing,
+  overall and per section (10-K Item 1A risk factors, Item 7 MD&A; 10-Q Part I Item 2; others: full text).
+storage: {path: features/filing_text_changes, format: parquet, partition_by: [year], write_mode: upsert}
+primary_key: [filing_id, section]
+pit: {knowledge_column: knowledge_date, rule: "filing date"}
+columns:
+  - {name: filing_id, type: string, nullable: false, description: "Current filing"}
+  - {name: prev_filing_id, type: string, nullable: false, description: "Comparison filing (same form, prior year same period)"}
+  - {name: issuer_id, type: string, nullable: false, description: "FK issuers"}
+  - {name: year, type: int16, nullable: false, description: "Partition: year(knowledge_date)"}
+  - {name: section, type: enum, nullable: false, values: [full, risk_factors, mdna, legal, other], description: "Section"}
+  - {name: cosine_tfidf, type: float64, nullable: true, description: "Cosine similarity of TF-IDF vectors"}
+  - {name: jaccard, type: float64, nullable: true, description: "Jaccard on word sets"}
+  - {name: min_edit_ratio, type: float64, nullable: true, description: "1 - normalized edit distance (sentence level)"}
+  - {name: words_added_pct, type: float64, nullable: true, description: "Share of new sentences"}
+  - {name: neg_word_delta, type: float64, nullable: true, description: "Change in Loughran-McDonald negative word share"}
+  - {name: uncertainty_word_delta, type: float64, nullable: true, description: "Change in LM uncertainty share"}
+  - {name: language, type: string, nullable: false, description: "Text language"}
+  - {name: knowledge_date, type: date, nullable: false, description: "Filing date"}
+  - {name: computed_at, type: datetime, nullable: false, description: "Write time UTC"}
+  - {name: form_type, type: string, nullable: true, description: "Form of the current filing (API LazyPricesRow.form_type) (added v2)"}
+  - {name: base_form, type: string, nullable: true, description: "Form without /A (10-K, 10-Q, 20-F, 40-F) (added v2)"}
+  - {name: source_entity_id, type: string, nullable: true, description: "Filer CIK (added v2)"}
+  - {name: prev_knowledge_date, type: date, nullable: true, description: "Filing date of the comparison filing (added v2)"}
+  - {name: tone_net, type: float64, nullable: true, description: "LM (positive - negative) word share of the current section; MD&A tone for section=mdna (added v2)"}
+  - {name: change_z, type: float64, nullable: true, description: "z-score of cosine_tfidf vs same section & base form filings known in the prior 365 days (PIT); negative = unusually large change (added v2)"}
+  - {name: universe_pct, type: float64, nullable: true, description: "Percentile of cosine_tfidf vs the same PIT reference set (low = big change = bearish; API LazyPricesRow.universe_percentile) (added v2)"}
+  - {name: large_change, type: bool, nullable: true, description: "risk_factors/full with change_z <= -2 or words_added_pct >= 0.35 (added v2)"}
+  - {name: n_words, type: int64, nullable: true, description: "Words in the current section (added v2)"}
+  - {name: n_words_prev, type: int64, nullable: true, description: "Words in the comparison section (added v2)"}

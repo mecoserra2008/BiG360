@@ -1,0 +1,28 @@
+table: sentiment_label_daily
+version: 1
+zone: features
+owner: news-live (app.news_live.compaction)
+description: >
+  Daily roll-up of sentiment_hourly per issuer, sector, country and market theme (roadmap v3 N3), written by the
+  daily finalise (job news_finalise) once the UTC day is complete. Model-based (FinBERT / XLM-R item sentiment).
+  Distinct from sentiment_daily (per security, owner signals-alt, nightly blend of news / GDELT / filings), which
+  stays the per-security system of record.
+storage: {path: features/sentiment_label_daily, format: parquet, partition_by: [year_month], write_mode: append, retention: "forever (small)"}
+primary_key: [date, label_type, label_id]
+pit: {knowledge_column: date, rule: "items first seen on that UTC date"}
+columns:
+  - {name: year_month, type: string, nullable: false, description: "Partition YYYY-MM"}
+  - {name: date, type: date, nullable: false, description: "UTC date"}
+  - {name: label_type, type: enum, nullable: false, values: [all, issuer, sector, country, theme], description: "Label dictionary"}
+  - {name: label_id, type: string, nullable: false, description: "issuer_id | sector code | ISO2 | theme id | '*'"}
+  - {name: n_items, type: int32, nullable: false, description: "Items that day"}
+  - {name: n_scored, type: int32, nullable: false, description: "Scored items"}
+  - {name: sentiment_mean, type: float32, nullable: true, description: "Mean item sentiment (scored-weighted over hours)"}
+  - {name: pos_share, type: float32, nullable: true, description: "Share of scored items > 0.2"}
+  - {name: neg_share, type: float32, nullable: true, description: "Share of scored items < -0.2"}
+  - {name: tier1_n, type: int32, nullable: true, description: "Official-source items"}
+  - {name: art_n, type: int32, nullable: true, description: "Labelled GDELT GKG articles with the label"}
+  - {name: art_tone, type: float32, nullable: true, description: "Mean GDELT tone"}
+  - {name: hours, type: int8, nullable: true, description: "Hours with items"}
+  - {name: sentiment_z, type: float32, nullable: true, description: "sentiment_mean vs the trailing 30 days of the label (min 7 obs)"}
+  - {name: computed_at, type: datetime, nullable: false, description: "Write time UTC"}

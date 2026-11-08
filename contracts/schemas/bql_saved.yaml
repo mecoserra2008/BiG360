@@ -1,0 +1,20 @@
+table: bql_saved
+version: 1
+zone: app_state
+owner: api (app.bql.store via /api/v1/bql/saved)
+description: >
+  Saved BQL-lite queries (roadmap v3 B1). kind = query (a saved console query) or screen (usable as a universe:
+  members('screen:NAME') returns the securities of its result). The query text is re-parsed and validated on every
+  run; nothing in this table is ever interpolated into SQL.
+storage: {path: app_state.duckdb, format: duckdb_table, partition_by: [], write_mode: upsert}
+primary_key: [query_id]
+columns:
+  - {name: query_id, type: string, nullable: false, description: "Q + UTC timestamp + 6 random base32 chars"}
+  - {name: name, type: string, nullable: false, description: "Display name (unique, case-insensitive)"}
+  - {name: description, type: string, nullable: true, description: "Notes"}
+  - {name: query, type: string, nullable: false, description: "BQL text"}
+  - {name: kind, type: enum, nullable: false, values: [query, screen], description: "query | screen (usable in members('screen:NAME'))"}
+  - {name: tags, type: list<string>, nullable: true, description: "Free tags"}
+  - {name: created_at, type: datetime, nullable: false, description: "UTC"}
+  - {name: updated_at, type: datetime, nullable: false, description: "UTC"}
+  - {name: last_run_at, type: datetime, nullable: true, description: "Last run from the console (UTC)"}

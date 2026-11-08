@@ -1,0 +1,20 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <RootNamespace>BiG360.Client</RootNamespace>
+    <AssemblyName>BiG360.Client</AssemblyName>
+    <Description>Typed .NET client for the BiG Equity 360 API (contracts/api.yaml 1.31.0): thin hand-written client for the key endpoints plus SSE live stream; replace or complement with an NSwag / Kiota generated client (see README).</Description>
+    <GenerateDocumentationFile>true</GenerateDocumentationFile>
+    <NoWarn>$(NoWarn);CS1591</NoWarn>
+  </PropertyGroup>
+
+  <ItemGroup Condition="'$(Big360Offline)' != 'true'">
+    <PackageReference Include="Microsoft.Extensions.Http" Version="8.0.1" />
+    <PackageReference Include="Microsoft.Extensions.Http.Resilience" Version="8.10.0" />
+  </ItemGroup>
+
+  <ItemGroup Condition="'$(Big360UseMsal)' == 'true' And '$(Big360Offline)' != 'true'">
+    <PackageReference Include="Microsoft.Identity.Client" Version="4.66.2" />
+  </ItemGroup>
+
+</Project>

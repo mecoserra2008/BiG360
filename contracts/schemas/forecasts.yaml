@@ -1,0 +1,22 @@
+table: forecasts
+version: 1
+zone: scores
+owner: analytics-valuation (app.analytics.forecast)
+description: >
+  Driver-based 3-statement forecast, long format: one row per (issuer, as_of, scenario, fiscal_year, item).
+  Items are canonical item ids (revenue, ebit, net_income, fcf, capex, total_debt, ...) plus driver ids
+  prefixed 'drv_' (drv_revenue_growth, drv_gross_margin, drv_opex_pct, drv_capex_pct, drv_nwc_pct, drv_tax_rate,
+  drv_payout, drv_da_pct). Historical anchor years are included with is_actual=true.
+storage: {path: scores/forecasts, format: parquet, partition_by: [], write_mode: upsert, retention: "forecast job keeps the last as_of of each month + the last 10 days (rewrites with mode overwrite)"}
+primary_key: [issuer_id, as_of_date, scenario, fiscal_year, item_id]
+columns:
+  - {name: issuer_id, type: string, nullable: false, description: "FK issuers"}
+  - {name: as_of_date, type: date, nullable: false, description: "Forecast date (uses fundamentals known at this date)"}
+  - {name: scenario, type: enum, nullable: false, values: [bear, base, bull], description: "Scenario"}
+  - {name: fiscal_year, type: int16, nullable: false, description: "Fiscal year (actuals: last 5y, forecast: next 5y)"}
+  - {name: item_id, type: string, nullable: false, description: "Canonical item id or drv_* driver id"}
+  - {name: value, type: float64, nullable: true, description: "Value (reporting currency for monetary; fraction for drivers)"}
+  - {name: currency, type: string, nullable: true, description: "Reporting currency for monetary items"}
+  - {name: is_actual, type: bool, nullable: false, description: "True for historical anchors"}
+  - {name: computed_at, type: datetime, nullable: false, description: "Write time UTC"}
+  - {name: run_id, type: string, nullable: true, description: "Producing run"}

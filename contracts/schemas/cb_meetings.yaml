@@ -1,0 +1,21 @@
+table: cb_meetings
+version: 1
+zone: scores
+owner: macro-w3 (app.macro.cb.rates, job cb_rates)
+description: >
+  Official monetary-policy meeting (decision) dates per central bank, past and upcoming: FOMC, ECB Governing Council,
+  BoE MPC (calendar + MPC voting history since 1997), BoJ MPM, BoC FAD, RBA Monetary Policy Board, BCB Copom (via
+  app.macro.calendar_sources, W2). History accumulates across runs (previous rows are merged).
+storage: {path: scores/cb_meetings, format: parquet, partition_by: [], write_mode: overwrite}
+primary_key: [bank, meeting_date]
+columns:
+  - {name: bank, type: string, nullable: false, description: "Bank code"}
+  - {name: meeting_date, type: date, nullable: false, description: "Decision day (local date)"}
+  - {name: scheduled_at, type: datetime, nullable: true, description: "Announcement time UTC (typical time when time_known=false)"}
+  - {name: time_known, type: bool, nullable: false, description: "Announcement time published by the source"}
+  - {name: source_id, type: string, nullable: false, description: "Calendar source id"}
+  - {name: name, type: string, nullable: true, description: "Event title"}
+  - {name: url, type: string, nullable: true, description: "Official calendar URL"}
+  - {name: sep, type: bool, nullable: false, description: "FOMC meeting with Summary of Economic Projections"}
+  - {name: is_past, type: bool, nullable: false, description: "meeting_date <= run date"}
+  - {name: computed_at, type: datetime, nullable: false, description: "Write time UTC"}

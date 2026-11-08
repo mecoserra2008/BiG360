@@ -1,0 +1,61 @@
+table: company_debt
+version: 1
+zone: features
+owner: rates-w3 (app.rates.company_debt, job company_debt)
+description: >
+  Issuer debt profile derived from filings, one row per issuer and balance-sheet date (fiscal year ends and quarter
+  ends). Balance / flow inputs from fundamentals_canonical (total_debt, short_term_debt, long_term_debt,
+  cash_and_equivalents, net_debt, ebit, ebitda, interest_expense; TTM flows, FY otherwise); contractual maturities and
+  the fixed / floating split from the XBRL tags of the filings: US GAAP LongTermDebtMaturitiesRepaymentsOfPrincipal-
+  InNextTwelveMonths / InYearTwo..Five / AfterYearFive, LongTermDebtPercentageBearing{Fixed,Variable}InterestAmount,
+  DebtWeightedAverageInterestRate / LongtermDebtWeightedAverageInterestRate (SEC companyfacts, the same filings as
+  fundamentals_raw), IFRS (ESEF) borrowings / financial-liability maturity analyses on MaturityAxis and
+  TypesOfInterestRatesAxis where tagged (fundamentals_raw). Amounts in reporting currency with fx_to_usd.
+  avg_cost_of_debt = interest expense / average total debt (this and the prior year end); interest_coverage =
+  EBIT / interest expense. Refinancing metrics (refi_market_rate, refi_rate_gap_bp, refi_cost_24m) are MODEL-BASED:
+  the latest local 5y government yield plus an ICE BofA IG / HY OAS proxy chosen by interest coverage.
+storage: {path: features/company_debt, format: parquet, partition_by: [fiscal_year], write_mode: overwrite, sort_by: [issuer_id, period_end], compression_level: 9}
+primary_key: [issuer_id, period_end]
+pit: {knowledge_column: knowledge_date, rule: "latest filed version of each period; knowledge_date = the latest knowledge_date of the facts used (a restated period moves forward)"}
+columns:
+  - {name: issuer_id, type: string, nullable: false, description: "FK issuers"}
+  - {name: fiscal_year, type: int16, nullable: false, description: "Partition: year(period_end)"}
+  - {name: period_end, type: date, nullable: false, description: "Balance-sheet date"}
+  - {name: period_kind, type: enum, nullable: false, values: [FY, Q], description: "FY = fiscal year end (FY flows), Q = interim (TTM flows)"}
+  - {name: currency, type: string, nullable: true, description: "Reporting currency"}
+  - {name: fx_to_usd, type: float64, nullable: true, description: "USD per unit of currency at period_end (from fundamentals_canonical)"}
+  - {name: total_debt, type: float64, nullable: true, unit: currency, description: "Short + long-term debt (borrowings; leases excluded)"}
+  - {name: debt_current, type: float64, nullable: true, unit: currency, description: "Short-term debt incl. the current portion of long-term debt"}
+  - {name: debt_noncurrent, type: float64, nullable: true, unit: currency, description: "Long-term debt, non-current"}
+  - {name: cash, type: float64, nullable: true, unit: currency, description: "Cash and equivalents"}
+  - {name: net_debt, type: float64, nullable: true, unit: currency, description: "Net debt (canonical net_debt, else total_debt - cash)"}
+  - {name: ebitda, type: float64, nullable: true, unit: currency, description: "EBITDA (TTM, FY otherwise)"}
+  - {name: ebit, type: float64, nullable: true, unit: currency, description: "EBIT (TTM, FY otherwise)"}
+  - {name: interest_expense, type: float64, nullable: true, unit: currency, description: "Interest expense / finance costs (TTM, FY otherwise)"}
+  - {name: avg_cost_of_debt, type: float64, nullable: true, unit: fraction, description: "Interest expense / average total debt (this and the prior year); 0.045 = 4.5 %"}
+  - {name: interest_coverage, type: float64, nullable: true, unit: x, description: "EBIT / interest expense"}
+  - {name: ebitda_interest_coverage, type: float64, nullable: true, unit: x, description: "EBITDA / interest expense"}
+  - {name: net_debt_to_ebitda, type: float64, nullable: true, unit: x, description: "Net debt / EBITDA (null when EBITDA <= 0)"}
+  - {name: debt_to_ebitda, type: float64, nullable: true, unit: x, description: "Total debt / EBITDA (null when EBITDA <= 0)"}
+  - {name: mat_y1, type: float64, nullable: true, unit: currency, description: "Principal maturing within 12 months"}
+  - {name: mat_y2, type: float64, nullable: true, unit: currency, description: "Maturing in year 2"}
+  - {name: mat_y3, type: float64, nullable: true, unit: currency, description: "Maturing in year 3"}
+  - {name: mat_y4, type: float64, nullable: true, unit: currency, description: "Maturing in year 4"}
+  - {name: mat_y5, type: float64, nullable: true, unit: currency, description: "Maturing in year 5"}
+  - {name: mat_after5, type: float64, nullable: true, unit: currency, description: "Maturing after year 5"}
+  - {name: mat_y2_5, type: float64, nullable: true, unit: currency, description: "Maturing in years 2-5 when only a combined bucket is tagged (IFRS 1-5 y)"}
+  - {name: mat_source, type: enum, nullable: true, values: [us_gaap, ifrs, none], description: "Which tags gave the maturity profile"}
+  - {name: mat_period_end, type: date, nullable: true, description: "Balance date of the maturity profile (latest fiscal year end <= period_end)"}
+  - {name: wam_years, type: float64, nullable: true, unit: years, description: "Weighted-average maturity from the buckets (midpoints 0.5..4.5 y, 7.5 y after year 5)"}
+  - {name: fixed_debt, type: float64, nullable: true, unit: currency, description: "Debt bearing a fixed rate (tagged)"}
+  - {name: floating_debt, type: float64, nullable: true, unit: currency, description: "Debt bearing a variable rate (tagged)"}
+  - {name: floating_share, type: float64, nullable: true, unit: fraction, description: "floating / (fixed + floating)"}
+  - {name: weighted_avg_rate, type: float64, nullable: true, unit: fraction, description: "Reported weighted-average interest rate of debt (fraction)"}
+  - {name: refi_share_24m, type: float64, nullable: true, unit: fraction, description: "Share of the tagged maturities due within 24 months"}
+  - {name: refi_market_rate, type: float64, nullable: true, unit: fraction, description: "MODEL-BASED: latest local 5y government yield + ICE BofA OAS proxy (IG if interest coverage >= 4, else HY)"}
+  - {name: refi_rate_gap_bp, type: float64, nullable: true, unit: bp, description: "MODEL-BASED: refi_market_rate - avg_cost_of_debt, bp"}
+  - {name: refi_cost_24m, type: float64, nullable: true, unit: currency, description: "MODEL-BASED: extra annual interest if the 24-month maturities refinance at refi_market_rate"}
+  - {name: n_bonds_listed, type: int32, nullable: true, description: "Listed, not yet matured bonds of the issuer in bond_reference"}
+  - {name: knowledge_date, type: date, nullable: false, description: "Latest knowledge_date of the facts used"}
+  - {name: knowledge_date_estimated, type: bool, nullable: false, description: "Any input knowledge date estimated"}
+  - {name: computed_at, type: datetime, nullable: false, description: "Write time UTC"}

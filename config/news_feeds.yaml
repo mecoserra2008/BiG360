@@ -1,0 +1,117 @@
+# Curated live news feeds (roadmap v3 N2). Owner: news-live (app.news_live.feeds). Read by the realtime RSS stream
+# (app.realtime.streams.news.RssStream) and GET /api/v1/news/feeds; verified with `python -m app.news_live.verify`
+# (results: data/state/news_feeds_verify.json).
+#
+# Policy: only RSS / Atom endpoints that the publisher offers for consumption. We store the headline, a summary
+# snippet (<= 300 chars), the item URL, publisher, time and language - never article text, never article pages.
+# Polite polling: conditional GET (ETag / If-Modified-Since), every_s 60-120 s (slower for statistics feeds),
+# per-host gap 5 s, exponential back-off on errors, Retry-After honoured.
+#
+# Per feed: id (rss_*), url, publisher, kind (central_bank | statistics | regulator | exchange | publisher | aggregator),
+# tier (1 official, 2 wire / major financial press, 3 other publisher), countries (ISO2 / EA), language, every_s,
+# status (ok | rejected | unverified), reason (why rejected / notes), terms (terms / RSS policy page),
+# robots (verified: allowed | disallowed | no_robots | unknown), rss_intended, title_filter (regex), parser.
+version: 1
+defaults: {every_s: 120, tier: 3, language: en, status: unverified, rss_intended: true}
+
+groups:
+  # ---------------------------------------------------------------- central banks (tier 1)
+  - name: Central banks
+    kind: central_bank
+    tier: 1
+    feeds:
+      - {id: rss_fed, url: "https://www.federalreserve.gov/feeds/press_all.xml", publisher: Federal Reserve, countries: [US], terms: "https://www.federalreserve.gov/disclaimer.htm", status: ok, robots: no_robots}
+      - {id: rss_fed_speeches, url: "https://www.federalreserve.gov/feeds/speeches.xml", publisher: Federal Reserve, countries: [US], terms: "https://www.federalreserve.gov/disclaimer.htm", status: ok, robots: no_robots}
+      - {id: rss_ecb, url: "https://www.ecb.europa.eu/rss/press.html", publisher: ECB, countries: [EA], terms: "https://www.ecb.europa.eu/services/disclaimer/html/index.en.html", status: ok, robots: allowed}
+      - {id: rss_boe, url: "https://www.bankofengland.co.uk/rss/news", publisher: Bank of England, countries: [GB], terms: "https://www.bankofengland.co.uk/legal", status: ok, robots: allowed}
+      - {id: rss_boj, url: "https://www.boj.or.jp/en/rss/whatsnew.xml", publisher: Bank of Japan, countries: [JP], terms: "https://www.boj.or.jp/en/about/services/kiyaku.htm", status: ok, robots: no_robots}
+      - {id: rss_boc, url: "https://www.bankofcanada.ca/content_type/press-releases/feed/", publisher: Bank of Canada, countries: [CA], terms: "https://www.bankofcanada.ca/terms/", status: ok, robots: allowed}
+      - {id: rss_rba, url: "https://www.rba.gov.au/rss/rss-cb-media-releases.xml", publisher: Reserve Bank of Australia, countries: [AU], terms: "https://www.rba.gov.au/copyright/", status: ok, robots: allowed}
+      - {id: rss_snb, url: "https://www.snb.ch/public/en/rss/pressrel", publisher: Swiss National Bank, countries: [CH], terms: "https://www.snb.ch/en/terms-of-use", status: ok, robots: allowed}
+      - {id: rss_riksbank, url: "https://www.riksbank.se/en-gb/rss/press-releases/", publisher: Sveriges Riksbank, countries: [SE], terms: "https://www.riksbank.se/en-gb/about-the-website/", status: ok, robots: allowed}
+      - {id: rss_norgesbank, url: "https://www.norges-bank.no/en/rss-feeds/Press-releases---Norges-Bank/", publisher: Norges Bank, countries: [NO], terms: "https://www.norges-bank.no/en/about/terms-of-use/", status: ok, robots: allowed}
+      - {id: rss_bcb, url: "https://www.bcb.gov.br/api/feed/sitebcb/sitefeeds/notasImprensa", publisher: Banco Central do Brasil, countries: [BR], language: pt, terms: "https://www.bcb.gov.br/acessoinformacao/legado?url=https:%2F%2Fwww.bcb.gov.br%2Fpre%2Fnormativos", status: ok, robots: allowed}
+      - {id: rss_bcb_news, url: "https://www.bcb.gov.br/api/feed/sitebcb/sitefeeds/noticias", publisher: Banco Central do Brasil, countries: [BR], language: pt, terms: "https://www.bcb.gov.br/acessoinformacao/legado?url=https:%2F%2Fwww.bcb.gov.br%2Fpre%2Fnormativos", status: ok, robots: allowed}
+      - {id: rss_bdp, url: "https://www.bportugal.pt/rss/comunicados", publisher: Banco de Portugal, countries: [PT], language: pt, terms: "https://www.bportugal.pt/page/termos-de-utilizacao", status: rejected, reason: "HTTP 403 from the site firewall for any non-browser client (no reachable RSS endpoint)"}
+  # ---------------------------------------------------------------- statistics offices (tier 1, slower)
+  - name: Statistics offices
+    kind: statistics
+    tier: 1
+    every_s: 300
+    feeds:
+      - {id: rss_bls_cpi, url: "https://www.bls.gov/feed/cpi.rss", publisher: BLS, countries: [US], terms: "https://www.bls.gov/bls/linksite.htm", status: ok, robots: allowed}
+      - {id: rss_bls_empsit, url: "https://www.bls.gov/feed/empsit.rss", publisher: BLS, countries: [US], terms: "https://www.bls.gov/bls/linksite.htm", status: ok, robots: allowed}
+      - {id: rss_bls_ppi, url: "https://www.bls.gov/feed/ppi.rss", publisher: BLS, countries: [US], terms: "https://www.bls.gov/bls/linksite.htm", status: ok, robots: allowed}
+      - {id: rss_bls_jolts, url: "https://www.bls.gov/feed/jolts.rss", publisher: BLS, countries: [US], every_s: 600, terms: "https://www.bls.gov/bls/linksite.htm", status: ok, robots: allowed}
+      - {id: rss_bls_eci, url: "https://www.bls.gov/feed/eci.rss", publisher: BLS, countries: [US], every_s: 600, terms: "https://www.bls.gov/bls/linksite.htm", status: ok, robots: allowed}
+      - {id: rss_bea, url: "https://apps.bea.gov/rss/rss.xml", publisher: BEA, countries: [US], terms: "https://www.bea.gov/help/guidelines-for-citing-bea", status: rejected, reason: "robots.txt (apps.bea.gov) disallows /rss/ for all user agents; BEA releases still arrive via the macro release watcher"}
+      - {id: rss_eurostat, url: "https://ec.europa.eu/eurostat/api/dissemination/catalogue/rss/en/statistics-update.rss", publisher: Eurostat, countries: [EA], parser: eurostat, terms: "https://ec.europa.eu/eurostat/about-us/policies/copyright", status: ok, robots: allowed}
+      - {id: rss_ons, url: "https://www.ons.gov.uk/releasecalendar?rss", publisher: ONS, countries: [GB], terms: "https://www.ons.gov.uk/methodology/geography/licences", status: ok, robots: no_robots}
+      - {id: rss_statcan, url: "https://www150.statcan.gc.ca/n1/rss/dai-quo/0-eng.atom", publisher: Statistics Canada, countries: [CA], terms: "https://www.statcan.gc.ca/en/reference/licence", status: ok, robots: allowed}
+      - {id: rss_destatis, url: "https://www.destatis.de/SiteGlobals/Functions/RSSFeed/EN/RSSNewsfeed/RSSNewsfeed.xml", publisher: Destatis, countries: [DE], terms: "https://www.destatis.de/EN/Service/Legal-Notice/_node.html", status: rejected, reason: "feed URL 404 and robots.txt disallows /SiteGlobals/ (no allowed RSS endpoint found)"}
+      - {id: rss_insee, url: "https://www.insee.fr/en/rss/actualites", publisher: INSEE, countries: [FR], terms: "https://www.insee.fr/en/information/2381863", status: rejected, reason: "HTTP 500 on every RSS endpoint tried (2026-10-22); re-verify later"}
+      - {id: rss_ine_pt, url: "https://www.ine.pt/xportal/xmain?xpid=INE&xpgid=ine_rss_destaques", publisher: INE Portugal, countries: [PT], language: pt, terms: "https://www.ine.pt/xportal/xmain?xpid=INE&xpgid=ine_termos", status: rejected, reason: "site in maintenance / RSS returns an HTML page (0 entries); re-verify later"}
+  # ---------------------------------------------------------------- regulators (tier 1)
+  - name: Regulators
+    kind: regulator
+    tier: 1
+    feeds:
+      - {id: rss_sec, url: "https://www.sec.gov/news/pressreleases.rss", publisher: SEC, countries: [US], terms: "https://www.sec.gov/privacy#dissemination", status: ok, robots: allowed}
+      - {id: rss_cftc, url: "https://www.cftc.gov/RSS/RSSGP/rssgp.xml", publisher: CFTC, countries: [US], terms: "https://www.cftc.gov/Disclaimers/index.htm", status: ok, robots: allowed}
+      - {id: rss_esma, url: "https://www.esma.europa.eu/rss.xml", publisher: ESMA, countries: [EA], terms: "https://www.esma.europa.eu/legal-notice", status: ok, robots: allowed}
+      - {id: rss_fca, url: "https://www.fca.org.uk/news/rss.xml", publisher: FCA, countries: [GB], terms: "https://www.fca.org.uk/legal", status: ok, robots: allowed}
+      - {id: rss_cmvm, url: "https://www.cmvm.pt/pt/Comunicados/Comunicados/Pages/rss.aspx", publisher: CMVM, countries: [PT], language: pt, terms: "https://www.cmvm.pt/pt/Pages/termos.aspx", status: rejected, reason: "no RSS endpoint on the current CMVM site (old Pages/rss.aspx is 404)"}
+      - {id: rss_eba, url: "https://www.eba.europa.eu/rss.xml", publisher: EBA, countries: [EA], terms: "https://www.eba.europa.eu/legal-notice", status: ok, robots: allowed}
+  # ---------------------------------------------------------------- exchanges (tier 1)
+  - name: Exchanges
+    kind: exchange
+    tier: 1
+    feeds:
+      - {id: rss_nasdaq_halts, url: "https://www.nasdaqtrader.com/rss.aspx?feed=tradehalts", publisher: Nasdaq Trader (halts), countries: [US], every_s: 60, terms: "https://www.nasdaqtrader.com/Trader.aspx?id=TermsofUse", status: rejected, reason: "trade-halt records carry no item link (not a headline feed)"}
+      - {id: rss_hkex_news, url: "https://www.hkex.com.hk/Services/RSS-Feeds/News-Releases?sc_lang=en", publisher: HKEX, countries: [HK], terms: "https://www.hkex.com.hk/Global/Exchange/Terms-of-Use?sc_lang=en", status: ok, robots: allowed}
+      - {id: rss_jpx_news, url: "https://www.jpx.co.jp/english/rss/markets_news.xml", publisher: JPX, countries: [JP], terms: "https://www.jpx.co.jp/english/terms-of-use/index.html", status: ok, robots: allowed}
+  # ---------------------------------------------------------------- wires / major financial press (tier 2)
+  - name: Major financial press
+    kind: publisher
+    tier: 2
+    every_s: 90
+    feeds:
+      - {id: rss_reuters_business, url: "https://feeds.reuters.com/reuters/businessNews", publisher: Reuters, countries: [], terms: "https://www.reuters.com/info-pages/terms-of-use/", status: rejected, reason: "Reuters discontinued its public RSS feeds in 2020 (feeds.reuters.com no longer resolves)"}
+      - {id: rss_ap_business, url: "https://apnews.com/hub/business.rss", publisher: AP, countries: [], terms: "https://apnews.com/termsofservice", status: rejected, reason: "AP offers no public RSS (HTTP 403); licensed feeds only"}
+      - {id: rss_cnbc_top, url: "https://search.cnbc.com/rs/search/combinedcms/view.xml?partnerId=wrss01&id=100003114", publisher: CNBC, countries: [US], terms: "https://www.cnbc.com/rss-feeds/", status: rejected, reason: "robots.txt of search.cnbc.com disallows /rs/ for all user agents (we honour robots even for RSS)"}
+      - {id: rss_cnbc_markets, url: "https://search.cnbc.com/rs/search/combinedcms/view.xml?partnerId=wrss01&id=15839069", publisher: CNBC, countries: [US], terms: "https://www.cnbc.com/rss-feeds/", status: rejected, reason: "robots.txt of search.cnbc.com disallows /rs/ for all user agents (we honour robots even for RSS)"}
+      - {id: rss_cnbc_economy, url: "https://search.cnbc.com/rs/search/combinedcms/view.xml?partnerId=wrss01&id=20910258", publisher: CNBC, countries: [US], terms: "https://www.cnbc.com/rss-feeds/", status: rejected, reason: "robots.txt of search.cnbc.com disallows /rs/ for all user agents (we honour robots even for RSS)"}
+      - {id: rss_mw_top, url: "https://feeds.content.dowjones.io/public/rss/mw_topstories", publisher: MarketWatch, countries: [US], terms: "https://www.marketwatch.com/rss", status: ok, robots: no_robots}
+      - {id: rss_mw_realtime, url: "https://feeds.content.dowjones.io/public/rss/mw_realtimeheadlines", publisher: MarketWatch, countries: [US], terms: "https://www.marketwatch.com/rss", status: rejected, robots: no_robots, reason: "pubDate values are stale (newest > 1 year old although the items are current): unusable for timing and latency"}
+      - {id: rss_wsj_markets, url: "https://feeds.content.dowjones.io/public/rss/RSSMarketsMain", publisher: WSJ, countries: [US], terms: "https://www.wsj.com/news/rss-news-and-feeds", status: ok, robots: no_robots}
+      - {id: rss_wsj_world, url: "https://feeds.content.dowjones.io/public/rss/RSSWorldNews", publisher: WSJ, countries: [], terms: "https://www.wsj.com/news/rss-news-and-feeds", status: ok, robots: no_robots}
+      - {id: rss_ft_home, url: "https://www.ft.com/rss/home", publisher: Financial Times, countries: [], terms: "https://help.ft.com/legal-privacy/terms-and-conditions/", status: ok, robots: allowed}
+      - {id: rss_ft_markets, url: "https://www.ft.com/markets?format=rss", publisher: Financial Times, countries: [], terms: "https://help.ft.com/legal-privacy/terms-and-conditions/", status: ok, robots: allowed}
+      - {id: rss_bloomberg_markets, url: "https://feeds.bloomberg.com/markets/news.rss", publisher: Bloomberg, countries: [], terms: "https://www.bloomberg.com/notices/tos/", status: ok, robots: no_robots}
+      - {id: rss_nikkei_asia, url: "https://asia.nikkei.com/rss/feed/nar", publisher: Nikkei Asia, countries: [JP], terms: "https://asia.nikkei.com/Terms-of-Use", status: ok, robots: allowed}
+      - {id: rss_scmp_business, url: "https://www.scmp.com/rss/92/feed", publisher: SCMP, countries: [HK, CN], terms: "https://www.scmp.com/rss", status: ok, robots: allowed}
+      - {id: rss_scmp_economy, url: "https://www.scmp.com/rss/12/feed", publisher: SCMP, countries: [HK, CN], terms: "https://www.scmp.com/rss", status: ok, robots: allowed}
+  # ---------------------------------------------------------------- European / LatAm business press (tier 2, native languages)
+  - name: European and LatAm business press
+    kind: publisher
+    tier: 2
+    every_s: 120
+    feeds:
+      - {id: rss_lesechos_une, url: "https://syndication.lesechos.fr/rss/rss_une.xml", publisher: Les Echos, countries: [FR], language: fr, terms: "https://www.lesechos.fr/conditions-generales-dutilisation", status: rejected, reason: "syndication.lesechos.fr answers 503 (backend fetch failed) and www.lesechos.fr 403 to non-browser clients; re-verify later"}
+      - {id: rss_lesechos_marches, url: "https://syndication.lesechos.fr/rss/rss_finance-marches.xml", publisher: Les Echos, countries: [FR], language: fr, terms: "https://www.lesechos.fr/conditions-generales-dutilisation", status: rejected, reason: "syndication.lesechos.fr answers 503 (backend fetch failed) and www.lesechos.fr 403 to non-browser clients; re-verify later"}
+      - {id: rss_handelsblatt_top, url: "https://www.handelsblatt.com/contentexport/feed/top-themen", publisher: Handelsblatt, countries: [DE], language: de, terms: "https://www.handelsblatt.com/impressum/nutzungshinweise/", status: ok, robots: allowed}
+      - {id: rss_handelsblatt_finanzen, url: "https://www.handelsblatt.com/contentexport/feed/finanzen", publisher: Handelsblatt, countries: [DE], language: de, terms: "https://www.handelsblatt.com/impressum/nutzungshinweise/", status: ok, robots: allowed}
+      - {id: rss_expansion_portada, url: "https://e00-expansion.uecdn.es/rss/portada.xml", publisher: Expansion, countries: [ES], language: es, terms: "https://www.expansion.com/aviso-legal.html", status: ok, robots: allowed}
+      - {id: rss_expansion_mercados, url: "https://e00-expansion.uecdn.es/rss/mercados.xml", publisher: Expansion, countries: [ES], language: es, terms: "https://www.expansion.com/aviso-legal.html", status: ok, robots: allowed}
+      - {id: rss_valor, url: "https://pox.globo.com/rss/valor/", publisher: Valor Economico, countries: [BR], language: pt, terms: "https://valor.globo.com/termos-de-uso/", status: ok, robots: no_robots}
+      - {id: rss_jornaldenegocios, url: "https://www.jornaldenegocios.pt/rss", publisher: Jornal de Negocios, countries: [PT], language: pt, terms: "https://www.jornaldenegocios.pt/termos-e-condicoes", status: ok, robots: allowed}
+      - {id: rss_eco, url: "https://eco.sapo.pt/feed/", publisher: ECO, countries: [PT], language: pt, terms: "https://eco.sapo.pt/termos-e-condicoes/", status: ok, robots: allowed}
+  # ---------------------------------------------------------------- other publishers (tier 3)
+  - name: Other publishers
+    kind: publisher
+    tier: 3
+    every_s: 120
+    feeds:
+      - {id: rss_yahoo_finance, url: "https://finance.yahoo.com/news/rssindex", publisher: Yahoo Finance, countries: [US], terms: "https://legal.yahoo.com/us/en/yahoo/terms/otos/index.html", status: rejected, reason: "rssindex endpoint retired (HTTP 404); Yahoo terms restrict automated use"}
+      - {id: rss_guardian_business, url: "https://www.theguardian.com/uk/business/rss", publisher: The Guardian, countries: [GB], terms: "https://www.theguardian.com/help/terms-of-service", status: ok, robots: allowed}
+      - {id: rss_bbc_business, url: "https://feeds.bbci.co.uk/news/business/rss.xml", publisher: BBC, countries: [GB], terms: "https://www.bbc.co.uk/usingthebbc/terms", status: ok, robots: allowed}

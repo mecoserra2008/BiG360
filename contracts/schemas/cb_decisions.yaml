@@ -1,0 +1,27 @@
+table: cb_decisions
+version: 1
+zone: scores
+owner: macro-w3 (app.macro.cb.rates, job cb_rates)
+description: >
+  Policy-rate decision history per central bank (method decisions_v1): change points of the official daily policy
+  rate attributed to official meeting dates (change effective 0..10 days after a meeting), inter-meeting moves
+  (scheduled=false), effective-date-dated moves before the machine-readable calendar starts (scheduled null), and hold
+  decisions at past official meetings. Vote splits only where an official machine-readable source exists (BoE MPC
+  voting history). Overwritten nightly.
+storage: {path: scores/cb_decisions, format: parquet, partition_by: [], write_mode: overwrite}
+primary_key: [bank, decision_date]
+columns:
+  - {name: bank, type: string, nullable: false, description: "Bank code"}
+  - {name: decision_date, type: date, nullable: false, description: "Official meeting / announcement date (or effective date when date_basis=effective_date)"}
+  - {name: effective_date, type: date, nullable: true, description: "Date the new rate took effect (null for holds)"}
+  - {name: rate_before, type: float64, nullable: true, unit: percent, description: "Rate before"}
+  - {name: rate_after, type: float64, nullable: true, unit: percent, description: "Rate after"}
+  - {name: change_bp, type: float64, nullable: false, unit: bp, description: "Change in basis points (0 = hold)"}
+  - {name: action, type: enum, nullable: false, values: [hike, cut, hold], description: "Direction"}
+  - {name: scheduled, type: bool, nullable: true, description: "true = at an official scheduled meeting; false = inter-meeting move; null = calendar not available for that date"}
+  - {name: date_basis, type: enum, nullable: false, values: [official_meeting, effective_date], description: "How decision_date was dated"}
+  - {name: vote, type: string, nullable: true, description: "Vote split text, e.g. '6-3 (3 for higher)' (BoE only)"}
+  - {name: vote_detail, type: json, nullable: true, description: "{member: rate voted for %} (BoE only)"}
+  - {name: vote_source, type: string, nullable: true, description: "Official vote source"}
+  - {name: method_version, type: string, nullable: false, description: "decisions_v1"}
+  - {name: computed_at, type: datetime, nullable: false, description: "Write time UTC"}

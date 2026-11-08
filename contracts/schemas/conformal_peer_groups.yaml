@@ -1,0 +1,27 @@
+table: conformal_peer_groups
+version: 1
+zone: features
+owner: conformal (app.conformal.peer_groups)
+description: >
+  Application B peer-group definitions (versioned): ~150-300 groups of N = 20-50 single-calendar members built from
+  industry (subsector x region bloc, most liquid names), supply-chain links (sc_edges, disclosed) and statistical
+  neighbours (company_neighbours). The group graph (nbr_ids / nbr_w) feeds the GCN-GRU filter. New versions are built
+  by the weekly fit job when none exists, when forced, or when the current version is older than 90 days.
+storage: {path: features/conformal_peer_groups, format: parquet, partition_by: [], write_mode: upsert}
+primary_key: [version, group_id, security_id]
+columns:
+  - {name: version, type: string, nullable: false, description: "Group-definition version (YYYYMMDD of the build)"}
+  - {name: group_id, type: string, nullable: false, description: "Stable id within a version, e.g. ind:US:semiconductors or sc:US:<hub security_id>"}
+  - {name: security_id, type: string, nullable: false, description: "Member security"}
+  - {name: issuer_id, type: string, nullable: true, description: "Member issuer"}
+  - {name: region_bloc, type: string, nullable: false, description: "Single trading-calendar bloc (listing region)"}
+  - {name: group_kind, type: enum, nullable: false, values: [industry, supply_chain], description: "industry = same subsector; supply_chain = hub + disclosed customers / suppliers + statistical neighbours"}
+  - {name: label, type: string, nullable: false, description: "Human label"}
+  - {name: sector_id, type: string, nullable: true, description: "Member sector"}
+  - {name: subsector_id, type: string, nullable: true, description: "Member subsector"}
+  - {name: member_rank, type: int16, nullable: false, description: "Rank by 60-session median USD dollar volume (1 = most liquid)"}
+  - {name: n_members, type: int16, nullable: false, description: "Members in the group"}
+  - {name: built_as_of, type: date, nullable: false, description: "Data date of the build"}
+  - {name: nbr_ids, type: list<string>, nullable: true, description: "Adjacent members in the group graph (supply chain, statistical neighbours, same subsector)"}
+  - {name: nbr_w, type: list<float64>, nullable: true, description: "Edge weights aligned with nbr_ids"}
+  - {name: computed_at, type: datetime, nullable: false, description: "Write time UTC"}

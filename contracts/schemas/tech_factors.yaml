@@ -1,0 +1,46 @@
+table: tech_factors
+version: 1
+zone: features
+owner: technicals (app.techv3.job:run_factors, nightly tech_factors)
+description: >
+  Technicals v3 #1 evidence-based technical factors per security and session, point-in-time (bars <= the date):
+  52-week-high proximity (George & Hwang 2004), 12-1 momentum (Jegadeesh & Titman 1993), residual momentum (36-month
+  OLS on region market + sector, months t-12..t-2 residuals / their std; Blitz, Huij & Martens 2011), 1-month reversal,
+  MAX (largest daily return of the last 21 sessions; Bali, Cakici & Whitelaw 2011), idiosyncratic volatility (21-session
+  residual std on market + sector; Ang et al. 2006), industry momentum (region x sector 126-session equal-weight
+  return; Moskowitz & Grinblatt 1999). Raw values plus percentiles 0..100 within region x sector x date among the LIQUID
+  names (20-day ADV >= $1M, close >= $1; region x date for industry momentum and for sectors with < 10 liquid names);
+  the composite = equal-weight mean of the sign-aligned percentiles of the factors that PASSED the gate
+  (docs/TECHNICALS_V3_VALIDATION.md; empty when none / composite gate failed). Rows: equities with 20-day ADV >= $200k
+  (or mvp members). History 2004 -> (research build seed), then nightly. Compact float32 storage.
+storage: {path: features/tech_factors, format: parquet, partition_by: [region, year], write_mode: upsert, sort_by: [security_id, as_of_date], compression_level: 9}
+primary_key: [as_of_date, security_id]
+pit: {knowledge_column: as_of_date, rule: "every value uses daily bars dated <= as_of_date (prices_daily); percentiles use the same date's cross-section"}
+columns:
+  - {name: as_of_date, type: date, nullable: false, description: "Session (region calendar)"}
+  - {name: security_id, type: string, nullable: false, description: "FK securities_master"}
+  - {name: region, type: string, nullable: false, description: "Partition: prices_daily region"}
+  - {name: year, type: int16, nullable: false, description: "Partition: year(as_of_date)"}
+  - {name: sector_id, type: string, nullable: true, description: "Sector of the percentile cross-section ('NA' unclassified)"}
+  - {name: hi52, type: float32, nullable: true, description: "close / max(close, last 252 sessions) (sign +)"}
+  - {name: mom, type: float32, nullable: true, description: "log C[t-21] - log C[t-252] (sign +)"}
+  - {name: rmom, type: float32, nullable: true, description: "Residual momentum: sum of residuals t-12..t-2 / their std (sign +)"}
+  - {name: strev, type: float32, nullable: true, description: "1-month log return (sign -: reversal)"}
+  - {name: maxret, type: float32, nullable: true, description: "Largest daily simple return over the last 21 sessions (sign -)"}
+  - {name: ivol, type: float32, nullable: true, description: "Annualised residual std of a 21-session daily OLS on market + sector (sign -)"}
+  - {name: indmom, type: float32, nullable: true, description: "Region x sector equal-weight log return over 126 sessions (sign +)"}
+  - {name: pct_hi52, type: float32, nullable: true, description: "Percentile 0..100 of hi52 (higher raw value -> higher percentile)"}
+  - {name: pct_mom, type: float32, nullable: true, description: "Percentile 0..100 of mom"}
+  - {name: pct_rmom, type: float32, nullable: true, description: "Percentile 0..100 of rmom"}
+  - {name: pct_strev, type: float32, nullable: true, description: "Percentile 0..100 of strev"}
+  - {name: pct_maxret, type: float32, nullable: true, description: "Percentile 0..100 of maxret"}
+  - {name: pct_ivol, type: float32, nullable: true, description: "Percentile 0..100 of ivol"}
+  - {name: pct_indmom, type: float32, nullable: true, description: "Percentile 0..100 of indmom within the region"}
+  - {name: composite, type: float32, nullable: true, description: "Equal-weight mean of the sign-aligned percentiles of the gate-passing factors (0..100; null when the composite failed the gate or < half the members exist)"}
+  - {name: composite_pct, type: float32, nullable: true, description: "Percentile 0..100 of composite within region x sector x date"}
+  - {name: adv20_usd, type: float32, nullable: true, description: "20-session average dollar volume (USD)"}
+  - {name: liquid, type: bool, nullable: false, description: "20-day ADV >= $1M and close >= $1 (the validated universe)"}
+  - {name: size_bucket, type: enum, nullable: true, values: [large, mid, small, micro], description: "60-day dollar volume bucket (market cap is not PIT outside mvp): large >= $50M, mid $10-50M, small < $10M, micro = below the liquidity floor"}
+  - {name: n_peers, type: int32, nullable: true, description: "Liquid names in the percentile cross-section"}
+  - {name: pct_scope, type: enum, nullable: true, values: [sector, region], description: "Cross-section of the percentiles"}
+  - {name: computed_at, type: datetime, nullable: false, description: "Write time UTC"}

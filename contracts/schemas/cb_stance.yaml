@@ -1,0 +1,34 @@
+table: cb_stance
+version: 1
+zone: scores
+owner: macro-w3 (app.macro.cb.stance, job cb_stance)
+description: >
+  Monthly policy stance per central bank (method stance_v1): real policy rate vs headline/core inflation (official
+  statistics) and vs expected inflation (US Cleveland Fed model; others our AR(1) - model-based), output gap (US CBO,
+  others OECD Economic Outlook), official r* (NY Fed LW for US, HLW for Canada/Euro Area) and MODEL-BASED Taylor-rule
+  estimates (1993 rule with r*=2%, with official r*, balanced-approach gap weight). Overwritten nightly.
+storage: {path: scores/cb_stance, format: parquet, partition_by: [], write_mode: overwrite}
+primary_key: [bank, date]
+columns:
+  - {name: bank, type: string, nullable: false, description: "Bank code"}
+  - {name: date, type: date, nullable: false, description: "Month (month start)"}
+  - {name: policy_rate, type: float64, nullable: false, unit: percent, description: "Policy rate at month end"}
+  - {name: cpi_yoy, type: float64, nullable: true, unit: percent, description: "Headline inflation y/y"}
+  - {name: core_yoy, type: float64, nullable: true, unit: percent, description: "Core inflation y/y"}
+  - {name: infl_taylor, type: float64, nullable: true, unit: percent, description: "Inflation used in the Taylor rules"}
+  - {name: infl_taylor_measure, type: string, nullable: true, description: "core PCE y/y (US) / core CPI y/y / headline CPI y/y"}
+  - {name: expected_infl, type: float64, nullable: true, unit: percent, description: "1-year-ahead expected inflation (model-based)"}
+  - {name: expected_infl_source, type: string, nullable: true, description: "Source / model of expected_infl"}
+  - {name: real_rate_cpi, type: float64, nullable: true, unit: percent, description: "policy_rate - cpi_yoy"}
+  - {name: real_rate_core, type: float64, nullable: true, unit: percent, description: "policy_rate - core_yoy"}
+  - {name: real_rate_expected, type: float64, nullable: true, unit: percent, description: "policy_rate - expected_infl (ex-ante, model-based)"}
+  - {name: output_gap, type: float64, nullable: true, unit: percent, description: "Output gap, % of potential"}
+  - {name: output_gap_source, type: string, nullable: true, description: "CBO / OECD EO"}
+  - {name: r_star, type: float64, nullable: true, unit: percent, description: "Official natural real rate estimate (NY Fed LW/HLW)"}
+  - {name: r_star_source, type: string, nullable: true, description: "nyfed:LW one-sided / nyfed:HLW"}
+  - {name: inflation_target, type: float64, nullable: true, unit: percent, description: "Official inflation target (midpoint)"}
+  - {name: taylor_1993, type: float64, nullable: true, unit: percent, description: "MODEL-BASED: 2 + pi + 0.5(pi - target) + 0.5 gap"}
+  - {name: taylor_rstar, type: float64, nullable: true, unit: percent, description: "MODEL-BASED: r* + pi + 0.5(pi - target) + 0.5 gap"}
+  - {name: taylor_balanced, type: float64, nullable: true, unit: percent, description: "MODEL-BASED: (r* or 2) + pi + 0.5(pi - target) + 1.0 gap"}
+  - {name: method_version, type: string, nullable: false, description: "stance_v1"}
+  - {name: computed_at, type: datetime, nullable: false, description: "Write time UTC"}

@@ -1,0 +1,13 @@
+Description:           Master Index of EDGAR Dissemination Feed
+Last Data Received:    September 30, 2026
+Comments:              webmaster@sec.gov
+
+CIK|Company Name|Form Type|Date Filed|Filename
+--------------------------------------------------------------------------------
+320193|Apple Inc.|10-K|2025-10-31|edgar/data/320193/0000320193-25-000079.txt
+320193|Apple Inc.|10-Q|2026-08-01|edgar/data/320193/0000320193-26-000010.txt
+1045810|NVIDIA CORP|4|2026-08-05|edgar/data/1045810/0001045810-26-000101.txt
+1000001|SOME FUND INC|N-CSR|2026-07-01|edgar/data/1000001/0001000001-26-000001.txt
+1000002|NEWCO INC|S-1|2026-09-01|edgar/data/1000002/0001000002-26-000002.txt
+1000003|FPI PLC|20-F|2026-04-15|edgar/data/1000003/0001000003-26-000003.txt
+1000004|OLDCO INC|10-K|2023-03-01|edgar/data/1000004/0001000004-23-000004.txt

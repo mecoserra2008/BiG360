@@ -1,0 +1,113 @@
+{
+"content": [
+{
+"docType": "XBRL",
+"id": 203139,
+"idEmisora": 1680,
+"idDocumento": 203139,
+"clave": "GFNORTE",
+"fechaPublicacion": 1777471339000,
+"fileName": null,
+"archivosXbrl": [
+{
+"url": "/storage/data-rs-cnbv/ReporteAnual_GFNORTE_2025_113141-260429-d7823a65_1777514976145.pdf",
+"extension": "PDF"
+},
+{
+"url": "/storage/data-rs-cnbv/ReporteAnual_GFNORTE_2025_113141-260429-d7823a65.xbrl",
+"extension": "XBRL"
+}
+],
+"nombreArchivo": "/storage/data-rs-cnbv/ReporteAnual_GFNORTE_2025_113141-260429-d7823a65.xbrl",
+"tipoDocumento": "Reporte anual 2025"
+},
+{
+"docType": "XBRL",
+"id": 200632,
+"idEmisora": 1680,
+"idDocumento": 200632,
+"clave": "GFNORTE",
+"fechaPublicacion": 1755252568000,
+"fileName": null,
+"archivosXbrl": [
+{
+"url": "/storage/data-rs-cnbv/ReporteAnual_GFNORTE_2024_108605-250815-d0a816ba_1755296088726.pdf",
+"extension": "PDF"
+},
+{
+"url": "/storage/data-rs-cnbv/ReporteAnual_GFNORTE_2024_108605-250815-d0a816ba.xbrl",
+"extension": "XBRL"
+}
+],
+"nombreArchivo": "/storage/data-rs-cnbv/ReporteAnual_GFNORTE_2024_108605-250815-d0a816ba.xbrl",
+"tipoDocumento": "Reporte anual 2024"
+},
+{
+"docType": "XBRL",
+"id": 194889,
+"idEmisora": 1680,
+"idDocumento": 194889,
+"clave": "GFNORTE",
+"fechaPublicacion": 1714467195000,
+"fileName": null,
+"archivosXbrl": [
+{
+"url": "/storage/data-rs-cnbv/ReporteAnual_GFNORTE_2023_76266-240430-6caa612d_1714510705105.pdf",
+"extension": "PDF"
+},
+{
+"url": "/storage/data-rs-cnbv/ReporteAnual_GFNORTE_2023_76266-240430-6caa612d.xbrl",
+"extension": "XBRL"
+}
+],
+"nombreArchivo": "/storage/data-rs-cnbv/ReporteAnual_GFNORTE_2023_76266-240430-6caa612d.xbrl",
+"tipoDocumento": "Reporte anual 2023"
+},
+{
+"docType": "XBRL",
+"id": 19335,
+"idEmisora": 1680,
+"idDocumento": 19335,
+"clave": "GFNORTE",
+"fechaPublicacion": 1557506220000,
+"fileName": null,
+"archivosXbrl": [
+{
+"url": "/storage/data-maintenance/bivaRA18_1696.pdf",
+"extension": "PDF"
+},
+{
+"url": "/storage/data-maintenance/bivaRA18_1696.xbrl",
+"extension": "XBRL"
+}
+],
+"nombreArchivo": "/visorxbrl/index.html?docins=/storage/data-maintenance/bivaRA18_1696.json&documentPath=/storage/data-maintenance/bivaRA18_1696.pdf&documentPathHtml=/storage/data-maintenance/bivaRA18_1696.html&documentPathWord=/storage/data-maintenance/bivaRA18_1696.docx&documentPathExcel=/storage/data-maintenance/bivaRA18_1696.xlsx&documentPathXbrl=/storage/data-maintenance/bivaRA18_1696.xbrl",
+"tipoDocumento": "Reporte anual 2018"
+},
+{
+"docType": "XBRL",
+"id": 19622,
+"idEmisora": 1680,
+"idDocumento": 19622,
+"clave": "GFNORTE",
+"fechaPublicacion": 1544529060000,
+"fileName": null,
+"archivosXbrl": [
+{
+"url": "/storage/data-maintenance/bivafr18_564.pdf",
+"extension": "PDF"
+},
+{
+"url": "/storage/data-maintenance/bivafr18_564.xbrl",
+"extension": "XBRL"
+}
+],
+"nombreArchivo": "/visorxbrl/index.html?docins=/storage/data-maintenance/bivafr18_564.json&documentPath=/storage/data-maintenance/bivafr18_564.pdf&documentPathHtml=/storage/data-maintenance/bivafr18_564.html&documentPathWord=/storage/data-maintenance/bivafr18_564.docx&documentPathExcel=/storage/data-maintenance/bivafr18_564.xlsx&documentPathXbrl=/storage/data-maintenance/bivafr18_564.xbrl",
+"tipoDocumento": "Reporte anual 2017"
+}
+],
+"number": 0,
+"size": 100,
+"totalElements": 5,
+"totalPages": 1
+}

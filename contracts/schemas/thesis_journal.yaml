@@ -1,0 +1,20 @@
+table: thesis_journal
+version: 1
+zone: app_state
+owner: theses (app.theses.store via app.api.routers.theses; alert / status_change entries also by job thesis_eval)
+description: >
+  Dated journal of a thesis (Markdown notes). links = JSON array of evidence references [{kind: filing|story|event|alert|
+  earnings|study|backtest|url, ref, label, url}] (filing_id, story_id, alert event_id, ...). System entries (kind
+  status_change / review / post_mortem) are written when the thesis moves on the board, a review is completed or it is
+  closed.
+storage: {path: app_state.duckdb, format: duckdb_table, partition_by: [], write_mode: upsert}
+primary_key: [entry_id]
+columns:
+  - {name: entry_id, type: string, nullable: false, description: "TJ + UTC timestamp + 6 random base32 chars"}
+  - {name: thesis_id, type: string, nullable: false, description: "FK theses"}
+  - {name: entry_date, type: date, nullable: false, description: "Date the note refers to (timeline position)"}
+  - {name: kind, type: enum, nullable: false, values: [note, catalyst, review, status_change, alert, post_mortem], description: "Entry type"}
+  - {name: body_md, type: string, nullable: false, description: "Markdown"}
+  - {name: links, type: json, nullable: true, description: "Evidence links (see description)"}
+  - {name: created_at, type: datetime, nullable: false, description: "UTC"}
+  - {name: updated_at, type: datetime, nullable: false, description: "UTC"}

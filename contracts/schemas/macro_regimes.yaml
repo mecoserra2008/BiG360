@@ -1,0 +1,21 @@
+table: macro_regimes
+version: 1
+zone: scores
+owner: ml (app.ml.macro_regime)
+description: >
+  HMM macro regime (Gaussian HMM, 4 states, on monthly-resampled core series: growth momentum, inflation momentum,
+  curve slope, credit spread, equity vol, USD). Filtered (not smoothed) probabilities for PIT safety.
+  Labels assigned post-fit by state means: expansion, slowdown, contraction, recovery (+ 'stagflation' if detected).
+storage: {path: scores/macro_regimes, format: parquet, partition_by: [model_id], write_mode: upsert}
+primary_key: [model_id, date]
+columns:
+  - {name: model_id, type: string, nullable: false, description: "e.g. hmm4_us_v1, hmm4_global_v1"}
+  - {name: date, type: date, nullable: false, description: "Date (month-end for history; daily latest nowcast)"}
+  - {name: region_scope, type: enum, nullable: false, values: [US, GLOBAL, EU, JP, CN, KR], description: "Macro scope (KR added O2.2c)"}
+  - {name: regime_id, type: int8, nullable: false, description: "Most probable state index"}
+  - {name: regime_label, type: enum, nullable: false, values: [expansion, slowdown, contraction, recovery, stagflation], description: "Label"}
+  - {name: probabilities, type: list<float64>, nullable: false, description: "Filtered P(state) indexed by regime_id"}
+  - {name: state_labels, type: list<string>, nullable: false, description: "Label for each state index"}
+  - {name: inputs_snapshot, type: json, nullable: true, description: "Standardized input values at date"}
+  - {name: computed_at, type: datetime, nullable: false, description: "Write time UTC"}
+  - {name: run_id, type: string, nullable: true, description: "Producing run"}

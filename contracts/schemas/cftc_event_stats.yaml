@@ -1,0 +1,29 @@
+table: cftc_event_stats
+version: 1
+zone: scores
+owner: cftc (app.analytics.cftc_signals)
+description: >
+  MODEL-BASED simple event study: forward returns of the mapped price instrument after a market enters a positioning
+  extreme (cot_index_3y crosses >= 0.9 or <= 0.1, 13-report cooldown). Entry = first close strictly after the release
+  date (PIT); horizons 4 / 13 / 26 weeks; compared with the unconditional mean forward return of all weekly entries of
+  the same market. Descriptive statistics only (small samples, overlapping windows), not a trading recommendation.
+storage: {path: scores/cftc_event_stats, format: parquet, partition_by: [], write_mode: overwrite, sort_by: [market_code, report_type, category, signal, horizon_w]}
+primary_key: [report_type, market_code, category, signal, horizon_w]
+columns:
+  - {name: report_type, type: enum, nullable: false, values: [legacy_fut, legacy_comb, disagg_fut, disagg_comb, tff_fut, tff_comb, cit_comb], description: "As cftc_positions"}
+  - {name: market_code, type: string, nullable: false, description: "FK cftc_markets"}
+  - {name: category, type: string, nullable: false, description: "Category whose extreme defines the event"}
+  - {name: signal, type: enum, nullable: false, values: [extreme_long, extreme_short], description: "Event type"}
+  - {name: horizon_w, type: int16, nullable: false, description: "Forward horizon in weeks"}
+  - {name: n_events, type: int32, nullable: false, description: "Events with a complete forward window"}
+  - {name: mean_fwd, type: float64, nullable: true, description: "Mean forward log return after events"}
+  - {name: median_fwd, type: float64, nullable: true, description: "Median forward log return"}
+  - {name: hit_rate, type: float64, nullable: true, description: "Share of events with a positive forward return"}
+  - {name: mean_uncond, type: float64, nullable: true, description: "Unconditional mean forward log return (all weeks)"}
+  - {name: excess_mean, type: float64, nullable: true, description: "mean_fwd - mean_uncond"}
+  - {name: t_stat, type: float64, nullable: true, description: "excess_mean / (std / sqrt(n)) (overlap ignored; indicative)"}
+  - {name: first_event, type: date, nullable: true, description: "First event report date"}
+  - {name: last_event, type: date, nullable: true, description: "Last event report date"}
+  - {name: price_security_id, type: string, nullable: false, description: "Instrument whose prices were used"}
+  - {name: price_is_proxy, type: bool, nullable: false, description: "Proxy instrument (not the futures contract)"}
+  - {name: computed_at, type: datetime, nullable: false, description: "Write time UTC"}

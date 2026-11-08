@@ -1,0 +1,29 @@
+table: prices_staging
+version: 3
+zone: normalized
+owner: ingest-market (app.ingestion.polygon_prices / yf_prices / krx_prices / baostock_prices / b3_cotahist / twse_prices)
+description: >
+  Source-native daily bars keyed by the SOURCE symbol (Polygon ticker, yfinance symbol, KRX code, BaoStock code,
+  B3 ticker), exactly as delivered (price_basis says whether the source pre-adjusted for splits). Written by the
+  price adapters; app.normalize.prices (job prices_finalize) resolves symbols to listings/securities, picks the
+  winning source per (security, date), reconciles overlaps, applies corporate actions and writes prices_daily.
+  Lets price ingestion run before/independently of identity resolution.
+storage: {path: normalized/prices_staging, format: parquet, partition_by: [source_id, year], write_mode: upsert, sort_by: [symbol, date], compression_level: 9, retention: "forever (prices_finalize rebuilds each region from the full staging history)"}
+primary_key: [source_id, symbol, date]
+columns:
+  - {name: source_id, type: enum, nullable: false, values: [polygon, yfinance, krx, baostock, b3_cotahist, twse, tpex, other], description: "Partition: source adapter"}
+  - {name: year, type: int16, nullable: false, description: "Partition: year(date)"}
+  - {name: symbol, type: string, nullable: false, description: "Source-native symbol (AAPL / BRK.B for Polygon; 7203.T for yfinance; 005930 for KRX; 600519.SS for BaoStock; PETR4.SA for B3; 2330.TW for TWSE; 6488.TWO for TPEx)"}
+  - {name: date, type: date, nullable: false, description: "Trading date (exchange-local)"}
+  - {name: open, type: float64, storage: float32, nullable: true, description: "Open as delivered (stored float32, read back rounded to 7 significant digits, v3)"}
+  - {name: high, type: float64, storage: float32, nullable: true, description: "High as delivered (stored float32, read back rounded to 7 significant digits, v3)"}
+  - {name: low, type: float64, storage: float32, nullable: true, description: "Low as delivered (stored float32, read back rounded to 7 significant digits, v3)"}
+  - {name: close, type: float64, storage: float32, nullable: false, description: "Close as delivered (see price_basis; stored float32, v3)"}
+  - {name: adj_close, type: float64, storage: float32, nullable: true, description: "Source split+dividend adjusted close if provided (yfinance 'Adj Close'; stored float32, v3)"}
+  - {name: volume, type: float64, nullable: true, description: "Volume as delivered (split-adjusted when price_basis=split_adjusted)"}
+  - {name: vwap, type: float64, storage: float32, nullable: true, description: "VWAP if provided (Polygon vw; stored float32, v3)"}
+  - {name: trades, type: int64, nullable: true, description: "Number of trades if provided (Polygon n)"}
+  - {name: currency, type: string, nullable: true, description: "Quote currency as delivered (may be GBp/ZAc/ILA minor units)"}
+  - {name: price_basis, type: enum, nullable: false, values: [raw, split_adjusted], description: "raw = unadjusted exchange prints; split_adjusted = source back-adjusted for splits (yfinance Close)"}
+  - {name: is_benchmark, type: bool, nullable: true, description: "True for indices / benchmark ETFs fetched for Market & Macro"}
+  - {name: ingested_at, type: datetime, nullable: false, description: "Write time UTC"}

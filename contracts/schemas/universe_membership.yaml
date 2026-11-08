@@ -1,0 +1,18 @@
+table: universe_membership
+version: 2
+zone: reference
+owner: ref-identity
+description: >
+  Point-in-time universe definitions (survivorship-bias-free). mvp_us = top ~500 US by market cap,
+  mvp_global = top ~200 non-US names, full = everything with prices + fundamentals.
+  Rebalanced monthly; a security keeps its row history.
+storage: {path: reference/universe_membership, format: parquet, partition_by: [], write_mode: overwrite}
+primary_key: [universe_id, security_id, valid_from]
+columns:
+  - {name: universe_id, type: enum, nullable: false, values: [mvp_us, mvp_global, full, watch, eu_broad], description: "Universe name (eu_broad: EEA/UK/CH/NO mcap >= EUR 300M, v2)"}
+  - {name: security_id, type: string, nullable: false, description: "FK securities_master"}
+  - {name: valid_from, type: date, nullable: false, description: "Membership start"}
+  - {name: valid_to, type: date, nullable: true, description: "Membership end (null = current)"}
+  - {name: rank_at_entry, type: int32, nullable: true, description: "Market-cap rank within region at entry"}
+  - {name: reason, type: string, nullable: true, description: "Rule/seed that added it"}
+  - {name: updated_at, type: datetime, nullable: false, description: "Last update UTC"}

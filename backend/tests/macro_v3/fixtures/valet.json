@@ -1,0 +1,82 @@
+{
+    "terms": {
+        "url": "https://www.bankofcanada.ca/terms/"
+    },
+    "seriesDetail": {
+        "BD.CDN.2YR.DQ.YLD": {
+            "label": "Benchmark bond yield, 2-year",
+            "description": "The yield on the Government of Canada 2-year benchmark bond. This series reflects the prevailing interest rate for the 2-year term and is used to monitor short-term government borrowing costs.",
+            "dimension": {
+                "key": "d",
+                "name": "Date"
+            }
+        },
+        "V80691344": {
+            "label": "3 month",
+            "description": "Treasury bills",
+            "dimension": {
+                "key": "d",
+                "name": "Date"
+            }
+        }
+    },
+    "observations": [
+        {
+            "d": "2026-09-28",
+            "BD.CDN.2YR.DQ.YLD": {
+                "v": "3.37"
+            }
+        },
+        {
+            "d": "2026-09-29",
+            "BD.CDN.2YR.DQ.YLD": {
+                "v": "3.37"
+            }
+        },
+        {
+            "d": "2026-09-30",
+            "V80691344": {
+                "v": "2.39"
+            }
+        },
+        {
+            "d": "2026-10-01",
+            "BD.CDN.2YR.DQ.YLD": {
+                "v": "3.27"
+            }
+        },
+        {
+            "d": "2026-10-02",
+            "BD.CDN.2YR.DQ.YLD": {
+                "v": "3.25"
+            }
+        },
+        {
+            "d": "2026-10-05",
+            "BD.CDN.2YR.DQ.YLD": {
+                "v": "3.26"
+            }
+        },
+        {
+            "d": "2026-10-06",
+            "BD.CDN.2YR.DQ.YLD": {
+                "v": "3.23"
+            }
+        },
+        {
+            "d": "2026-10-07",
+            "BD.CDN.2YR.DQ.YLD": {
+                "v": "3.23"
+            },
+            "V80691344": {
+                "v": "2.39"
+            }
+        },
+        {
+            "d": "2026-10-08",
+            "BD.CDN.2YR.DQ.YLD": {
+                "v": "3.24"
+            }
+        }
+    ]
+}

@@ -1,0 +1,103 @@
+{
+ "title": "Market return distribution (NGBoost)",
+ "description": "Heteroskedastic Normal forecast of the next-month equity return from macro-financial conditions.",
+ "question": "forecasting",
+ "tags": [
+  "probabilistic",
+  "NGBoost",
+  "macro"
+ ],
+ "method_note": "VIX should drive the scale (volatility clustering) while the mean stays near the unconditional premium. CRPS and PIT vs the homoskedastic linear-Gaussian baseline. Caveat: the universe is today's constituents (membership history starts 2026-10), so early years carry survivorship bias; read the premium as an upper bound.",
+ "expected_outputs": [
+  "loc / scale importance",
+  "CRPS / PIT vs baseline"
+ ],
+ "runtime_s": 9.5,
+ "validated": "2026-11-06 on snapshot R20261106T010757G9ZB",
+ "result": {
+  "run_id": "SR20261106T015443ZS3SW",
+  "beats_baseline": false,
+  "beats_linear": false,
+  "verdict": "NGBoost does not significantly beat linear-Gaussian baseline on CRPS (DM p = 0.977); point forecast: NGBoost is worse than linear baseline out of sample (mean loss 0.002721 vs 0.002615)",
+  "n_obs": 369,
+  "metrics": {
+   "oos_rmse": 0.05215853424514797,
+   "oos_r2_oos": -0.021131362384164243,
+   "crps": 0.027940212418377786,
+   "crps_linear": 0.027965887295654395,
+   "crps_skill_vs_linear": 0.0009180784076391335,
+   "coverage_90": 0.8513513513513513,
+   "dm_p_crps_vs_linear": 0.9767298337820831,
+   "dm_p_vs_linear": 0.6359656345574141
+  },
+  "coefficients": []
+ },
+ "study": {
+  "name": "Market return distribution (NGBoost)",
+  "method": "ngboost",
+  "y": "fwd_mkt_1m",
+  "x": [
+   "vix",
+   "baa_spread",
+   "nfci",
+   "term_spread"
+  ],
+  "params": {
+   "n_estimators": 200,
+   "learning_rate": 0.03,
+   "max_depth": 2,
+   "min_samples_leaf": 20,
+   "cv": {
+    "folds": 5,
+    "scheme": "expanding",
+    "purge": 1
+   }
+  },
+  "dataset": {
+   "kind": "timeseries",
+   "frequency": "M",
+   "start": "1996-01-01",
+   "variables": [
+    {
+     "name": "fwd_mkt_1m",
+     "source": "prices",
+     "field": "ret",
+     "transforms": [
+      {
+       "op": "fwd_compound",
+       "k": 1
+      }
+     ],
+     "entity_agg": "mean",
+     "entities": {
+      "universe": "mvp_us"
+     }
+    },
+    {
+     "name": "term_spread",
+     "source": "macro",
+     "field": "fred:T10Y3M",
+     "agg": "last"
+    },
+    {
+     "name": "baa_spread",
+     "source": "macro",
+     "field": "fred:BAA10Y",
+     "agg": "last"
+    },
+    {
+     "name": "vix",
+     "source": "macro",
+     "field": "fred:VIXCLS",
+     "agg": "last"
+    },
+    {
+     "name": "nfci",
+     "source": "macro",
+     "field": "fred:NFCI",
+     "agg": "last"
+    }
+   ]
+  }
+ }
+}

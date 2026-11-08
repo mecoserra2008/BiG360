@@ -1,0 +1,190 @@
+<?xml version='1.0' encoding='utf-8'?>
+<xbrli:xbrl xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:ipp_ge="http://www.cnmv.es/xbrl/ipp/ge/2019-01-01" xmlns:link="http://www.xbrl.org/2003/linkbase" xmlns:ipp_ge_dim="http://www.cnmv.es/xbrl/ipp/ge/dim/2019-01-01" xmlns:nonnum="http://www.xbrl.org/dtr/type/non-numeric" xmlns:xbrldt="http://xbrl.org/2005/xbrldt" xmlns:xbrldi="http://xbrl.org/2006/xbrldi" xmlns:xbrli="http://www.xbrl.org/2003/instance" xmlns:iso4217="http://www.xbrl.org/2003/iso4217" xmlns:xlink="http://www.w3.org/1999/xlink" xsi:schemaLocation="http://xbrl.org/2006/xbrldi http://www.xbrl.org/2006/xbrldi-2006.xsd">
+  <link:schemaRef xlink:type="simple" xlink:href="http://www.cnmv.es/xbrl/ipp/ge/2019-01-01/ipp_ge_2019-01-01.xsd"/>
+  <xbrli:context id="Icur_PeriodoActualBalanceMiembro">
+    <xbrli:entity>
+      <xbrli:identifier scheme="http://www.cnmv.es/xbrl/ipp/A28015865">TELEFONICA, S.A.</xbrli:identifier>
+    </xbrli:entity>
+    <xbrli:period>
+      <xbrli:instant>2025-12-31</xbrli:instant>
+    </xbrli:period>
+    <xbrli:scenario>
+      <xbrldi:explicitMember dimension="ipp_ge_dim:PeriodoBalanceEje">ipp_ge_dim:PeriodoActualMiembro</xbrldi:explicitMember>
+    </xbrli:scenario>
+  </xbrli:context>
+  <xbrli:context id="Ipre_PeriodoCierreAnteriorBalanceMiembro">
+    <xbrli:entity>
+      <xbrli:identifier scheme="http://www.cnmv.es/xbrl/ipp/A28015865">TELEFONICA, S.A.</xbrli:identifier>
+    </xbrli:entity>
+    <xbrli:period>
+      <xbrli:instant>2024-12-31</xbrli:instant>
+    </xbrli:period>
+    <xbrli:scenario>
+      <xbrldi:explicitMember dimension="ipp_ge_dim:PeriodoBalanceEje">ipp_ge_dim:PeriodoCierreAnteriorMiembro</xbrldi:explicitMember>
+    </xbrli:scenario>
+  </xbrli:context>
+  <xbrli:context id="Dcur_PeriodoCorrienteActualMiembro">
+    <xbrli:entity>
+      <xbrli:identifier scheme="http://www.cnmv.es/xbrl/ipp/A28015865">TELEFONICA, S.A.</xbrli:identifier>
+    </xbrli:entity>
+    <xbrli:period>
+      <xbrli:startDate>2025-07-01</xbrli:startDate>
+      <xbrli:endDate>2025-12-31</xbrli:endDate>
+    </xbrli:period>
+    <xbrli:scenario>
+      <xbrldi:explicitMember dimension="ipp_ge_dim:CuentaPerdidasGananciasEje">ipp_ge_dim:PeriodoCorrienteActualMiembro</xbrldi:explicitMember>
+    </xbrli:scenario>
+  </xbrli:context>
+  <xbrli:context id="Dpre_PeriodoCorrienteAnteriorMiembro">
+    <xbrli:entity>
+      <xbrli:identifier scheme="http://www.cnmv.es/xbrl/ipp/A28015865">TELEFONICA, S.A.</xbrli:identifier>
+    </xbrli:entity>
+    <xbrli:period>
+      <xbrli:startDate>2024-07-01</xbrli:startDate>
+      <xbrli:endDate>2024-12-31</xbrli:endDate>
+    </xbrli:period>
+    <xbrli:scenario>
+      <xbrldi:explicitMember dimension="ipp_ge_dim:CuentaPerdidasGananciasEje">ipp_ge_dim:PeriodoCorrienteAnteriorMiembro</xbrldi:explicitMember>
+    </xbrli:scenario>
+  </xbrli:context>
+  <xbrli:context id="Dcur_AcumuladoActualMiembro">
+    <xbrli:entity>
+      <xbrli:identifier scheme="http://www.cnmv.es/xbrl/ipp/A28015865">TELEFONICA, S.A.</xbrli:identifier>
+    </xbrli:entity>
+    <xbrli:period>
+      <xbrli:startDate>2025-01-01</xbrli:startDate>
+      <xbrli:endDate>2025-12-31</xbrli:endDate>
+    </xbrli:period>
+    <xbrli:scenario>
+      <xbrldi:explicitMember dimension="ipp_ge_dim:CuentaPerdidasGananciasEje">ipp_ge_dim:AcumuladoActualMiembro</xbrldi:explicitMember>
+    </xbrli:scenario>
+  </xbrli:context>
+  <xbrli:context id="Dpre_AcumuladoAnteriorMiembro">
+    <xbrli:entity>
+      <xbrli:identifier scheme="http://www.cnmv.es/xbrl/ipp/A28015865">TELEFONICA, S.A.</xbrli:identifier>
+    </xbrli:entity>
+    <xbrli:period>
+      <xbrli:startDate>2024-01-01</xbrli:startDate>
+      <xbrli:endDate>2024-12-31</xbrli:endDate>
+    </xbrli:period>
+    <xbrli:scenario>
+      <xbrldi:explicitMember dimension="ipp_ge_dim:CuentaPerdidasGananciasEje">ipp_ge_dim:AcumuladoAnteriorMiembro</xbrldi:explicitMember>
+    </xbrli:scenario>
+  </xbrli:context>
+  <xbrli:context id="Dcur_PeriodoActualMiembro">
+    <xbrli:entity>
+      <xbrli:identifier scheme="http://www.cnmv.es/xbrl/ipp/A28015865">TELEFONICA, S.A.</xbrli:identifier>
+    </xbrli:entity>
+    <xbrli:period>
+      <xbrli:startDate>2025-01-01</xbrli:startDate>
+      <xbrli:endDate>2025-12-31</xbrli:endDate>
+    </xbrli:period>
+    <xbrli:scenario>
+      <xbrldi:explicitMember dimension="ipp_ge_dim:PeriodoEje">ipp_ge_dim:PeriodoActualMiembro</xbrldi:explicitMember>
+    </xbrli:scenario>
+  </xbrli:context>
+  <xbrli:context id="Dpre_PeriodoAnteriorMiembro">
+    <xbrli:entity>
+      <xbrli:identifier scheme="http://www.cnmv.es/xbrl/ipp/A28015865">TELEFONICA, S.A.</xbrli:identifier>
+    </xbrli:entity>
+    <xbrli:period>
+      <xbrli:startDate>2024-01-01</xbrli:startDate>
+      <xbrli:endDate>2024-12-31</xbrli:endDate>
+    </xbrli:period>
+    <xbrli:scenario>
+      <xbrldi:explicitMember dimension="ipp_ge_dim:PeriodoEje">ipp_ge_dim:PeriodoAnteriorMiembro</xbrldi:explicitMember>
+    </xbrli:scenario>
+  </xbrli:context>
+  <xbrli:context id="Icur_AreaGeograficaIndividualMiembro_PeriodoActualMiembro">
+    <xbrli:entity>
+      <xbrli:identifier scheme="http://www.cnmv.es/xbrl/ipp/A28015865">TELEFONICA, S.A.</xbrli:identifier>
+    </xbrli:entity>
+    <xbrli:period>
+      <xbrli:instant>2025-12-31</xbrli:instant>
+    </xbrli:period>
+    <xbrli:scenario>
+      <xbrldi:explicitMember dimension="ipp_ge_dim:AreaGeograficaEje">ipp_ge_dim:AreaGeograficaIndividualMiembro</xbrldi:explicitMember>
+      <xbrldi:explicitMember dimension="ipp_ge_dim:PeriodoEje">ipp_ge_dim:PeriodoActualMiembro</xbrldi:explicitMember>
+    </xbrli:scenario>
+  </xbrli:context>
+  <xbrli:context id="Ipre_AreaGeograficaIndividualMiembro_PeriodoAnteriorMiembro">
+    <xbrli:entity>
+      <xbrli:identifier scheme="http://www.cnmv.es/xbrl/ipp/A28015865">TELEFONICA, S.A.</xbrli:identifier>
+    </xbrli:entity>
+    <xbrli:period>
+      <xbrli:instant>2024-12-31</xbrli:instant>
+    </xbrli:period>
+    <xbrli:scenario>
+      <xbrldi:explicitMember dimension="ipp_ge_dim:AreaGeograficaEje">ipp_ge_dim:AreaGeograficaIndividualMiembro</xbrldi:explicitMember>
+      <xbrldi:explicitMember dimension="ipp_ge_dim:PeriodoEje">ipp_ge_dim:PeriodoAnteriorMiembro</xbrldi:explicitMember>
+    </xbrli:scenario>
+  </xbrli:context>
+  <xbrli:context id="Icur_AreaGeograficaConsolidadoMiembro_PeriodoActualMiembro">
+    <xbrli:entity>
+      <xbrli:identifier scheme="http://www.cnmv.es/xbrl/ipp/A28015865">TELEFONICA, S.A.</xbrli:identifier>
+    </xbrli:entity>
+    <xbrli:period>
+      <xbrli:instant>2025-12-31</xbrli:instant>
+    </xbrli:period>
+    <xbrli:scenario>
+      <xbrldi:explicitMember dimension="ipp_ge_dim:AreaGeograficaEje">ipp_ge_dim:AreaGeograficaConsolidadoMiembro</xbrldi:explicitMember>
+      <xbrldi:explicitMember dimension="ipp_ge_dim:PeriodoEje">ipp_ge_dim:PeriodoActualMiembro</xbrldi:explicitMember>
+    </xbrli:scenario>
+  </xbrli:context>
+  <xbrli:context id="Ipre_AreaGeograficaConsolidadoMiembro_PeriodoAnteriorMiembro">
+    <xbrli:entity>
+      <xbrli:identifier scheme="http://www.cnmv.es/xbrl/ipp/A28015865">TELEFONICA, S.A.</xbrli:identifier>
+    </xbrli:entity>
+    <xbrli:period>
+      <xbrli:instant>2024-12-31</xbrli:instant>
+    </xbrli:period>
+    <xbrli:scenario>
+      <xbrldi:explicitMember dimension="ipp_ge_dim:AreaGeograficaEje">ipp_ge_dim:AreaGeograficaConsolidadoMiembro</xbrldi:explicitMember>
+      <xbrldi:explicitMember dimension="ipp_ge_dim:PeriodoEje">ipp_ge_dim:PeriodoAnteriorMiembro</xbrldi:explicitMember>
+    </xbrli:scenario>
+  </xbrli:context>
+  <xbrli:unit id="euro">
+    <xbrli:measure>iso4217:EUR</xbrli:measure>
+  </xbrli:unit>
+  <!--Periodo E2-->
+  <ipp_ge:I0205 unitRef="euro" decimals="-3" contextRef="Dcur_PeriodoCorrienteActualMiembro">553768000</ipp_ge:I0205>
+  <ipp_ge:I0205 unitRef="euro" decimals="-3" contextRef="Dpre_PeriodoCorrienteAnteriorMiembro">6100897000</ipp_ge:I0205>
+  <ipp_ge:I0205 unitRef="euro" decimals="-3" contextRef="Dcur_AcumuladoActualMiembro">890011000</ipp_ge:I0205>
+  <ipp_ge:I0205 unitRef="euro" decimals="-3" contextRef="Dpre_AcumuladoAnteriorMiembro">6429543000</ipp_ge:I0205>
+  <ipp_ge:I1100 unitRef="euro" decimals="-3" contextRef="Icur_PeriodoActualBalanceMiembro">92016841000</ipp_ge:I1100>
+  <ipp_ge:I1100 unitRef="euro" decimals="-3" contextRef="Ipre_PeriodoCierreAnteriorBalanceMiembro">100501886000</ipp_ge:I1100>
+  <ipp_ge:I1195 unitRef="euro" decimals="-3" contextRef="Icur_PeriodoActualBalanceMiembro">17807716000</ipp_ge:I1195>
+  <ipp_ge:I1195 unitRef="euro" decimals="-3" contextRef="Ipre_PeriodoCierreAnteriorBalanceMiembro">22748874000</ipp_ge:I1195>
+  <ipp_ge:I1189 unitRef="euro" decimals="-3" contextRef="Icur_PeriodoActualBalanceMiembro">14257727000</ipp_ge:I1189>
+  <ipp_ge:I1189 unitRef="euro" decimals="-3" contextRef="Ipre_PeriodoCierreAnteriorBalanceMiembro">19347248000</ipp_ge:I1189>
+  <ipp_ge:I1205 unitRef="euro" decimals="-3" contextRef="Dcur_PeriodoCorrienteActualMiembro">17787233000</ipp_ge:I1205>
+  <ipp_ge:I1205 unitRef="euro" decimals="-3" contextRef="Dpre_PeriodoCorrienteAnteriorMiembro">17835928000</ipp_ge:I1205>
+  <ipp_ge:I1205 unitRef="euro" decimals="-3" contextRef="Dcur_AcumuladoActualMiembro">35119611000</ipp_ge:I1205>
+  <ipp_ge:I1205 unitRef="euro" decimals="-3" contextRef="Dpre_AcumuladoAnteriorMiembro">35670661000</ipp_ge:I1205>
+  <ipp_ge:I1265 unitRef="euro" decimals="-3" contextRef="Dcur_PeriodoCorrienteActualMiembro">-2578185000</ipp_ge:I1265>
+  <ipp_ge:I1265 unitRef="euro" decimals="-3" contextRef="Dpre_PeriodoCorrienteAnteriorMiembro">1223664000</ipp_ge:I1265>
+  <ipp_ge:I1265 unitRef="euro" decimals="-3" contextRef="Dcur_AcumuladoActualMiembro">-1403395000</ipp_ge:I1265>
+  <ipp_ge:I1265 unitRef="euro" decimals="-3" contextRef="Dpre_AcumuladoAnteriorMiembro">2589250000</ipp_ge:I1265>
+  <ipp_ge:I1288 unitRef="euro" decimals="-3" contextRef="Dcur_PeriodoCorrienteActualMiembro">-2865613000</ipp_ge:I1288>
+  <ipp_ge:I1288 unitRef="euro" decimals="-3" contextRef="Dpre_PeriodoCorrienteAnteriorMiembro">-835339000</ipp_ge:I1288>
+  <ipp_ge:I1288 unitRef="euro" decimals="-3" contextRef="Dcur_AcumuladoActualMiembro">-4151901000</ipp_ge:I1288>
+  <ipp_ge:I1288 unitRef="euro" decimals="-3" contextRef="Dpre_AcumuladoAnteriorMiembro">208586000</ipp_ge:I1288>
+  <ipp_ge:I1300 unitRef="euro" decimals="-3" contextRef="Dcur_PeriodoCorrienteActualMiembro">-2964009000</ipp_ge:I1300>
+  <ipp_ge:I1300 unitRef="euro" decimals="-3" contextRef="Dpre_PeriodoCorrienteAnteriorMiembro">-999204000</ipp_ge:I1300>
+  <ipp_ge:I1300 unitRef="euro" decimals="-3" contextRef="Dcur_AcumuladoActualMiembro">-4318112000</ipp_ge:I1300>
+  <ipp_ge:I1300 unitRef="euro" decimals="-3" contextRef="Dpre_AcumuladoAnteriorMiembro">-48996000</ipp_ge:I1300>
+  <ipp_ge:I1290 unitRef="euro" decimals="2" contextRef="Dcur_PeriodoCorrienteActualMiembro">-0.55</ipp_ge:I1290>
+  <ipp_ge:I1290 unitRef="euro" decimals="2" contextRef="Dpre_PeriodoCorrienteAnteriorMiembro">-0.20</ipp_ge:I1290>
+  <ipp_ge:I1290 unitRef="euro" decimals="2" contextRef="Dcur_AcumuladoActualMiembro">-0.81</ipp_ge:I1290>
+  <ipp_ge:I1290 unitRef="euro" decimals="2" contextRef="Dpre_AcumuladoAnteriorMiembro">-0.06</ipp_ge:I1290>
+  <ipp_ge:I1435 unitRef="euro" decimals="-3" contextRef="Dcur_PeriodoActualMiembro">0</ipp_ge:I1435>
+  <ipp_ge:I1435 unitRef="euro" decimals="-3" contextRef="Dpre_PeriodoAnteriorMiembro">0</ipp_ge:I1435>
+  <ipp_ge:I8435 unitRef="euro" decimals="-3" contextRef="Dcur_PeriodoActualMiembro">9721905000</ipp_ge:I8435>
+  <ipp_ge:I8435 unitRef="euro" decimals="-3" contextRef="Dpre_PeriodoAnteriorMiembro">10994095000</ipp_ge:I8435>
+  <ipp_ge:I8442 unitRef="euro" decimals="-3" contextRef="Dcur_PeriodoActualMiembro">-5446713000</ipp_ge:I8442>
+  <ipp_ge:I8442 unitRef="euro" decimals="-3" contextRef="Dpre_PeriodoAnteriorMiembro">-5068414000</ipp_ge:I8442>
+  <ipp_ge:I2210 unitRef="euro" decimals="-3" contextRef="Icur_AreaGeograficaIndividualMiembro_PeriodoActualMiembro">459538000</ipp_ge:I2210>
+  <ipp_ge:I2210 unitRef="euro" decimals="-3" contextRef="Ipre_AreaGeograficaIndividualMiembro_PeriodoAnteriorMiembro">2753362000</ipp_ge:I2210>
+  <ipp_ge:I2210 unitRef="euro" decimals="-3" contextRef="Icur_AreaGeograficaConsolidadoMiembro_PeriodoActualMiembro">13455327000</ipp_ge:I2210>
+  <ipp_ge:I2210 unitRef="euro" decimals="-3" contextRef="Ipre_AreaGeograficaConsolidadoMiembro_PeriodoAnteriorMiembro">13126214000</ipp_ge:I2210>
+  </xbrli:xbrl>

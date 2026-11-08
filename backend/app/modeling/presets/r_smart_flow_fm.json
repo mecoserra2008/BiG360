@@ -1,0 +1,120 @@
+{
+ "title": "13F smart-money flows and future returns",
+ "description": "Do quarterly institutional flows (all filers and the smart cohort) predict returns?",
+ "question": "events",
+ "tags": [
+  "events",
+  "13F",
+  "smart money"
+ ],
+ "method_note": "13F holdings are known 45 days after quarter end; the smart-money table stamps them on the filing date, so no look-ahead. Short sample (2023 on). Caveat: the universe is today's constituents (membership history starts 2026-10), so early years carry survivorship bias; read the premium as an upper bound.",
+ "expected_outputs": [
+  "premium per flow signal",
+  "slope time series"
+ ],
+ "runtime_s": 2.2,
+ "validated": "2026-11-06 on snapshot R20261106T010757G9ZB",
+ "result": {
+  "run_id": "SR20261106T020813PFZC9",
+  "n_obs": 11237,
+  "metrics": {
+   "avg_r2": 0.04325031754518048
+  },
+  "coefficients": [
+   {
+    "term": "inst_flow",
+    "estimate": 0.01287393339243882,
+    "statistic": 2.0310971301507443,
+    "p_value": 0.05150084363813636
+   },
+   {
+    "term": "smart_flow",
+    "estimate": -0.003784830659295939,
+    "statistic": -0.8990696892026159,
+    "p_value": 0.37602046075163936
+   },
+   {
+    "term": "log_mcap",
+    "estimate": -0.023103223244220917,
+    "statistic": -3.901933326420128,
+    "p_value": 0.0005217882999858552
+   }
+  ]
+ },
+ "study": {
+  "name": "13F smart-money flows and future returns",
+  "method": "fama_macbeth",
+  "y": "fwd_ret_3m",
+  "x": [
+   "inst_flow",
+   "smart_flow",
+   "log_mcap"
+  ],
+  "params": {
+   "nw_lags": 4
+  },
+  "dataset": {
+   "kind": "panel",
+   "frequency": "M",
+   "start": "2023-06-01",
+   "entities": {
+    "universe": "mvp_us"
+   },
+   "variables": [
+    {
+     "name": "fwd_ret_3m",
+     "source": "prices",
+     "field": "ret",
+     "transforms": [
+      {
+       "op": "fwd_compound",
+       "k": 3
+      },
+      {
+       "op": "winsorize"
+      }
+     ]
+    },
+    {
+     "name": "inst_flow",
+     "source": "smart_money",
+     "field": "z_inst_flow",
+     "transforms": [
+      {
+       "op": "winsorize"
+      },
+      {
+       "op": "cs_zscore"
+      }
+     ]
+    },
+    {
+     "name": "smart_flow",
+     "source": "smart_money",
+     "field": "z_smart_flow",
+     "transforms": [
+      {
+       "op": "winsorize"
+      },
+      {
+       "op": "cs_zscore"
+      }
+     ]
+    },
+    {
+     "name": "log_mcap",
+     "source": "valuation",
+     "field": "market_cap_usd",
+     "transforms": [
+      {
+       "op": "log"
+      },
+      {
+       "op": "cs_zscore"
+      }
+     ]
+    }
+   ]
+  }
+ }
+}

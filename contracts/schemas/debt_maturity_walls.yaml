@@ -1,0 +1,28 @@
+table: debt_maturity_walls
+version: 1
+zone: scores
+owner: rates-w3 (app.rates.company_debt, job company_debt)
+description: >
+  Sector maturity walls and refinancing-risk metrics: for every region x sector (plus ALL), the latest company_debt
+  profile per issuer (period_end within 18 months of as_of), maturities by bucket in USD, coverage counts and
+  refinancing metrics (debt-weighted cost of debt, share of maturities due within 24 months, median interest coverage
+  and net debt / EBITDA, debt-weighted floating share, MODEL-BASED aggregate refinancing cost). Overwritten each run.
+storage: {path: scores/debt_maturity_walls, format: parquet, partition_by: [], write_mode: overwrite, sort_by: [region, sector_id, bucket]}
+primary_key: [as_of, region, sector_id, bucket]
+columns:
+  - {name: as_of, type: date, nullable: false, description: "Computation date"}
+  - {name: region, type: string, nullable: false, description: "Region (US, EU, UK, JP, ...) or ALL"}
+  - {name: sector_id, type: string, nullable: false, description: "Sector id or ALL"}
+  - {name: bucket, type: enum, nullable: false, values: [y1, y2, y3, y4, y5, after5, total], description: "Maturity bucket (total = summary row)"}
+  - {name: amount_usd, type: float64, nullable: true, unit: currency_usd, description: "Principal maturing in the bucket (USD), summed over issuers with a tagged profile"}
+  - {name: share, type: float64, nullable: true, unit: fraction, description: "amount / total tagged maturities"}
+  - {name: n_issuers, type: int32, nullable: false, description: "Issuers with a tagged maturity profile"}
+  - {name: n_issuers_debt, type: int32, nullable: true, description: "Issuers with total debt (any profile)"}
+  - {name: total_debt_usd, type: float64, nullable: true, unit: currency_usd, description: "total row: total debt of the issuers (USD)"}
+  - {name: wavg_cost_of_debt, type: float64, nullable: true, unit: fraction, description: "total row: debt-weighted average cost of debt"}
+  - {name: median_interest_coverage, type: float64, nullable: true, unit: x, description: "total row"}
+  - {name: median_net_debt_to_ebitda, type: float64, nullable: true, unit: x, description: "total row"}
+  - {name: refi_share_24m, type: float64, nullable: true, unit: fraction, description: "total row: maturities within 24 months / tagged maturities"}
+  - {name: floating_share, type: float64, nullable: true, unit: fraction, description: "total row: debt-weighted floating share (issuers that tag it)"}
+  - {name: refi_cost_24m_usd, type: float64, nullable: true, unit: currency_usd, description: "total row: MODEL-BASED extra annual interest if the 24-month maturities refinance at the market rate"}
+  - {name: computed_at, type: datetime, nullable: false, description: "Write time UTC"}

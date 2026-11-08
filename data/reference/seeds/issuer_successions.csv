@@ -1,0 +1,3 @@
+# predecessor,successor,effective_date,reason,note  (keys: cik:/lei:/isin:/edinet:/cvm:). Owner: ref-identity.
+predecessor,successor,effective_date,reason,note
+cik:0000034088,cik:0002115436,2026-01-01,holding_company_reorganization,Exxon Mobil Corp -> ExxonMobil Holdings Corp (XOM); history under old CIK (reported by ingest-us; effective date approximate)

@@ -1,0 +1,58 @@
+table: inst_ownership
+version: 1
+zone: scores
+owner: smart-money (app.analytics.smart_money_13f)
+description: >
+  Institutional (13F, SEC official) ownership per security x quarter, PIT on the quarter cutoff = 13F filing deadline
+  (period end + 45 days, next SEC business day, + 1 business day for after-hours filings) or the run date while filings are still arriving (is_complete = false):
+  only 13F rows filed on or before the cutoff are used and knowledge_date = cutoff. Positions are as of the quarter end
+  (the 45-day lag). Changes vs the previous quarter are counted among filers that filed both quarters (|change| <= 1% =
+  unchanged). inst_own_pct = 13F long shares / shares outstanding (valuation_daily, else fundamentals
+  shares_outstanding known by the cutoff; null if unknown or > 200%). Hedge-fund-like / smart-cohort fields and
+  crowding_pct are MODEL-BASED (see inst_filers).
+storage: {path: scores/inst_ownership, format: parquet, partition_by: [], write_mode: overwrite, sort_by: [security_id, period_end], compression_level: 9}
+primary_key: [security_id, period_end]
+pit: {knowledge_column: knowledge_date, rule: "usable from the quarter cutoff"}
+columns:
+  - {name: security_id, type: string, nullable: false, description: "FK securities_master (13F CUSIP mapping)"}
+  - {name: issuer_id, type: string, nullable: true, description: "FK issuers"}
+  - {name: period_end, type: date, nullable: false, description: "13F quarter end (positions as of)"}
+  - {name: knowledge_date, type: date, nullable: false, description: "Cutoff: filings made by this date"}
+  - {name: is_complete, type: bool, nullable: false, description: "Cutoff reached the filing deadline"}
+  - {name: n_holders, type: int32, nullable: false, description: "13F filers with a long position"}
+  - {name: n_holders_prev, type: int32, nullable: true, description: "Previous quarter"}
+  - {name: n_new, type: int32, nullable: true, description: "New positions (filer filed both quarters)"}
+  - {name: n_added, type: int32, nullable: true, description: "Increased positions"}
+  - {name: n_trimmed, type: int32, nullable: true, description: "Reduced positions"}
+  - {name: n_exited, type: int32, nullable: true, description: "Closed positions"}
+  - {name: n_unchanged, type: int32, nullable: true, description: "Unchanged (|change| <= 1%)"}
+  - {name: shares_held, type: float64, nullable: false, description: "13F long shares"}
+  - {name: shares_held_prev, type: float64, nullable: true, description: "Previous quarter, re-expressed on this quarter's share basis (split-adjusted)"}
+  - {name: value_usd, type: float64, nullable: false, description: "13F long value USD"}
+  - {name: shares_out, type: float64, nullable: true, description: "Shares outstanding used"}
+  - {name: shares_out_source, type: enum, nullable: true, values: [valuation_daily, fundamentals], description: "Source of shares_out"}
+  - {name: inst_own_pct, type: float64, nullable: true, description: "shares_held / shares_out (fraction)"}
+  - {name: inst_own_pct_prev, type: float64, nullable: true, description: "Previous quarter"}
+  - {name: inst_own_chg, type: float64, nullable: true, description: "inst_own_pct - previous (fraction points)"}
+  - {name: shares_held_chg_pct, type: float64, nullable: true, description: "shares_held / previous - 1"}
+  - {name: net_flow_shares, type: float64, nullable: true, description: "Sum of share changes of filers that filed both quarters"}
+  - {name: flow_pct_out, type: float64, nullable: true, description: "net_flow_shares / shares_out"}
+  - {name: breadth, type: float64, nullable: true, description: "(new + added - trimmed - exited) / positions compared"}
+  - {name: hhi, type: float64, nullable: true, description: "Concentration of 13F shares across holders (0..1)"}
+  - {name: top10_share, type: float64, nullable: true, description: "Share of 13F shares held by the 10 largest holders"}
+  - {name: n_hf_holders, type: int32, nullable: true, description: "MODEL-BASED hedge-fund-like holders"}
+  - {name: hf_shares_pct, type: float64, nullable: true, description: "Hedge-fund-like shares / shares_out"}
+  - {name: hf_share_of_inst, type: float64, nullable: true, description: "Hedge-fund-like shares / 13F shares"}
+  - {name: hf_net_flow_shares, type: float64, nullable: true, description: "Share changes of hedge-fund-like filers"}
+  - {name: hf_top20_count, type: int32, nullable: true, description: "Hedge-fund-like filers holding it among their top-20 positions (crowding)"}
+  - {name: crowding_pct, type: float64, nullable: true, description: "MODEL-BASED percentile of hf_top20_count within the quarter (0..1)"}
+  - {name: n_smart_holders, type: int32, nullable: true, description: "MODEL-BASED smart-cohort holders"}
+  - {name: smart_net_flow_shares, type: float64, nullable: true, description: "Share changes of smart-cohort filers"}
+  - {name: smart_flow_pct_out, type: float64, nullable: true, description: "smart_net_flow_shares / shares_out"}
+  - {name: smart_buyers, type: int32, nullable: true, description: "Smart-cohort new + added"}
+  - {name: smart_sellers, type: int32, nullable: true, description: "Smart-cohort trimmed + exited"}
+  - {name: put_value_usd, type: float64, nullable: true, description: "13F put option value (underlying)"}
+  - {name: call_value_usd, type: float64, nullable: true, description: "13F call option value (underlying)"}
+  - {name: put_call_ratio, type: float64, nullable: true, description: "put / call value"}
+  - {name: computed_at, type: datetime, nullable: false, description: "Write time UTC"}
+  - {name: run_id, type: string, nullable: true, description: "job_runs.run_id"}

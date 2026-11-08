@@ -1,0 +1,34 @@
+table: earnings_pead
+version: 1
+zone: scores
+owner: earnings (app.earnings.signals)
+description: >
+  Post-earnings-announcement-drift signal on MODEL-BASED surprises (not consensus), for the backtesting lab. One row
+  per release with a usable surprise. signal_date = first trading day on which both the price reaction and the
+  actual were public: max(reaction_date + 1 trading day, first trading day after actual_knowledge_date). Inputs known
+  at signal_date only: SUE = EPS surprise / std of the issuer's previous 8 EPS surprises (falls back to surprise_z),
+  revenue surprise z, EAR = CAR[-1,+1]. pead_score = mean of the available z-capped inputs (SUE, revenue z, EAR / its
+  baseline), cross-sectional decile within (region, signal month). outcome_* columns are realised post-signal
+  abnormal returns, beta-adjusted r - beta x r_m with beta from earnings_reactions and no alpha (LABELS, never usable at signal_date; null until the window completes).
+storage: {path: scores/earnings_pead, format: parquet, partition_by: [region], write_mode: overwrite, sort_by: [security_id, signal_date]}
+primary_key: [security_id, period_end]
+pit: {knowledge_column: signal_date, rule: "signal usable from signal_date; outcome_* are forward labels"}
+columns:
+  - {name: security_id, type: string, nullable: false, description: "Primary security"}
+  - {name: issuer_id, type: string, nullable: false, description: "FK issuers"}
+  - {name: region, type: string, nullable: false, description: "Partition"}
+  - {name: sector_id, type: string, nullable: true, description: "Sector"}
+  - {name: period_end, type: date, nullable: false, description: "Fiscal period"}
+  - {name: release_date, type: date, nullable: false, description: "Release date"}
+  - {name: signal_date, type: date, nullable: false, description: "First trading day the signal is usable"}
+  - {name: sue, type: float64, nullable: true, description: "Standardized unexpected EPS (model-based)"}
+  - {name: rev_surprise_z, type: float64, nullable: true, description: "Revenue surprise z (model-based)"}
+  - {name: ear, type: float64, nullable: true, description: "Earnings announcement return CAR[-1,+1]"}
+  - {name: ear_z, type: float64, nullable: true, description: "CAR[-1,+1] / realised-vol baseline"}
+  - {name: pead_score, type: float64, nullable: true, description: "Composite (mean of capped inputs, +-3)"}
+  - {name: decile, type: int8, nullable: true, description: "1..10 within region x signal month (>= 20 names)"}
+  - {name: outcome_car_p2_p20, type: float64, nullable: true, description: "LABEL: CAR from signal day+1 over 20 trading days"}
+  - {name: outcome_car_p2_p60, type: float64, nullable: true, description: "LABEL: CAR from signal day+1 over 60 trading days"}
+  - {name: label, type: string, nullable: false, description: "'Model-based surprise (not consensus)'"}
+  - {name: computed_at, type: datetime, nullable: false, description: "Write time UTC"}
+  - {name: run_id, type: string, nullable: true, description: "job_runs.run_id"}

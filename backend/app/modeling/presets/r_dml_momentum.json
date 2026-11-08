@@ -1,0 +1,165 @@
+{
+ "title": "DML: momentum controlling for size, value and industry",
+ "description": "Is the momentum effect on next-month returns robust to flexible (non-linear) controls for size, value, profitability, volatility and sector? Double machine learning, partially linear model.",
+ "question": "factors",
+ "tags": [
+  "causal",
+  "DML",
+  "momentum"
+ ],
+ "method_note": "Chernozhukov et al. (2018) partially linear DML: LightGBM learns E[y|controls] and E[momentum|controls] out of fold (purged date blocks), and theta is the slope of the residualized return on residualized momentum, with date-clustered errors. Compared with the naive OLS slope: if theta shrinks, part of 'momentum' was size / value / volatility exposure. Caveat: the universe is today's constituents (membership history starts 2026-10), so early years carry survivorship bias; read the premium as an upper bound.",
+ "expected_outputs": [
+  "theta (PLR) with clustered CI",
+  "naive OLS vs DML",
+  "nuisance R2",
+  "residual scatter"
+ ],
+ "runtime_s": 9.8,
+ "validated": "2026-11-06 on snapshot R20261106T010757G9ZB",
+ "result": {
+  "run_id": "SR20261106T022432CCC0J",
+  "metrics": {
+   "theta": 0.002962428059144369,
+   "p_value": 0.046197145073381685
+  },
+  "coefficients": [
+   {
+    "term": "θ (PLR)",
+    "estimate": 0.002962428059144369,
+    "statistic": 1.9935875681530304,
+    "p_value": 0.046197145073381685
+   },
+   {
+    "term": "naive OLS with controls",
+    "estimate": 0.0017509435627682357,
+    "statistic": 1.1838620572626044,
+    "p_value": 0.23646767194141982
+   }
+  ]
+ },
+ "study": {
+  "name": "DML: momentum controlling for size, value and industry",
+  "method": "dml",
+  "y": "fwd_ret_1m",
+  "x": [
+   "log_mcap",
+   "earnings_yield",
+   "pb_rank",
+   "gross_prof",
+   "ivol"
+  ],
+  "params": {
+   "treatment": "mom_12_1",
+   "learner_y": "lgbm",
+   "learner_d": "lgbm",
+   "crossfit": {
+    "folds": 5,
+    "purge": 1,
+    "embargo": 1
+   },
+   "cluster": "date"
+  },
+  "dataset": {
+   "kind": "panel",
+   "frequency": "M",
+   "start": "2012-01-01",
+   "entities": {
+    "universe": "mvp_us"
+   },
+   "variables": [
+    {
+     "name": "fwd_ret_1m",
+     "source": "prices",
+     "field": "ret",
+     "transforms": [
+      {
+       "op": "fwd_compound",
+       "k": 1
+      },
+      {
+       "op": "winsorize"
+      }
+     ]
+    },
+    {
+     "name": "mom_12_1",
+     "source": "tech_factors",
+     "field": "mom",
+     "transforms": [
+      {
+       "op": "winsorize"
+      },
+      {
+       "op": "cs_zscore"
+      }
+     ]
+    },
+    {
+     "name": "log_mcap",
+     "source": "valuation",
+     "field": "market_cap_usd",
+     "transforms": [
+      {
+       "op": "log"
+      },
+      {
+       "op": "cs_zscore"
+      }
+     ]
+    },
+    {
+     "name": "earnings_yield",
+     "source": "valuation",
+     "field": "earnings_yield",
+     "transforms": [
+      {
+       "op": "cs_rank"
+      }
+     ]
+    },
+    {
+     "name": "pb_rank",
+     "source": "valuation",
+     "field": "pb",
+     "transforms": [
+      {
+       "op": "winsorize"
+      },
+      {
+       "op": "cs_rank"
+      }
+     ]
+    },
+    {
+     "name": "gross_prof",
+     "source": "ratios",
+     "field": "gross_profitability",
+     "transforms": [
+      {
+       "op": "winsorize"
+      },
+      {
+       "op": "cs_zscore"
+      }
+     ]
+    },
+    {
+     "name": "ivol",
+     "source": "tech_factors",
+     "field": "ivol",
+     "transforms": [
+      {
+       "op": "winsorize"
+      },
+      {
+       "op": "cs_zscore"
+      }
+     ]
+    }
+   ],
+   "dummies": [
+    "sector"
+   ]
+  }
+ }
+}

@@ -1,0 +1,120 @@
+{
+ "title": "52-week-high momentum (George-Hwang)",
+ "description": "Does nearness to the 52-week high predict returns beyond standard momentum?",
+ "question": "factors",
+ "tags": [
+  "factors",
+  "momentum",
+  "anchoring"
+ ],
+ "method_note": "George & Hwang (2004): investors anchor on the 52-week high, so stocks near it under-react to good news. Industry momentum (Moskowitz-Grinblatt) is included to separate the two effects. Caveat: the universe is today's constituents (membership history starts 2026-10), so early years carry survivorship bias; read the premium as an upper bound.",
+ "expected_outputs": [
+  "premium per signal",
+  "slope time series"
+ ],
+ "runtime_s": 12.3,
+ "validated": "2026-11-06 on snapshot R20261106T010757G9ZB",
+ "result": {
+  "run_id": "SR20261106T013201N1C7S",
+  "n_obs": 107466,
+  "metrics": {
+   "avg_r2": 0.0941923913251858
+  },
+  "coefficients": [
+   {
+    "term": "hi52",
+    "estimate": -0.004195829987018231,
+    "statistic": -3.2485119854825406,
+    "p_value": 0.0013127665952573822
+   },
+   {
+    "term": "mom_12_1",
+    "estimate": 0.0027084424350411348,
+    "statistic": 2.557559289104177,
+    "p_value": 0.011108998846598626
+   },
+   {
+    "term": "indmom",
+    "estimate": 0.0002915957752893066,
+    "statistic": 0.4272044107285807,
+    "p_value": 0.6695840153367143
+   }
+  ]
+ },
+ "study": {
+  "name": "52-week-high momentum (George-Hwang)",
+  "method": "fama_macbeth",
+  "y": "fwd_ret_1m",
+  "x": [
+   "hi52",
+   "mom_12_1",
+   "indmom"
+  ],
+  "params": {
+   "nw_lags": 3
+  },
+  "dataset": {
+   "kind": "panel",
+   "frequency": "M",
+   "start": "2005-01-01",
+   "entities": {
+    "universe": "mvp_us"
+   },
+   "variables": [
+    {
+     "name": "fwd_ret_1m",
+     "source": "prices",
+     "field": "ret",
+     "transforms": [
+      {
+       "op": "fwd_compound",
+       "k": 1
+      },
+      {
+       "op": "winsorize"
+      }
+     ]
+    },
+    {
+     "name": "hi52",
+     "source": "tech_factors",
+     "field": "hi52",
+     "transforms": [
+      {
+       "op": "winsorize"
+      },
+      {
+       "op": "cs_zscore"
+      }
+     ]
+    },
+    {
+     "name": "mom_12_1",
+     "source": "tech_factors",
+     "field": "mom",
+     "transforms": [
+      {
+       "op": "winsorize"
+      },
+      {
+       "op": "cs_zscore"
+      }
+     ]
+    },
+    {
+     "name": "indmom",
+     "source": "tech_factors",
+     "field": "indmom",
+     "transforms": [
+      {
+       "op": "winsorize"
+      },
+      {
+       "op": "cs_zscore"
+      }
+     ]
+    }
+   ]
+  }
+ }
+}

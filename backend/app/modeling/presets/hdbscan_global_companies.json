@@ -1,0 +1,96 @@
+{
+ "title": "HDBSCAN of global companies",
+ "description": "mvp_global companies on latest point-in-time profitability, growth, leverage and valuation ratios (winsorized, standardized): HDBSCAN finds dense peer clusters and flags outliers as noise.",
+ "tags": [
+  "clustering",
+  "HDBSCAN",
+  "global",
+  "peers"
+ ],
+ "study": {
+  "name": "Global company clusters (HDBSCAN)",
+  "method": "density_clustering",
+  "x": [
+   "roic",
+   "op_margin",
+   "rev_growth",
+   "net_debt_ebitda",
+   "earnings_yield"
+  ],
+  "params": {
+   "algorithm": "hdbscan",
+   "min_cluster_size": 6,
+   "min_samples": 2,
+   "impute": "median"
+  },
+  "dataset": {
+   "kind": "cross_section",
+   "frequency": "M",
+   "entities": {
+    "universe": "mvp_global"
+   },
+   "variables": [
+    {
+     "name": "roic",
+     "source": "ratios",
+     "field": "roic",
+     "transforms": [
+      {
+       "op": "winsorize",
+       "lower": 0.02,
+       "upper": 0.98
+      }
+     ]
+    },
+    {
+     "name": "op_margin",
+     "source": "ratios",
+     "field": "operating_margin",
+     "transforms": [
+      {
+       "op": "winsorize",
+       "lower": 0.02,
+       "upper": 0.98
+      }
+     ]
+    },
+    {
+     "name": "rev_growth",
+     "source": "ratios",
+     "field": "revenue_growth_yoy",
+     "transforms": [
+      {
+       "op": "winsorize",
+       "lower": 0.02,
+       "upper": 0.98
+      }
+     ]
+    },
+    {
+     "name": "net_debt_ebitda",
+     "source": "ratios",
+     "field": "net_debt_to_ebitda",
+     "transforms": [
+      {
+       "op": "winsorize",
+       "lower": 0.02,
+       "upper": 0.98
+      }
+     ]
+    },
+    {
+     "name": "earnings_yield",
+     "source": "valuation",
+     "field": "earnings_yield",
+     "transforms": [
+      {
+       "op": "winsorize",
+       "lower": 0.02,
+       "upper": 0.98
+      }
+     ]
+    }
+   ]
+  }
+ }
+}

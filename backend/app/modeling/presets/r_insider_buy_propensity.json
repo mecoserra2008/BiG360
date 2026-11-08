@@ -1,0 +1,140 @@
+{
+ "title": "Effect of an insider cluster buy (propensity scores, AIPW)",
+ "description": "Average effect of a cluster buy on the 3-month return, adjusting for size, value, momentum and volatility.",
+ "question": "events",
+ "tags": [
+  "events",
+  "insiders",
+  "causal"
+ ],
+ "method_note": "Doubly robust AIPW: a propensity model for 'cluster buy this month' and an outcome model, both cross-fitted; the balance table shows whether treated and control stocks look alike after weighting. Not causal if insiders time on information we do not observe. Caveat: the universe is today's constituents (membership history starts 2026-10), so early years carry survivorship bias; read the premium as an upper bound.",
+ "expected_outputs": [
+  "ATE (AIPW) with CI",
+  "balance table",
+  "overlap plot"
+ ],
+ "runtime_s": 4.7,
+ "validated": "2026-11-06 on snapshot R20261106T010757G9ZB",
+ "result": {
+  "run_id": "SR20261106T022507FHH96",
+  "metrics": {},
+  "coefficients": [
+   {
+    "term": "ATE (AIPW)",
+    "estimate": -0.011097205982916206,
+    "statistic": -1.2394081910834318,
+    "p_value": 0.21519436953711102
+   },
+   {
+    "term": "difference in means (unadjusted)",
+    "estimate": -0.009121163507793677,
+    "statistic": -1.031826348420604,
+    "p_value": 0.3021534737093827
+   }
+  ]
+ },
+ "study": {
+  "name": "Effect of an insider cluster buy (propensity scores, AIPW)",
+  "method": "propensity",
+  "y": "fwd_ret_3m",
+  "x": [
+   "log_mcap",
+   "earnings_yield",
+   "mom_12_1",
+   "ivol"
+  ],
+  "params": {
+   "treatment": "cluster_buy",
+   "estimator": "aipw",
+   "crossfit": {
+    "folds": 5,
+    "purge": 3
+   },
+   "cluster": "date"
+  },
+  "dataset": {
+   "kind": "panel",
+   "frequency": "M",
+   "start": "2017-06-01",
+   "entities": {
+    "universe": "mvp_us"
+   },
+   "variables": [
+    {
+     "name": "fwd_ret_3m",
+     "source": "prices",
+     "field": "ret",
+     "transforms": [
+      {
+       "op": "fwd_compound",
+       "k": 3
+      },
+      {
+       "op": "winsorize"
+      }
+     ]
+    },
+    {
+     "name": "cluster_buy",
+     "source": "insider",
+     "field": "cluster_buy",
+     "transforms": [
+      {
+       "op": "binarize",
+       "threshold": 0.5
+      }
+     ]
+    },
+    {
+     "name": "log_mcap",
+     "source": "valuation",
+     "field": "market_cap_usd",
+     "transforms": [
+      {
+       "op": "log"
+      },
+      {
+       "op": "cs_zscore"
+      }
+     ]
+    },
+    {
+     "name": "earnings_yield",
+     "source": "valuation",
+     "field": "earnings_yield",
+     "transforms": [
+      {
+       "op": "cs_rank"
+      }
+     ]
+    },
+    {
+     "name": "mom_12_1",
+     "source": "tech_factors",
+     "field": "mom",
+     "transforms": [
+      {
+       "op": "winsorize"
+      },
+      {
+       "op": "cs_zscore"
+      }
+     ]
+    },
+    {
+     "name": "ivol",
+     "source": "tech_factors",
+     "field": "ivol",
+     "transforms": [
+      {
+       "op": "winsorize"
+      },
+      {
+       "op": "cs_zscore"
+      }
+     ]
+    }
+   ]
+  }
+ }
+}

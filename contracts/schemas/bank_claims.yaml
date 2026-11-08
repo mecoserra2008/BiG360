@@ -1,0 +1,23 @@
+table: bank_claims
+version: 1
+zone: normalized
+owner: linkage (app.linkage.banking)
+description: >
+  A4 bilateral banking exposures from the BIS international banking statistics (official SDMX API), quarterly from
+  2000: locational (LBS: cross-border claims / liabilities of banks located in the reporting country, all sectors)
+  and consolidated (CBS: claims of the reporting country's domestic banks, immediate-counterparty and guarantor /
+  ultimate-risk basis). Aggregate counterparties are excluded; values in USD millions.
+storage: {path: normalized/bank_claims, format: parquet, partition_by: [dataset], write_mode: upsert, retention: "forever"}
+primary_key: [dataset, reporter_iso2, counterparty_iso2, period]
+pit: {knowledge_column: knowledge_date, rule: "quarter end + 4 months (BIS release lag; estimated)"}
+columns:
+  - {name: dataset, type: enum, nullable: false, values: [lbs_claims, lbs_liabilities, cbs_immediate, cbs_ultimate], description: "BIS series family"}
+  - {name: reporter_iso2, type: string, nullable: false, description: "Reporting country (LBS: bank location; CBS: bank nationality)"}
+  - {name: counterparty_iso2, type: string, nullable: false, description: "Counterparty country"}
+  - {name: period_end, type: date, nullable: false, description: "Quarter end"}
+  - {name: period, type: string, nullable: false, description: "BIS TIME_PERIOD (YYYY-Qn)"}
+  - {name: value_usd_m, type: float64, nullable: false, unit: "USD millions", description: "Outstanding amount"}
+  - {name: obs_status, type: string, nullable: true, description: "BIS OBS_STATUS (A normal, E estimated, ...)"}
+  - {name: knowledge_date, type: date, nullable: false, description: "period_end + 4 months (rule)"}
+  - {name: knowledge_date_estimated, type: bool, nullable: false, description: "true (rule-based)"}
+  - {name: ingested_at, type: datetime, nullable: false, description: "Write time UTC"}

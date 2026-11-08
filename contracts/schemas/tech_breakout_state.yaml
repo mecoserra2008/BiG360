@@ -1,0 +1,32 @@
+table: tech_breakout_state
+version: 1
+zone: features
+owner: technicals (app.techv3.job:run_breakouts, nightly tech_breakouts)
+description: >
+  Technicals v3 #5 daily breakout state per liquid security: the most recent breakout of the last 20 sessions
+  (tech_breakouts) and where the price stands relative to it at the as-of close - active (still beyond the level, target
+  not reached), followed_through (target reached first), failed (closed back inside first) or none - with the event's
+  confirmation flag / score and calibrated P(follow-through) (model-based; experimental when it failed the gate).
+storage: {path: features/tech_breakout_state, format: parquet, partition_by: [], write_mode: overwrite, retention: "latest + month-end snapshots"}
+primary_key: [as_of_date, security_id]
+columns:
+  - {name: as_of_date, type: date, nullable: false, description: "As-of session"}
+  - {name: security_id, type: string, nullable: false, description: "FK securities_master"}
+  - {name: region, type: string, nullable: true, description: "Region"}
+  - {name: state, type: enum, nullable: false, values: [none, active, followed_through, failed], description: "Status of the latest breakout within 20 sessions"}
+  - {name: direction, type: int8, nullable: true, description: "+1 up / -1 down"}
+  - {name: lookback, type: int16, nullable: true, description: "N of the breakout (20 / 55; the longer one when both fired)"}
+  - {name: event_date, type: date, nullable: true, description: "Breakout session"}
+  - {name: sessions_since, type: int16, nullable: true, description: "Sessions since the breakout"}
+  - {name: level, type: float32, nullable: true, description: "Breakout level (adjusted price)"}
+  - {name: target_20, type: float32, nullable: true, description: "Follow-through target (H = 20)"}
+  - {name: last_close, type: float32, nullable: true, description: "As-of close (adjusted)"}
+  - {name: confirmed, type: bool, nullable: true, description: "Pre-registered volume confirmation"}
+  - {name: confirm_score, type: float32, nullable: true, description: "0..100 confirmation score"}
+  - {name: relvol50, type: float32, nullable: true, description: "Breakout-day relative volume (50 sessions)"}
+  - {name: clv, type: float32, nullable: true, description: "Breakout-day close location (dir-signed)"}
+  - {name: p_follow_20, type: float32, nullable: true, description: "Calibrated P(follow-through within 20 sessions) at the event"}
+  - {name: p_geo_20, type: float32, nullable: true, description: "Geometry-only baseline P"}
+  - {name: base_rate_20, type: float32, nullable: true, description: "Historical follow-through rate of all breakouts of this lookback x direction (validation)"}
+  - {name: gate, type: enum, nullable: false, values: [production, experimental], description: "Gate of the calibrated P(follow-through) (docs/TECHNICALS_V3_VALIDATION.md)"}
+  - {name: computed_at, type: datetime, nullable: false, description: "Write time UTC"}

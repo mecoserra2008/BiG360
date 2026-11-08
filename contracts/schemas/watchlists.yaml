@@ -1,0 +1,13 @@
+table: watchlists
+version: 1
+zone: app_state
+owner: api (app.api.routers.watchlists)
+description: User watchlists (single-user app). Mutable state lives in data/db/app_state.duckdb, not Parquet.
+storage: {path: app_state.duckdb, format: duckdb_table, partition_by: [], write_mode: upsert}
+primary_key: [watchlist_id]
+columns:
+  - {name: watchlist_id, type: string, nullable: false, description: "uuid4 hex"}
+  - {name: name, type: string, nullable: false, description: "Name"}
+  - {name: description, type: string, nullable: true, description: "Notes"}
+  - {name: created_at, type: datetime, nullable: false, description: "UTC"}
+  - {name: updated_at, type: datetime, nullable: false, description: "UTC"}

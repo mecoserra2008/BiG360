@@ -1,0 +1,43 @@
+{
+ "title": "Markov switching: US market regimes",
+ "description": "Monthly S&P 500 return (percent, IDX:^GSPC) since 1960 with a two-regime Markov-switching mean and variance: calm vs turbulent regimes, smoothed probabilities, transition matrix and expected durations.",
+ "tags": [
+  "regimes",
+  "Markov switching",
+  "market"
+ ],
+ "study": {
+  "name": "US market regimes",
+  "method": "markov_switching",
+  "y": "spx",
+  "x": [],
+  "params": {
+   "k_regimes": 2,
+   "switching_variance": true,
+   "search_reps": 10
+  },
+  "dataset": {
+   "kind": "timeseries",
+   "frequency": "M",
+   "start": "1960-01-01",
+   "variables": [
+    {
+     "name": "spx",
+     "source": "prices",
+     "field": "ret",
+     "entities": {
+      "security_ids": [
+       "IDX:^GSPC"
+      ]
+     },
+     "transforms": [
+      {
+       "op": "scale",
+       "factor": 100
+      }
+     ]
+    }
+   ]
+  }
+ }
+}

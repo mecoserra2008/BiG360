@@ -1,0 +1,30 @@
+table: earnings_announcements
+version: 2
+zone: normalized
+owner: earnings (app.earnings.fetch)
+description: >
+  Dated earnings announcements from schedule-type sources, one row per (source, security, announced date): Yahoo
+  Finance earnings dates (past and upcoming; company data relayed by a provider, labelled "provider estimate" for
+  upcoming dates) and official exchange schedules where machine-readable (JPX listed-company earnings announcement
+  schedule = company-announced dates). Only dates / times are stored (no provider consensus numbers).
+  v2 (COVERAGE_V2 W1, 2026-10-31): HKEX board-meeting notifications (hkex_bmn), CNINFO periodic-report booking schedule
+  (cninfo: booked / changed dates + actual disclosure dates of A-shares) and FCA NSM results announcements / notices of
+  results (fca_nsm: FR / IR / QRF / QRS / QRT publication minute, NOR announced date) - app.earnings.announce;
+  event_kind tells an announced-in-advance date (schedule) from the actual publication of results (release).
+  PIT: knowledge_date = first fetch date that returned the row.
+storage: {path: normalized/earnings_announcements, format: parquet, partition_by: [source_id], write_mode: upsert, sort_by: [security_id, event_date]}
+primary_key: [source_id, security_id, event_date]
+pit: {knowledge_column: knowledge_date, rule: "an announced date is known from the first fetch that returned it"}
+columns:
+  - {name: source_id, type: enum, nullable: false, values: [yahoo, jpx_schedule, hkex_bmn, cninfo, fca_nsm], description: "yahoo = Yahoo Finance earnings dates (provider); jpx_schedule = JPX earnings announcement schedule (company-announced); hkex_bmn = HKEX board meeting notifications (company-announced); cninfo = CNINFO periodic-report booking schedule / actual disclosure date (SSE + SZSE); fca_nsm = FCA National Storage Mechanism results announcements and notices of results"}
+  - {name: security_id, type: string, nullable: false, description: "FK securities_master (primary listing used for the lookup)"}
+  - {name: issuer_id, type: string, nullable: true, description: "FK issuers"}
+  - {name: event_date, type: date, nullable: false, description: "Announced date (exchange-local calendar)"}
+  - {name: event_ts, type: datetime, nullable: true, description: "Announced time UTC when the source gives one (null = date only)"}
+  - {name: time_known, type: bool, nullable: false, description: "True when the source gives a time of day"}
+  - {name: period_hint, type: string, nullable: true, description: "Source period text if any"}
+  - {name: provider_symbol, type: string, nullable: true, description: "Symbol used at the source (yf ticker, JP code, HK code)"}
+  - {name: knowledge_date, type: date, nullable: false, description: "First fetch date (UTC) that returned this row"}
+  - {name: fetched_at, type: datetime, nullable: false, description: "Last fetch time UTC"}
+  - {name: event_kind, type: enum, nullable: true, values: [schedule, release], description: "v2: schedule = date announced in advance (upcoming release), release = actual publication of results (official release time / date); null = legacy yahoo / jpx rows (yahoo past = provider date, jpx = schedule)"}
+  - {name: url, type: string, nullable: true, description: "v2: source document / page"}

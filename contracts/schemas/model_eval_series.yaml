@@ -1,0 +1,16 @@
+table: model_eval_series
+version: 1
+zone: ml
+owner: ml (app.ml.evaluate)
+description: >
+  Time series and bucket diagnostics per model run for Model Lab charts: per-date IC / rank IC,
+  per-decile mean forward excess returns, cumulative long-short, per-fold metrics.
+storage: {path: ml/model_eval_series, format: parquet, partition_by: [], write_mode: upsert}
+primary_key: [model_run_id, metric, date, bucket]
+columns:
+  - {name: model_run_id, type: string, nullable: false, description: "FK model_runs"}
+  - {name: metric, type: enum, nullable: false, values: [ic, rank_ic, decile_return, cum_long_short, fold_rank_ic, coverage], description: "Metric"}
+  - {name: date, type: date, nullable: false, description: "Date (fold end date for fold_* metrics; 1900-01-01 for date-less aggregates)"}
+  - {name: bucket, type: string, nullable: false, description: "Decile '1'..'10', fold id, sector id, or '' when not bucketed"}
+  - {name: value, type: float64, nullable: true, description: "Metric value"}
+  - {name: computed_at, type: datetime, nullable: false, description: "Write time UTC"}

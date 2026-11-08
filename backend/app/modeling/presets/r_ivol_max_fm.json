@@ -1,0 +1,119 @@
+{
+ "title": "Low-volatility anomaly: IVOL and MAX (Fama-MacBeth)",
+ "description": "Do high idiosyncratic-volatility and lottery-like (MAX) stocks underperform next month?",
+ "question": "factors",
+ "tags": [
+  "factors",
+  "low volatility"
+ ],
+ "method_note": "Ang et al. (2006) IVOL puzzle and Bali-Cakici-Whitelaw (2011) MAX effect; size controls for the small-cap concentration of high-IVOL names. Expect negative IVOL / MAX slopes, weaker in large caps. Caveat: the universe is today's constituents (membership history starts 2026-10), so early years carry survivorship bias; read the premium as an upper bound.",
+ "expected_outputs": [
+  "premium per signal",
+  "slope time series"
+ ],
+ "runtime_s": 4.9,
+ "validated": "2026-11-06 on snapshot R20261106T010757G9ZB",
+ "result": {
+  "run_id": "SR20261106T015430HGQBM",
+  "n_obs": 80156,
+  "metrics": {
+   "avg_r2": 0.06666057920290122
+  },
+  "coefficients": [
+   {
+    "term": "ivol",
+    "estimate": 0.00150789914086558,
+    "statistic": 1.2697999018675128,
+    "p_value": 0.2056313456799673
+   },
+   {
+    "term": "maxret",
+    "estimate": 0.0008159620414282513,
+    "statistic": 0.7773807645525933,
+    "p_value": 0.4378527036846835
+   },
+   {
+    "term": "log_mcap",
+    "estimate": -0.0028322037799334613,
+    "statistic": -5.318620804061749,
+    "p_value": 2.786126114726693e-07
+   }
+  ]
+ },
+ "study": {
+  "name": "Low-volatility anomaly: IVOL and MAX (Fama-MacBeth)",
+  "method": "fama_macbeth",
+  "y": "fwd_ret_1m",
+  "x": [
+   "ivol",
+   "maxret",
+   "log_mcap"
+  ],
+  "params": {
+   "nw_lags": 3
+  },
+  "dataset": {
+   "kind": "panel",
+   "frequency": "M",
+   "start": "2010-01-01",
+   "entities": {
+    "universe": "mvp_us"
+   },
+   "variables": [
+    {
+     "name": "fwd_ret_1m",
+     "source": "prices",
+     "field": "ret",
+     "transforms": [
+      {
+       "op": "fwd_compound",
+       "k": 1
+      },
+      {
+       "op": "winsorize"
+      }
+     ]
+    },
+    {
+     "name": "ivol",
+     "source": "tech_factors",
+     "field": "ivol",
+     "transforms": [
+      {
+       "op": "winsorize"
+      },
+      {
+       "op": "cs_zscore"
+      }
+     ]
+    },
+    {
+     "name": "maxret",
+     "source": "tech_factors",
+     "field": "maxret",
+     "transforms": [
+      {
+       "op": "winsorize"
+      },
+      {
+       "op": "cs_zscore"
+      }
+     ]
+    },
+    {
+     "name": "log_mcap",
+     "source": "valuation",
+     "field": "market_cap_usd",
+     "transforms": [
+      {
+       "op": "log"
+      },
+      {
+       "op": "cs_zscore"
+      }
+     ]
+    }
+   ]
+  }
+ }
+}

@@ -1,0 +1,35 @@
+table: valuation_daily
+version: 2
+zone: features
+owner: analytics-scoring (app.analytics.valuation)
+description: >
+  Daily price-dependent metrics per security using the PIT fundamentals known at that date (TTM, USD basis,
+  per-share figures split-adjusted). Market cap uses PIT shares outstanding x close.
+storage: {path: features/valuation_daily, format: parquet, partition_by: [year], write_mode: upsert}
+primary_key: [security_id, date]
+pit: {knowledge_column: fundamentals_knowledge_date, rule: "uses fundamentals with knowledge_date <= date"}
+columns:
+  - {name: security_id, type: string, nullable: false, description: "FK securities_master"}
+  - {name: issuer_id, type: string, nullable: false, description: "FK issuers"}
+  - {name: date, type: date, nullable: false, description: "Trading date"}
+  - {name: year, type: int16, nullable: false, description: "Partition"}
+  - {name: shares_out, type: float64, nullable: true, description: "PIT shares outstanding (split-adjusted to date)"}
+  - {name: market_cap_usd, type: float64, nullable: true, description: "Issuer-level market cap USD (all classes)"}
+  - {name: enterprise_value_usd, type: float64, nullable: true, description: "mcap + total_debt + preferred + minority - cash_and_st_investments"}
+  - {name: size_bucket, type: enum, nullable: true, values: [large, mid, small], description: "From _conventions.size_buckets_usd"}
+  - {name: pe_ttm, type: float64, nullable: true, description: "Price / diluted EPS TTM (null if EPS<=0)"}
+  - {name: earnings_yield, type: float64, nullable: true, description: "net_income_common TTM / mcap (defined for negatives)"}
+  - {name: pb, type: float64, nullable: true, description: "mcap / total_equity_parent"}
+  - {name: ps_ttm, type: float64, nullable: true, description: "mcap / revenue TTM"}
+  - {name: ev_sales, type: float64, nullable: true, description: "EV / revenue TTM"}
+  - {name: ev_ebitda, type: float64, nullable: true, description: "EV / EBITDA TTM (null if EBITDA<=0)"}
+  - {name: ev_ebit, type: float64, nullable: true, description: "EV / EBIT TTM"}
+  - {name: fcf_yield, type: float64, nullable: true, description: "FCF TTM / mcap"}
+  - {name: dividend_yield, type: float64, nullable: true, description: "Dividends per share TTM / price"}
+  - {name: shareholder_yield, type: float64, nullable: true, description: "(dividends + net buybacks) TTM / mcap"}
+  - {name: p_ffo, type: float64, nullable: true, description: "REITs: mcap / FFO TTM"}
+  - {name: p_tbv, type: float64, nullable: true, description: "Banks: mcap / tangible book"}
+  - {name: gp_to_ev, type: float64, nullable: true, description: "Gross profit TTM / EV (quality per unit of valuation, Novy-Marx) (v2)"}
+  - {name: close_usd, type: float64, nullable: true, description: "Close in USD used for market cap (v2)"}
+  - {name: fundamentals_knowledge_date, type: date, nullable: true, description: "knowledge_date of the fundamentals row used"}
+  - {name: computed_at, type: datetime, nullable: false, description: "Write time UTC"}

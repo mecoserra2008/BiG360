@@ -1,0 +1,30 @@
+table: macro_nowcasts
+version: 1
+zone: scores
+owner: macro-w2 (app.macro.nowcast, job macro_nowcast)
+description: >
+  Real GDP nowcasts per target quarter and as-of date. method=dfm_mq: our statsmodels DynamicFactorMQ on a documented
+  monthly panel plus quarterly GDP, estimated on point-in-time data (model-based, ours); news = decomposition of the
+  change vs the previous as-of nowcast into each released series' contribution. method=official_benchmark: published
+  reference series downloaded from the publisher (Atlanta Fed GDPNow; New York Fed Staff Nowcast), stored verbatim
+  for comparison and labelled as theirs.
+storage: {path: scores/macro_nowcasts, format: parquet, partition_by: [], write_mode: upsert}
+primary_key: [model_id, target_period, as_of]
+columns:
+  - {name: model_id, type: string, nullable: false, description: "dfm_mq_us_v1, dfm_mq_ea_v1, ... | gdpnow_atlanta_fed | nyfed_staff_nowcast"}
+  - {name: country, type: string, nullable: false, description: "ISO2 or EA"}
+  - {name: method, type: enum, nullable: false, values: [dfm_mq, official_benchmark], description: "Ours vs published reference"}
+  - {name: target_period, type: date, nullable: false, description: "Target quarter (first day)"}
+  - {name: target_label, type: string, nullable: false, description: "e.g. 2026Q3"}
+  - {name: as_of, type: date, nullable: false, description: "Information date of the nowcast"}
+  - {name: nowcast, type: float64, nullable: false, description: "Real GDP growth in units"}
+  - {name: lo, type: float64, nullable: true, description: "Interval low (80%)"}
+  - {name: hi, type: float64, nullable: true, description: "Interval high (80%)"}
+  - {name: units, type: string, nullable: false, description: "q/q % SAAR (US and benchmarks) or q/q % (non-annualized)"}
+  - {name: prev_nowcast, type: float64, nullable: true, description: "Previous as-of nowcast for the same target"}
+  - {name: news, type: json, nullable: true, description: "[{series_id, title, contribution}] news decomposition vs the previous vintage (dfm_mq only)"}
+  - {name: source, type: string, nullable: false, description: "Publisher URL for benchmarks; BiG Equity 360 model for ours"}
+  - {name: model_based, type: bool, nullable: false, description: "True for our models; false for official published benchmarks"}
+  - {name: label, type: string, nullable: false, description: "Display label (Model-based nowcast (ours) / Atlanta Fed GDPNow (official, reference))"}
+  - {name: computed_at, type: datetime, nullable: false, description: "Write time UTC"}
+  - {name: run_id, type: string, nullable: true, description: "Producing run"}

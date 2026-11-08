@@ -1,0 +1,105 @@
+{
+ "title": "Outperformance classifier from composite scores (LightGBM)",
+ "description": "Will a stock beat the cross-sectional mean over the next 3 months? LightGBM classifier on the app's factor and composite scores.",
+ "question": "factors",
+ "tags": [
+  "ML",
+  "scores",
+  "classification"
+ ],
+ "method_note": "Validates the app's own scores: AUC above 0.5 out of fold (purged 3-month blocks) means the scores order future outperformance; the DM test against logit tells whether non-linearity helps. Scores exist from 2016-10.",
+ "expected_outputs": [
+  "OOS AUC / log loss vs logit",
+  "DM test",
+  "importance"
+ ],
+ "runtime_s": 7.1,
+ "validated": "2026-11-06 on snapshot R20261106T010757G9ZB",
+ "result": {
+  "run_id": "SR20261106T013244D0NW8",
+  "beats_linear": true,
+  "verdict": "LightGBM beats linear baseline (DM p = 9.22e-05)",
+  "n_obs": 48758,
+  "metrics": {
+   "oos_auc": 0.47658310348383864,
+   "dm_p_vs_linear": 9.219331406154256e-05
+  },
+  "coefficients": []
+ },
+ "study": {
+  "name": "Outperformance classifier from composite scores (LightGBM)",
+  "method": "lightgbm",
+  "y": "outperf_3m",
+  "x": [
+   "quality",
+   "value",
+   "momentum",
+   "growth",
+   "balanced"
+  ],
+  "params": {
+   "task": "classification",
+   "n_estimators": 300,
+   "min_child_samples": 200,
+   "cv": {
+    "folds": 5,
+    "scheme": "purged_kfold",
+    "purge": 3,
+    "embargo": 3
+   }
+  },
+  "dataset": {
+   "kind": "panel",
+   "frequency": "M",
+   "start": "2017-01-01",
+   "entities": {
+    "universe": "mvp_us"
+   },
+   "variables": [
+    {
+     "name": "outperf_3m",
+     "source": "prices",
+     "field": "ret",
+     "transforms": [
+      {
+       "op": "fwd_compound",
+       "k": 3
+      },
+      {
+       "op": "cs_demean"
+      },
+      {
+       "op": "binarize",
+       "threshold": 0.0
+      }
+     ]
+    },
+    {
+     "name": "quality",
+     "source": "factor_scores",
+     "field": "quality"
+    },
+    {
+     "name": "value",
+     "source": "factor_scores",
+     "field": "value"
+    },
+    {
+     "name": "momentum",
+     "source": "factor_scores",
+     "field": "momentum"
+    },
+    {
+     "name": "growth",
+     "source": "factor_scores",
+     "field": "growth"
+    },
+    {
+     "name": "balanced",
+     "source": "composite_scores",
+     "field": "balanced"
+    }
+   ]
+  }
+ }
+}

@@ -1,0 +1,25 @@
+table: macro_series
+version: 2
+zone: normalized
+owner: macro-coverage (app.ingestion.fred, app.ingestion.macro_*; catalog contracts/macro_catalog.yaml)
+description: Catalog of macro series (FRED, DBnomics, World Bank, OECD, IMF, ECB, BoJ, BoK ECOS...). series_id is ours.
+storage: {path: normalized/macro_series, format: parquet, partition_by: [], write_mode: overwrite}
+primary_key: [series_id]
+columns:
+  - {name: series_id, type: string, nullable: false, description: "'{source_id}:{native code}', e.g. fred:DGS10, ecb:EXR.D.USD.EUR.SP00.A, dbnomics:OECD/MEI/..."}
+  - {name: source_id, type: string, nullable: false, description: "fred | ecb | eurostat | bis | imf | oecd | worldbank | boe | ons | boj | mof_jp | bcb | ibge | ... (see contracts/macro_catalog.yaml sources)"}
+  - {name: native_code, type: string, nullable: false, description: "Source series code"}
+  - {name: title, type: string, nullable: false, description: "Title"}
+  - {name: country, type: string, nullable: true, description: "ISO2 or aggregate code: EA (euro area), G7, OECD, EM, WLD"}
+  - {name: category, type: enum, nullable: false, values: [growth, inflation, rates, credit, fx, commodities, labor, housing, sentiment, liquidity, trade, fiscal, other], description: "Category"}
+  - {name: frequency, type: enum, nullable: false, values: [D, W, M, Q, A], description: "Native frequency"}
+  - {name: units, type: string, nullable: true, description: "Units text"}
+  - {name: seasonal_adjustment, type: string, nullable: true, description: "SA/NSA"}
+  - {name: default_transform, type: enum, nullable: false, values: [level, diff, pct_change, yoy, log_diff], description: "Transform used by regime/beta models"}
+  - {name: release_lag_days, type: int16, nullable: false, description: "Typical days from period end to release (for estimated knowledge_date)"}
+  - {name: is_core, type: bool, nullable: false, description: "Used by macro_regimes / macro_betas"}
+  - {name: last_observation_date, type: date, nullable: true, description: "Latest obs"}
+  - {name: updated_at, type: datetime, nullable: false, description: "Write time UTC"}
+  - {name: scale, type: enum, nullable: true, values: [percent, fraction, index, level], description: "How to read values: percent = 4.25 means 4.25%; fraction = 0.0425; index = index/diffusion/balance; level = amounts/prices (see unit_multiplier). Added v2."}
+  - {name: unit_multiplier, type: float64, nullable: true, description: "Multiplier of the stored value for level series (1e6 = millions, 1e9 = billions); 1 otherwise. Added v2."}
+  - {name: indicator, type: string, nullable: true, description: "Catalog indicator key(s) this series measures, comma separated (e.g. cpi_yoy, yield_10y; contracts/macro_catalog.yaml indicators). Added v2."}

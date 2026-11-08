@@ -1,0 +1,35 @@
+table: earnings_calendar
+version: 1
+zone: features
+owner: earnings (app.earnings.events)
+description: >
+  Upcoming earnings dates, one row per issuer x expected fiscal period (the next one or two). Source preference:
+  company_announced (official exchange schedule, e.g. JPX) > provider_estimate (Yahoo; labelled "provider estimate")
+  > model_projection (our cadence model: the same-period release a year earlier + 364 days, else period end + the
+  issuer's median report lag; labelled "model-based projection", with a +-window). Rebuilt every run (overwrite);
+  first_seen_date = first run that produced the same expected date for that period (carried across runs). A forecast
+  table: the column is not named knowledge_date because expected periods legitimately end after it.
+storage: {path: features/earnings_calendar, format: parquet, partition_by: [], write_mode: overwrite, sort_by: [expected_date, issuer_id]}
+primary_key: [issuer_id, period_end]
+pit: {knowledge_column: first_seen_date, rule: "expected date first produced on first_seen_date"}
+columns:
+  - {name: issuer_id, type: string, nullable: false, description: "FK issuers"}
+  - {name: security_id, type: string, nullable: true, description: "Primary security"}
+  - {name: region, type: string, nullable: true, description: "Issuer region"}
+  - {name: country, type: string, nullable: true, description: "Issuer country"}
+  - {name: sector_id, type: string, nullable: true, description: "Own taxonomy sector"}
+  - {name: period_end, type: date, nullable: false, description: "Expected fiscal period end being reported"}
+  - {name: fiscal_period, type: enum, nullable: true, values: [Q1, Q2, Q3, Q4, H1, H2, FY], description: "Expected fiscal period"}
+  - {name: expected_date, type: date, nullable: false, description: "Expected release date (exchange-local)"}
+  - {name: expected_ts, type: datetime, nullable: true, description: "Expected time UTC when the source gives one"}
+  - {name: session, type: enum, nullable: false, values: [pre_market, intraday, post_market, unknown], description: "Expected session (source time, else the issuer's usual session)"}
+  - {name: window_lo, type: date, nullable: true, description: "model_projection only: earliest plausible date"}
+  - {name: window_hi, type: date, nullable: true, description: "model_projection only: latest plausible date"}
+  - {name: date_source, type: enum, nullable: false, values: [company_announced, provider_estimate, model_projection], description: "Label shown in the UI"}
+  - {name: source_id, type: string, nullable: false, description: "jpx_schedule | hkex_bmn | yahoo | cadence_model"}
+  - {name: source_label, type: string, nullable: false, description: "Human label"}
+  - {name: usual_session, type: enum, nullable: true, values: [pre_market, intraday, post_market, unknown], description: "Most frequent known session of the issuer's last 8 releases"}
+  - {name: n_history, type: int16, nullable: true, description: "Number of past releases used by the cadence model"}
+  - {name: first_seen_date, type: date, nullable: false, description: "First run date that produced this expected date"}
+  - {name: computed_at, type: datetime, nullable: false, description: "Write time UTC"}
+  - {name: run_id, type: string, nullable: true, description: "job_runs.run_id"}

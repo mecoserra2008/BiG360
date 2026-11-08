@@ -1,0 +1,32 @@
+table: event_irf
+version: 1
+zone: scores
+owner: event-models (app.events_models.irf, job event_irf)
+description: >
+  B4 impulse responses of country equity returns / volatility to event shocks. model lp = panel Jorda local
+  projections: response = cumulative log return (%) over t..t+h (vol: cumulative abs return %), regressors own
+  shock (component own) and the spatially lagged shock W s (component spatial), 2 response lags, country FE,
+  Driscoll-Kraay SE (bandwidth h+1). model svar = pooled spatial VAR(1)
+  y_it = a_i + phi y_i,t-1 + psi (W y)_i,t-1 + c s_it + d (W s)_it; IRF of a 1-sd shock in one country
+  (scope = that country) or in all countries (scope '*'); components own (shocked unit), others (mean of the other
+  units), total (mean of all units); simulation bands. Model-based. One snapshot per run (as_of).
+storage: {path: scores/event_irf, format: parquet, partition_by: [], write_mode: upsert, retention: "last 52 snapshots"}
+primary_key: [as_of, model, response, shock, component, scope, h]
+columns:
+  - {name: as_of, type: date, nullable: false, description: "Run date"}
+  - {name: window_start, type: date, nullable: false, description: "First date used"}
+  - {name: window_end, type: date, nullable: false, description: "Last date used"}
+  - {name: model, type: enum, nullable: false, values: [lp, svar], description: "Model"}
+  - {name: response, type: enum, nullable: false, values: [ret, vol], description: "Response"}
+  - {name: shock, type: string, nullable: false, description: "attention_all | tone_all | attention_geo"}
+  - {name: component, type: enum, nullable: false, values: [own, spatial, others, total], description: "Response component"}
+  - {name: scope, type: string, nullable: false, description: "'*' panel / all units, else the shocked ISO2"}
+  - {name: h, type: int16, nullable: false, description: "Horizon (trading days)"}
+  - {name: coef, type: float64, nullable: true, description: "Response (% per 1-sd shock)"}
+  - {name: std_error, type: float64, nullable: true, description: "Standard error"}
+  - {name: ci_low, type: float64, nullable: true, description: "95% lower"}
+  - {name: ci_high, type: float64, nullable: true, description: "95% upper"}
+  - {name: p_value, type: float64, nullable: true, description: "p-value"}
+  - {name: n_obs, type: int32, nullable: false, description: "Observations"}
+  - {name: w_kind, type: string, nullable: false, description: "Weights kind"}
+  - {name: computed_at, type: datetime, nullable: false, description: "Write time UTC"}

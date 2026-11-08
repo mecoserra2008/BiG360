@@ -1,0 +1,39 @@
+table: ml_predictions
+version: 3
+zone: ml
+owner: ml (app.ml.predict)
+description: >
+  Model predictions per (model_run, date, security, horizon). Out-of-sample walk-forward predictions (is_oos=true)
+  and live predictions (latest date, production model). shap_top holds the top 10 |SHAP| contributions
+  for live rows (XGBoost TreeSHAP; Transformer uses integrated gradients approximations stored the same way).
+  v2 (docs/CONTRACT_GAPS_FRONTEND.md #11): expected_excess_return/interval/confidence calibrate the raw `score`
+  (predicted rank_label, a unitless 0..1 cross-sectional quantity) into an actual excess-return scale using
+  isotonic regression fit on that model's own OOS (score -> fwd_excess_sector) pairs, with the interval from the
+  empirical OOS residual quantiles (conformal-style) -- see `app.ml.predict`. live rows only (null on is_oos rows,
+  where the realized fwd_excess_sector is the better "prediction quality" reference).
+  v3 (full-universe extension 2026-10-30, additive): `scope` = mvp (null on older rows: the model universe) or
+  extrapolated (a security outside the MVP universe scored by the MVP-trained production model with features
+  transformed against the MVP cross-section; rank_pct / decile = position among that date's MVP predictions;
+  calibration columns null, not validated out of universe). Written only for segments whose out-of-sample
+  extrapolation check passed (see ml_scope_status).
+storage: {path: ml/ml_predictions, format: parquet, partition_by: [model_run_id], write_mode: upsert}
+primary_key: [model_run_id, date, security_id, horizon]
+columns:
+  - {name: model_run_id, type: string, nullable: false, description: "FK model_runs"}
+  - {name: date, type: date, nullable: false, description: "Feature date"}
+  - {name: security_id, type: string, nullable: false, description: "FK securities_master"}
+  - {name: horizon, type: enum, nullable: false, values: ["1M", "3M", "6M"], description: "Horizon"}
+  - {name: score, type: float64, nullable: false, description: "Raw model output (predicted rank_label)"}
+  - {name: rank_pct, type: float64, nullable: false, description: "Cross-sectional percentile of score at date (0..1)"}
+  - {name: decile, type: int8, nullable: false, description: "1..10 (10 = most attractive)"}
+  - {name: is_oos, type: bool, nullable: false, description: "Out-of-sample walk-forward prediction"}
+  - {name: is_live, type: bool, nullable: false, description: "Latest production prediction"}
+  - {name: shap_top, type: json, nullable: true, description: "[{feature, value, contribution}] top 10 by |contribution|"}
+  - {name: expected_excess_return, type: float64, nullable: true, description: "score calibrated to excess-return scale via isotonic regression on OOS (score, fwd_excess_sector); live rows only"}
+  - {name: interval_low, type: float64, nullable: true, description: "Lower bound of the prediction interval (expected_excess_return + OOS residual quantile, default 10th pct)"}
+  - {name: interval_high, type: float64, nullable: true, description: "Upper bound (default 90th pct residual quantile); [interval_low, interval_high] is an 80% empirical/conformal interval"}
+  - {name: confidence, type: float64, nullable: true, description: "0..1 heuristic: narrower interval_high-interval_low (relative to that date's cross-section) -> higher confidence"}
+  - {name: trained_at, type: datetime, nullable: true, description: "FK convenience: model_runs.created_at for model_run_id (avoids a join for the API)"}
+  - {name: feature_set_version, type: string, nullable: true, description: "FK convenience: model_runs.feature_set_version for model_run_id"}
+  - {name: scope, type: enum, nullable: true, values: [mvp, extrapolated], description: "v3: null/mvp = model universe; extrapolated = out-of-universe prediction of the production model"}
+  - {name: computed_at, type: datetime, nullable: false, description: "Write time UTC"}

@@ -1,0 +1,33 @@
+table: live_filings
+version: 1
+zone: normalized
+owner: realtime (app.realtime.compact)
+description: >
+  Filings seen by the real-time layer (R1): SEC EDGAR current-events feed, FCA NSM, TDnet, HKEXnews and OpenDART
+  recent disclosures, compacted hourly from the hot store (data/realtime/bus.sqlite, topic filings). knowledge_ts is
+  the FIRST-SEEN time of the real-time path (point in time); source_ts is the source's own publication / acceptance
+  time. filing_id uses the same natural key as filings_index ({source_id}:{native key}) so the nightly batch and the
+  live path dedupe by key (app.realtime.compact.reconcile reports the agreement). Rows are never rewritten.
+storage: {path: normalized/live_filings, format: parquet, partition_by: [date], write_mode: append, retention: "forever"}
+primary_key: [filing_id]
+pit: {knowledge_column: knowledge_ts, rule: "first seen by the real-time path"}
+columns:
+  - {name: filing_id, type: string, nullable: false, description: "{source_id}:{native key} (= filings_index.filing_id)"}
+  - {name: date, type: date, nullable: false, description: "Partition: UTC date of knowledge_ts"}
+  - {name: source_id, type: string, nullable: false, description: "sec_edgar | fca_nsm | tdnet | hkex | opendart"}
+  - {name: source_entity_id, type: string, nullable: true, description: "Native entity key (CIK, LEI, TSE code, HK code, DART corp code)"}
+  - {name: issuer_id, type: string, nullable: true, description: "Resolved issuer"}
+  - {name: security_id, type: string, nullable: true, description: "Primary security of the issuer"}
+  - {name: ticker, type: string, nullable: true, description: "Display ticker"}
+  - {name: company, type: string, nullable: true, description: "Company name as published"}
+  - {name: form_type, type: string, nullable: true, description: "Native form type (8-K, 4, SCHEDULE 13D, DSH, TANSHIN ...)"}
+  - {name: form_class, type: string, nullable: true, description: "filings_index form_class"}
+  - {name: title, type: string, nullable: true, description: "Headline / title when the source has one"}
+  - {name: items, type: list<string>, nullable: true, description: "8-K items or the title"}
+  - {name: url, type: string, nullable: true, description: "Filing URL"}
+  - {name: country, type: string, nullable: true, description: "ISO2"}
+  - {name: source_ts, type: datetime, nullable: true, description: "Source publication / acceptance time UTC"}
+  - {name: knowledge_ts, type: datetime, nullable: false, description: "First seen by the real-time path, UTC"}
+  - {name: bus_id, type: int64, nullable: false, description: "Hot-store message id"}
+  - {name: payload, type: json, nullable: true, description: "Full live payload"}
+  - {name: compacted_at, type: datetime, nullable: false, description: "Write time UTC"}

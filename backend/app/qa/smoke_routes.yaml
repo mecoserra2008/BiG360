@@ -1,0 +1,46 @@
+# UI smoke suite configuration (app.qa.smoke). Routes are discovered from frontend/src/App.tsx; this file only adds
+# parameter values, exclusions and the pages where an empty panel is legitimate.
+version: 1
+# route pattern -> value of its parameter: {fixed: X} or {api: path, keys: [...], params: {...}} (first id found;
+# no instance -> the route is skipped, e.g. no thesis exists yet)
+params:
+  /company/:id:            {fixed: AAPL}
+  /instruments/:id:        {api: /api/v1/instruments, keys: [security_id]}
+  /macro/positioning/:code: {api: /api/v1/positioning/markets, keys: [market_code]}
+  /macro/cb/:bank:         {api: /api/v1/macro/v3/central-banks, keys: [bank, bank_id]}
+  /macro/country/:cc:      {fixed: US}
+  /macro/theme/:theme:     {fixed: growth}
+  /macro/series/:id:       {fixed: "fred:CPIAUCSL"}
+  /theses/:id:             {api: /api/v1/theses, keys: [thesis_id]}
+  /theses/:id/edit:        {api: /api/v1/theses, keys: [thesis_id]}
+# extra routes visited besides the App.tsx ones (variants worth a separate load)
+extra_routes:
+  - /company/7203.T
+# routes never visited (forms that would only make sense with user input)
+skip_routes: []
+# routes where an EmptyState is expected (user content that may not exist yet); anywhere else an empty panel fails
+allow_empty:
+  - /watchlist
+  - /theses
+  - /studio
+  - /backtest
+  - /smart-money/activism
+  - /macro/calendar
+# empty panels whose text says the entity legitimately has no such data (reported as info, never failed)
+allow_empty_text:
+  - "No EU / UK short disclosures"
+  - "No disclosed (customers|suppliers)"
+  - "Not enough companies reported"
+  - "No (saved|open|closed) "
+  - "No .* yet"
+# default budgets
+max_load_ms: 8000
+quiet_ms: 1200
+nav_timeout_ms: 30000
+widths: {dark: 1440, light: 1280}
+# API answers that are expected for some pages (e.g. nowcast models exist only for a few countries)
+allowed_http: ["404 /api/v1/macro/v2/nowcast/"]
+# latency budgets (roadmap v3 N4.4): pages exposing window.__BIG360_NEWS_PERF__ (first rows painted after navigation
+# start; synthetic live update render = frame flush -> committed, median of `samples`)
+perf_checks:
+  /news: {first_rows_ms: 1000, live_update_ms: 100, samples: 5}

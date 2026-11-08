@@ -1,0 +1,21 @@
+table: tech_prob_gates
+version: 1
+zone: features
+owner: technicals (app.techprob.job:run_fit_job, weekly technicals_probabilities_fit)
+description: >
+  T6 gate verdict per Technicals v2 output, copied from data/reports/technicals_v2/gate.json at each weekly fit: PASS
+  -> production, FAIL / not validated -> experimental (hidden unless the UI's experimental toggle is on).
+storage: {path: features/tech_prob_gates, format: parquet, partition_by: [], write_mode: overwrite, retention: "last 8 fits"}
+primary_key: [fit_date, output]
+columns:
+  - {name: fit_date, type: date, nullable: false, description: "Fit date"}
+  - {name: output, type: string, nullable: false, description: "t2_h5..t2_h60, t3_hold, t3_edge, t4_h5 / t4_h20 / t4_h60"}
+  - {name: verdict, type: enum, nullable: false, values: [pass, fail, not_validated], description: "T6 verdict"}
+  - {name: shown_as, type: enum, nullable: false, values: [production, experimental], description: "production / experimental"}
+  - {name: ece, type: float64, nullable: true, description: "Expected calibration error (probability units)"}
+  - {name: max_regime_gap, type: float64, nullable: true, description: "Largest |realised - predicted| over the regimes checked"}
+  - {name: beats_baselines, type: bool, nullable: true, description: "Better Brier / log-loss than every baseline"}
+  - {name: edge_significant, type: bool, nullable: true, description: "Edge output significant (t3_edge, t4_*)"}
+  - {name: detail, type: json, nullable: true, description: "Full gate record"}
+  - {name: validated_at, type: string, nullable: true, description: "Validation run time"}
+  - {name: computed_at, type: datetime, nullable: false, description: "Write time UTC"}

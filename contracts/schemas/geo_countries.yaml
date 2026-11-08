@@ -1,0 +1,36 @@
+table: geo_countries
+version: 1
+zone: reference
+owner: linkage (app.linkage.geo)
+description: >
+  A1 country geography from Natural Earth admin-0 10m (public domain): one row per ISO2 with label point (used for
+  great-circle distances), largest-polygon centroid, area, population / GDP estimates, continent / subregion and
+  libpysal queen / rook contiguity lists. Distances are derived on demand (app.linkage.geo.distance_matrix).
+storage: {path: reference/geo_countries, format: parquet, partition_by: [], write_mode: overwrite, retention: "latest edition only"}
+primary_key: [iso2]
+columns:
+  - {name: iso2, type: string, nullable: false, description: "ISO 3166-1 alpha-2 (Natural Earth ISO_A2, else ISO_A2_EH; XK = Kosovo)"}
+  - {name: iso3, type: string, nullable: true, description: "ISO 3166-1 alpha-3"}
+  - {name: iso_n3, type: string, nullable: true, description: "ISO 3166-1 numeric (3 digits; ~= UN M49)"}
+  - {name: name, type: string, nullable: true, description: "Natural Earth NAME"}
+  - {name: name_long, type: string, nullable: true, description: "Natural Earth NAME_LONG"}
+  - {name: formal_name, type: string, nullable: true, description: "Natural Earth FORMAL_EN"}
+  - {name: alt_names, type: "list<string>", nullable: true, description: "Other Natural Earth name fields (ADMIN, NAME_SORT, NAME_EN, ...)"}
+  - {name: continent, type: string, nullable: true, description: "Natural Earth CONTINENT"}
+  - {name: subregion, type: string, nullable: true, description: "Natural Earth SUBREGION (UN geoscheme)"}
+  - {name: region_un, type: string, nullable: true, description: "Natural Earth REGION_UN"}
+  - {name: region_wb, type: string, nullable: true, description: "Natural Earth REGION_WB"}
+  - {name: lat, type: float64, nullable: false, description: "Label point latitude (degrees)"}
+  - {name: lon, type: float64, nullable: false, description: "Label point longitude (degrees)"}
+  - {name: centroid_lat, type: float64, nullable: true, description: "Centroid latitude of the largest polygon"}
+  - {name: centroid_lon, type: float64, nullable: true, description: "Centroid longitude of the largest polygon"}
+  - {name: area_km2, type: float64, nullable: true, unit: km2, description: "Area (EPSG:6933 equal-area)"}
+  - {name: pop_est, type: int64, nullable: true, description: "Natural Earth POP_EST"}
+  - {name: gdp_md_usd, type: float64, nullable: true, unit: "USD millions", description: "Natural Earth GDP_MD (nominal, gdp_year)"}
+  - {name: gdp_year, type: int32, nullable: true, description: "Year of gdp_md_usd / pop_est"}
+  - {name: neighbors_queen, type: "list<string>", nullable: false, description: "ISO2 of queen-contiguous countries (shared vertex)"}
+  - {name: neighbors_rook, type: "list<string>", nullable: false, description: "ISO2 of rook-contiguous countries (shared edge)"}
+  - {name: n_neighbors, type: int16, nullable: false, description: "len(neighbors_queen); 0 = island"}
+  - {name: sovereign_iso3, type: string, nullable: true, description: "Natural Earth SOV_A3"}
+  - {name: ne_version, type: string, nullable: true, description: "Natural Earth release (zip VERSION.txt)"}
+  - {name: ingested_at, type: datetime, nullable: false, description: "Write time UTC"}

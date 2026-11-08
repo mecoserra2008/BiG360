@@ -1,0 +1,43 @@
+table: eu_short_positions
+version: 1
+zone: normalized
+owner: smart-money (app.ingestion.eu_short)
+description: >
+  Official EU / UK / EEA net short-position disclosures in shares (Short Selling Regulation: holders at or above 0.5%
+  of issued share capital are published by the competent authority). One row per regulator x position type x holder x
+  ISIN x position date. Sources (machine-readable public registers, verified 2026-10-19; formats in docs/SMART_MONEY.md):
+  UK FCA (individual positions until the regime change of 10 Jul 2026, frozen history file; since then aggregated net
+  short positions per issuer only, current + historic CSV), France AMF (complete history since 2012-11 with LEI and
+  publication dates, data.gouv.fr), Spain CNMV (current + series + previous sheets, issuer LEI), Netherlands AFM (current
+  + historic CSV), Ireland CBI (current + historical xlsx), Belgium FSMA (current CSV; history accumulates nightly),
+  Sweden FI (current + historic ODS), Norway Finanstilsynet (SSR open API: aggregate per instrument + active holder
+  positions, last 2 years). Not ingested: Italy CONSOB (bot challenge / captcha on the xlsx), Germany BaFin
+  Bundesanzeiger (robots.txt disallows /nlp, the net-short-position pages), Denmark (monthly xlsx snapshots only),
+  Finland (HTML only). PIT: knowledge_date = published date where the regulator publishes it (AMF), else position date
+  + 1 (FI, NO) or + 2 business days (others), capped by the file publication / download date
+  (knowledge_date_estimated = true).
+storage: {path: normalized/eu_short_positions, format: parquet, partition_by: [regulator], write_mode: upsert, sort_by: [isin, holder_name, position_date]}
+primary_key: [regulator, position_type, holder_name, isin, position_date]
+pit: {knowledge_column: knowledge_date, rule: "usable from the publication date (observed or estimated)"}
+columns:
+  - {name: regulator, type: enum, nullable: false, values: [fca, amf, cnmv, afm, cbi, fsma, fi_se, ftno], description: "Competent authority (partition)"}
+  - {name: country, type: string, nullable: false, description: "ISO2 of the regulator (GB, FR, ES, NL, IE, BE, SE, NO)"}
+  - {name: position_type, type: enum, nullable: false, values: [individual, aggregate], description: "individual = one named holder; aggregate = regulator-published total net short position of the issuer (holder_name '(aggregate)')"}
+  - {name: holder_name, type: string, nullable: false, description: "Position holder as published ('(aggregate)' for aggregate rows)"}
+  - {name: holder_lei, type: string, nullable: true, description: "Holder LEI when published (AMF)"}
+  - {name: issuer_name, type: string, nullable: true, description: "Issuer name as published"}
+  - {name: isin, type: string, nullable: false, description: "ISIN of the shares"}
+  - {name: issuer_lei, type: string, nullable: true, description: "Issuer LEI when published (CNMV)"}
+  - {name: issuer_id, type: string, nullable: true, description: "Resolved issuer (identity: ISIN, else issuer LEI)"}
+  - {name: security_id, type: string, nullable: true, description: "Resolved security (identity: ISIN, else the issuer's primary security)"}
+  - {name: position_pct, type: float64, nullable: true, unit: percent, description: "Net short position in percent of issued share capital (1.25 = 1.25%); null when only '<0.5' is published"}
+  - {name: below_threshold, type: bool, nullable: false, description: "Position at or below the 0.5% publication threshold (closing / falling-below disclosures)"}
+  - {name: shares, type: float64, nullable: true, description: "Number of shares when published (Norway)"}
+  - {name: position_date, type: date, nullable: false, description: "Date of the position"}
+  - {name: publication_date, type: date, nullable: true, description: "Published date when the regulator states it (AMF start of publication; file date for current-list rows)"}
+  - {name: knowledge_date, type: date, nullable: false, description: "PIT date (see description)"}
+  - {name: knowledge_date_estimated, type: bool, nullable: false, description: "True when knowledge_date is imputed"}
+  - {name: in_current_list, type: bool, nullable: true, description: "Row is in the regulator's current table at the latest ingestion (snapshot flag, not PIT)"}
+  - {name: source_url, type: string, nullable: false, description: "Public file / API URL"}
+  - {name: source_id, type: string, nullable: false, description: "eu_short"}
+  - {name: ingested_at, type: datetime, nullable: false, description: "Write time UTC"}

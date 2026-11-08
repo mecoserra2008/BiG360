@@ -1,0 +1,6 @@
+{"observations":[
+{"realtime_start":"1991-12-04","realtime_end":"1992-01-28","date":"1960-01-01","value":"2.5"},
+{"realtime_start":"1992-01-29","realtime_end":"9999-12-31","date":"1960-01-01","value":"2.6"},
+{"realtime_start":"2026-07-30","realtime_end":"2026-08-27","date":"2026-04-01","value":"23500.1"},
+{"realtime_start":"2026-08-28","realtime_end":"9999-12-31","date":"2026-04-01","value":"23510.4"}
+]}

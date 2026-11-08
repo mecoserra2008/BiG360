@@ -1,0 +1,20 @@
+table: peer_sets
+version: 1
+zone: app_state
+owner: model-studio (app.modeling.store via app.api.routers.studio)
+description: >
+  Custom peer groups saved from a Model Studio clustering run (k-means, hierarchical, GMM, density). members is a JSON
+  array [{security_id, label, cluster}]; GET /companies/{security_id}/peers?peer_set_id= uses the members of the
+  security's cluster (or the whole set when the security is not a member) as the peer group.
+storage: {path: app_state.duckdb, format: duckdb_table, partition_by: [], write_mode: upsert}
+primary_key: [peer_set_id]
+columns:
+  - {name: peer_set_id, type: string, nullable: false, description: "PS + UTC timestamp + 6 random base32 chars"}
+  - {name: name, type: string, nullable: false, description: "Display name"}
+  - {name: description, type: string, nullable: true, description: "Notes"}
+  - {name: source_run_id, type: string, nullable: false, description: "study_runs.run_id of the clustering run"}
+  - {name: method, type: string, nullable: false, description: "Clustering method id"}
+  - {name: members, type: json, nullable: false, description: "[{security_id, label, cluster}] (noise points excluded)"}
+  - {name: n_members, type: int32, nullable: false, description: "Members"}
+  - {name: n_clusters, type: int32, nullable: false, description: "Distinct clusters"}
+  - {name: created_at, type: datetime, nullable: false, description: "UTC"}

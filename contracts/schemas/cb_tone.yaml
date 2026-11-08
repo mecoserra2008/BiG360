@@ -1,0 +1,27 @@
+table: cb_tone
+version: 1
+zone: scores
+owner: macro-w3 (app.macro.cb.tone, job cb_tone)
+description: >
+  MODEL-BASED communication tone per policy-meeting document (official statements / press releases / BoE Monetary
+  Policy Summary and minutes / BoJ Statement on Monetary Policy) since 2020 (method tone_v1): local CPU classifier
+  mrince/CBRT-RoBERTa-HawkishDovish-Classifier (MIT) -> tone_model = mean(P(hawkish) - P(dovish)) over sentences,
+  plus a transparent lexicon score. Vote split parsed from the official text where stated. Overwritten nightly
+  (sentence scores cached).
+storage: {path: scores/cb_tone, format: parquet, partition_by: [], write_mode: overwrite}
+primary_key: [bank, date, doc_type]
+columns:
+  - {name: bank, type: string, nullable: false, description: "fed | ecb | boe | boj | boc"}
+  - {name: date, type: date, nullable: false, description: "Meeting (decision) date"}
+  - {name: doc_type, type: enum, nullable: false, values: [statement, summary_minutes], description: "Document type"}
+  - {name: url, type: string, nullable: false, description: "Official document URL"}
+  - {name: n_sentences, type: int32, nullable: false, description: "Sentences scored (max 120)"}
+  - {name: tone_lexicon, type: float64, nullable: true, description: "Lexicon score in [-1, 1] (+ = hawkish), model-based"}
+  - {name: tone_model, type: float64, nullable: true, description: "Classifier score mean(P(hawk) - P(dove)) in [-1, 1], model-based"}
+  - {name: hawkish_share, type: float64, nullable: true, description: "Share of sentences classified hawkish"}
+  - {name: dovish_share, type: float64, nullable: true, description: "Share of sentences classified dovish"}
+  - {name: dissents, type: int32, nullable: true, description: "Votes against the decision (fed/boe/boj, parsed from the official text)"}
+  - {name: vote_text, type: string, nullable: true, description: "Vote split as stated, e.g. '12-0', '6-3'"}
+  - {name: model_id, type: string, nullable: true, description: "Hugging Face model id (null = lexicon only)"}
+  - {name: method_version, type: string, nullable: false, description: "tone_v1"}
+  - {name: computed_at, type: datetime, nullable: false, description: "Write time UTC"}

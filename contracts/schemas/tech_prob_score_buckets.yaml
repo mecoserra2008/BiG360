@@ -1,0 +1,31 @@
+table: tech_prob_score_buckets
+version: 1
+zone: features
+owner: technicals (app.techprob.job:run_fit_job, weekly technicals_probabilities_fit)
+description: >
+  T4 score -> historical outcome table: technical_score deciles (all history of the gate universe) -> forward 5 / 20 /
+  60-session excess log return (vs the region's equal-weight universe mean) median, IQR, hit rate, n, month-block
+  bootstrap CIs; edge flags from the walk-forward (docs/TECHNICALS_V2_VALIDATION.md).
+storage: {path: features/tech_prob_score_buckets, format: parquet, partition_by: [], write_mode: overwrite, retention: "last 8 fits"}
+primary_key: [fit_date, score_col, horizon, decile]
+columns:
+  - {name: fit_date, type: date, nullable: false, description: "Fit date"}
+  - {name: score_col, type: string, nullable: false, description: "Score column (technical_score)"}
+  - {name: horizon, type: int16, nullable: false, description: "Sessions (5 / 20 / 60)"}
+  - {name: decile, type: int16, nullable: false, description: "1..10"}
+  - {name: score_lo, type: float64, nullable: true, description: "Decile lower bound (null = -inf)"}
+  - {name: score_hi, type: float64, nullable: true, description: "Upper bound (null = +inf)"}
+  - {name: n, type: int64, nullable: false, description: "Observations"}
+  - {name: median, type: float64, nullable: true, description: "Median excess log return"}
+  - {name: q25, type: float64, nullable: true, description: "25th pct"}
+  - {name: q75, type: float64, nullable: true, description: "75th pct"}
+  - {name: mean, type: float64, nullable: true, description: "Mean"}
+  - {name: hit_rate, type: float64, nullable: true, description: "Share > 0"}
+  - {name: median_lo, type: float64, nullable: true, description: "Median CI low"}
+  - {name: median_hi, type: float64, nullable: true, description: "Median CI high"}
+  - {name: hit_lo, type: float64, nullable: true, description: "Hit CI low"}
+  - {name: hit_hi, type: float64, nullable: true, description: "Hit CI high"}
+  - {name: edge_significant, type: bool, nullable: false, description: "Walk-forward edge verdict for this score / horizon"}
+  - {name: ic_mean, type: float64, nullable: true, description: "Walk-forward mean rank IC"}
+  - {name: ic_t, type: float64, nullable: true, description: "Walk-forward IC t-stat (non-overlapping)"}
+  - {name: computed_at, type: datetime, nullable: false, description: "Write time UTC"}

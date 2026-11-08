@@ -1,0 +1,29 @@
+table: futures_contracts
+version: 1
+zone: reference
+owner: cross-asset (app.ingestion.futures_curve, jobs futures_curve / futures_curve_backfill)
+description: >
+  Coverage register of the futures term-structure ingestion: one row per listed contract the job has asked Yahoo for
+  (the next N contracts of each root's exchange listing cycle at each run). status served = Yahoo returned bars;
+  missing = listed by the exchange cycle but Yahoo returned no bars at the last check (a recorded gap, never
+  interpolated); unchecked = the request was throttled and could not be verified; expired = past the approximate last
+  trading day (rows kept for history). Upserted every run.
+storage: {path: reference/futures_contracts, format: parquet, partition_by: [], write_mode: upsert, sort_by: [root, contract_month]}
+primary_key: [root, contract_month]
+columns:
+  - {name: root, type: string, nullable: false, description: "Futures root"}
+  - {name: contract_month, type: date, nullable: false, description: "Contract month (first day)"}
+  - {name: contract, type: string, nullable: false, description: "Month code + yy, e.g. Z26"}
+  - {name: symbol, type: string, nullable: false, description: "Yahoo ticker"}
+  - {name: root_name, type: string, nullable: false, description: "Human name of the root"}
+  - {name: asset_class, type: enum, nullable: false, values: [energy, metals, grains, softs, livestock, rates, equity_index, fx, crypto], description: "Futures sector"}
+  - {name: exchange, type: string, nullable: false, description: "Yahoo exchange suffix (NYM, CMX, CBT, CME, NYB)"}
+  - {name: expiry, type: date, nullable: false, description: "APPROXIMATE last trading day"}
+  - {name: expiry_rule, type: string, nullable: false, description: "Rule used for expiry (text)"}
+  - {name: status, type: enum, nullable: false, values: [served, missing, unchecked, expired], description: "Coverage status at the last check"}
+  - {name: first_date, type: date, nullable: true, description: "First stored bar"}
+  - {name: last_date, type: date, nullable: true, description: "Last stored bar"}
+  - {name: n_bars, type: int32, nullable: true, description: "Stored bars"}
+  - {name: last_close, type: float32, nullable: true, description: "Close on last_date"}
+  - {name: last_checked, type: date, nullable: false, description: "As-of date of the last check"}
+  - {name: updated_at, type: datetime, nullable: false, description: "Write time UTC"}

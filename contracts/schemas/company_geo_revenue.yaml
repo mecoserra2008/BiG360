@@ -1,0 +1,45 @@
+table: company_geo_revenue
+version: 1
+zone: normalized
+owner: linkage (app.linkage.georev)
+description: >
+  A5 company -> country exposure from XBRL geographic segment facts, point-in-time by filing date. Main source: SEC
+  Financial Statement Data Sets (quarterly, 2009q1 ->), which keep the dimensional `segments` that companyfacts /
+  frames drop (single-axis "Geographical=<member>" rows of the preferred revenue concept per filing and period, and
+  long-lived assets / PP&E by geography). Also IFRS GeographicalAreasAxis facts already in fundamentals_raw (ESEF /
+  CMF / BIVA ... where tagged). Members are normalized to ISO2 (country) or region codes (app.linkage.members.REGIONS);
+  share = value / reported non-dimensional total of the same concept (else / sum of geographic members).
+  Roadmap #9 (additive): IFRS facts on the geographic axis now include entity-specific revenue concepts, and
+  source_id esef_textblock adds geographic revenue parsed with rules from the tables inside the tagged ESEF segment /
+  geographic-area text blocks (ifrs-full:DisclosureOfEntitysReportableSegmentsExplanatory ...; app.linkage.esef_geo;
+  method ixbrl_textblock_table, confidence 0.7-0.8, knowledge_date = filing date).
+storage: {path: normalized/company_geo_revenue, format: parquet, partition_by: [source_id], write_mode: overwrite, retention: "forever (rebuilt from landed extracts)"}
+primary_key: [source_id, entity_id, filing_id, measure, concept, period_end, qtrs, member_raw, currency]
+pit: {knowledge_column: knowledge_date, rule: "use rows with knowledge_date <= D; latest filing per (entity, period_end, qtrs) wins"}
+columns:
+  - {name: source_id, type: string, nullable: false, description: "sec_fsds, or the fundamentals_raw source (esef_xbrl_org, cmf_cl, biva_mx, ...)"}
+  - {name: entity_id, type: string, nullable: false, description: "CIK10 for sec_fsds, else the source_entity_id"}
+  - {name: issuer_id, type: string, nullable: true, description: "Our issuer (identifier_map cik conf >= 0.9 / fundamentals_raw issuer_id)"}
+  - {name: name, type: string, nullable: true, description: "Filer name (FSDS sub.name)"}
+  - {name: filing_id, type: string, nullable: false, description: "sec_edgar:<adsh> or the source filing id"}
+  - {name: form_type, type: string, nullable: true, description: "10-K, 10-Q, 20-F, 40-F, ..."}
+  - {name: measure, type: enum, nullable: false, values: [revenue, long_lived_assets], description: "What the value measures"}
+  - {name: concept, type: string, nullable: false, description: "XBRL concept (no prefix)"}
+  - {name: period_start, type: date, nullable: true, description: "Duration start (null for instants)"}
+  - {name: period_end, type: date, nullable: false, description: "Period end (FSDS ddate, month-end rounded)"}
+  - {name: qtrs, type: int16, nullable: false, description: "Duration in quarters (4 = annual, 0 = instant)"}
+  - {name: fiscal_period, type: string, nullable: true, description: "FY / Q1..Q4 of the filing"}
+  - {name: member_raw, type: string, nullable: false, description: "Axis member as reported (FSDS 'Geographical=' value or QName)"}
+  - {name: member_type, type: enum, nullable: false, values: [country, region, domestic, rest_of_world, other], description: "Normalized member class"}
+  - {name: iso2, type: string, nullable: true, description: "Country ISO2 (country members; domestic = company country)"}
+  - {name: region, type: string, nullable: true, description: "Region code for multi-country members (app.linkage.members.REGIONS)"}
+  - {name: value, type: float64, nullable: false, description: "Reported value"}
+  - {name: currency, type: string, nullable: false, description: "Unit (ISO 4217 for monetary facts)"}
+  - {name: denominator, type: float64, nullable: true, description: "Reported total (non-dimensional) else sum of geographic members"}
+  - {name: share, type: float64, nullable: true, description: "value / denominator (null for member_type other)"}
+  - {name: n_countries, type: int32, nullable: true, description: "Country members reported in the same filing / period / concept"}
+  - {name: company_country, type: string, nullable: true, description: "Business-address country (FSDS countryba, else countryinc / issuers.country)"}
+  - {name: knowledge_date, type: date, nullable: false, description: "Filing date (FSDS sub.filed)"}
+  - {name: method, type: string, nullable: true, description: "xbrl_dimensional (tagged facts) | ixbrl_textblock_table (parsed note table); roadmap #9"}
+  - {name: confidence, type: float64, nullable: true, description: "1.0 for tagged facts; 0.7-0.8 for parsed text-block tables"}
+  - {name: ingested_at, type: datetime, nullable: false, description: "Write time UTC"}

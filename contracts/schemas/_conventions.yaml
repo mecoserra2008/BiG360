@@ -1,0 +1,74 @@
+# Conventions shared by every table contract in contracts/schemas/.
+# Files starting with "_" are NOT tables. backend/app/core/schema.py loads every other *.yaml here.
+version: 1
+
+file_format: |
+  Each table file has these top-level keys:
+    table:        snake_case table name == file stem == DuckDB view name
+    version:      int, bump on breaking change
+    zone:         reference | normalized | features | scores | ml | ops | app_state
+    owner:        build agent / module that is the SOLE writer (see docs/ARCHITECTURE.md §Ownership)
+    description:  one paragraph
+    storage:
+      path:          relative to data/ (Parquet dataset dir) — or "app_state.duckdb" for app_state tables
+      format:        parquet | duckdb_table
+      partition_by:  list of Hive partition columns (dirs "col=value"); [] = single dataset dir
+      write_mode:    DEFAULT mode used by app.core.storage.write_table(); a job may pass another mode explicitly.
+                     overwrite           = whole table replaced each run
+                     upsert              = for each touched partition: existing rows + new rows, dedupe on PK, NEW rows win
+                     append              = new file added to touched partitions without reading existing; writer guarantees no PK overlap
+                     overwrite_partition = (explicit opt-in only) touched partitions replaced entirely by the new rows
+                     Every write is atomic per partition (tmp dir + rename) and serialized per table by a file lock.
+      retention:     free text, optional
+    primary_key:  list of columns (unique per row after write)
+    pit:          optional {knowledge_column, rule} — point-in-time semantics
+    dynamic_columns: optional {source, pattern, type, nullable} for wide tables whose columns come from a registry
+    columns:      list of {name, type, nullable, description, values?(enum), unit?}
+
+types: # contract type -> Polars dtype -> DuckDB type
+  string:        {polars: Utf8, duckdb: VARCHAR}
+  enum:          {polars: Utf8, duckdb: VARCHAR, note: "allowed values listed in column.values; validated"}
+  bool:          {polars: Boolean, duckdb: BOOLEAN}
+  int8:          {polars: Int8, duckdb: TINYINT}
+  int16:         {polars: Int16, duckdb: SMALLINT}
+  int32:         {polars: Int32, duckdb: INTEGER}
+  int64:         {polars: Int64, duckdb: BIGINT}
+  float32:       {polars: Float32, duckdb: FLOAT}
+  float64:       {polars: Float64, duckdb: DOUBLE}
+  date:          {polars: Date, duckdb: DATE}
+  datetime:      {polars: "Datetime(us, UTC)", duckdb: "TIMESTAMP WITH TIME ZONE", note: "always UTC"}
+  json:          {polars: Utf8, duckdb: JSON, note: "compact JSON text (orjson)"}
+  list<string>:  {polars: "List(Utf8)", duckdb: "VARCHAR[]"}
+  list<float64>: {polars: "List(Float64)", duckdb: "DOUBLE[]"}
+  list<int32>:   {polars: "List(Int32)", duckdb: "INTEGER[]"}
+
+identifiers:
+  issuer_id:   "I + 12 chars Crockford base32 of sha1(seed). Assigned once by app.normalize.identity; never recomputed. e.g. I7Q2K9M4XA1BZ"
+  security_id: "S + 12 chars base32 of sha1(issuer_id|share_class_key). One per economic share class (ADR = own security)."
+  listing_id:  "L + 12 chars base32 of sha1(security_id|mic)."
+  filing_id:   "{source_id}:{native filing key}, e.g. sec_edgar:0000320193-24-000123, edinet:S100ABCD, opendart:20240315000123"
+  txn_id:      "{filing_id}:{line no}"
+  run_id:      "R + UTC timestamp YYYYMMDDTHHMMSS + 4 random base32 chars"
+
+standard_columns:
+  ingested_at:  "datetime UTC when the row was written by an ingestion job (normalized zone)"
+  computed_at:  "datetime UTC when the row was written by an analytics job (features/scores/ml zones)"
+  run_id:       "job_runs.run_id that produced the row"
+  source_id:    "adapter id (SourceAdapter.source_id), e.g. sec_edgar, polygon, yfinance, edinet, opendart, esef_xbrl_org, cvm, akshare, fred, gdelt"
+  knowledge_date: "date (exchange-local calendar) on which the information became public. Mandatory on all fundamental/insider/news/filing/macro rows."
+  knowledge_ts: "optional datetime UTC precision of knowledge_date (e.g. SEC acceptanceDateTime)"
+  knowledge_date_estimated: "true when knowledge_date was imputed (period_end + lag rule) rather than observed"
+  currency:     "ISO 4217 3-letter code of the value column(s)"
+  region:       "enum: US, CA, LATAM, UK, EU, JP, KR, CN, HK, APAC, OTHER (EU = continental Europe incl. CH, NO; CN = mainland A/B shares; HK = HKEX listings incl. H-shares)"
+  country:      "ISO 3166-1 alpha-2"
+
+pit_rule: |
+  Signals/features for as_of_date D may only use rows with knowledge_date <= D.
+  Labels (ml_labels) measure forward returns from close(D+1) to close(D+1+h) — one-day execution lag —
+  so filings released after the close of D never leak into the label window.
+  For versioned facts (restatements), the as-of value is the row with max(knowledge_date) <= D per natural key.
+
+size_buckets_usd: # market cap, USD, used for peer groups
+  large: {min: 10.0e9}
+  mid:   {min: 2.0e9, max: 10.0e9}
+  small: {max: 2.0e9}

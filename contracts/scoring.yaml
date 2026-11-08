@@ -1,0 +1,303 @@
+# Scoring specification: metric registry -> metric scores (peer / self-history / market-cap adjusted)
+# -> factor families -> composite. Consumed by app.analytics.scoring (writes peer_scores, factor_scores, composite_scores)
+# and by the API (custom-weight composites computed on the fly from factor_scores).
+version: 2
+
+as_of:
+  frequency: daily              # every trading day of the security's region after prices load
+  fundamentals_period: TTM      # use TTM rows; fall back to latest FY (or H for semiannual reporters) if no TTM
+  staleness_days: 400           # fundamentals older (period_end) than this at as_of -> treated as missing
+  pit: "all inputs filtered knowledge_date <= as_of_date (see contracts/schemas/_conventions.yaml pit_rule)"
+
+# ------------------------------------------------------------------ METRIC SOURCES
+metric_sources:
+  ratios:            {table: ratios, key: metric_id, registry: "sector_kpis.yaml generic_metrics + accounting_scores"}
+  sector_kpis:       {table: sector_kpis, key: kpi_id, registry: "sector_kpis.yaml kpi_sets[*].kpis (id resolved within issuer's kpi set)"}
+  valuation:         {table: valuation_daily, key: column}
+  market:            {table: prices_daily, key: computed, registry: market_metrics (below)}
+  insider:           {table: insider_signals, key: column}
+  sentiment:         {table: sentiment_daily, key: column}
+  macro:             {table: macro_betas, key: computed, registry: macro_metrics (below)}
+  moat:              {table: moat, key: column}
+  forecast:          {table: forecast_valuation, key: column, filter: "scenario = 'market_implied'"}
+
+valuation_metrics:   # valuation_daily columns used as metrics; all get market-cap adjustment
+  earnings_yield:    {higher_is_better: true}
+  fcf_yield:         {higher_is_better: true}
+  ev_ebitda:         {higher_is_better: false, positive_only: true}
+  ev_sales:          {higher_is_better: false, positive_only: true}
+  pe_ttm:            {higher_is_better: false, positive_only: true}
+  pb:                {higher_is_better: false, positive_only: true}
+  p_tbv:             {higher_is_better: false, positive_only: true}
+  p_ffo:             {higher_is_better: false, positive_only: true}
+  dividend_yield:    {higher_is_better: true}
+  shareholder_yield: {higher_is_better: true}
+
+market_metrics:      # computed from prices_daily.adj_close / high / low at as_of_date (t); null if < 126 bars of history
+  mom_12_1:          {formula: "adj_close[t-21] / adj_close[t-252] - 1", higher_is_better: true}
+  mom_6_1:           {formula: "adj_close[t-21] / adj_close[t-126] - 1", higher_is_better: true}
+  mom_1m:            {formula: "adj_close[t] / adj_close[t-21] - 1", higher_is_better: false, note: "short-term reversal; ML feature only, not in factor"}
+  high_52w_proximity: {formula: "adj_close[t] / max(adj_high[t-251..t])", higher_is_better: true}
+  trend_200d:        {formula: "adj_close[t] / sma(adj_close, 200)[t] - 1", higher_is_better: true}
+  vol_1y:            {formula: "std(log returns t-251..t) * sqrt(252)", higher_is_better: false}
+
+macro_metrics:
+  macro_regime_fit:  {formula: "sum_r P_current(regime r) * beta(regime_r)  (from macro_betas factor_id regime_<label>, current probs from macro_regimes)", higher_is_better: true}
+  macro_rate_beta_abs: {formula: "abs(beta rates_10y)", higher_is_better: false}
+
+other_metrics:
+  insider_signal:    {source: insider, column: signal_score, higher_is_better: true, already_scaled_0_100: true}
+  sentiment_ewm_30d: {source: sentiment, column: sentiment_ewm_30d, higher_is_better: true}
+  gdelt_tone_ewm_7d: {source: sentiment, column: gdelt_tone_ewm_7d, higher_is_better: true}
+  lazy_prices_pct:   {source: sentiment, column: lazy_prices_pct, higher_is_better: true, note: "high similarity = no big changes = good"}
+  moat_score:        {source: moat, column: moat_score, higher_is_better: true, already_scaled_0_100: true}
+  rdcf_implied_vs_hist: {source: forecast, column: implied_vs_hist_growth_pct, higher_is_better: false, note: "market implies less growth than history -> cheap"}
+
+optional_inputs:     # extra factor members behind a flag; default OFF so production scores are unchanged
+  smart_money:       # roadmap #7: MODEL-BASED smart-money score (smart_money_signals.score_pct, 0..100, weekly, PIT)
+    enabled: false
+    factor: insider
+    metric: smart_money_score
+    member_weight: 0.30     # relative to insider_signal 1.0 when enabled
+    max_age_days: 10
+
+forecast_confidence:   # v2: DCF / fair-value derived inputs (forecast_valuation) are confidence-weighted
+  source: forecast_valuation.valuation_confidence   # 0..100, row scenario = market_implied
+  applies_to: [rdcf_implied_vs_hist]                # any future DCF upside / fair-value metric follows the same rule
+  min_confidence: 40      # below -> metric treated as missing (not imputed); Value renormalizes onto the multiples
+  weight_rule: "effective member weight = weight * valuation_confidence / 100 (null confidence -> 1.0); coverage numerator uses the effective weight"
+
+# ------------------------------------------------------------------ TRANSFORMS
+transforms:
+  winsorize: {lower: 0.01, upper: 0.99, scope: peer_group, applies_to: [z, regression]}
+  percentile:
+    method: average_rank            # pct = (rank - 0.5) / n * 100 after direction adjustment; ties averaged
+    direction: "if higher_is_better=false multiply by -1 before ranking; target metrics use -abs(x - target)"
+  z:
+    clip: 3.0
+  positive_only: "valuation multiples <= 0 or null (negative earnings) are placed at the worst percentile (score 5) rather than dropped"
+  log_before_regression: [ev_ebitda, ev_sales, pe_ttm, pb, p_tbv, p_ffo]
+
+# ------------------------------------------------------------------ PEER GROUPS
+peer_groups:
+  peer_region_map:                  # region -> peer region bucket
+    US: NA
+    CA: NA
+    UK: EUROPE
+    EU: EUROPE
+    JP: JP
+    KR: ASIA_EX_JP
+    CN: GREATER_CHINA
+    HK: GREATER_CHINA
+    APAC: ASIA_EX_JP
+    LATAM: LATAM
+    OTHER: GLOBAL
+  size_buckets: {source: valuation_daily.size_bucket, buckets: [large, mid, small]}
+  levels:                           # tried in order; first with >= min_peers valid values (incl. self) wins
+    - {id: subsector_region_size, keys: [subsector_id, peer_region, size_bucket]}
+    - {id: subsector_region,      keys: [subsector_id, peer_region]}
+    - {id: subsector_global,      keys: [subsector_id]}
+    - {id: sector_region,         keys: [sector_id, peer_region]}
+    - {id: sector_global,         keys: [sector_id]}
+  min_peers: 8
+  market_metric_levels:             # momentum/volatility compared within region cross-section (sector-neutral optional)
+    - {id: region_all, keys: [peer_region]}
+    - {id: global_all, keys: []}
+  peer_group_key_format: "{level}:{v1}|{v2}|{v3}"   # e.g. subsector_region_size:semiconductors|NA|large
+
+# ------------------------------------------------------------------ SELF HISTORY
+self_history:
+  window_years: 10
+  min_window_years: 5
+  observations: "TTM rows at each quarter end (or FY/H for non-quarterly reporters) within window, PIT as-of"
+  min_obs: 8
+  score: "self_score = norm_cdf(direction * (x - mean_hist) / std_hist) * 100 ; std floor = 0.05 * |mean_hist| + 1e-9"
+  applies_to: [ratios, sector_kpis, valuation]     # market/insider/sentiment metrics have no self-history component
+
+# ------------------------------------------------------------------ MARKET-CAP / VALUATION ADJUSTMENT
+market_cap_adjustment:
+  applies_to: valuation_metrics
+  method: >
+    Within peer group (min 20; else sector_global), cross-sectional OLS:
+    log(multiple) ~ log(market_cap_usd) + quality_factor_score + revenue_cagr_3y   (yields: dependent = yield, no log).
+    Residual direction-adjusted (cheaper than predicted = better) -> percentile = mcap_adj_score.
+    Captures "cheap vs what its size and quality justify".
+  min_obs: 20
+
+# ------------------------------------------------------------------ METRIC BLEND -> metric_score (0..100)
+metric_blend:
+  fundamental: {peer: 0.70, self: 0.30}                 # ratios, sector_kpis
+  valuation:   {peer: 0.40, self: 0.25, mcap_adj: 0.35}
+  market:      {peer: 1.00}
+  other:       {peer: 1.00}                             # insider/sentiment/macro; already_scaled_0_100 metrics pass through
+  renormalize_missing_components: true                  # e.g. no self-history -> peer weight becomes 1.0
+
+# ------------------------------------------------------------------ FACTORS
+# members: {metric_id: weight}. Members excluded for the issuer's kpi set (excluded_generic) or null are dropped and
+# weights renormalized. 'overrides' replace members entirely for the listed kpi sets.
+factors:
+  - id: quality
+    name: Quality
+    description: "Sector-specific quality composite (kpi_sets.quality_weights) blended with accounting quality."
+    members_rule: "0.80 * weighted mean over kpi_set.quality_weights (metric_scores) + 0.20 * accounting block"
+    accounting_block: {piotroski_f: 0.50, sloan_accruals: 0.25, beneish_m: 0.25}
+  - id: profitability
+    name: Profitability
+    members: {roic: 0.25, roe: 0.15, gross_profitability: 0.20, operating_margin: 0.20, fcf_margin: 0.20}
+    overrides:
+      banks: {rote: 0.40, roe: 0.30, ppop_to_assets: 0.30}
+      consumer_finance: {roe: 0.60, nim: 0.40}
+      insurance_pc: {roe: 0.60, combined_ratio: 0.40}
+      insurance_life: {roe: 0.70, investment_yield: 0.30}
+      reits: {ffo_margin: 0.50, roe: 0.20, ebitda_margin: 0.30}
+      utilities: {roe: 0.50, roic: 0.30, ebitda_margin: 0.20}
+  - id: growth
+    name: Growth
+    members: {revenue_growth_yoy: 0.20, revenue_cagr_3y: 0.20, eps_growth_yoy: 0.15, eps_cagr_3y: 0.15, fcf_per_share_cagr_3y: 0.15, gross_profit_growth_yoy: 0.10, revenue_growth_accel: 0.05}
+    overrides:
+      banks: {revenue_growth_yoy: 0.20, eps_cagr_3y: 0.30, bvps_cagr_3y: 0.30, deposit_growth_yoy: 0.20}
+      insurance_pc: {premium_growth_yoy: 0.40, bvps_cagr_3y: 0.40, eps_cagr_3y: 0.20}
+      insurance_life: {premium_growth_yoy: 0.30, bvps_cagr_3y: 0.50, eps_cagr_3y: 0.20}
+      reits: {ffo_per_share_growth: 0.50, affo_per_share_growth: 0.30, revenue_growth_yoy: 0.20}
+  - id: value
+    name: Value
+    members: {earnings_yield: 0.20, fcf_yield: 0.25, ev_ebitda: 0.20, ev_sales: 0.10, pb: 0.10, shareholder_yield: 0.10, rdcf_implied_vs_hist: 0.05}
+    overrides:
+      banks: {earnings_yield: 0.35, p_tbv: 0.35, dividend_yield: 0.30}
+      consumer_finance: {earnings_yield: 0.50, pb: 0.50}
+      insurance_pc: {earnings_yield: 0.40, pb: 0.40, dividend_yield: 0.20}
+      insurance_life: {earnings_yield: 0.40, pb: 0.40, dividend_yield: 0.20}
+      reits: {p_ffo: 0.50, dividend_yield: 0.30, ev_ebitda: 0.20}
+      holdings: {pb: 0.60, earnings_yield: 0.40}
+  - id: balance_sheet
+    name: Balance-sheet health
+    members: {net_debt_to_ebitda: 0.25, interest_coverage: 0.20, altman_z2: 0.20, current_ratio: 0.10, liabilities_to_assets: 0.10, cash_to_assets: 0.15}
+    overrides:
+      banks: {equity_to_assets: 0.40, cet1: 0.30, loans_to_deposits: 0.30}
+      consumer_finance: {leverage: 0.60, cost_of_risk: 0.40}
+      insurance_pc: {reserves_to_equity: 0.50, debt_to_equity: 0.50}
+      insurance_life: {leverage: 0.60, debt_to_equity: 0.40}
+      reits: {net_debt_to_ebitda: 0.40, debt_to_gross_assets: 0.30, interest_coverage: 0.30}
+  - id: momentum
+    name: Momentum
+    members: {mom_12_1: 0.35, mom_6_1: 0.25, high_52w_proximity: 0.15, trend_200d: 0.15, vol_1y: 0.10}
+  - id: insider
+    name: Insider
+    members: {insider_signal: 1.0}
+    missing_policy: neutral_50      # no filings / non-covered region -> 50 with coverage 0
+  - id: sentiment
+    name: Sentiment
+    members: {sentiment_ewm_30d: 0.40, gdelt_tone_ewm_7d: 0.20, lazy_prices_pct: 0.40}
+    missing_policy: neutral_50
+  - id: macro
+    name: Macro sensitivity
+    members: {macro_regime_fit: 0.70, macro_rate_beta_abs: 0.30}
+    missing_policy: neutral_50
+  - id: moat
+    name: Moat
+    members: {moat_score: 1.0}
+
+factor_score:
+  aggregation: "weighted mean of available metric_scores (weights renormalized)"
+  repercentile: "score = percentile of score_raw within peer_region x sector (min 8 else peer_region) -> 0..100"
+  coverage: "sum of weights of non-imputed members / sum of all member weights"
+
+# ------------------------------------------------------------------ COMPOSITE
+composite:
+  default_profile: balanced
+  profiles:
+    balanced:      {quality: 0.18, profitability: 0.12, growth: 0.12, value: 0.15, balance_sheet: 0.08, momentum: 0.12, insider: 0.05, sentiment: 0.05, macro: 0.05, moat: 0.08}
+    quality_value: {quality: 0.25, profitability: 0.15, value: 0.25, balance_sheet: 0.10, moat: 0.15, growth: 0.05, momentum: 0.05}
+    growth:        {growth: 0.30, quality: 0.15, profitability: 0.15, momentum: 0.20, sentiment: 0.05, moat: 0.10, value: 0.05}
+    momentum:      {momentum: 0.40, sentiment: 0.15, insider: 0.10, growth: 0.15, quality: 0.10, macro: 0.10}
+    defensive:     {balance_sheet: 0.25, quality: 0.25, value: 0.15, moat: 0.15, macro: 0.10, profitability: 0.10}
+    ml_blend:      {_base_profile: balanced, _base_weight: 0.5, _ml_weight: 0.5, _ml_source: "ml_predictions production model horizon 3M rank_pct*100"}
+  custom_weights:
+    api: "POST /api/v1/screener/query with factor_weights {factor_id: weight>=0}; normalized to sum 1; computed from factor_scores at request time"
+  aggregation: "score = sum_f w_f * factor_score_f over factors with coverage >= 0.3 (weights renormalized); factors with neutral_50 policy count with their 50"
+  grades: {method: quintile, scope: global_scored_universe, labels: [A, B, C, D, E]}
+  # coverage v3 A8 (2026-11): every composite is DESCRIPTIVE (a rules-based peer ranking, not a forecast). "signal",
+  # "predictive" or buy / sell wording is allowed only for a profile whose RECORDED out-of-sample gate passed: job
+  # composite_validation (manual) -> data/reports/composite/gate.json (app.analytics.composite_gate). Re-weighted
+  # (custom) composites are never validated. Served as GET /meta/factors composite_validation + CompositeSummary.label.
+  validation:
+    label: descriptive
+    gate:
+      horizon: 3M                   # ml_labels.fwd_excess_sector, close(D+1) -> close(D+1+63 sessions), minus sector x region mean
+      min_dates: 24                 # point-in-time scoring dates (month-ends) with a label
+      min_names_per_date: 30
+      min_rank_ic_t: 2.0            # Newey-West t of the mean per-date Spearman rank IC (> 0)
+      min_auc_t: 2.0                # Newey-West t of the mean per-date AUC - 0.5 (fwd_excess_sector > 0), one-sided p < 0.025
+      label_join_tolerance_days: 7  # first label date L >= scoring date D, L - D <= 7 days (label starts at close(L+1))
+    survivorship: >                 # review A7_A8 (app.analytics.composite_gate.evaluate_pit)
+      The stored history scores today's MVP universe backwards (universe_membership history starts 2026-10-09/10), so the
+      panel is masked by point-in-time universe_membership (mvp_us + mvp_global; initial snapshot = members since
+      inception, later additions from valid_from, exits until valid_to) and only scoring months on or after the membership
+      history start (survivorship-free) can decide a pass: fewer than min_dates such months -> verdict not_validated (a
+      fail stays fail), recorded as survivorship.survivorship_biased = true. Readers refuse a pass without
+      survivorship_biased = false.
+    evidence:                       # out-of-sample results on record (none passes; they keep the label descriptive)
+      - {id: SR20261012T0319222S5ZX, date: 2026-10-12, source: "Model Studio run (data/modeling/runs)", subject: "factor scores (quality, value, momentum, growth, profitability) + ratios -> P(3M return above the cross-sectional mean)", universe: mvp_us, method: "HistGradientBoosting, monthly panel 2017-06 ->, purged 5-fold CV", metric: oos_auc, value: 0.490, n_obs: 42384, verdict: no_edge}
+
+# ------------------------------------------------------------------ MISSING DATA POLICY
+missing_data:
+  metric_level: >
+    null metric -> no metric_score (imputed=false, excluded) unless 'positive_only' rule assigns score 5.
+    Generic metrics in excluded_generic are never scored for that kpi set.
+  factor_level: >
+    coverage < 0.30 -> factor score = null (fundamental factors) or 50 (neutral_50 factors, coverage stays 0).
+  composite_level: >
+    require >= 5 non-null factors including at least 2 of {quality, profitability, value, growth}; else composite null.
+  dq_penalty: >
+    composite_scores.dq_score = mean fundamentals_wide.dq_score of inputs; UI shows a warning badge below 0.6.
+  minimum_history: "issuers with < 2 FY of fundamentals: growth/self-history components null"
+
+# ------------------------------------------------------------------ COST OF CAPITAL (shared by moat + forecast)
+cost_of_capital:
+  risk_free: "10y government yield of reporting-currency country from macro_observations (fred:DGS10 for USD); fallback US10Y + inflation differential"
+  equity_risk_premium: 0.050
+  country_risk_premium: {US: 0.0, CA: 0.0, UK: 0.004, EU: 0.006, JP: 0.007, KR: 0.008, CN: 0.010, HK: 0.008, APAC: 0.012, LATAM: 0.030, OTHER: 0.020}
+  beta: "Blume-adjusted 0.67*beta_market + 0.33 (macro_betas, 36m) ; fallback subsector median; clip [0.4, 2.0]"
+  cost_of_debt: "clip(interest_expense / avg(total_debt), rf + 0.005, rf + 0.08) * (1 - tax_rate_norm)"
+  weights: "E = market_cap, D = total_debt (book)"
+  wacc_clip: [0.05, 0.15]
+  financials: "banks/insurers use cost of equity only (no WACC)"
+  implementation_notes: >
+    app.analytics.cost_of_capital: beta = weekly 3y vs local benchmark (Blume, clip [0.4,2.0], fallback subsector median);
+    cost of equity floored at max(rf + 0.6*(ERP+CRP), 5%); EM local-currency rf net of default spread (CRP/1.5 when CRP >= 2%);
+    WACC upper clip widened by max(0, rf - 5%) for high-rate currencies; terminal growth = min(nominal GDP proxy - 0.5%, rf,
+    3% + max(0, GDP proxy - 4%)) clipped [0.5%, 7%]. Valuation (forecast job, erp_mode=implied) re-solves the ERP per region
+    bucket (NA / EUROPE / JP / EM_APAC, pooled fallback) so the median base-case upside is ~0 (market-implied ERP, bounds 1-10%);
+    cost_of_capital and moat keep equity_risk_premium above.
+
+# ------------------------------------------------------------------ MOAT
+moat:
+  window_years: 10
+  min_years: 5
+  components:                      # each scored 0..100
+    roic_wacc_spread:      {weight: 0.30, metric: "mean(ROIC - WACC) over window -> percentile within sector_global"}
+    roic_wacc_persistence: {weight: 0.20, metric: "share of years ROIC > WACC -> score = 100 * share"}
+    gm_level:              {weight: 0.10, metric: "gross margin level percentile within subsector_global"}
+    gm_stability:          {weight: 0.10, metric: "-stdev(gross margin, window) percentile within subsector_global"}
+    margin_premium:        {weight: 0.10, metric: "operating margin minus subsector median, mean over window -> percentile"}
+    market_share:          {weight: 0.10, metric: "issuer revenue_usd / sum subsector revenue_usd (global, latest FY) -> percentile within subsector"}
+    intangibles_intensity: {weight: 0.10, metric: "(rnd + amortization_intangibles + capex_intangibles)/revenue mean 3y -> percentile within sector"}
+  supplementary_components:        # added by analytics-valuation; weights are renormalized together with `components`
+    revenue_stability:     {weight: 0.06, metric: "-stdev(yoy revenue growth, window) -> global percentile (switching-cost proxy)"}
+    customer_lockin:       {weight: 0.04, metric: "deferred_revenue / revenue mean 3y -> global percentile (null when not reported; switching-cost proxy)"}
+  financials_variant: "banks/insurers: replace ROIC-WACC with ROE - cost of equity; GM components replaced by efficiency_ratio / combined_ratio stability"
+  financials_variant_impl: "implemented: ROE - cost of equity; gm_level/gm_stability use pretax margin, margin_premium uses net margin (efficiency/combined ratio not reliably populated)"
+  classification:
+    # bars as applied by app.analytics.moat.classify = the `calibrated` block below (the v1 text read 70 / 0.80 and 50 / 0.60)
+    wide:   "moat_score >= 75 AND roic_wacc_persistence >= 0.90 AND years >= 7 (calibrated.wide_*)"
+    narrow: "moat_score >= 55 AND roic_wacc_persistence >= 0.60 (calibrated.narrow_*)"
+    none:   "otherwise"
+    insufficient_data: "years < min_years OR component coverage < 0.6"
+  confidence: "0.4 * min(years/10, 1) + 0.3 * component_coverage + 0.3 * (1 - normalized stdev of annual ROIC-WACC spreads)"
+  calibrated:                      # analytics-valuation, calibrated on live data 2026-10-11 (see CONTRACT_CHANGES); used by app.analytics.moat.classify
+    wide_score: 75
+    wide_persistence: 0.9
+    wide_min_years: 7
+    narrow_score: 55
+    narrow_persistence: 0.6
+    note: "wide/narrow bars raised vs the v1 text (70/0.8, 50/0.6) so that wide stays a minority on the large-cap MVP universe; spread score = 0.5*sector percentile + 0.5*absolute map (-5%->0, +15%->100); financials use ROE - cost of equity"

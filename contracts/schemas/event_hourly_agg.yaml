@@ -1,0 +1,31 @@
+table: event_hourly_agg
+version: 1
+zone: features
+owner: news-live (app.news_live.compaction)
+description: >
+  Hourly twin of event_daily_agg (roadmap v3 N3): country x theme x hour, sector x theme x hour, issuer x hour
+  (theme -1 = all themes) from the GDELT 15-minute files of that UTC hour (slot stamps HH:00..HH:45), folded hourly
+  from the live hot store by the job news_hourly with the events_v2 aggregation (all parsed events / all labelled
+  articles of the hour, before the T2 keep filter). One day file per UTC date, rewritten as hours are folded
+  (idempotent); event_daily_agg stays the daily system of record (written at the daily finalise from the full day).
+storage: {path: features/event_hourly_agg, format: parquet, partition_by: [year_month], write_mode: append, retention: "forever (about 0.1-0.3 MB per day)"}
+primary_key: [date, hour, label_type, label_id, theme]
+pit: {knowledge_column: date, rule: "hour h is known once its last 15-min slot was released (about h:50 UTC)"}
+columns:
+  - {name: year_month, type: string, nullable: false, description: "Partition YYYY-MM"}
+  - {name: date, type: date, nullable: false, description: "UTC date of the slots"}
+  - {name: hour, type: int8, nullable: false, description: "UTC hour 0..23 (slots HH:00, HH:15, HH:30, HH:45)"}
+  - {name: label_type, type: enum, nullable: false, values: [country, sector, issuer], description: "Label dictionary"}
+  - {name: label_id, type: int32, nullable: false, description: "event_labels id (country 0 = GLOBAL)"}
+  - {name: theme, type: int8, nullable: false, description: "Theme bit, -1 = all themes"}
+  - {name: ev_n, type: int32, nullable: false, description: "Events"}
+  - {name: ev_mentions, type: int32, nullable: false, description: "Sum NumMentions"}
+  - {name: ev_articles, type: int32, nullable: false, description: "Sum NumArticles"}
+  - {name: ev_conflict_n, type: int32, nullable: false, description: "Events with QuadClass 3/4"}
+  - {name: ev_goldstein, type: float32, nullable: true, description: "Mean Goldstein"}
+  - {name: ev_tone, type: float32, nullable: true, description: "Mean event AvgTone"}
+  - {name: art_n, type: int32, nullable: false, description: "Labelled GKG articles"}
+  - {name: art_tone, type: float32, nullable: true, description: "Mean article tone"}
+  - {name: art_neg_share, type: float32, nullable: true, description: "Share of articles with tone < -2"}
+  - {name: slots, type: int8, nullable: true, description: "15-min slots of the hour present in the hot store (4 = complete)"}
+  - {name: computed_at, type: datetime, nullable: false, description: "Write time UTC"}

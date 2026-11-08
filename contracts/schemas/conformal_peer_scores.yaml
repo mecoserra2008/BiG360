@@ -1,0 +1,40 @@
+table: conformal_peer_scores
+version: 1
+zone: features
+owner: conformal (app.conformal.peer_groups)
+description: >
+  Application B daily joint-anomaly score per peer group (MODEL-BASED): the members' one-day log returns scored
+  against the frozen filter's predictive law emitted at the previous close; score_pct is the calibrated percentile
+  within the rolling calibration window; anomaly flags compare with the conformal radius. Coverage is marginal over
+  history. Next-session radii (q_next_*) plus conformal_peer_members' law give any a'Y band at query time:
+  a'mu +- sqrt(q a'(diag(d) + L L')a).
+storage: {path: features/conformal_peer_scores, format: parquet, partition_by: [year], write_mode: upsert}
+primary_key: [as_of_date, group_id]
+columns:
+  - {name: as_of_date, type: date, nullable: false, description: "Session of the realised move"}
+  - {name: group_id, type: string, nullable: false, description: "Group"}
+  - {name: year, type: int16, nullable: false, description: "Partition: year(as_of_date)"}
+  - {name: version, type: string, nullable: false, description: "Group-definition version"}
+  - {name: filter, type: enum, nullable: false, values: [ewma_lr, factor, gcn_gru, garch_dcc], description: "Shape filter"}
+  - {name: radius_mode, type: enum, nullable: false, values: [plain, aci], description: "Radius used for the anomaly flags"}
+  - {name: model_based, type: bool, nullable: false, description: "Always true"}
+  - {name: region_bloc, type: string, nullable: false, description: "Bloc"}
+  - {name: n_members, type: int16, nullable: false, description: "Members scored"}
+  - {name: score, type: float64, nullable: true, description: "Joint squared-Mahalanobis score of the members' log returns of as_of_date vs the law emitted at the previous close"}
+  - {name: score_pct, type: float64, nullable: true, description: "Calibrated percentile of the score among the calibration window's scores (0..1)"}
+  - {name: q_80, type: float64, nullable: true, description: "Radius at 80%"}
+  - {name: q_90, type: float64, nullable: true, description: "Radius at 90%"}
+  - {name: q_95, type: float64, nullable: true, description: "Radius at 95%"}
+  - {name: q_aci_90, type: float64, nullable: true, description: "ACI radius at 90% target"}
+  - {name: aci_alpha_90, type: float64, nullable: true, description: "ACI level for the 90% target"}
+  - {name: anomaly_90, type: bool, nullable: true, description: "score above the 90% radius (radius_mode)"}
+  - {name: anomaly_95, type: bool, nullable: true, description: "score above the 95% radius"}
+  - {name: group_move, type: float64, nullable: true, description: "Equal-weight mean log return of the members"}
+  - {name: top_member, type: string, nullable: true, description: "Member with the largest contribution r_i (Sigma^-1 r)_i"}
+  - {name: top_share, type: float64, nullable: true, description: "Its share of the score"}
+  - {name: breakaway_member, type: string, nullable: true, description: "Member with the largest |z_cond| (moved most vs what the rest of the group implies)"}
+  - {name: breakaway_z, type: float64, nullable: true, description: "Its conditional z"}
+  - {name: q_next_90, type: float64, nullable: true, description: "90% radius for the NEXT session's set (pair / spread bands at query time)"}
+  - {name: q_next_95, type: float64, nullable: true, description: "95% radius for the next session's set"}
+  - {name: computed_at, type: datetime, nullable: false, description: "Write time UTC"}
+  - {name: run_id, type: string, nullable: true, description: "job_runs.run_id"}

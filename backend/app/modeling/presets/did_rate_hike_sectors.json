@@ -1,0 +1,53 @@
+{
+ "title": "DiD event study: sector reaction to a rate hike date",
+ "description": "Weekly returns of mvp_us stocks around the first Fed hike of the 2022 cycle (2022-03-16): financials (treated) vs all other sectors (controls). Two-way fixed-effects event study with 8 leads and 16 lags (reference week -1), entity-clustered errors and a joint pre-trend test.",
+ "tags": [
+  "causal",
+  "DiD",
+  "event study",
+  "rates",
+  "sectors"
+ ],
+ "study": {
+  "name": "Financials around the March 2022 hike",
+  "method": "did",
+  "y": "ret",
+  "x": [],
+  "params": {
+   "design": "event_study",
+   "leads": 8,
+   "lags": 16,
+   "treatment": {
+    "mode": "attribute",
+    "attribute": "sector_id",
+    "values": [
+     "FINS"
+    ],
+    "date": "2022-03-16"
+   }
+  },
+  "dataset": {
+   "kind": "panel",
+   "frequency": "W",
+   "start": "2021-06-01",
+   "end": "2023-03-31",
+   "entities": {
+    "universe": "mvp_us"
+   },
+   "variables": [
+    {
+     "name": "ret",
+     "source": "prices",
+     "field": "ret",
+     "transforms": [
+      {
+       "op": "clip",
+       "lower": -0.5,
+       "upper": 1.0
+      }
+     ]
+    }
+   ]
+  }
+ }
+}

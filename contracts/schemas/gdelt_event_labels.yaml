@@ -1,0 +1,41 @@
+table: gdelt_event_labels
+version: 1
+zone: normalized
+owner: events-v2 (app.events_v2.pipeline)
+description: >
+  T2 labelled GDELT 2.0 events (Events export + translingual export), compact encoding (E3). One row per kept
+  GLOBALEVENTID. Kept when labelled AND salient: a linked issuer (via the SOURCEURL article or a Mentions article,
+  link confidence >= 0.5), or a market-relevant CAMEO event type (taxonomy CAMEO rules) with NumArticles >= 3 or
+  |Goldstein| >= 7 (~22% of all events). theme_mask = CAMEO themes | themes of the SOURCEURL article.
+  All parsed events (kept or not) are folded into event_daily_agg first. Full detail for the last 180 days
+  (configurable); older months are compacted to the salient top-k per label/day plus extremes (events_retention).
+  Raw URLs are not stored (url_hash = first 8 bytes of blake2b(normalised URL); joins gdelt_article_labels /
+  story_members). Day files d-YYYYMMDD.parquet, compacted months m-YYYYMM.parquet; ZSTD; sorted by (country, date).
+storage: {path: normalized/gdelt_event_labels, format: parquet, partition_by: [year_month], write_mode: append, retention: "full 180 d, then salient-only"}
+primary_key: [event_id]
+pit: {knowledge_column: date, rule: "DATEADDED (UTC) date"}
+columns:
+  - {name: year_month, type: string, nullable: false, description: "Partition YYYY-MM of date"}
+  - {name: date, type: date, nullable: false, description: "DATEADDED UTC date (knowledge date)"}
+  - {name: event_id, type: int64, nullable: false, description: "GLOBALEVENTID"}
+  - {name: event_date, type: date, nullable: true, description: "SQLDATE"}
+  - {name: cameo, type: int16, nullable: false, description: "CAMEO EventCode as int (e.g. 0231 -> 231)"}
+  - {name: cameo_root, type: int8, nullable: false, description: "CAMEO root 1..20"}
+  - {name: quad, type: int8, nullable: false, description: "QuadClass 1..4"}
+  - {name: goldstein_x10, type: int8, nullable: true, description: "GoldsteinScale x 10 (-100..100)"}
+  - {name: tone_x100, type: int16, nullable: true, description: "AvgTone x 100 (clipped to int16)"}
+  - {name: n_mentions, type: int16, nullable: false, description: "NumMentions (clipped 32767)"}
+  - {name: n_sources, type: int16, nullable: false, description: "NumSources (clipped)"}
+  - {name: n_articles, type: int16, nullable: false, description: "NumArticles (clipped)"}
+  - {name: country, type: int16, nullable: false, description: "Primary country id (event_labels country): ActionGeo, else actor country, else 0 = GLOBAL"}
+  - {name: countries, type: list<int16>, nullable: false, description: "Country label ids (action + actor countries, GLOBAL rule)"}
+  - {name: lat_x100, type: int16, nullable: true, description: "ActionGeo_Lat x 100"}
+  - {name: lon_x100, type: int16, nullable: true, description: "ActionGeo_Long x 100"}
+  - {name: url_hash, type: int64, nullable: true, description: "blake2b-64 of the normalised SOURCEURL"}
+  - {name: domain_id, type: int32, nullable: true, description: "event_labels domain id of SOURCEURL"}
+  - {name: theme_mask, type: int64, nullable: false, description: "Market-theme bitmask (CAMEO rules | linked article themes)"}
+  - {name: sector_mask, type: int16, nullable: false, description: "Sector bitmask (linked issuers' sectors | GKG theme -> sector of the source article)"}
+  - {name: issuer_ids, type: list<int32>, nullable: false, description: "Linked issuer ids (event_labels issuer), may be empty"}
+  - {name: issuer_conf, type: list<int8>, nullable: false, description: "Link confidence x 100 per issuer_ids element (>= 50)"}
+  - {name: salience, type: int16, nullable: false, description: "x100: log1p(mentions) + log1p(sources) + log1p(articles) + |goldstein|/5 + 2 if issuer-linked"}
+  - {name: translated, type: bool, nullable: false, description: "From the translingual feed"}

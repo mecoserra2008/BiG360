@@ -1,0 +1,17 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <RootNamespace>BiG360.ConsoleSample</RootNamespace>
+    <AssemblyName>BiG360.Console</AssemblyName>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\src\BiG360.Client\BiG360.Client.csproj" />
+  </ItemGroup>
+
+  <ItemGroup Condition="'$(Big360Offline)' != 'true'">
+    <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="8.0.1" />
+  </ItemGroup>
+
+</Project>

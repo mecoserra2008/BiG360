@@ -1,0 +1,25 @@
+table: ratios
+version: 2
+zone: features
+owner: analytics-scoring (app.analytics.ratios)
+description: >
+  Generic fundamental metrics (contracts/sector_kpis.yaml -> generic_metrics) and accounting-quality scores
+  (piotroski_f, altman_z, beneish_m, sloan_accruals) per issuer and fiscal period, long format, PIT-versioned.
+  Price-dependent valuation metrics live in valuation_daily, not here.
+storage: {path: features/ratios, format: parquet, partition_by: [period_kind], write_mode: upsert}
+primary_key: [issuer_id, metric_id, period_end, period_kind, knowledge_date]
+pit: {knowledge_column: knowledge_date, rule: "same as fundamentals_wide"}
+columns:
+  - {name: issuer_id, type: string, nullable: false, description: "FK issuers"}
+  - {name: metric_id, type: string, nullable: false, description: "Metric id from sector_kpis.yaml generic_metrics or accounting_scores; plus (O2.2a, never scored) beneish_dsri/gmi/aqi/sgi/depi/sgai/tata/lvgi, beneish_m_growth_adj, beneish_red_flags, beneish_flag_adj (app.analytics.beneish)"}
+  - {name: period_kind, type: enum, nullable: false, values: [FY, Q, H, TTM], description: "Partition"}
+  - {name: fiscal_year, type: int16, nullable: false, description: "Fiscal year"}
+  - {name: fiscal_period, type: string, nullable: false, description: "FY/Q1../H1/TTM"}
+  - {name: period_end, type: date, nullable: false, description: "Period end"}
+  - {name: value, type: float64, nullable: true, description: "Metric value (null if undefined, e.g. negative denominator)"}
+  - {name: unit, type: enum, nullable: false, values: [ratio, pct, x, days, currency_usd, score, count, years], description: "Unit (pct stored as fraction 0.12 = 12%)"}
+  - {name: inputs_complete, type: bool, nullable: false, description: "All formula inputs present (no imputation)"}
+  - {name: knowledge_date, type: date, nullable: false, description: "Max knowledge_date of inputs"}
+  - {name: dq_score, type: float32, nullable: true, description: "fundamentals_wide.dq_score of the period row (low-dq input flag; v2)"}
+  - {name: computed_at, type: datetime, nullable: false, description: "Write time UTC"}
+  - {name: run_id, type: string, nullable: true, description: "Producing run"}

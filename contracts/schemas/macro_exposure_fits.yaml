@@ -1,0 +1,27 @@
+table: macro_exposure_fits
+version: 1
+zone: scores
+owner: macro-w4 (app.macro.markets.exposures, job macro_exposures)
+description: >
+  Latest full fit per (entity, model) used by the scenario engine (W4.4): coefficient vector, HAC covariance matrix
+  (row-major K x K, scaled by the shrinkage weights, for uncertainty bands), intercept and residual volatility. One
+  as_of (the latest month end, or the run date when it is later). The market loading of the S&P 500 on the macro
+  block (gamma, used to split an equity shock into its macro-explained and residual parts) is stored as the
+  univariate-style row entity_type = index, entity_id = IDX:^GSPC, model = gamma.
+storage: {path: scores/macro_exposure_fits, format: parquet, partition_by: [], write_mode: overwrite}
+primary_key: [entity_type, entity_id, weighting, model]
+columns:
+  - {name: as_of_date, type: date, nullable: false, description: "Estimation date"}
+  - {name: entity_type, type: string, nullable: false, description: "As macro_exposures"}
+  - {name: entity_id, type: string, nullable: false, description: "As macro_exposures"}
+  - {name: weighting, type: string, nullable: false, description: "cw | ew | none"}
+  - {name: model, type: string, nullable: false, description: "joint | surprise | gamma"}
+  - {name: factors, type: list<string>, nullable: false, description: "Factor order of betas / cov"}
+  - {name: betas, type: list<float64>, nullable: false, description: "Betas (shrunk for securities)"}
+  - {name: cov, type: list<float64>, nullable: false, description: "K*K HAC covariance, row-major"}
+  - {name: alpha, type: float64, nullable: true, description: "Weekly intercept"}
+  - {name: resid_vol, type: float64, nullable: true, description: "Weekly residual volatility"}
+  - {name: r2, type: float64, nullable: true, description: "R2"}
+  - {name: n_obs, type: int32, nullable: false, description: "Weeks used"}
+  - {name: scope, type: string, nullable: true, description: "Surprise scope"}
+  - {name: computed_at, type: datetime, nullable: false, description: "Write time UTC"}

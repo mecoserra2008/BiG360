@@ -1,0 +1,31 @@
+table: insider_signals
+version: 1
+zone: scores
+owner: signals-alt (app.analytics.insider)
+description: >
+  Daily insider signal per security: aggregates of open-market activity, opportunistic-vs-routine classification
+  (Cohen-Malloy-Pomorski: insider traded same calendar month in each of prior 3 years = routine),
+  IsolationForest anomaly score and XGBoost probability of positive 3M excess return.
+storage: {path: scores/insider_signals, format: parquet, partition_by: [year], write_mode: upsert}
+primary_key: [as_of_date, security_id]
+pit: {knowledge_column: as_of_date, rule: "uses insider_transactions with knowledge_date <= as_of_date"}
+columns:
+  - {name: as_of_date, type: date, nullable: false, description: "Signal date"}
+  - {name: year, type: int16, nullable: false, description: "Partition"}
+  - {name: security_id, type: string, nullable: false, description: "FK securities_master"}
+  - {name: issuer_id, type: string, nullable: false, description: "FK issuers"}
+  - {name: net_buy_value_usd_30d, type: float64, nullable: true, description: "Open-market buys - sells, USD, filed in last 30d"}
+  - {name: net_buy_value_usd_90d, type: float64, nullable: true, description: "Same, 90d"}
+  - {name: net_buy_mcap_bps_90d, type: float64, nullable: true, description: "net_buy_value_usd_90d / mcap * 1e4"}
+  - {name: n_buyers_90d, type: int32, nullable: true, description: "Distinct insiders buying"}
+  - {name: n_sellers_90d, type: int32, nullable: true, description: "Distinct insiders selling"}
+  - {name: cluster_buy, type: bool, nullable: false, description: ">=3 distinct buyers within 30d"}
+  - {name: c_suite_buy, type: bool, nullable: false, description: "CEO or CFO open-market buy in 90d"}
+  - {name: opportunistic_buy_value_usd_90d, type: float64, nullable: true, description: "Buys by non-routine insiders"}
+  - {name: opportunistic_sell_value_usd_90d, type: float64, nullable: true, description: "Sells by non-routine insiders (excluding 10b5-1)"}
+  - {name: anomaly_score, type: float64, nullable: true, description: "IsolationForest score 0..1 (1 = most anomalous) on latest filing features"}
+  - {name: xgb_prob_up, type: float64, nullable: true, description: "Model P(3M excess return > 0)"}
+  - {name: signal_score, type: float64, nullable: true, description: "0..100 insider factor input (50 = neutral / no activity)"}
+  - {name: top_transactions, type: json, nullable: true, description: "Up to 5 txn_ids driving the signal"}
+  - {name: computed_at, type: datetime, nullable: false, description: "Write time UTC"}
+  - {name: run_id, type: string, nullable: true, description: "Producing run"}

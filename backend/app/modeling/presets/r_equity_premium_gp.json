@@ -1,0 +1,104 @@
+{
+ "title": "Equity premium forecast with a Gaussian process",
+ "description": "Next-month US equity return from the term spread, Baa spread, VIX and NFCI with a Matern GP (small n).",
+ "question": "forecasting",
+ "tags": [
+  "probabilistic",
+  "GP",
+  "equity premium"
+ ],
+ "method_note": "Welch-Goyal (2008) showed most equity-premium predictors fail out of sample. A GP is a flexible Bayesian regression whose predictive sd widens where data are sparse (e.g. VIX spikes); walk-forward CV and a CRPS DM test against a linear-Gaussian baseline keep it honest. n is about 350, well under the O(n^3) cap. Caveat: the universe is today's constituents (membership history starts 2026-10), so early years carry survivorship bias; read the premium as an upper bound.",
+ "expected_outputs": [
+  "OOS CRPS / RMSE vs linear",
+  "PIT / calibration",
+  "GP slices with bands",
+  "conformal 90 % band"
+ ],
+ "runtime_s": 10.5,
+ "validated": "2026-11-06 on snapshot R20261106T010757G9ZB",
+ "result": {
+  "run_id": "SR20261106T015249BKSB1",
+  "beats_baseline": false,
+  "beats_linear": false,
+  "verdict": "GP is worse than linear-Gaussian baseline on CRPS (mean 0.02827 vs 0.02797); point forecast: GP is worse than linear baseline out of sample (mean loss 0.002668 vs 0.002615)",
+  "n_obs": 369,
+  "metrics": {
+   "oos_rmse": 0.05165600647136338,
+   "oos_r2_oos": -0.0015497200106564524,
+   "crps": 0.02826672251687666,
+   "crps_linear": 0.027965887295654395,
+   "crps_skill_vs_linear": -0.010757220682535262,
+   "coverage_90": 0.8738738738738738,
+   "dm_p_crps_vs_linear": 0.6258394259450564,
+   "conformal_coverage": 0.9606741573033708,
+   "dm_p_vs_linear": 0.7061401570767282
+  },
+  "coefficients": []
+ },
+ "study": {
+  "name": "Equity premium forecast with a Gaussian process",
+  "method": "gp_regression",
+  "y": "fwd_mkt_1m",
+  "x": [
+   "term_spread",
+   "baa_spread",
+   "vix",
+   "nfci"
+  ],
+  "params": {
+   "kernel": "matern52",
+   "cv": {
+    "folds": 5,
+    "scheme": "expanding",
+    "purge": 1,
+    "conformal_alpha": 0.1
+   }
+  },
+  "dataset": {
+   "kind": "timeseries",
+   "frequency": "M",
+   "start": "1996-01-01",
+   "variables": [
+    {
+     "name": "fwd_mkt_1m",
+     "source": "prices",
+     "field": "ret",
+     "transforms": [
+      {
+       "op": "fwd_compound",
+       "k": 1
+      }
+     ],
+     "entity_agg": "mean",
+     "entities": {
+      "universe": "mvp_us"
+     }
+    },
+    {
+     "name": "term_spread",
+     "source": "macro",
+     "field": "fred:T10Y3M",
+     "agg": "last"
+    },
+    {
+     "name": "baa_spread",
+     "source": "macro",
+     "field": "fred:BAA10Y",
+     "agg": "last"
+    },
+    {
+     "name": "vix",
+     "source": "macro",
+     "field": "fred:VIXCLS",
+     "agg": "last"
+    },
+    {
+     "name": "nfci",
+     "source": "macro",
+     "field": "fred:NFCI",
+     "agg": "last"
+    }
+   ]
+  }
+ }
+}

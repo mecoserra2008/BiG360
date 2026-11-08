@@ -1,0 +1,74 @@
+{
+ "title": "Conformal ellipsoid: joint macro surprise (IP / CPI / 10Y)",
+ "description": "Filtered conformal ellipsoid on monthly US industrial-production growth, CPI inflation and the change in the 10Y yield: an EWMA shape filter with a rolling split-conformal radius (ACI) gives a calibrated 90% joint set for next month's triple; months outside it are joint macro anomalies, with the variable that drove each. Model-based: coverage is marginal over time.",
+ "tags": [
+  "multivariate",
+  "conformal",
+  "macro",
+  "anomaly"
+ ],
+ "study": {
+  "name": "IP / CPI / 10Y conformal ellipsoid",
+  "method": "conformal_ellipsoid",
+  "x": [
+   "ip_g",
+   "infl",
+   "d10y"
+  ],
+  "params": {
+   "filter": "ewma",
+   "alpha": 0.1,
+   "window": 120,
+   "min_cal": 40,
+   "aci_gamma": 0.005,
+   "pretrain_frac": 0.25
+  },
+  "dataset": {
+   "kind": "timeseries",
+   "frequency": "M",
+   "start": "1990-01-01",
+   "macro_alignment": "period",
+   "variables": [
+    {
+     "name": "ip_g",
+     "source": "macro",
+     "field": "fred:INDPRO",
+     "transforms": [
+      {
+       "op": "log_diff"
+      },
+      {
+       "op": "scale",
+       "factor": 100
+      }
+     ]
+    },
+    {
+     "name": "infl",
+     "source": "macro",
+     "field": "fred:CPIAUCSL",
+     "transforms": [
+      {
+       "op": "log_diff"
+      },
+      {
+       "op": "scale",
+       "factor": 100
+      }
+     ]
+    },
+    {
+     "name": "d10y",
+     "source": "macro",
+     "field": "fred:DGS10",
+     "transforms": [
+      {
+       "op": "diff"
+      }
+     ],
+     "agg": "mean"
+    }
+   ]
+  }
+ }
+}

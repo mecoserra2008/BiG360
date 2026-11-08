@@ -1,0 +1,22 @@
+table: factor_scores
+version: 1
+zone: scores
+owner: analytics-scoring (app.analytics.scoring)
+description: Factor-family scores (Quality, Profitability, Growth, Value, Balance, Momentum, Insider, Sentiment, Macro, Moat) per security per day.
+storage: {path: scores/factor_scores, format: parquet, partition_by: [year], write_mode: upsert}
+primary_key: [as_of_date, security_id, factor_id]
+pit: {knowledge_column: as_of_date, rule: "inputs knowledge_date <= as_of_date"}
+columns:
+  - {name: as_of_date, type: date, nullable: false, description: "Scoring date"}
+  - {name: year, type: int16, nullable: false, description: "Partition"}
+  - {name: security_id, type: string, nullable: false, description: "FK securities_master"}
+  - {name: issuer_id, type: string, nullable: false, description: "FK issuers"}
+  - {name: factor_id, type: enum, nullable: false, values: [quality, profitability, growth, value, balance_sheet, momentum, insider, sentiment, macro, moat], description: "scoring.yaml factor id"}
+  - {name: score, type: float64, nullable: true, description: "0..100 (weighted mean of metric_scores, then re-percentiled within peer universe)"}
+  - {name: score_raw, type: float64, nullable: true, description: "Weighted mean before re-percentiling"}
+  - {name: coverage, type: float32, nullable: false, description: "Weight share of metrics with non-imputed values"}
+  - {name: rank_in_sector, type: int32, nullable: true, description: "1 = best within sector x region"}
+  - {name: sector_count, type: int32, nullable: true, description: "Securities ranked in sector x region"}
+  - {name: delta_1m, type: float64, nullable: true, description: "score - score 21 trading days ago"}
+  - {name: computed_at, type: datetime, nullable: false, description: "Write time UTC"}
+  - {name: run_id, type: string, nullable: true, description: "Producing run"}

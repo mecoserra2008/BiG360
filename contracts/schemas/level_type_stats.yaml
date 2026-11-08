@@ -1,0 +1,52 @@
+table: level_type_stats
+version: 2
+zone: features
+owner: technicals (app.technicals.level_backtest)
+description: >
+  Per-ticker backtest of which level types produce the best reactions (weekly job, last 10y of bars, point-in-time:
+  only levels known before each bar, only events whose outcome window closed on/before as_of_date).
+  Event (v2) = a session whose OPEN is > 0.25 ATR14 away from an active level and whose range then comes within
+  0.25 ATR of it (side = support if the open is above, resistance if below); one event per level instance until it resolves.
+  Hit (bounce) = favourable excursion >= 1 ATR within 10 bars before an adverse CLOSE beyond 0.5 ATR (touch bar: close only;
+  same-bar ambiguity counted as break). Break = adverse close beyond 0.5 ATR first.
+  Random-level control: every level instance/series is replayed shifted by +-U(0.75, 2.5) ATR; edge = hit_rate_shrunk -
+  control_hit_rate_shrunk. Shrinkage is beta-binomial: ticker -> (sector, region) pool -> universe, prior strength estimated
+  per level_key by method of moments across tickers, clipped to 2000..5000 pseudo-events (validated out of sample: per-ticker
+  deviations from the pooled rate carry little information). score = logistic(edge / 0.02) = reliability (0..1).
+  Pool rows: security_id = '*' (universe) or '*{sector_id}|{region}' with pool_key set.
+storage: {path: features/level_type_stats, format: parquet, partition_by: [], write_mode: overwrite}
+primary_key: [as_of_date, security_id, level_key]
+columns:
+  - {name: as_of_date, type: date, nullable: false, description: "Backtest end date"}
+  - {name: security_id, type: string, nullable: false, description: "FK securities_master ('*' row = universe prior)"}
+  - {name: level_key, type: string, nullable: false, description: "{level_type}@{timeframe}"}
+  - {name: n_events, type: int32, nullable: false, description: "Touch events"}
+  - {name: hit_rate, type: float64, nullable: true, description: "Raw share of events with reaction >= 1 ATR before invalidation"}
+  - {name: hit_rate_shrunk, type: float64, nullable: true, description: "Shrunk toward prior"}
+  - {name: mean_reaction_atr, type: float64, nullable: true, description: "Mean MFE (ATR)"}
+  - {name: mean_adverse_atr, type: float64, nullable: true, description: "Mean MAE (ATR)"}
+  - {name: break_rate, type: float64, nullable: true, description: "Share of touches that closed through by > 0.5 ATR"}
+  - {name: expectancy_r, type: float64, nullable: true, description: "Mean R multiple with stop at 0.5 ATR beyond level, exit at 10 bars or 2R"}
+  - {name: rank, type: int16, nullable: true, description: "Rank among level_keys for this security (1 = best by score; v2: ranked by reliability score, keys with >= 8 events first)"}
+  - {name: score, type: float64, nullable: true, description: "0..1 reliability = logistic(edge / 0.02); used as KDE weight in confluence"}
+  - {name: window_start, type: date, nullable: false, description: "First bar used"}
+  - {name: computed_at, type: datetime, nullable: false, description: "Write time UTC"}
+  - {name: level_type, type: string, nullable: true, description: "v2: level type part of level_key"}
+  - {name: timeframe, type: string, nullable: true, description: "v2: timeframe part of level_key (D/W/M/Q/Y/NA)"}
+  - {name: family, type: string, nullable: true, description: "v2: level family (app.technicals.taxonomy)"}
+  - {name: pool_key, type: string, nullable: true, description: "v2: '{sector_id}|{region}' pool the ticker row was shrunk toward; '*' for the universe row"}
+  - {name: n_support, type: int32, nullable: true, description: "v2: events approached from above (support tests)"}
+  - {name: n_resistance, type: int32, nullable: true, description: "v2: events approached from below (resistance tests)"}
+  - {name: hit_rate_support, type: float64, nullable: true, description: "v2: raw bounce rate of support tests"}
+  - {name: hit_rate_resistance, type: float64, nullable: true, description: "v2: raw bounce rate of resistance tests"}
+  - {name: median_reaction_atr, type: float64, nullable: true, description: "v2: median MFE (ATR), ticker rows only"}
+  - {name: mean_reaction_pct, type: float64, nullable: true, description: "v2: mean MFE as a fraction of price"}
+  - {name: follow_through_atr, type: float64, nullable: true, description: "v2: mean move in the break direction within 10 bars after a break (ATR)"}
+  - {name: control_n, type: int32, nullable: true, description: "v2: events of the random-level control"}
+  - {name: control_hit_rate, type: float64, nullable: true, description: "v2: raw bounce rate of the random-level control"}
+  - {name: control_hit_rate_shrunk, type: float64, nullable: true, description: "v2: control rate shrunk toward the pool control"}
+  - {name: edge, type: float64, nullable: true, description: "v2: hit_rate_shrunk - control_hit_rate_shrunk (bounce-rate edge vs random levels)"}
+  - {name: edge_raw, type: float64, nullable: true, description: "v2: hit_rate - control_hit_rate"}
+  - {name: prior_strength, type: float64, nullable: true, description: "v2: beta-binomial prior strength (pseudo-events) used for this level_key"}
+  - {name: hold_rate, type: float64, nullable: true, description: "v2: share of touches whose touch bar closed back on the approach side (level held on the close)"}
+  - {name: control_hold_rate, type: float64, nullable: true, description: "v2: hold rate of the random-level control"}

@@ -1,0 +1,21 @@
+table: thesis_reviews
+version: 1
+zone: app_state
+owner: theses (app.theses.store via app.api.routers.theses)
+description: >
+  Review schedule and completed reviews of a thesis. While review_every_days is set one scheduled row (status scheduled,
+  due_date) exists for the next review; completing it records the decision, the conviction after the review and the
+  snapshot captured, then schedules the next one. The thesis_eval job fires a thesis_review alert when a review is due.
+storage: {path: app_state.duckdb, format: duckdb_table, partition_by: [], write_mode: upsert}
+primary_key: [review_id]
+columns:
+  - {name: review_id, type: string, nullable: false, description: "TR + UTC timestamp + 6 random base32 chars"}
+  - {name: thesis_id, type: string, nullable: false, description: "FK theses"}
+  - {name: due_date, type: date, nullable: false, description: "Scheduled date"}
+  - {name: status, type: enum, nullable: false, values: [scheduled, completed, skipped], description: "Review state"}
+  - {name: completed_at, type: datetime, nullable: true, description: "UTC"}
+  - {name: decision, type: enum, nullable: true, values: [hold, add, trim, close, none], description: "Decision taken"}
+  - {name: conviction_after, type: int16, nullable: true, description: "1..5 after the review"}
+  - {name: notes_md, type: string, nullable: true, description: "Review notes (Markdown)"}
+  - {name: snapshot_id, type: string, nullable: true, description: "thesis_snapshots row captured at the review"}
+  - {name: created_at, type: datetime, nullable: false, description: "UTC"}

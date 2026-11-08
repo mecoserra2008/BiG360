@@ -1,0 +1,37 @@
+table: ccnews_articles
+version: 1
+zone: normalized
+owner: events-v2 historical news (app.events_v2.ccnews / app.events_v2.hist_merge)
+description: >
+  N1 CC-NEWS (Common Crawl news crawl, 2016-08 onwards): DERIVED metadata of labelled news articles only - never the
+  article text. Per article: cleaned title and a <= 300-character description (HTML head og:/meta description),
+  URL and its blake2b-64 hash (same key as GDELT), publisher domain and language ids (event_labels), publication
+  minute (page meta, else WARC fetch time), issuer links (events-v2 alias table, free-text rules), market-theme /
+  sector / country labels, the story it belongs to (news_stories, source `ccnews`), dedupe pointer
+  (dup_source_id = source id of the GDELT / RSS / Polygon member that already had the URL), 8 MinHash-LSH band keys
+  of the title (cross-source re-clustering) and the story's model sentiment. Kept only when the article has a market
+  theme or an issuer link. Full rows for 120 days, then salient-only (top-k per label per day), like E6.
+storage: {path: normalized/ccnews_articles, format: parquet, partition_by: [year_month], write_mode: append, retention: "full 120 d, then salient-only"}
+primary_key: [url_hash, date]
+pit: {knowledge_column: date, rule: "UTC publication date (page meta; WARC fetch date when the page has none)"}
+columns:
+  - {name: year_month, type: string, nullable: false, description: "Partition YYYY-MM of date"}
+  - {name: date, type: date, nullable: false, description: "UTC publication date"}
+  - {name: minute, type: int16, nullable: false, description: "Minute of day (UTC)"}
+  - {name: ts_source, type: int8, nullable: false, description: "0 = page meta publication time, 1 = WARC fetch time"}
+  - {name: url_hash, type: int64, nullable: false, description: "blake2b-64 of the normalised URL (app.events_v2.parse.url_key_expr)"}
+  - {name: url, type: string, nullable: false, description: "Article URL"}
+  - {name: domain_id, type: int32, nullable: true, description: "event_labels domain id (publisher)"}
+  - {name: lang_id, type: int8, nullable: true, description: "event_labels lang id"}
+  - {name: title, type: string, nullable: false, description: "Cleaned headline (og:title / title), <= 300 chars"}
+  - {name: description, type: string, nullable: true, description: "og:description / meta description, <= 300 chars (never body text)"}
+  - {name: theme_mask, type: int64, nullable: false, description: "Market-theme bitmask (English headline rules)"}
+  - {name: sector_mask, type: int16, nullable: false, description: "Linked issuers' sectors | theme -> sector"}
+  - {name: countries, type: list<int16>, nullable: false, description: "Country label ids: named in the text, else issuer countries, else publisher ccTLD, else GLOBAL"}
+  - {name: issuer_ids, type: list<int32>, nullable: false, description: "Linked issuer ids (event_labels issuer dictionary), may be empty"}
+  - {name: issuer_conf, type: list<int8>, nullable: false, description: "Link confidence x 100 per issuer (>= 50)"}
+  - {name: story_id, type: int64, nullable: true, description: "news_stories story id (null until the day joins the story layer)"}
+  - {name: dup_source_id, type: int8, nullable: true, description: "Source id of an existing member with the same URL (0 = GDELT GKG); null = new article"}
+  - {name: minhash_bands, type: list<int32>, nullable: true, description: "8 MinHash-LSH band keys (24 permutations, 3 rows per band) of the title token set"}
+  - {name: salience, type: int16, nullable: true, description: "x100: log1p(story size) + 2 if issuer-linked"}
+  - {name: sentiment_x100, type: int8, nullable: true, description: "Story sentiment P(pos)-P(neg) x 100 (FinBERT en / XLM-R other)"}

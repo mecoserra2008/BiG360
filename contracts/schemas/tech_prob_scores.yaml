@@ -1,0 +1,71 @@
+table: tech_prob_scores
+version: 1
+zone: scores
+owner: technicals (app.techprob.job:run, nightly technicals_probabilities)
+description: >
+  T4 calibrated technical score per security: percentile sub-scores within region x sector (additive; the original
+  saturating sub-scores are kept) and the historical forward excess-return stats of the score's decile
+  (tech_prob_score_buckets) with the walk-forward edge flag. Historical frequencies, not forecasts.
+storage: {path: scores/tech_prob_scores, format: parquet, partition_by: [], write_mode: overwrite, retention: "latest + month-end snapshots"}
+primary_key: [as_of_date, security_id]
+columns:
+  - {name: as_of_date, type: date, nullable: false, description: "tech_setups as_of"}
+  - {name: security_id, type: string, nullable: false, description: "FK securities_master"}
+  - {name: region, type: string, nullable: true, description: "Region of the percentile cross-section"}
+  - {name: sector_id, type: string, nullable: true, description: "Sector of the cross-section"}
+  - {name: technical_score, type: float64, nullable: true, description: "Composite technical score (unchanged)"}
+  - {name: technical_score_pct, type: float64, nullable: true, description: "Weighted mean of the percentile sub-scores (same weights)"}
+  - {name: pct_trend, type: float64, nullable: true, description: "Percentile rank 0..100 of the trend sub-score within region x sector"}
+  - {name: pct_structure, type: float64, nullable: true, description: "Percentile rank 0..100 of the structure sub-score within region x sector"}
+  - {name: pct_location, type: float64, nullable: true, description: "Percentile rank 0..100 of the location sub-score within region x sector"}
+  - {name: pct_rr, type: float64, nullable: true, description: "Percentile rank 0..100 of the rr sub-score within region x sector"}
+  - {name: pct_momentum, type: float64, nullable: true, description: "Percentile rank 0..100 of the momentum sub-score within region x sector"}
+  - {name: pct_technical, type: float64, nullable: true, description: "Percentile rank of the composite within region x sector"}
+  - {name: score_trend, type: float64, nullable: true, description: "Original sub-score 0..100"}
+  - {name: score_structure, type: float64, nullable: true, description: "Original sub-score 0..100"}
+  - {name: score_location, type: float64, nullable: true, description: "Original sub-score 0..100"}
+  - {name: score_rr, type: float64, nullable: true, description: "Original sub-score 0..100"}
+  - {name: score_momentum, type: float64, nullable: true, description: "Original sub-score 0..100"}
+  - {name: n_peers, type: int32, nullable: true, description: "Securities in the region x sector cross-section"}
+  - {name: vol_regime, type: string, nullable: true, description: "Vol regime"}
+  - {name: h5_decile, type: int16, nullable: true, description: "Score decile (fit table) for 5-session outcomes"}
+  - {name: h5_median, type: float64, nullable: true, description: "Historical median 5-session excess log return of the bucket"}
+  - {name: h5_q25, type: float64, nullable: true, description: "25th percentile"}
+  - {name: h5_q75, type: float64, nullable: true, description: "75th percentile"}
+  - {name: h5_mean, type: float64, nullable: true, description: "Mean"}
+  - {name: h5_hit_rate, type: float64, nullable: true, description: "Share with excess > 0"}
+  - {name: h5_n, type: int64, nullable: true, description: "Historical observations"}
+  - {name: h5_median_lo, type: float64, nullable: true, description: "Median 95% CI low (month blocks)"}
+  - {name: h5_median_hi, type: float64, nullable: true, description: "Median 95% CI high"}
+  - {name: h5_hit_lo, type: float64, nullable: true, description: "Hit-rate CI low"}
+  - {name: h5_hit_hi, type: float64, nullable: true, description: "Hit-rate CI high"}
+  - {name: h5_edge_significant, type: bool, nullable: false, description: "Out-of-sample rank IC t >= 2, monotone deciles and a top-bottom spread CI excluding 0 (walk-forward)"}
+  - {name: h5_gate, type: enum, nullable: false, values: [production, experimental], description: "gate verdict of this output from tech_prob_gates (docs/TECHNICALS_V2_VALIDATION.md): production = passed the T6 gate; experimental = failed or not validated (hidden by default in the UI)"}
+  - {name: h20_decile, type: int16, nullable: true, description: "Score decile (fit table) for 20-session outcomes"}
+  - {name: h20_median, type: float64, nullable: true, description: "Historical median 20-session excess log return of the bucket"}
+  - {name: h20_q25, type: float64, nullable: true, description: "25th percentile"}
+  - {name: h20_q75, type: float64, nullable: true, description: "75th percentile"}
+  - {name: h20_mean, type: float64, nullable: true, description: "Mean"}
+  - {name: h20_hit_rate, type: float64, nullable: true, description: "Share with excess > 0"}
+  - {name: h20_n, type: int64, nullable: true, description: "Historical observations"}
+  - {name: h20_median_lo, type: float64, nullable: true, description: "Median 95% CI low (month blocks)"}
+  - {name: h20_median_hi, type: float64, nullable: true, description: "Median 95% CI high"}
+  - {name: h20_hit_lo, type: float64, nullable: true, description: "Hit-rate CI low"}
+  - {name: h20_hit_hi, type: float64, nullable: true, description: "Hit-rate CI high"}
+  - {name: h20_edge_significant, type: bool, nullable: false, description: "Out-of-sample rank IC t >= 2, monotone deciles and a top-bottom spread CI excluding 0 (walk-forward)"}
+  - {name: h20_gate, type: enum, nullable: false, values: [production, experimental], description: "gate verdict of this output from tech_prob_gates (docs/TECHNICALS_V2_VALIDATION.md): production = passed the T6 gate; experimental = failed or not validated (hidden by default in the UI)"}
+  - {name: h60_decile, type: int16, nullable: true, description: "Score decile (fit table) for 60-session outcomes"}
+  - {name: h60_median, type: float64, nullable: true, description: "Historical median 60-session excess log return of the bucket"}
+  - {name: h60_q25, type: float64, nullable: true, description: "25th percentile"}
+  - {name: h60_q75, type: float64, nullable: true, description: "75th percentile"}
+  - {name: h60_mean, type: float64, nullable: true, description: "Mean"}
+  - {name: h60_hit_rate, type: float64, nullable: true, description: "Share with excess > 0"}
+  - {name: h60_n, type: int64, nullable: true, description: "Historical observations"}
+  - {name: h60_median_lo, type: float64, nullable: true, description: "Median 95% CI low (month blocks)"}
+  - {name: h60_median_hi, type: float64, nullable: true, description: "Median 95% CI high"}
+  - {name: h60_hit_lo, type: float64, nullable: true, description: "Hit-rate CI low"}
+  - {name: h60_hit_hi, type: float64, nullable: true, description: "Hit-rate CI high"}
+  - {name: h60_edge_significant, type: bool, nullable: false, description: "Out-of-sample rank IC t >= 2, monotone deciles and a top-bottom spread CI excluding 0 (walk-forward)"}
+  - {name: h60_gate, type: enum, nullable: false, values: [production, experimental], description: "gate verdict of this output from tech_prob_gates (docs/TECHNICALS_V2_VALIDATION.md): production = passed the T6 gate; experimental = failed or not validated (hidden by default in the UI)"}
+  - {name: fit_date, type: string, nullable: true, description: "Bucket table fit date"}
+  - {name: computed_at, type: datetime, nullable: false, description: "Write time UTC"}

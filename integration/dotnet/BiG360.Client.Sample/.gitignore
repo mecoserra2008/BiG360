@@ -1,0 +1,6 @@
+bin/
+obj/
+*.user
+.vs/
+src/BiG360.Client.Generated/
+src/BiG360.Client.Kiota/

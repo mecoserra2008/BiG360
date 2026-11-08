@@ -1,0 +1,32 @@
+table: tech_prob_zones
+version: 1
+zone: scores
+owner: technicals (app.techprob.job:run, nightly technicals_probabilities)
+description: >
+  T3 zone hold model per confluence zone (MODEL-BASED): calibrated P(hold | touch) (hold = reversal >= 1.5 sigma
+  before a close beyond the far edge by >= 0.5 sigma within 10 sessions of the touch), the same pipeline trained on
+  random control bands, and the edge vs random with its walk-forward significance. Combined with the conformal
+  P(touch) at query time.
+storage: {path: scores/tech_prob_zones, format: parquet, partition_by: [], write_mode: overwrite, retention: "latest + month-end snapshots"}
+primary_key: [as_of_date, security_id, zone_id]
+columns:
+  - {name: as_of_date, type: date, nullable: false, description: "confluence_zones as_of"}
+  - {name: security_id, type: string, nullable: false, description: "FK securities_master"}
+  - {name: zone_id, type: int16, nullable: false, description: "confluence_zones.zone_id"}
+  - {name: side, type: enum, nullable: false, values: [support, resistance], description: "Zone side"}
+  - {name: in_zone, type: bool, nullable: true, description: "Close inside the zone"}
+  - {name: distance_atr, type: float64, nullable: true, description: "Zone distance (ATR)"}
+  - {name: p_hold, type: float64, nullable: true, description: "Calibrated P(hold | touch)"}
+  - {name: p_hold_ctrl, type: float64, nullable: true, description: "Random-control model P(hold | touch) for the same band features"}
+  - {name: edge, type: float64, nullable: true, description: "p_hold - p_hold_ctrl"}
+  - {name: edge_bucket, type: int16, nullable: true, description: "Predicted-edge quintile (walk-forward table)"}
+  - {name: edge_significant, type: bool, nullable: false, description: "Walk-forward bucket CI excludes 0 and the edge output passed the gate"}
+  - {name: edge_direction, type: string, nullable: true, description: "better_than_random / worse_than_random / none"}
+  - {name: edge_ci_lo, type: float64, nullable: true, description: "Bucket realised-edge 95% CI low"}
+  - {name: edge_ci_hi, type: float64, nullable: true, description: "Bucket realised-edge 95% CI high"}
+  - {name: edge_realised, type: float64, nullable: true, description: "Bucket realised edge (walk-forward)"}
+  - {name: model_kind, type: string, nullable: true, description: "logit / hgb"}
+  - {name: fit_date, type: string, nullable: true, description: "Model fit date"}
+  - {name: gate, type: enum, nullable: false, values: [production, experimental], description: "Gate of P(hold | touch). gate verdict of this output from tech_prob_gates (docs/TECHNICALS_V2_VALIDATION.md): production = passed the T6 gate; experimental = failed or not validated (hidden by default in the UI)"}
+  - {name: gate_edge, type: enum, nullable: false, values: [production, experimental], description: "Gate of the edge output"}
+  - {name: computed_at, type: datetime, nullable: false, description: "Write time UTC"}

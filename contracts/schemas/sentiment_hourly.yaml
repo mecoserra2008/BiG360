@@ -1,0 +1,31 @@
+table: sentiment_hourly
+version: 1
+zone: features
+owner: news-live (app.news_live.compaction)
+description: >
+  Hourly news sentiment per issuer, sector, country and market theme (roadmap v3 N3), from the live news items of
+  that UTC hour (RSS / Atom feeds, Polygon news, issuer-linked / salient GDELT articles; first-seen hour = knowledge
+  time) folded by the job news_hourly. Item sentiment = FinBERT P(pos) - P(neg) for English headlines (live, news
+  desk) and XLM-R for other languages (scored in the hourly job); MODEL-BASED. label_type all with label_id '*' is
+  the whole feed. art_n / art_tone: all labelled GDELT GKG articles of the hour with that label (attention / tone
+  context). One day file per UTC date, rewritten as hours are folded; rolled up into sentiment_label_daily by the
+  daily finalise (job news_finalise).
+storage: {path: features/sentiment_hourly, format: parquet, partition_by: [year_month], write_mode: append, retention: "forever (small)"}
+primary_key: [date, hour, label_type, label_id]
+pit: {knowledge_column: date, rule: "items first seen by the live path in that hour"}
+columns:
+  - {name: year_month, type: string, nullable: false, description: "Partition YYYY-MM"}
+  - {name: date, type: date, nullable: false, description: "UTC date (first seen)"}
+  - {name: hour, type: int8, nullable: false, description: "UTC hour 0..23 (first seen)"}
+  - {name: label_type, type: enum, nullable: false, values: [all, issuer, sector, country, theme], description: "Label dictionary"}
+  - {name: label_id, type: string, nullable: false, description: "issuer_id | sector code (TECH, FINS, ...) | ISO2 / EA / GLOBAL | theme id | '*'"}
+  - {name: n_items, type: int32, nullable: false, description: "Live news items with the label"}
+  - {name: n_scored, type: int32, nullable: false, description: "Items with a model sentiment"}
+  - {name: sentiment_mean, type: float32, nullable: true, description: "Mean item sentiment (-1..1, model-based)"}
+  - {name: pos_share, type: float32, nullable: true, description: "Share of scored items > 0.2"}
+  - {name: neg_share, type: float32, nullable: true, description: "Share of scored items < -0.2"}
+  - {name: n_sources, type: int16, nullable: true, description: "Distinct publishers / sources"}
+  - {name: tier1_n, type: int32, nullable: true, description: "Items from official sources (tier 1)"}
+  - {name: art_n, type: int32, nullable: true, description: "Labelled GDELT GKG articles of the hour with the label"}
+  - {name: art_tone, type: float32, nullable: true, description: "Mean GDELT tone of those articles"}
+  - {name: computed_at, type: datetime, nullable: false, description: "Write time UTC"}

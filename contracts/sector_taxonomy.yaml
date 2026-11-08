@@ -1,0 +1,709 @@
+# BiG Equity 360 unified sector taxonomy (own names; GICS-like structure, not GICS).
+# Consumed by app.normalize.taxonomy.classify(issuer) -> (sector_id, subsector_id, classification_source).
+version: 3   # v3 2026-10-31: SIC 3712-3713, 3750-3759, 7600-7699 mapped (were unclassified)
+
+precedence: [override, yf_industry, sic, tse33, ksic, csrc, cvm, twse, unknown]
+precedence_notes: >
+  1) overrides (by CIK / ticker@MIC / ISIN) always win. 2) yfinance industry string is the most modern and global.
+  3) SIC (US/SEC filers incl. 20-F) via ranges below. 4) national codes (coarse) fill the remainder.
+  TSE33/KSIC/CSRC map to a default subsector; if yf_industry is available it refines inside the same sector.
+  'Shell Companies' / SIC 6770 / blank-check -> excluded from scoring (sector_id null).
+  Bank subsector split: banks_global if total_assets_usd > 500e9 or G-SIB list, else banks_regional (size_rule).
+
+sectors:
+  - {id: TECH, name: Technology}
+  - {id: COMM, name: Communication & Media}
+  - {id: CDIS, name: Consumer Discretionary}
+  - {id: CSTA, name: Consumer Staples}
+  - {id: HLTH, name: Healthcare}
+  - {id: FINS, name: Financials}
+  - {id: INDU, name: Industrials}
+  - {id: MATR, name: Materials}
+  - {id: ENRG, name: Energy}
+  - {id: UTIL, name: Utilities}
+  - {id: REAL, name: Real Estate}
+
+# group tags used by canonical_line_items.applies_to, sector_kpis and scoring (business-model families)
+subsectors:
+  # ---- TECH
+  - {id: semiconductors,          sector: TECH, name: Semiconductors,                       groups: [semis, rnd_heavy]}
+  - {id: semi_equipment,          sector: TECH, name: Semiconductor Equipment & Materials,  groups: [semis, rnd_heavy]}
+  - {id: software_application,    sector: TECH, name: Application Software,                 groups: [software, rnd_heavy]}
+  - {id: software_infrastructure, sector: TECH, name: Infrastructure Software & Security,   groups: [software, rnd_heavy]}
+  - {id: it_services,             sector: TECH, name: IT Services & Consulting,             groups: [services]}
+  - {id: hardware_networking,     sector: TECH, name: "Hardware, Devices & Networking",       groups: [hardware, rnd_heavy]}
+  - {id: electronic_components,   sector: TECH, name: Electronic Components & Instruments,  groups: [hardware]}
+  # ---- COMM
+  - {id: telecom_operators,       sector: COMM, name: Telecom Operators,                    groups: [telecom, capital_intensive]}
+  - {id: internet_platforms,      sector: COMM, name: Internet Platforms & Search/Social,   groups: [software, rnd_heavy]}
+  - {id: media_entertainment,     sector: COMM, name: "Media, Streaming & Entertainment",     groups: [media]}
+  - {id: video_games,             sector: COMM, name: Video Games & Interactive,            groups: [software, rnd_heavy]}
+  - {id: advertising_publishing,  sector: COMM, name: Advertising & Publishing,             groups: [media]}
+  # ---- CDIS
+  - {id: autos,                   sector: CDIS, name: Automobiles,                          groups: [autos, capital_intensive]}
+  - {id: auto_parts,              sector: CDIS, name: Auto Parts & Tires,                   groups: [autos]}
+  - {id: homebuilders,            sector: CDIS, name: Homebuilders,                         groups: [homebuilders]}
+  - {id: household_durables_leisure, sector: CDIS, name: Household Durables & Leisure Products, groups: [consumer_products]}
+  - {id: apparel_luxury,          sector: CDIS, name: "Apparel, Footwear & Luxury",           groups: [consumer_brands]}
+  - {id: ecommerce,               sector: CDIS, name: E-commerce & Marketplaces,            groups: [retail]}
+  - {id: specialty_retail,        sector: CDIS, name: Specialty & Department Retail,        groups: [retail]}
+  - {id: restaurants,             sector: CDIS, name: Restaurants,                          groups: [restaurants]}
+  - {id: hotels_travel_leisure,   sector: CDIS, name: "Hotels, Travel, Cruise & Casinos",     groups: [travel_leisure]}
+  - {id: consumer_services,       sector: CDIS, name: Education & Consumer Services,        groups: [services]}
+  # ---- CSTA
+  - {id: beverages,               sector: CSTA, name: Beverages,                            groups: [consumer_brands]}
+  - {id: packaged_food,           sector: CSTA, name: Packaged Food & Meat,                 groups: [consumer_brands]}
+  - {id: tobacco,                 sector: CSTA, name: Tobacco,                              groups: [consumer_brands]}
+  - {id: household_personal_products, sector: CSTA, name: Household & Personal Products,    groups: [consumer_brands]}
+  - {id: staples_retail,          sector: CSTA, name: "Grocery, Discount & Drug Retail",      groups: [retail]}
+  - {id: agri_products,           sector: CSTA, name: Agricultural Products,                groups: [commodity_processors]}
+  # ---- HLTH
+  - {id: pharma,                  sector: HLTH, name: Pharmaceuticals,                      groups: [pharma_biotech, rnd_heavy]}
+  - {id: biotech,                 sector: HLTH, name: Biotechnology,                        groups: [pharma_biotech, rnd_heavy]}
+  - {id: medtech,                 sector: HLTH, name: Medical Devices & Supplies,           groups: [medtech, rnd_heavy]}
+  - {id: life_science_tools,      sector: HLTH, name: Life Science Tools & Diagnostics,     groups: [medtech, rnd_heavy]}
+  - {id: health_providers_services, sector: HLTH, name: Healthcare Providers & Services,    groups: [services]}
+  - {id: managed_care,            sector: HLTH, name: Managed Care & Health Insurance,      groups: [managed_care]}
+  - {id: health_distribution,     sector: HLTH, name: Healthcare Distribution & Health IT,  groups: [distributors]}
+  # ---- FINS
+  - {id: banks_global,            sector: FINS, name: Global & Diversified Banks,           groups: [banks]}
+  - {id: banks_regional,          sector: FINS, name: Regional Banks,                       groups: [banks]}
+  - {id: insurance_life_health,   sector: FINS, name: Life & Health Insurance,              groups: [insurers, insurers_life]}
+  - {id: insurance_pc_reinsurance, sector: FINS, name: P&C Insurance & Reinsurance,         groups: [insurers, insurers_pc]}
+  - {id: insurance_brokers,       sector: FINS, name: Insurance Brokers,                    groups: [services, asset_light_fin]}
+  - {id: asset_managers,          sector: FINS, name: Asset & Wealth Managers,              groups: [asset_light_fin]}
+  - {id: capital_markets_exchanges, sector: FINS, name: "Capital Markets, Brokers & Exchanges", groups: [asset_light_fin]}
+  - {id: consumer_specialty_finance, sector: FINS, name: Consumer & Specialty Finance (incl. mortgage REITs), groups: [consumer_finance]}
+  - {id: payments_fintech,        sector: FINS, name: Payments & Fintech,                   groups: [software, asset_light_fin]}
+  - {id: diversified_holdings,    sector: FINS, name: Diversified Holding Companies,        groups: [holdings]}
+  # ---- INDU
+  - {id: aerospace_defense,       sector: INDU, name: Aerospace & Defense,                  groups: [industrial_mfg]}
+  - {id: industrial_machinery,    sector: INDU, name: Industrial & Heavy Machinery,         groups: [industrial_mfg]}
+  - {id: electrical_equipment,    sector: INDU, name: Electrical Equipment & Automation,    groups: [industrial_mfg]}
+  - {id: construction_building,   sector: INDU, name: "Construction, Engineering & Building Products", groups: [industrial_mfg]}
+  - {id: industrial_conglomerates, sector: INDU, name: Industrial Conglomerates,            groups: [industrial_mfg]}
+  - {id: trading_distributors,    sector: INDU, name: Trading Companies & Distributors (incl. sogo shosha), groups: [distributors]}
+  - {id: airlines,                sector: INDU, name: Airlines,                             groups: [transport, capital_intensive]}
+  - {id: logistics_freight,       sector: INDU, name: "Logistics, Freight & Trucking",        groups: [transport]}
+  - {id: rail_marine_infra,       sector: INDU, name: "Railroads, Shipping & Transport Infrastructure", groups: [transport, capital_intensive]}
+  - {id: business_services,       sector: INDU, name: "Business, Environmental & Professional Services", groups: [services]}
+  # ---- MATR
+  - {id: chemicals_diversified,   sector: MATR, name: Commodity & Diversified Chemicals,    groups: [chemicals, capital_intensive]}
+  - {id: chemicals_specialty,     sector: MATR, name: Specialty Chemicals & Ag Inputs,      groups: [chemicals]}
+  - {id: steel_aluminum,          sector: MATR, name: Steel & Aluminum,                     groups: [mining, capital_intensive]}
+  - {id: metals_mining,           sector: MATR, name: Diversified Metals & Mining,          groups: [mining, capital_intensive]}
+  - {id: precious_metals,         sector: MATR, name: Gold & Precious Metals,               groups: [mining, capital_intensive]}
+  - {id: construction_materials,  sector: MATR, name: Construction Materials,               groups: [capital_intensive]}
+  - {id: packaging_paper,         sector: MATR, name: "Packaging, Paper & Forest Products",   groups: [capital_intensive]}
+  # ---- ENRG
+  - {id: integrated_oil_gas,      sector: ENRG, name: Integrated Oil & Gas,                 groups: [energy, capital_intensive]}
+  - {id: exploration_production,  sector: ENRG, name: Exploration & Production,             groups: [energy, capital_intensive]}
+  - {id: refining_marketing,      sector: ENRG, name: Refining & Marketing,                 groups: [energy]}
+  - {id: midstream,               sector: ENRG, name: Midstream & Pipelines,                groups: [energy, capital_intensive]}
+  - {id: oilfield_services,       sector: ENRG, name: Oilfield Services & Drilling,         groups: [energy]}
+  - {id: coal_uranium,            sector: ENRG, name: Coal & Uranium,                       groups: [energy, mining]}
+  # ---- UTIL
+  - {id: electric_utilities,      sector: UTIL, name: Electric Utilities,                   groups: [utilities, capital_intensive]}
+  - {id: gas_utilities,           sector: UTIL, name: Gas Utilities,                        groups: [utilities, capital_intensive]}
+  - {id: water_utilities,         sector: UTIL, name: Water Utilities,                      groups: [utilities, capital_intensive]}
+  - {id: multi_utilities,         sector: UTIL, name: Multi-Utilities,                      groups: [utilities, capital_intensive]}
+  - {id: renewable_ipp,           sector: UTIL, name: Renewables & Independent Power,       groups: [utilities, capital_intensive]}
+  # ---- REAL
+  - {id: reit_residential,        sector: REAL, name: Residential REITs,                    groups: [reits]}
+  - {id: reit_industrial,         sector: REAL, name: Industrial & Logistics REITs,         groups: [reits]}
+  - {id: reit_office_retail,      sector: REAL, name: "Office, Retail & Diversified REITs",   groups: [reits]}
+  - {id: reit_specialty,          sector: REAL, name: "Specialty REITs (data centers, towers, healthcare, hotel)", groups: [reits]}
+  - {id: real_estate_development, sector: REAL, name: Real Estate Development & Operating,  groups: [real_estate]}
+  - {id: real_estate_services,    sector: REAL, name: Real Estate Services,                 groups: [services]}
+
+size_rules:
+  banks_global: {metric: total_assets_usd, min: 500.0e9, also_if_gsib: true, else: banks_regional}
+
+# ------------------------------------------------------------------ yfinance industry -> subsector
+# Keys are yfinance `info['industry']` strings normalized: replace em/en-dash '—'/'–' with ' - ', collapse spaces.
+yf_industry:
+  "Semiconductors": semiconductors
+  "Semiconductor Equipment & Materials": semi_equipment
+  "Software - Application": software_application
+  "Software - Infrastructure": software_infrastructure
+  "Information Technology Services": it_services
+  "Computer Hardware": hardware_networking
+  "Consumer Electronics": hardware_networking
+  "Communication Equipment": hardware_networking
+  "Electronic Components": electronic_components
+  "Scientific & Technical Instruments": electronic_components
+  "Electronics & Computer Distribution": trading_distributors
+  "Solar": electrical_equipment
+  "Telecom Services": telecom_operators
+  "Internet Content & Information": internet_platforms
+  "Entertainment": media_entertainment
+  "Broadcasting": media_entertainment
+  "Electronic Gaming & Multimedia": video_games
+  "Advertising Agencies": advertising_publishing
+  "Publishing": advertising_publishing
+  "Auto Manufacturers": autos
+  "Auto Parts": auto_parts
+  "Recreational Vehicles": household_durables_leisure
+  "Residential Construction": homebuilders
+  "Furnishings, Fixtures & Appliances": household_durables_leisure
+  "Leisure": household_durables_leisure
+  "Textile Manufacturing": apparel_luxury
+  "Apparel Manufacturing": apparel_luxury
+  "Footwear & Accessories": apparel_luxury
+  "Luxury Goods": apparel_luxury
+  "Internet Retail": ecommerce
+  "Specialty Retail": specialty_retail
+  "Apparel Retail": specialty_retail
+  "Department Stores": specialty_retail
+  "Home Improvement Retail": specialty_retail
+  "Auto & Truck Dealerships": specialty_retail
+  "Restaurants": restaurants
+  "Lodging": hotels_travel_leisure
+  "Resorts & Casinos": hotels_travel_leisure
+  "Gambling": hotels_travel_leisure
+  "Travel Services": hotels_travel_leisure
+  "Personal Services": consumer_services
+  "Education & Training Services": consumer_services
+  "Beverages - Non-Alcoholic": beverages
+  "Beverages - Brewers": beverages
+  "Beverages - Wineries & Distilleries": beverages
+  "Packaged Foods": packaged_food
+  "Confectioners": packaged_food
+  "Farm Products": agri_products
+  "Tobacco": tobacco
+  "Household & Personal Products": household_personal_products
+  "Grocery Stores": staples_retail
+  "Discount Stores": staples_retail
+  "Pharmaceutical Retailers": staples_retail
+  "Food Distribution": staples_retail
+  "Drug Manufacturers - General": pharma
+  "Drug Manufacturers - Specialty & Generic": pharma
+  "Biotechnology": biotech
+  "Medical Devices": medtech
+  "Medical Instruments & Supplies": medtech
+  "Diagnostics & Research": life_science_tools
+  "Medical Care Facilities": health_providers_services
+  "Healthcare Plans": managed_care
+  "Medical Distribution": health_distribution
+  "Health Information Services": health_distribution
+  "Banks - Diversified": banks_global
+  "Banks - Regional": banks_regional
+  "Insurance - Life": insurance_life_health
+  "Insurance - Property & Casualty": insurance_pc_reinsurance
+  "Insurance - Reinsurance": insurance_pc_reinsurance
+  "Insurance - Specialty": insurance_pc_reinsurance
+  "Insurance - Diversified": insurance_life_health
+  "Insurance Brokers": insurance_brokers
+  "Asset Management": asset_managers
+  "Capital Markets": capital_markets_exchanges
+  "Financial Data & Stock Exchanges": capital_markets_exchanges
+  "Credit Services": consumer_specialty_finance
+  "Mortgage Finance": consumer_specialty_finance
+  "REIT - Mortgage": consumer_specialty_finance
+  "Financial Conglomerates": diversified_holdings
+  "Shell Companies": null
+  "Aerospace & Defense": aerospace_defense
+  "Specialty Industrial Machinery": industrial_machinery
+  "Farm & Heavy Construction Machinery": industrial_machinery
+  "Tools & Accessories": industrial_machinery
+  "Metal Fabrication": industrial_machinery
+  "Electrical Equipment & Parts": electrical_equipment
+  "Engineering & Construction": construction_building
+  "Building Products & Equipment": construction_building
+  "Infrastructure Operations": rail_marine_infra
+  "Conglomerates": industrial_conglomerates
+  "Industrial Distribution": trading_distributors
+  "Business Equipment & Supplies": business_services
+  "Airlines": airlines
+  "Airports & Air Services": rail_marine_infra
+  "Integrated Freight & Logistics": logistics_freight
+  "Trucking": logistics_freight
+  "Railroads": rail_marine_infra
+  "Marine Shipping": rail_marine_infra
+  "Rental & Leasing Services": business_services
+  "Staffing & Employment Services": business_services
+  "Consulting Services": business_services
+  "Specialty Business Services": business_services
+  "Security & Protection Services": business_services
+  "Waste Management": business_services
+  "Pollution & Treatment Controls": business_services
+  "Chemicals": chemicals_diversified
+  "Specialty Chemicals": chemicals_specialty
+  "Agricultural Inputs": chemicals_specialty
+  "Steel": steel_aluminum
+  "Aluminum": steel_aluminum
+  "Copper": metals_mining
+  "Other Industrial Metals & Mining": metals_mining
+  "Gold": precious_metals
+  "Silver": precious_metals
+  "Other Precious Metals & Mining": precious_metals
+  "Building Materials": construction_materials
+  "Packaging & Containers": packaging_paper
+  "Paper & Paper Products": packaging_paper
+  "Lumber & Wood Production": packaging_paper
+  "Oil & Gas Integrated": integrated_oil_gas
+  "Oil & Gas E&P": exploration_production
+  "Oil & Gas Refining & Marketing": refining_marketing
+  "Oil & Gas Midstream": midstream
+  "Oil & Gas Equipment & Services": oilfield_services
+  "Oil & Gas Drilling": oilfield_services
+  "Thermal Coal": coal_uranium
+  "Coking Coal": coal_uranium
+  "Uranium": coal_uranium
+  "Utilities - Regulated Electric": electric_utilities
+  "Utilities - Regulated Gas": gas_utilities
+  "Utilities - Regulated Water": water_utilities
+  "Utilities - Diversified": multi_utilities
+  "Utilities - Renewable": renewable_ipp
+  "Utilities - Independent Power Producers": renewable_ipp
+  "REIT - Residential": reit_residential
+  "REIT - Industrial": reit_industrial
+  "REIT - Office": reit_office_retail
+  "REIT - Retail": reit_office_retail
+  "REIT - Diversified": reit_office_retail
+  "REIT - Specialty": reit_specialty
+  "REIT - Healthcare Facilities": reit_specialty
+  "REIT - Hotel & Motel": reit_specialty
+  "Real Estate - Development": real_estate_development
+  "Real Estate - Diversified": real_estate_development
+  "Real Estate Services": real_estate_services
+
+# ------------------------------------------------------------------ US SIC (4-digit) ranges -> subsector
+# Evaluated top-down; first matching [lo, hi] inclusive range wins (specific codes are listed before broad ranges).
+sic_ranges:
+  - [6770, 6770, null]                       # blank checks / SPACs -> excluded
+  - [100, 999, agri_products]
+  - [1040, 1049, precious_metals]
+  - [1000, 1099, metals_mining]
+  - [1200, 1299, coal_uranium]
+  - [1311, 1311, exploration_production]
+  - [1381, 1389, oilfield_services]
+  - [1400, 1499, construction_materials]
+  - [1520, 1531, homebuilders]
+  - [1540, 1799, construction_building]
+  - [2080, 2086, beverages]
+  - [2000, 2099, packaged_food]
+  - [2100, 2199, tobacco]
+  - [2200, 2399, apparel_luxury]
+  - [2400, 2499, packaging_paper]
+  - [2500, 2599, household_durables_leisure]
+  - [2600, 2699, packaging_paper]
+  - [2700, 2799, advertising_publishing]
+  - [2834, 2835, pharma]
+  - [2836, 2836, biotech]
+  - [2830, 2833, pharma]
+  - [2840, 2844, household_personal_products]
+  - [2870, 2879, chemicals_specialty]
+  - [2800, 2829, chemicals_diversified]
+  - [2850, 2899, chemicals_specialty]
+  - [2911, 2911, integrated_oil_gas]
+  - [2900, 2999, refining_marketing]
+  - [3011, 3011, auto_parts]
+  - [3000, 3099, chemicals_specialty]
+  - [3100, 3199, apparel_luxury]
+  - [3200, 3299, construction_materials]
+  - [3300, 3399, steel_aluminum]
+  - [3480, 3489, aerospace_defense]
+  - [3400, 3499, industrial_machinery]
+  - [3570, 3579, hardware_networking]
+  - [3500, 3569, industrial_machinery]
+  - [3580, 3599, industrial_machinery]
+  - [3630, 3639, household_durables_leisure]
+  - [3651, 3652, hardware_networking]
+  - [3660, 3669, hardware_networking]
+  - [3674, 3674, semiconductors]
+  - [3670, 3679, electronic_components]
+  - [3600, 3699, electrical_equipment]
+  - [3711, 3711, autos]
+  - [3712, 3713, autos]
+  - [3714, 3714, auto_parts]
+  - [3715, 3716, industrial_machinery]
+  - [3720, 3729, aerospace_defense]
+  - [3730, 3743, industrial_machinery]
+  - [3750, 3759, autos]
+  - [3760, 3769, aerospace_defense]
+  - [3790, 3799, autos]
+  - [3826, 3826, life_science_tools]
+  - [3841, 3851, medtech]
+  - [3800, 3829, electronic_components]
+  - [3861, 3861, hardware_networking]
+  - [3870, 3879, apparel_luxury]
+  - [3900, 3999, household_durables_leisure]
+  - [4011, 4013, rail_marine_infra]
+  - [4100, 4199, logistics_freight]
+  - [4200, 4299, logistics_freight]
+  - [4400, 4499, rail_marine_infra]
+  - [4512, 4512, airlines]
+  - [4513, 4513, logistics_freight]
+  - [4500, 4599, airlines]
+  - [4600, 4699, midstream]
+  - [4700, 4799, logistics_freight]
+  - [4810, 4829, telecom_operators]
+  - [4830, 4841, media_entertainment]
+  - [4890, 4899, telecom_operators]
+  - [4911, 4911, electric_utilities]
+  - [4922, 4923, midstream]
+  - [4924, 4925, gas_utilities]
+  - [4931, 4932, multi_utilities]
+  - [4939, 4939, multi_utilities]
+  - [4941, 4941, water_utilities]
+  - [4950, 4959, business_services]
+  - [4991, 4991, renewable_ipp]
+  - [4900, 4999, multi_utilities]
+  - [5122, 5122, health_distribution]
+  - [5140, 5149, staples_retail]
+  - [5000, 5199, trading_distributors]
+  - [5331, 5331, staples_retail]
+  - [5399, 5399, staples_retail]
+  - [5411, 5412, staples_retail]
+  - [5812, 5813, restaurants]
+  - [5912, 5912, staples_retail]
+  - [5961, 5961, ecommerce]
+  - [5200, 5999, specialty_retail]
+  - [6020, 6029, banks_regional]           # size_rules may upgrade to banks_global
+  - [6030, 6099, banks_regional]
+  - [6100, 6199, consumer_specialty_finance]
+  - [6282, 6282, asset_managers]
+  - [6200, 6299, capital_markets_exchanges]
+  - [6311, 6311, insurance_life_health]
+  - [6321, 6321, insurance_life_health]
+  - [6324, 6324, managed_care]
+  - [6331, 6399, insurance_pc_reinsurance]
+  - [6411, 6411, insurance_brokers]
+  - [6798, 6798, reit_office_retail]       # REIT default; refine with yf_industry
+  - [6500, 6599, real_estate_development]
+  - [6700, 6799, diversified_holdings]
+  - [7000, 7099, hotels_travel_leisure]
+  - [7200, 7299, consumer_services]
+  - [7370, 7370, internet_platforms]
+  - [7371, 7371, it_services]
+  - [7372, 7372, software_application]
+  - [7373, 7379, it_services]
+  - [7300, 7399, business_services]
+  - [7500, 7599, specialty_retail]
+  - [7600, 7699, consumer_services]
+  - [7800, 7849, media_entertainment]
+  - [7900, 7999, hotels_travel_leisure]
+  - [8000, 8099, health_providers_services]
+  - [8200, 8299, consumer_services]
+  - [8731, 8731, biotech]
+  - [8700, 8799, business_services]
+  - [8000, 8999, business_services]
+
+# ------------------------------------------------------------------ Tokyo Stock Exchange 33 industries
+tse33:
+  "0050": {name: "Fishery, Agriculture & Forestry", default: agri_products}
+  "1050": {name: Mining, default: exploration_production}
+  "2050": {name: Construction, default: construction_building}
+  "3050": {name: Foods, default: packaged_food}
+  "3100": {name: Textiles & Apparels, default: apparel_luxury}
+  "3150": {name: Pulp & Paper, default: packaging_paper}
+  "3200": {name: Chemicals, default: chemicals_diversified}
+  "3250": {name: Pharmaceutical, default: pharma}
+  "3300": {name: Oil & Coal Products, default: refining_marketing}
+  "3350": {name: Rubber Products, default: auto_parts}
+  "3400": {name: Glass & Ceramics Products, default: construction_materials}
+  "3450": {name: Iron & Steel, default: steel_aluminum}
+  "3500": {name: Nonferrous Metals, default: metals_mining}
+  "3550": {name: Metal Products, default: industrial_machinery}
+  "3600": {name: Machinery, default: industrial_machinery}
+  "3650": {name: Electric Appliances, default: electronic_components}
+  "3700": {name: Transportation Equipment, default: autos}
+  "3750": {name: Precision Instruments, default: medtech}
+  "3800": {name: Other Products, default: household_durables_leisure}
+  "4050": {name: Electric Power & Gas, default: electric_utilities}
+  "5050": {name: Land Transportation, default: rail_marine_infra}
+  "5100": {name: Marine Transportation, default: rail_marine_infra}
+  "5150": {name: Air Transportation, default: airlines}
+  "5200": {name: Warehousing & Harbor Transportation, default: logistics_freight}
+  "5250": {name: Information & Communication, default: software_application}
+  "6050": {name: Wholesale Trade, default: trading_distributors}
+  "6100": {name: Retail Trade, default: specialty_retail}
+  "7050": {name: Banks, default: banks_regional}
+  "7100": {name: Securities & Commodity Futures, default: capital_markets_exchanges}
+  "7150": {name: Insurance, default: insurance_pc_reinsurance}
+  "7200": {name: Other Financing Business, default: consumer_specialty_finance}
+  "8050": {name: Real Estate, default: real_estate_development}
+  "9050": {name: Services, default: business_services}
+
+# ------------------------------------------------------------------ KSIC (Korean Standard Industrial Classification, 10th rev.)
+# DART company.json induty_code is a KSIC code (2-5 digits). Match longest prefix in 'divisions', else section letter.
+ksic:
+  sections:
+    A: {name: "Agriculture, forestry and fishing", default: agri_products}
+    B: {name: Mining and quarrying, default: metals_mining}
+    C: {name: Manufacturing, default: industrial_machinery}
+    D: {name: "Electricity, gas, steam and air conditioning supply", default: electric_utilities}
+    E: {name: "Water supply; sewage, waste management", default: business_services}
+    F: {name: Construction, default: construction_building}
+    G: {name: Wholesale and retail trade, default: specialty_retail}
+    H: {name: Transportation and storage, default: logistics_freight}
+    I: {name: Accommodation and food service, default: hotels_travel_leisure}
+    J: {name: Information and communication, default: software_application}
+    K: {name: Financial and insurance activities, default: capital_markets_exchanges}
+    L: {name: Real estate activities, default: real_estate_development}
+    M: {name: "Professional, scientific and technical", default: business_services}
+    N: {name: Business facilities management and support, default: business_services}
+    P: {name: Education, default: consumer_services}
+    Q: {name: Human health and social work, default: health_providers_services}
+    R: {name: "Arts, sports and recreation", default: hotels_travel_leisure}
+    S: {name: "Membership organizations, repair and other personal services", default: consumer_services}
+  section_of_division: {A: [1, 3], B: [5, 8], C: [10, 34], D: [35, 35], E: [36, 39], F: [41, 42], G: [45, 47], H: [49, 52], I: [55, 56], J: [58, 63], K: [64, 66], L: [68, 68], M: [70, 73], N: [74, 76], P: [85, 85], Q: [86, 87], R: [90, 91], S: [94, 96]}
+  divisions:
+    "10": packaged_food
+    "11": beverages
+    "12": tobacco
+    "13": apparel_luxury
+    "14": apparel_luxury
+    "15": apparel_luxury
+    "16": packaging_paper
+    "17": packaging_paper
+    "18": advertising_publishing
+    "19": refining_marketing
+    "20": chemicals_diversified
+    "21": pharma
+    "22": chemicals_specialty
+    "23": construction_materials
+    "24": steel_aluminum
+    "25": industrial_machinery
+    "261": semiconductors
+    "262": electronic_components
+    "263": hardware_networking
+    "264": hardware_networking
+    "265": hardware_networking
+    "26": electronic_components
+    "27": medtech
+    "28": electrical_equipment
+    "29": industrial_machinery
+    "30": autos
+    "303": auto_parts
+    "31": aerospace_defense
+    "311": industrial_machinery      # shipbuilding
+    "32": household_durables_leisure
+    "33": household_durables_leisure
+    "35": electric_utilities
+    "41": construction_building
+    "42": construction_building
+    "46": trading_distributors
+    "47": specialty_retail
+    "49": logistics_freight
+    "50": rail_marine_infra
+    "51": airlines
+    "52": logistics_freight
+    "55": hotels_travel_leisure
+    "56": restaurants
+    "58": advertising_publishing
+    "582": video_games
+    "59": media_entertainment
+    "60": media_entertainment
+    "61": telecom_operators
+    "62": it_services
+    "63": internet_platforms
+    "64": banks_regional
+    "649": consumer_specialty_finance
+    "65": insurance_life_health
+    "651": insurance_life_health
+    "652": insurance_pc_reinsurance
+    "66": capital_markets_exchanges
+    "68": real_estate_development
+    "70": biotech
+    "71": business_services
+    "72": business_services
+  notes: >
+    KSIC 582 is software publishing (games 5821, other software 5822): 5822 -> software_application (add 4-digit override).
+    Korean holding companies (지주회사, KSIC 7151) -> diversified_holdings.
+  overrides_4digit:
+    "5822": software_application
+    "7151": diversified_holdings
+    "2612": semiconductors
+    "2611": semiconductors
+
+# ------------------------------------------------------------------ China CSRC industry classes (2012 guideline, letter + 2 digits)
+csrc:
+  notes: >
+    AKShare exposes CSRC industry (证监会行业) per stock. Map by 3-char code, else by letter. Shenwan (申万) L1/L2 can
+    replace CSRC later for finer detail. Only key codes listed; letter defaults catch the rest.
+  letters:
+    A: agri_products
+    B: metals_mining
+    C: industrial_machinery
+    D: electric_utilities
+    E: construction_building
+    F: trading_distributors
+    G: logistics_freight
+    H: hotels_travel_leisure
+    I: software_application
+    J: capital_markets_exchanges
+    K: real_estate_development
+    L: business_services
+    M: business_services
+    N: business_services
+    P: consumer_services
+    Q: health_providers_services
+    R: media_entertainment
+    S: diversified_holdings
+  codes:
+    B06: coal_uranium
+    B07: exploration_production
+    C13: packaged_food
+    C14: packaged_food
+    C15: beverages
+    C16: tobacco
+    C17: apparel_luxury
+    C18: apparel_luxury
+    C22: packaging_paper
+    C25: refining_marketing
+    C26: chemicals_diversified
+    C27: pharma
+    C28: chemicals_diversified
+    C29: chemicals_specialty
+    C30: construction_materials
+    C31: steel_aluminum
+    C32: metals_mining
+    C33: industrial_machinery
+    C34: industrial_machinery
+    C35: industrial_machinery
+    C36: autos
+    C37: aerospace_defense
+    C38: electrical_equipment
+    C39: electronic_components
+    C40: electronic_components
+    D44: electric_utilities
+    D45: gas_utilities
+    D46: water_utilities
+    F51: trading_distributors
+    F52: specialty_retail
+    G53: rail_marine_infra
+    G54: logistics_freight
+    G55: rail_marine_infra
+    G56: airlines
+    I63: telecom_operators
+    I64: internet_platforms
+    I65: software_application
+    J66: banks_regional
+    J67: capital_markets_exchanges
+    J68: insurance_life_health
+    J69: consumer_specialty_finance
+    K70: real_estate_development
+    R86: media_entertainment
+    R87: media_entertainment
+
+# ------------------------------------------------------------------ Brazil CVM
+twse:
+  notes: >
+    TWSE / TPEx industry code (產業別, company masters openapi t187ap03_L / mopsfin_t187ap03_O), 2 digits. Added
+    2026-10-11 (price coverage P3) for the full Taiwan listing set; 17 (finance & insurance) defaults to regional banks.
+  codes:
+    "01": construction_materials
+    "02": packaged_food
+    "03": chemicals_diversified
+    "04": apparel_luxury
+    "05": industrial_machinery
+    "06": electrical_equipment
+    "08": construction_materials
+    "09": packaging_paper
+    "10": steel_aluminum
+    "11": auto_parts
+    "12": autos
+    "14": construction_building
+    "15": rail_marine_infra
+    "16": hotels_travel_leisure
+    "17": banks_regional
+    "18": specialty_retail
+    "19": industrial_conglomerates
+    "20": business_services
+    "21": chemicals_specialty
+    "22": pharma
+    "23": refining_marketing
+    "24": semiconductors
+    "25": hardware_networking
+    "26": electronic_components
+    "27": hardware_networking
+    "28": electronic_components
+    "29": trading_distributors
+    "30": it_services
+    "31": electronic_components
+    "32": media_entertainment
+    "33": agri_products
+    "34": ecommerce
+    "35": renewable_ipp
+    "36": software_application
+    "37": household_durables_leisure
+    "38": household_durables_leisure
+cvm:
+  notes: >
+    cad_cia_aberta.csv SETOR_ATIV is free text (Portuguese) — map by keyword regex (case/accents-insensitive), first match wins.
+  keywords:
+    - ["banco|bancos|intermedia.*financeira", banks_regional]
+    - ["seguradora|seguros|resseguro", insurance_pc_reinsurance]
+    - ["petr[oó]leo|g[aá]s natural", integrated_oil_gas]
+    - ["energia el[eé]trica", electric_utilities]
+    - ["saneamento|[aá]gua", water_utilities]
+    - ["minera[cç][aã]o|metalurgia", metals_mining]
+    - ["siderurgia", steel_aluminum]
+    - ["papel|celulose", packaging_paper]
+    - ["alimentos|frigor[ií]fico|carnes", packaged_food]
+    - ["bebidas", beverages]
+    - ["varejo|com[eé]rcio", specialty_retail]
+    - ["constru[cç][aã]o civil|incorpora", homebuilders]
+    - ["telecomunica", telecom_operators]
+    - ["transporte|log[ií]stica", logistics_freight]
+    - ["sa[uú]de|hospital", health_providers_services]
+    - ["farmac[eê]utic", pharma]
+    - ["educa[cç][aã]o", consumer_services]
+    - ["tecnologia|software|inform[aá]tica", software_application]
+    - ["agricultura|a[cç][uú]car|[aá]lcool", agri_products]
+    - ["qu[ií]mic", chemicals_diversified]
+    - ["holding|participa[cç][oõ]es", diversified_holdings]
+    # completeness audit 2026-10-27: CVM SETOR_ATIV texts without a match (77 LATAM issuers); appended last, so no
+    # issuer classified by an earlier keyword changes. "Emp. Adm. Part. - X" = holding whose main business is X.
+    - ["t[eê]xtil|vestu[aá]rio", apparel_luxury]
+    - ["servi[cç]os m[eé]dicos", health_providers_services]
+    - ["mat. const|decora[cç][aã]o|const. civil", construction_materials]
+    - ["m[aá]quinas|equipamentos|ve[ií]culos e pe[cç]as", industrial_machinery]
+    - ["brinquedos|lazer", household_durables_leisure]
+    - ["hospedagem|turismo", hotels_travel_leisure]
+    - ["extra[cç][aã]o mineral", metals_mining]
+    - ["embalage", packaging_paper]
+    - ["cr[eé]dito imobili", consumer_specialty_finance]
+    - ["sem setor principal", diversified_holdings]
+
+# ------------------------------------------------------------------ manual overrides (highest precedence)
+# key forms: "cik:0000320193", "ticker:AAPL@XNAS", "isin:US0378331005"
+overrides:
+  "ticker:V@XNYS": payments_fintech
+  "ticker:MA@XNYS": payments_fintech
+  "ticker:PYPL@XNAS": payments_fintech
+  "ticker:FI@XNYS": payments_fintech
+  "ticker:FIS@XNYS": payments_fintech
+  "ticker:GPN@XNYS": payments_fintech
+  "ticker:AXP@XNYS": consumer_specialty_finance
+  "ticker:MSFT@XNAS": software_infrastructure
+  "ticker:ORCL@XNYS": software_infrastructure
+  "ticker:AMZN@XNAS": ecommerce
+  "ticker:GOOGL@XNAS": internet_platforms
+  "ticker:GOOG@XNAS": internet_platforms
+  "ticker:META@XNAS": internet_platforms
+  "ticker:NFLX@XNAS": media_entertainment
+  "ticker:TSLA@XNAS": autos
+  "ticker:BRK.B@XNYS": diversified_holdings
+  "ticker:BRK.A@XNYS": diversified_holdings
+  "ticker:JPM@XNYS": banks_global
+  "ticker:BAC@XNYS": banks_global
+  "ticker:C@XNYS": banks_global
+  "ticker:WFC@XNYS": banks_global
+  "ticker:GS@XNYS": capital_markets_exchanges
+  "ticker:MS@XNYS": capital_markets_exchanges
+  "ticker:8058@XTKS": trading_distributors
+  "ticker:8031@XTKS": trading_distributors
+  "ticker:8001@XTKS": trading_distributors
+  "ticker:8053@XTKS": trading_distributors
+  "ticker:8002@XTKS": trading_distributors
+  "ticker:8035@XTKS": semi_equipment
+  "ticker:6857@XTKS": semi_equipment
+  "ticker:6758@XTKS": hardware_networking
+  "ticker:9984@XTKS": diversified_holdings
+  "ticker:005930@XKRX": semiconductors
+  "ticker:000660@XKRX": semiconductors
+  "ticker:0700@XHKG": internet_platforms
+  "ticker:9988@XHKG": ecommerce

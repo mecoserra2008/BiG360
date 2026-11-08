@@ -1,0 +1,5 @@
+{"results":[
+{"id":"a1","publisher":{"name":"The Motley Fool"},"title":"Apple's services keep growing","author":"x","published_utc":"2026-10-10T01:30:00Z","article_url":"https://www.fool.com/investing/2026/10/09/apple-services/?utm_source=polygon","tickers":["AAPL","MSFT"],"description":"Apple reported...","keywords":["apple","services"],"insights":[{"ticker":"AAPL","sentiment":"positive","sentiment_reasoning":"growth"},{"ticker":"MSFT","sentiment":"neutral","sentiment_reasoning":"mention"}]},
+{"id":"a2","publisher":{"name":"Benzinga"},"title":"Nvidia slips","published_utc":"2026-10-09T15:00:00Z","article_url":"https://www.benzinga.com/nvda-slips","tickers":["NVDA"]},
+{"id":"a3","publisher":{"name":"Dup"},"title":"Apple's services keep growing (dup)","published_utc":"2026-10-10T02:00:00Z","article_url":"https://fool.com/investing/2026/10/09/apple-services","tickers":["AAPL"]}
+]}

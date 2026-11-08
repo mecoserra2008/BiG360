@@ -1,0 +1,73 @@
+table: cross_asset_signals
+version: 1
+zone: scores
+owner: cross-asset (app.analytics.cross_asset, job cross_asset_signals)
+description: >
+  Daily per-asset cross-asset signals (roadmap v2 item #5) for commodities, FX pairs, equity indices, US Treasuries,
+  US credit and crypto futures: trend / momentum, realised and implied volatility, carry (method per asset class),
+  futures-curve roll yield and shape, value proxies and time-series z-scores. Definitions in
+  docs/CROSS_ASSET_DEFINITIONS.md and the app.analytics.cross_asset docstring. Inputs: OFFICIAL fx_rates fixings
+  (FX prices), cb_policy_rates (FX / equity funding), FRED H.15 CMT, TIPS and ICE BofA OAS series, macro_cell_history
+  CPI; Yahoo market data for futures, indices, ETFs and the futures_curve table. trend_signal, curve_shape, value proxies
+  and z-scores are MODEL-BASED transformations. Positioning (cot_*) columns: CFTC Commitments of Traders (OFFICIAL,
+  cftc_signals) joined on futures_root = cftc_markets.root, latest report RELEASED on or before the row date (PIT on the
+  release date, not the Tuesday as-of date; stale > 28 days -> null); disaggregated futures-only managed money for
+  commodities, TFF futures-only leveraged funds for financial futures (equity indices, rates, FX, crypto); inverted for
+  pairs quoted against the futures (USDJPY from 6J). Recomputed in full and overwritten nightly; rows from 2000-01-01. Storage: float32, derived signal columns
+  (everything except price) rounded to a 12-bit mantissa (relative precision 2.4e-4) so ZSTD compresses them.
+storage: {path: scores/cross_asset_signals, format: parquet, partition_by: [asset_class], write_mode: overwrite, sort_by: [asset_id, date], compression_level: 9}
+primary_key: [asset_id, date]
+pit: {knowledge_column: knowledge_date, rule: "inputs as known on knowledge_date (FRED by knowledge_date, CPI period start + 46 days)"}
+columns:
+  - {name: asset_id, type: string, nullable: false, description: "Asset key (CL, GC, SPX, EURUSD, UST10Y, US_HY, BTC ...)"}
+  - {name: asset_class, type: enum, nullable: false, values: [commodity, fx, equity_index, rates, credit, crypto], description: "Asset class; partition"}
+  - {name: sector, type: string, nullable: true, description: "Commodity sector (energy, metals, grains, softs, livestock) / region (US, EU, JP ...) / G10 vs EM for FX"}
+  - {name: date, type: date, nullable: false, description: "Trading date of the asset (UST: CMT observation date)"}
+  - {name: futures_root, type: string, nullable: true, description: "futures_curve root used for carry_curve / curve_slope (also the CFTC join key)"}
+  - {name: price, type: float32, nullable: false, description: "Price level the signals are computed on (UST: synthetic total-return index; ETFs: adjusted close)"}
+  - {name: price_source, type: enum, nullable: false, values: [yahoo, official_fx, official_ust_synthetic], description: "Where price comes from"}
+  - {name: mom_1m, type: float32, nullable: true, description: "ln(P_t / P_t-21)"}
+  - {name: mom_3m, type: float32, nullable: true, description: "ln(P_t / P_t-63)"}
+  - {name: mom_12m, type: float32, nullable: true, description: "ln(P_t / P_t-252)"}
+  - {name: mom_12_1, type: float32, nullable: true, description: "ln(P_t-21 / P_t-252) (12-1 momentum)"}
+  - {name: trend_signal, type: float32, nullable: true, description: "MODEL-BASED trend-following signal in [-1, 1]: mean of clip(mom_h / (sigma_63 sqrt(h)), -2, 2) / 2 over h = 21, 63, 252 (>= 2 horizons)"}
+  - {name: rv_1m, type: float32, nullable: true, description: "Realised vol, 21-day std of daily log returns * sqrt(252) (fraction)"}
+  - {name: rv_3m, type: float32, nullable: true, description: "Realised vol over 63 days (fraction)"}
+  - {name: iv, type: float32, nullable: true, description: "Implied vol index (fraction; UST10Y: ^MOVE in bp)"}
+  - {name: iv_source, type: string, nullable: true, description: "Vol index used (^VIX, ^VXN, ^VXD, ^OVX, ^GVZ, ^INDIAVIX, ^AXVI, ^MOVE)"}
+  - {name: iv_units, type: enum, nullable: true, values: [fraction, bp], description: "Units of iv"}
+  - {name: iv_rv_ratio, type: float32, nullable: true, description: "iv / rv_1m (UST10Y: MOVE / realised bp vol of the 10y yield)"}
+  - {name: carry, type: float32, nullable: true, description: "Headline carry, annualised fraction, method in carry_method"}
+  - {name: carry_method, type: enum, nullable: true, values: [futures_roll, fx_rate_diff, bond_carry_rolldown, equity_div_funding, credit_oas], description: "Definition used for carry"}
+  - {name: carry_curve, type: float32, nullable: true, description: "Futures roll yield ln(F1/F2) * 365 / (T2 - T1), front >= 5 and <= 200 days to expiry (sign-flipped for USD/X pairs)"}
+  - {name: carry_12m, type: float32, nullable: true, description: "Seasonality-neutral roll yield: front vs the contract ~365 days further out (300..430), annualised"}
+  - {name: carry_fundamental, type: float32, nullable: true, description: "Non-curve carry: FX policy-rate differential, bond carry + roll-down, dividend yield - funding, OAS"}
+  - {name: carry_front_contract, type: string, nullable: true, description: "Front contract used by carry_curve (e.g. Z26)"}
+  - {name: carry_dte_front, type: int16, nullable: true, description: "Days to expiry of the front contract"}
+  - {name: carry_dte_next, type: int16, nullable: true, description: "Days to expiry of the next contract"}
+  - {name: curve_slope, type: float32, nullable: true, description: "OLS slope of ln F on years to expiry, contracts 5..400 days (>= 3); + = contango (raw futures curve, not sign-flipped)"}
+  - {name: curve_shape, type: enum, nullable: true, values: [contango, backwardation, flat], description: "MODEL-BASED label: slope > +1%/yr contango, < -1%/yr backwardation"}
+  - {name: curve_n, type: int16, nullable: true, description: "Contracts in the slope fit"}
+  - {name: dividend_yield, type: float32, nullable: true, description: "Equity: trailing-12m tracking-ETF distributions / ETF close (proxy)"}
+  - {name: funding_rate, type: float32, nullable: true, description: "Funding used (fraction): local policy rate (equity), quote-currency policy rate (FX)"}
+  - {name: value, type: float32, nullable: true, description: "Value proxy, method in value_method"}
+  - {name: value_method, type: enum, nullable: true, values: [reversal_5y, fx_real_5y, real_yield, oas_level], description: "Definition used for value"}
+  - {name: real_rate_diff, type: float32, nullable: true, description: "FX: (policy - CPI y/y) base minus quote, percentage points (official inputs)"}
+  - {name: z_mom_12m, type: float32, nullable: true, description: "Time-series z of mom_12m (756 rows, min 126)"}
+  - {name: z_carry, type: float32, nullable: true, description: "Time-series z of carry"}
+  - {name: z_value, type: float32, nullable: true, description: "Time-series z of value"}
+  - {name: z_rv, type: float32, nullable: true, description: "Time-series z of rv_1m"}
+  - {name: z_iv_rv, type: float32, nullable: true, description: "Time-series z of iv_rv_ratio"}
+  - {name: z_curve_slope, type: float32, nullable: true, description: "Time-series z of curve_slope"}
+  - {name: cot_market_code, type: string, nullable: true, description: "CFTC contract market joined (cftc_markets.market_code, matched on futures_root = cftc_markets.root)"}
+  - {name: cot_report_type, type: string, nullable: true, description: "COT report used: disagg_fut (commodities) or tff_fut (financial futures)"}
+  - {name: cot_category, type: string, nullable: true, description: "Trader category: m_money (managed money, commodities) or lev_money (leveraged funds, financials)"}
+  - {name: cot_report_date, type: date, nullable: true, description: "COT as-of Tuesday of the joined report"}
+  - {name: cot_knowledge_date, type: date, nullable: true, description: "Release date of the joined report (<= date; PIT)"}
+  - {name: cot_inverted, type: bool, nullable: true, description: "True when the positioning is sign-flipped because the asset is quoted inversely to the futures (USDJPY vs 6J): cot_index_3y = 1 - index, z and % OI negated"}
+  - {name: cot_index_3y, type: float32, nullable: true, description: "COT index 0..1 over 156 reports of the category (CFTC official positions; index is a transform)"}
+  - {name: cot_z_3y, type: float32, nullable: true, description: "z-score of the category's net position over 156 reports"}
+  - {name: cot_net_pct_oi, type: float32, nullable: true, description: "Category net (long - short) / open interest"}
+  - {name: knowledge_date, type: date, nullable: false, description: "Date the row's inputs are known (= date; UST rows: FRED knowledge date)"}
+  - {name: computed_at, type: datetime, nullable: false, description: "Write time UTC"}
+  - {name: run_id, type: string, nullable: true, description: "job_runs.run_id"}

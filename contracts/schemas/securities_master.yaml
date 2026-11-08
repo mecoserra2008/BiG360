@@ -1,0 +1,31 @@
+table: securities_master
+version: 4
+zone: reference
+owner: ref-identity
+description: >
+  One row per economic security (share class). ADRs/GDRs are separate securities linked to the underlying.
+  The primary listing is the one whose prices populate prices_daily.
+storage: {path: reference/securities_master, format: parquet, partition_by: [], write_mode: overwrite}
+primary_key: [security_id]
+columns:
+  - {name: security_id, type: string, nullable: false, description: "Internal security id (S + 12 base32)"}
+  - {name: issuer_id, type: string, nullable: false, description: "FK issuers.issuer_id"}
+  - {name: security_type, type: enum, nullable: false, values: [common, preferred, adr, gdr, reit_unit, etf, fund, index, future, fx, other], description: "Instrument type (index / future / etf / fx rows with ids IDX:<yf> / ETF:<yf> are benchmark / market instruments with a synthetic issuer, v3; fx = Yahoo FX pair IDX:EURUSD=X, market instrument only - conversions use fx_rates, v4)"}
+  - {name: share_class, type: string, nullable: true, description: "Share class label (A, B, H, A-share, pref) — null for single-class"}
+  - {name: isin, type: string, nullable: true, description: "ISIN (current)"}
+  - {name: figi, type: string, nullable: true, description: "Share-class level FIGI (shareClassFIGI) preferred; composite FIGI in identifier_map"}
+  - {name: cusip, type: string, nullable: true, description: "CUSIP (US/CA) — internal use only"}
+  - {name: primary_listing_id, type: string, nullable: false, description: "FK listings.listing_id used for prices"}
+  - {name: display_ticker, type: string, nullable: false, description: "Human ticker shown in UI, e.g. AAPL, 7203.T, 005930.KS, 0700.HK, PETR4.SA"}
+  - {name: name, type: string, nullable: false, description: "Security display name"}
+  - {name: trading_currency, type: string, nullable: false, description: "ISO 4217 of primary listing quotes (GBp normalized to GBP; see prices_daily)"}
+  - {name: underlying_security_id, type: string, nullable: true, description: "For ADR/GDR: security_id of underlying local share"}
+  - {name: adr_ratio, type: float64, nullable: true, description: "Underlying ordinary shares per ADR/GDR (TM 10, PBR 2, MFG 0.2). Set from data/reference/seeds/adr_ratios.csv by ref_universe and identity_resolve (v2); null = unknown (consumers assume 1)"}
+  - {name: shares_class_weight, type: float64, nullable: true, description: "Fraction of issuer economic shares in this class (for per-share metrics on multi-class issuers)"}
+  - {name: is_primary_security, type: bool, nullable: false, description: "True for the issuer's main security used in scoring (one per issuer)"}
+  - {name: is_active, type: bool, nullable: false, description: "False after delisting"}
+  - {name: first_trade_date, type: date, nullable: true, description: "First date with price"}
+  - {name: last_trade_date, type: date, nullable: true, description: "Last date with price (delisted)"}
+  - {name: delisting_reason, type: enum, nullable: true, values: [merger, bankruptcy, going_private, exchange_move, other], description: "If delisted"}
+  - {name: updated_at, type: datetime, nullable: false, description: "Last update UTC"}
+  - {name: run_id, type: string, nullable: true, description: "Producing job run"}

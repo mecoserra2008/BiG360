@@ -1,0 +1,40 @@
+table: data_gaps
+version: 1
+zone: ops
+owner: platform (app.ops.gaps detector + app.ops.filler)
+description: >
+  Data Ops gap queue (docs/OPERATIONS_ROADMAP.md O1.2/O1.3). One row per detected or seeded gap of a
+  contracts/coverage.yaml dataset: expected (calendar x entities) vs actual. gap_class missing | stale | partial |
+  suspicious | unfillable; status tracks the filler (open -> queued -> filling -> filled, failed with exponential
+  back-off, unfillable after max attempts or a known source outage, manual = needs a code change or an API key).
+  The detector owns detection fields and resolution; the filler owns attempts / status transitions. Both
+  read-modify-write under data/.locks/data_gaps_rw.lock.
+storage: {path: ops/data_gaps, format: parquet, partition_by: [], write_mode: upsert}
+primary_key: [gap_id]
+columns:
+  - {name: gap_id, type: string, nullable: false, description: "dataset|entity|period_start|period_end (stale gaps: dataset|entity|stale)"}
+  - {name: dataset, type: string, nullable: false, description: "contracts/coverage.yaml dataset id"}
+  - {name: gap_group, type: string, nullable: true, description: "Dataset group (prices, fx, macro, events, filings, positioning, earnings, analytics)"}
+  - {name: entity, type: string, nullable: false, description: "Region / currency / country / source / day the gap is about ('*' = whole dataset)"}
+  - {name: gap_class, type: enum, nullable: false, values: [missing, stale, partial, suspicious, unfillable], description: "Kind of gap"}
+  - {name: status, type: enum, nullable: false, values: [open, queued, filling, filled, failed, unfillable, manual, ignored], description: "Filler state"}
+  - {name: period_start, type: date, nullable: true, description: "First affected date"}
+  - {name: period_end, type: date, nullable: true, description: "Last affected date"}
+  - {name: expected, type: int64, nullable: true, description: "Expected count (bars, files, releases, quarters ...)"}
+  - {name: actual, type: int64, nullable: true, description: "Observed count"}
+  - {name: priority, type: int16, nullable: false, description: "1 = most urgent ... 100 = whenever idle"}
+  - {name: fill_kind, type: string, nullable: true, description: "Filler action (polygon_dates, yf_refetch, job, gdelt_redo, campaign, dag, none)"}
+  - {name: fill_params, type: json, nullable: true, description: "Action parameters"}
+  - {name: source, type: string, nullable: true, description: "Rate-budget source (contracts/coverage.yaml sources)"}
+  - {name: cost_units, type: float64, nullable: true, description: "Estimated budget units"}
+  - {name: note, type: string, nullable: true, description: "Human explanation"}
+  - {name: origin, type: enum, nullable: false, values: [detector, seed, filler], description: "Who created the row"}
+  - {name: first_seen, type: datetime, nullable: false, description: "First detection UTC"}
+  - {name: last_seen, type: datetime, nullable: false, description: "Last detection UTC"}
+  - {name: attempts, type: int16, nullable: false, description: "Fill attempts so far"}
+  - {name: last_attempt_at, type: datetime, nullable: true, description: "Last fill attempt UTC"}
+  - {name: next_attempt_at, type: datetime, nullable: true, description: "Earliest next attempt (exponential back-off)"}
+  - {name: last_error, type: string, nullable: true, description: "Last fill error (truncated, secrets redacted)"}
+  - {name: resolved_at, type: datetime, nullable: true, description: "When the gap was no longer detected"}
+  - {name: detector_run_id, type: string, nullable: true, description: "job_runs.run_id of the last detection"}
+  - {name: updated_at, type: datetime, nullable: false, description: "Last change UTC"}

@@ -1,0 +1,21 @@
+table: macro_surprise_index
+version: 1
+zone: scores
+owner: macro-w2 (app.macro.surprise, job macro_surprise)
+description: >
+  Citi-style economic surprise index built from MODEL-BASED surprises (not consensus). For each country (and GLOBAL)
+  and theme (all, growth, inflation, labor), daily value = 100 * sum_i w_i * signed_z_i / max(sum_i w_i, 1) over
+  releases i dated in the trailing 365 days, with w_i = importance weight (tier 1: 1.0, tier 2: 0.6, tier 3: 0.3) *
+  0.5^(age_days / halflife_days). Point-in-time: only releases dated <= date contribute.
+storage: {path: scores/macro_surprise_index, format: parquet, partition_by: [], write_mode: overwrite}
+primary_key: [country, theme, date]
+columns:
+  - {name: country, type: string, nullable: false, description: "ISO2, EA or GLOBAL"}
+  - {name: theme, type: enum, nullable: false, values: [all, growth, inflation, labor], description: "Theme"}
+  - {name: date, type: date, nullable: false, description: "Index date"}
+  - {name: value, type: float64, nullable: true, description: "Index (z x 100; > 0 = data beating model expectations)"}
+  - {name: n_events, type: int32, nullable: false, description: "Releases in the window"}
+  - {name: last_event_date, type: date, nullable: true, description: "Most recent contributing release"}
+  - {name: halflife_days, type: int16, nullable: false, description: "Decay half-life"}
+  - {name: model_based, type: bool, nullable: false, description: "Always true"}
+  - {name: computed_at, type: datetime, nullable: false, description: "Write time UTC"}

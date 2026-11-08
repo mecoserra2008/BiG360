@@ -1,0 +1,74 @@
+{
+ "title": "Poisson: insider cluster-buy counts vs drawdown",
+ "description": "Monthly count of mvp_us companies with an active insider cluster buy, on the previous month's average 12-month drawdown and 3-month return of the same universe. Poisson GLM with HAC errors; the dispersion test says whether a negative binomial is needed.",
+ "tags": [
+  "GLM",
+  "poisson",
+  "insiders",
+  "counts"
+ ],
+ "study": {
+  "name": "Insider cluster buys vs drawdown",
+  "method": "glm",
+  "y": "cluster_buys",
+  "x": [
+   "drawdown_l1",
+   "ret3m_l1"
+  ],
+  "params": {
+   "family": "poisson",
+   "cov_type": "HAC"
+  },
+  "dataset": {
+   "kind": "timeseries",
+   "frequency": "M",
+   "start": "2017-03-01",
+   "entities": {
+    "universe": "mvp_us"
+   },
+   "variables": [
+    {
+     "name": "cluster_buys",
+     "source": "insider",
+     "field": "cluster_buy",
+     "agg": "max",
+     "entity_agg": "sum"
+    },
+    {
+     "name": "drawdown_l1",
+     "source": "prices",
+     "field": "adj_close",
+     "pre_transforms": [
+      {
+       "op": "drawdown",
+       "window": 12
+      }
+     ],
+     "entity_agg": "mean",
+     "transforms": [
+      {
+       "op": "lag",
+       "k": 1
+      }
+     ]
+    },
+    {
+     "name": "ret3m_l1",
+     "source": "prices",
+     "field": "ret",
+     "entity_agg": "mean",
+     "transforms": [
+      {
+       "op": "rolling_sum",
+       "window": 3
+      },
+      {
+       "op": "lag",
+       "k": 1
+      }
+     ]
+    }
+   ]
+  }
+ }
+}

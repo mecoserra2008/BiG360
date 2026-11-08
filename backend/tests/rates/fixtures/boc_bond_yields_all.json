@@ -1,0 +1,269 @@
+{
+    "terms": {
+        "url": "https://www.bankofcanada.ca/terms/"
+    },
+    "groupDetail": {
+        "label": "Selected bond yields",
+        "description": "Average yields for selected Government of Canada marketable bonds.",
+        "link": "https://www.bankofcanada.ca/?p=39890",
+        "metadata": {
+            "unit": "Percent",
+            "frequency": "Business daily"
+        }
+    },
+    "seriesDetail": {
+        "CDN.AVG.1YTO3Y.AVG": {
+            "label": "Marketable bonds average yield, 1- to 3-year",
+            "description": "The average yield of Government of Canada marketable bonds with maturities between 1 and 3 years.",
+            "dimension": {
+                "key": "d",
+                "name": "Date"
+            },
+            "dateFormat": "daily",
+            "metadata": {
+                "unit": "Percent",
+                "frequency": "Business daily"
+            }
+        },
+        "CDN.AVG.3YTO5Y.AVG": {
+            "label": "Marketable bonds average yield, 3- to 5-year",
+            "description": "The average yield of Government of Canada marketable bonds with maturities between 3 and 5 years.",
+            "dimension": {
+                "key": "d",
+                "name": "Date"
+            },
+            "dateFormat": "daily",
+            "metadata": {
+                "unit": "Percent",
+                "frequency": "Business daily"
+            }
+        },
+        "CDN.AVG.5YTO10Y.AVG": {
+            "label": "Marketable bonds average yield 5- to 10-year",
+            "description": "The average yield of Government of Canada marketable bonds with maturities between 5 and 10 years.",
+            "dimension": {
+                "key": "d",
+                "name": "Date"
+            },
+            "dateFormat": "daily",
+            "metadata": {
+                "unit": "Percent",
+                "frequency": "Business daily"
+            }
+        },
+        "CDN.AVG.OVER.10.AVG": {
+            "label": "Marketable bonds average yield, over 10 years",
+            "description": "The average yield of Government of Canada marketable bonds with maturities greater than 10 years.",
+            "dimension": {
+                "key": "d",
+                "name": "Date"
+            },
+            "dateFormat": "daily",
+            "metadata": {
+                "unit": "Percent",
+                "frequency": "Business daily"
+            }
+        },
+        "BD.CDN.2YR.DQ.YLD": {
+            "label": "Benchmark bond yield, 2-year",
+            "description": "The yield on the Government of Canada 2-year benchmark bond. This series reflects the prevailing interest rate for the 2-year term and is used to monitor short-term government borrowing costs.",
+            "dimension": {
+                "key": "d",
+                "name": "Date"
+            },
+            "dateFormat": "daily",
+            "metadata": {
+                "unit": "Percent",
+                "frequency": "Business daily"
+            }
+        },
+        "BD.CDN.3YR.DQ.YLD": {
+            "label": "Benchmark bond yield, 3-year",
+            "description": "The yield on the Government of Canada 3-year benchmark bond. This series measures the market interest rate for the Government of Canada’s 3-year bond, which serves as a reference rate for Canadian dollar-denominated debt securities.",
+            "dimension": {
+                "key": "d",
+                "name": "Date"
+            },
+            "dateFormat": "daily",
+            "metadata": {
+                "unit": "Percent",
+                "frequency": "Business daily"
+            }
+        },
+        "BD.CDN.5YR.DQ.YLD": {
+            "label": "Benchmark bond yield, 5-year",
+            "description": "The yield on the Government of Canada 5-year benchmark bond. This series reports the prevailing yield for the 5-year maturity point on the Canadian government bond yield curve.",
+            "dimension": {
+                "key": "d",
+                "name": "Date"
+            },
+            "dateFormat": "daily",
+            "metadata": {
+                "unit": "Percent",
+                "frequency": "Business daily"
+            }
+        },
+        "BD.CDN.7YR.DQ.YLD": {
+            "label": "Benchmark bond yield, 7-year",
+            "description": "The yield on the Government of Canada 7-year benchmark bond. This series represents the prevailing market yield for the 7-year maturity point on the Government of Canada yield curve.",
+            "dimension": {
+                "key": "d",
+                "name": "Date"
+            },
+            "dateFormat": "daily",
+            "metadata": {
+                "unit": "Percent",
+                "frequency": "Business daily"
+            }
+        },
+        "BD.CDN.10YR.DQ.YLD": {
+            "label": "Benchmark bond yield, 10-year",
+            "description": "The yield on the Government of Canada 10-year benchmark bond. This series represents the prevailing market interest rate for the 10-year Government of Canada bond and is used as a reference for financial market analysis and reporting.",
+            "dimension": {
+                "key": "d",
+                "name": "Date"
+            },
+            "dateFormat": "daily",
+            "metadata": {
+                "unit": "Percent",
+                "frequency": "Business daily"
+            }
+        },
+        "BD.CDN.LONG.DQ.YLD": {
+            "label": "Benchmark bond yield, long-term",
+            "description": "The yield on the Government of Canada long-term benchmark bond. This series represents the prevailing interest rate for the designated long-term benchmark bond and is used in the Bank of Canada’s reporting of financial market conditions.",
+            "dimension": {
+                "key": "d",
+                "name": "Date"
+            },
+            "dateFormat": "daily",
+            "metadata": {
+                "unit": "Percent",
+                "frequency": "Business daily"
+            }
+        },
+        "BD.CDN.RRB.DQ.YLD": {
+            "label": "Real Return Bonds yield, long-term",
+            "description": "The yield on Government of Canada Real Return Bonds. These bonds are part of the government securities held by the Bank of Canada and are reported in millions of Canadian dollars.",
+            "dimension": {
+                "key": "d",
+                "name": "Date"
+            },
+            "dateFormat": "daily",
+            "metadata": {
+                "unit": "Percent",
+                "frequency": "Business daily"
+            }
+        }
+    },
+    "observations": [
+        {
+            "d": "2026-10-29",
+            "BD.CDN.RRB.DQ.YLD": {
+                "v": "1.89"
+            },
+            "CDN.AVG.1YTO3Y.AVG": {
+                "v": "3.30"
+            },
+            "CDN.AVG.3YTO5Y.AVG": {
+                "v": "3.55"
+            },
+            "CDN.AVG.5YTO10Y.AVG": {
+                "v": "3.72"
+            },
+            "CDN.AVG.OVER.10.AVG": {
+                "v": "4.09"
+            },
+            "BD.CDN.2YR.DQ.YLD": {
+                "v": "3.36"
+            },
+            "BD.CDN.3YR.DQ.YLD": {
+                "v": "3.46"
+            },
+            "BD.CDN.5YR.DQ.YLD": {
+                "v": "3.58"
+            },
+            "BD.CDN.7YR.DQ.YLD": {
+                "v": "3.67"
+            },
+            "BD.CDN.10YR.DQ.YLD": {
+                "v": "3.84"
+            },
+            "BD.CDN.LONG.DQ.YLD": {
+                "v": "4.13"
+            }
+        },
+        {
+            "d": "2026-10-28",
+            "BD.CDN.RRB.DQ.YLD": {
+                "v": "1.90"
+            },
+            "CDN.AVG.1YTO3Y.AVG": {
+                "v": "3.34"
+            },
+            "CDN.AVG.3YTO5Y.AVG": {
+                "v": "3.58"
+            },
+            "CDN.AVG.5YTO10Y.AVG": {
+                "v": "3.75"
+            },
+            "CDN.AVG.OVER.10.AVG": {
+                "v": "4.11"
+            },
+            "BD.CDN.2YR.DQ.YLD": {
+                "v": "3.41"
+            },
+            "BD.CDN.3YR.DQ.YLD": {
+                "v": "3.51"
+            },
+            "BD.CDN.5YR.DQ.YLD": {
+                "v": "3.62"
+            },
+            "BD.CDN.7YR.DQ.YLD": {
+                "v": "3.70"
+            },
+            "BD.CDN.10YR.DQ.YLD": {
+                "v": "3.87"
+            },
+            "BD.CDN.LONG.DQ.YLD": {
+                "v": "4.15"
+            }
+        },
+        {
+            "d": "2026-10-27",
+            "BD.CDN.RRB.DQ.YLD": {
+                "v": "1.87"
+            },
+            "CDN.AVG.1YTO3Y.AVG": {
+                "v": "3.29"
+            },
+            "CDN.AVG.3YTO5Y.AVG": {
+                "v": "3.53"
+            },
+            "CDN.AVG.5YTO10Y.AVG": {
+                "v": "3.71"
+            },
+            "CDN.AVG.OVER.10.AVG": {
+                "v": "4.08"
+            },
+            "BD.CDN.2YR.DQ.YLD": {
+                "v": "3.36"
+            },
+            "BD.CDN.3YR.DQ.YLD": {
+                "v": "3.45"
+            },
+            "BD.CDN.5YR.DQ.YLD": {
+                "v": "3.57"
+            },
+            "BD.CDN.7YR.DQ.YLD": {
+                "v": "3.66"
+            },
+            "BD.CDN.10YR.DQ.YLD": {
+                "v": "3.83"
+            },
+            "BD.CDN.LONG.DQ.YLD": {
+                "v": "4.12"
+            }
+        }
+    ]
+}

@@ -1,0 +1,17 @@
+table: model_promotions
+version: 1
+zone: app_state
+owner: api (app.api.routers.models POST /models/runs/{id}/promote)
+description: >
+  Manual model promotions requested through the API (the API never writes Parquet, so it cannot flip
+  model_runs.is_production itself). One row per (model_type, horizon); the serving snapshot builder prefers a promoted
+  run over model_runs.is_production when choosing the production model per horizon. The ml agent's predict/ensemble
+  jobs may read this table to adopt the promotion for live predictions.
+storage: {path: app_state.duckdb, format: duckdb_table, partition_by: [], write_mode: upsert}
+primary_key: [model_type, horizon]
+columns:
+  - {name: model_run_id, type: string, nullable: false, description: "FK model_runs"}
+  - {name: model_type, type: string, nullable: false, description: "model_runs.model_type"}
+  - {name: horizon, type: string, nullable: false, description: "1M | 3M | 6M (empty string for horizon-less models)"}
+  - {name: promoted_at, type: datetime, nullable: false, description: "UTC"}
+  - {name: promoted_by, type: string, nullable: false, description: "api | cli"}

@@ -1,0 +1,44 @@
+table: confluence_zones
+version: 2
+zone: scores
+owner: technicals (app.technicals.confluence)
+description: >
+  Ranked confluence zones: weighted Gaussian KDE over tech_levels prices (weight = level_type_stats.score x recency x touches),
+  bandwidth = 0.35 x ATR14; zones = density peaks above the 60th percentile, bounded where density falls to 50% of peak.
+  Trade plan: entry at zone edge nearest price, invalidation 0.5 ATR beyond far edge, target = next opposing zone.
+  v2: KDE runs in ATR-normalized space x = (price - close)/ATR14 over levels within +-12 ATR; level weight =
+  reliability(level_type_stats.score) x recency x touches x timeframe x volume-node strength (x 0.7 if role flipped).
+  Zones = density peaks >= 15% of the max peak, bounded at 50% of the peak / the valley / +-0.75 ATR; level types with
+  type_rank_score < 0.4 (worse than random for the stock) are excluded. strength = 100 x S / (S + 20),
+  S = sum(member weights) x diversity, diversity = 1 + 0.2 x (families - 1). Per-security setup + score: tech_setups.
+storage: {path: scores/confluence_zones, format: parquet, partition_by: [], write_mode: overwrite, retention: "latest + month-end snapshots"}
+primary_key: [as_of_date, security_id, zone_id]
+columns:
+  - {name: as_of_date, type: date, nullable: false, description: "Date"}
+  - {name: security_id, type: string, nullable: false, description: "FK securities_master"}
+  - {name: zone_id, type: int16, nullable: false, description: "1..N ordered by rank"}
+  - {name: side, type: enum, nullable: false, values: [support, resistance], description: "Relative to last close"}
+  - {name: zone_low, type: float64, nullable: false, description: "Lower bound"}
+  - {name: zone_high, type: float64, nullable: false, description: "Upper bound"}
+  - {name: center, type: float64, nullable: false, description: "Density peak price"}
+  - {name: density, type: float64, nullable: false, description: "Peak KDE density (normalized 0..1 within security)"}
+  - {name: strength, type: float64, nullable: false, description: "0..100 zone score = 100 x S/(S+20), S = sum(member weights) x diversity"}
+  - {name: rank, type: int16, nullable: false, description: "1 = strongest"}
+  - {name: distance_atr, type: float64, nullable: false, description: "(center - close)/ATR14"}
+  - {name: member_level_keys, type: list<string>, nullable: false, description: "Level keys inside the zone"}
+  - {name: member_count, type: int16, nullable: false, description: "Number of member levels"}
+  - {name: entry, type: float64, nullable: true, description: "Suggested entry"}
+  - {name: invalidation, type: float64, nullable: true, description: "Stop/invalidation price"}
+  - {name: target, type: float64, nullable: true, description: "Target (next opposing zone center)"}
+  - {name: reward_risk, type: float64, nullable: true, description: "(target-entry)/(entry-invalidation), sign-normalized"}
+  - {name: atr14, type: float64, nullable: false, description: "ATR used"}
+  - {name: last_close, type: float64, nullable: false, description: "Close at as_of_date"}
+  - {name: computed_at, type: datetime, nullable: false, description: "Write time UTC"}
+  - {name: distance_pct, type: float64, nullable: true, description: "v2: center/close - 1"}
+  - {name: in_zone, type: bool, nullable: true, description: "v2: last close lies inside [zone_low, zone_high]"}
+  - {name: member_level_types, type: list<string>, nullable: true, description: "v2: distinct contributing level types"}
+  - {name: member_families, type: list<string>, nullable: true, description: "v2: distinct contributing families"}
+  - {name: member_prices, type: list<float64>, nullable: true, description: "v2: price of each member level (aligned with member_level_keys)"}
+  - {name: member_weights, type: list<float64>, nullable: true, description: "v2: confluence weight of each member level (aligned with member_level_keys)"}
+  - {name: n_families, type: int16, nullable: true, description: "v2: number of distinct families in the zone"}
+  - {name: weight_sum, type: float64, nullable: true, description: "v2: sum of member weights (pre-diversity)"}

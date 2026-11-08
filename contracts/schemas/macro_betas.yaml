@@ -1,0 +1,22 @@
+table: macro_betas
+version: 1
+zone: scores
+owner: ml (app.ml.macro_betas)
+description: >
+  Per-security sensitivities (rolling 36-month OLS with Newey-West t-stats, weekly refresh) of monthly excess returns
+  to macro factor changes: market, rates_10y, curve_2s10s, credit_spread, usd_index, oil, inflation_surprise, gold, copper.
+  Plus average excess return per regime.
+storage: {path: scores/macro_betas, format: parquet, partition_by: [], write_mode: upsert}
+primary_key: [as_of_date, security_id, factor_id]
+columns:
+  - {name: as_of_date, type: date, nullable: false, description: "Estimation date"}
+  - {name: security_id, type: string, nullable: false, description: "FK securities_master"}
+  - {name: factor_id, type: string, nullable: false, description: "market | rates_10y | curve_2s10s | credit_spread | usd_index | oil | inflation_surprise | gold | copper | regime_<label>"}
+  - {name: beta, type: float64, nullable: true, description: "Coefficient (regime_* rows: mean monthly excess return in that regime)"}
+  - {name: t_stat, type: float64, nullable: true, description: "Newey-West t"}
+  - {name: r2, type: float64, nullable: true, description: "Model R2 (same on all rows of a regression)"}
+  - {name: n_obs, type: int32, nullable: false, description: "Months used"}
+  - {name: window_months, type: int16, nullable: false, description: "Window"}
+  - {name: peer_percentile, type: float64, nullable: true, description: "Percentile of beta within sector"}
+  - {name: computed_at, type: datetime, nullable: false, description: "Write time UTC"}
+  - {name: run_id, type: string, nullable: true, description: "Producing run"}

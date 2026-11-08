@@ -1,0 +1,48 @@
+table: macro_cells
+version: 1
+zone: scores
+owner: macro-w1 (app.macro.indicators, job macro_cells)
+description: >
+  Macro v2 canonical (country, indicator) cells, point-in-time daily snapshots (as_of_date = snapshot date; only
+  observation rows with knowledge_date <= as_of_date are used). One primary official series per cell chosen by
+  freshness status, catalog rank and latest observation (contracts/macro_catalog.yaml). Values are on the canonical
+  measure (transform yoy / qoq / level, see app.macro.indicators); statistics vs the series' own trailing 10 years.
+  First run backfills 36 month-end snapshots. curve_2s10s is derived (yield_10y - yield_2y).
+storage: {path: scores/macro_cells, format: parquet, partition_by: [], write_mode: upsert}
+primary_key: [as_of_date, country, indicator]
+pit: {knowledge_column: as_of_date, rule: "snapshot as of as_of_date"}
+columns:
+  - {name: as_of_date, type: date, nullable: false, description: "Snapshot date (PIT)"}
+  - {name: country, type: string, nullable: false, description: "ISO2 or EA (24 coverage countries)"}
+  - {name: indicator, type: string, nullable: false, description: "gdp_qoq, gdp_yoy, industrial_production, retail_sales, pmi_proxy, consumer_confidence, cpi_yoy, core_cpi_yoy, ppi_yoy, unemployment, employment, policy_rate, rate_3m, yield_2y, yield_10y, curve_2s10s, private_credit, money_supply, house_prices, current_account, gov_deficit, gov_debt, reer"}
+  - {name: label, type: string, nullable: false, description: "Display label"}
+  - {name: group, type: enum, nullable: false, values: [growth, inflation, labor, rates, money_credit, housing, external, fiscal, fx], description: "Heatmap group"}
+  - {name: series_id, type: string, nullable: false, description: "Primary series (FK macro_series); for curve_2s10s the 10Y series"}
+  - {name: inputs, type: list<string>, nullable: true, description: "Input series ids (2 for curve_2s10s)"}
+  - {name: source_id, type: string, nullable: true, description: "Source of the primary series"}
+  - {name: title, type: string, nullable: true, description: "Series title"}
+  - {name: units, type: string, nullable: true, description: "Units of value (e.g. '% y/y', '% q/q', 'percent', index text, 'pp')"}
+  - {name: transform, type: enum, nullable: false, values: [yoy, qoq, level], description: "Canonical transform applied to the native series"}
+  - {name: frequency, type: enum, nullable: false, values: [D, W, M, Q, A], description: "Native frequency"}
+  - {name: period, type: date, nullable: true, description: "Observation period of value (period start for M/Q/A; day for D/W)"}
+  - {name: period_label, type: string, nullable: true, description: "2026-08 / 2026Q2 / 2025 / ISO day"}
+  - {name: value, type: float64, nullable: true, description: "Latest canonical value"}
+  - {name: release_date, type: date, nullable: true, description: "knowledge_date of the latest period (vintage or estimated release)"}
+  - {name: release_date_estimated, type: bool, nullable: true, description: "release_date imputed from the release lag"}
+  - {name: change_3m, type: float64, nullable: true, description: "value - canonical value 3 months earlier (units of value)"}
+  - {name: change_6m, type: float64, nullable: true, description: "6-month change"}
+  - {name: change_12m, type: float64, nullable: true, description: "12-month change"}
+  - {name: direction, type: enum, nullable: true, values: [up, down, flat], description: "Sign of change_3m (fallback 6m/12m); flat if |change| <= 0.1 x 10y std"}
+  - {name: z_10y, type: float64, nullable: true, description: "(value - 10y mean) / 10y std of the canonical series"}
+  - {name: percentile_10y, type: float64, nullable: true, description: "Share of 10y window values <= value (0..1)"}
+  - {name: n_hist, type: int32, nullable: true, description: "Points in the 10y window"}
+  - {name: first_release_value, type: float64, nullable: true, description: "Canonical value of the latest period as first released (vintage series only)"}
+  - {name: revision, type: float64, nullable: true, description: "value - first_release_value"}
+  - {name: has_vintages, type: bool, nullable: true, description: "Series has 2+ vintages for some period"}
+  - {name: status, type: enum, nullable: true, values: [fresh, stale, discontinued, empty], description: "Staleness vs cadence + release lag (macro_audit rule)"}
+  - {name: age_days, type: int32, nullable: true, description: "Days since the end of the last observed period"}
+  - {name: rank, type: int16, nullable: true, description: "Catalog rank of the primary series"}
+  - {name: n_candidates, type: int16, nullable: true, description: "Candidate series for this cell"}
+  - {name: good_direction, type: int8, nullable: true, description: "+1 higher is better, -1 lower is better, 0 neutral (colouring hint)"}
+  - {name: method_version, type: string, nullable: false, description: "cells_v1"}
+  - {name: computed_at, type: datetime, nullable: false, description: "Write time UTC"}

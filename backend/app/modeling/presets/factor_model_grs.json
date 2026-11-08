@@ -1,0 +1,62 @@
+{
+ "title": "Factor model with GRS: quality / value / momentum long-short factors",
+ "description": "Long-short quintile factors built from our quality, value and momentum scores (sorted on last month's score, mvp_us, equal weight) plus the equal-weight market; time-series regressions of the 15 score-quintile portfolios with the GRS test of zero alphas, and second-pass Fama-MacBeth premia on the betas.",
+ "tags": [
+  "panel",
+  "factor model",
+  "GRS",
+  "factors"
+ ],
+ "study": {
+  "name": "QVM factor model (GRS)",
+  "method": "factor_model",
+  "y": "ret",
+  "x": [],
+  "params": {
+   "factor_scores": [
+    "quality",
+    "value",
+    "momentum"
+   ],
+   "quantiles": 5,
+   "include_market": true
+  },
+  "dataset": {
+   "kind": "panel",
+   "frequency": "M",
+   "start": "2017-01-01",
+   "entities": {
+    "universe": "mvp_us"
+   },
+   "variables": [
+    {
+     "name": "ret",
+     "source": "prices",
+     "field": "ret",
+     "transforms": [
+      {
+       "op": "clip",
+       "lower": -0.5,
+       "upper": 1.0
+      }
+     ]
+    },
+    {
+     "name": "quality",
+     "source": "factor_scores",
+     "field": "quality"
+    },
+    {
+     "name": "value",
+     "source": "factor_scores",
+     "field": "value"
+    },
+    {
+     "name": "momentum",
+     "source": "factor_scores",
+     "field": "momentum"
+    }
+   ]
+  }
+ }
+}

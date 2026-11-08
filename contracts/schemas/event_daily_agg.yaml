@@ -1,0 +1,32 @@
+table: event_daily_agg
+version: 1
+zone: features
+owner: events-v2 (app.events_v2.pipeline / app.events_v2.agg)
+description: >
+  T1 daily aggregates, kept forever (E3): country x theme x day, sector x theme x day, issuer x day (theme -1 =
+  all themes). Event measures come from ALL parsed GDELT events of the day (before the T2 keep filter); article
+  measures from all labelled GKG articles. attention_z = log1p(ev_n + art_n) vs the label's own trailing 90 days;
+  tone_z = article tone (else event tone) vs trailing 90 days (recomputed by events_agg, so newest-first backfills
+  converge).
+storage: {path: features/event_daily_agg, format: parquet, partition_by: [year_month], write_mode: upsert, retention: "forever"}
+# write_mode upsert (was append; refresh-pipeline fixes 2026-10-26): every writer replaces whole UTC days through
+# app.events_v2.store (write_day / compact_month: a d- day file is authoritative for its day, compactions dedupe on the
+# primary key, events_agg heals overlapping months). Appending recomputed rows created the 2026-05-22..31 duplicates.
+primary_key: [date, label_type, label_id, theme]
+columns:
+  - {name: year_month, type: string, nullable: false, description: "Partition YYYY-MM"}
+  - {name: date, type: date, nullable: false, description: "UTC date"}
+  - {name: label_type, type: enum, nullable: false, values: [country, sector, issuer], description: "Label dictionary"}
+  - {name: label_id, type: int32, nullable: false, description: "event_labels id (country 0 = GLOBAL)"}
+  - {name: theme, type: int8, nullable: false, description: "Theme bit, -1 = all themes"}
+  - {name: ev_n, type: int32, nullable: false, description: "Events"}
+  - {name: ev_mentions, type: int32, nullable: false, description: "Sum NumMentions"}
+  - {name: ev_articles, type: int32, nullable: false, description: "Sum NumArticles"}
+  - {name: ev_conflict_n, type: int32, nullable: false, description: "Events with QuadClass 3/4"}
+  - {name: ev_goldstein, type: float32, nullable: true, description: "Mean Goldstein"}
+  - {name: ev_tone, type: float32, nullable: true, description: "Mean event AvgTone"}
+  - {name: art_n, type: int32, nullable: false, description: "Labelled GKG articles"}
+  - {name: art_tone, type: float32, nullable: true, description: "Mean article tone"}
+  - {name: art_neg_share, type: float32, nullable: true, description: "Share of articles with tone < -2"}
+  - {name: attention_z, type: float32, nullable: true, description: "z of log1p(ev_n + art_n) vs trailing 90 days (min 10 obs)"}
+  - {name: tone_z, type: float32, nullable: true, description: "z of art_tone (else ev_tone) vs trailing 90 days"}

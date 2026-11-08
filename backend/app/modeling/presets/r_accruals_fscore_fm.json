@@ -1,0 +1,116 @@
+{
+ "title": "Accruals and Piotroski F-score (Fama-MacBeth)",
+ "description": "Earnings-quality signals: Sloan accruals (negative) and the Piotroski F-score (positive) as predictors of the 3-month forward return.",
+ "question": "factors",
+ "tags": [
+  "factors",
+  "earnings quality"
+ ],
+ "method_note": "Sloan (1996): high accruals = low-quality earnings that mean-revert; Piotroski (2000): the F-score separates winners among cheap stocks. 3-month overlapping targets: NW lags >= horizon. Caveat: the universe is today's constituents (membership history starts 2026-10), so early years carry survivorship bias; read the premium as an upper bound.",
+ "expected_outputs": [
+  "premium per signal (3M)",
+  "slope time series"
+ ],
+ "runtime_s": 10.2,
+ "validated": "2026-11-06 on snapshot R20261106T010757G9ZB",
+ "result": {
+  "run_id": "SR20261106T022315TKBVP",
+  "n_obs": 62907,
+  "metrics": {
+   "avg_r2": 0.04966781741666932
+  },
+  "coefficients": [
+   {
+    "term": "accruals",
+    "estimate": -0.007633085610209192,
+    "statistic": -3.8857176015148727,
+    "p_value": 0.0001397310816048313
+   },
+   {
+    "term": "fscore",
+    "estimate": -0.004333837838392149,
+    "statistic": -3.722489839419535,
+    "p_value": 0.00025805781837319664
+   },
+   {
+    "term": "earnings_yield",
+    "estimate": -0.011061097046927443,
+    "statistic": -1.4293159285263781,
+    "p_value": 0.15451349612717238
+   }
+  ]
+ },
+ "study": {
+  "name": "Accruals and Piotroski F-score (Fama-MacBeth)",
+  "method": "fama_macbeth",
+  "y": "fwd_ret_3m",
+  "x": [
+   "accruals",
+   "fscore",
+   "earnings_yield"
+  ],
+  "params": {
+   "nw_lags": 4
+  },
+  "dataset": {
+   "kind": "panel",
+   "frequency": "M",
+   "start": "2005-01-01",
+   "entities": {
+    "universe": "mvp_us"
+   },
+   "variables": [
+    {
+     "name": "fwd_ret_3m",
+     "source": "prices",
+     "field": "ret",
+     "transforms": [
+      {
+       "op": "fwd_compound",
+       "k": 3
+      },
+      {
+       "op": "winsorize"
+      }
+     ]
+    },
+    {
+     "name": "accruals",
+     "source": "ratios",
+     "field": "sloan_accruals",
+     "transforms": [
+      {
+       "op": "winsorize"
+      },
+      {
+       "op": "cs_zscore"
+      }
+     ]
+    },
+    {
+     "name": "fscore",
+     "source": "ratios",
+     "field": "piotroski_f",
+     "transforms": [
+      {
+       "op": "winsorize"
+      },
+      {
+       "op": "cs_zscore"
+      }
+     ]
+    },
+    {
+     "name": "earnings_yield",
+     "source": "valuation",
+     "field": "earnings_yield",
+     "transforms": [
+      {
+       "op": "cs_rank"
+      }
+     ]
+    }
+   ]
+  }
+ }
+}

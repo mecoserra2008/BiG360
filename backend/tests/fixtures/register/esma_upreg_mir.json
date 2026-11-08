@@ -1,0 +1,5 @@
+{"response": {"numFound": 3, "docs": [
+  {"ae_micLeiEsmaId": "XZAG", "ae_status": "Active", "ae_entityTypeLabel": "Regulated market"},
+  {"ae_micLeiEsmaId": "XPAR", "ae_status": "Active", "ae_entityTypeLabel": "Regulated market"},
+  {"ae_micLeiEsmaId": "OLDX", "ae_status": "Withdrawn", "ae_entityTypeLabel": "Regulated market"}
+]}}

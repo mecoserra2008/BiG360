@@ -1,0 +1,32 @@
+table: sentiment_daily
+version: 2
+zone: features
+owner: signals-alt (app.nlp.aggregate)
+description: Daily sentiment aggregates per security from news_items, GDELT and filing text changes.
+storage: {path: features/sentiment_daily, format: parquet, partition_by: [year], write_mode: upsert}
+primary_key: [date, security_id]
+pit: {knowledge_column: date, rule: "items with knowledge_date <= date"}
+columns:
+  - {name: date, type: date, nullable: false, description: "Date"}
+  - {name: year, type: int16, nullable: false, description: "Partition"}
+  - {name: security_id, type: string, nullable: false, description: "FK securities_master"}
+  - {name: issuer_id, type: string, nullable: false, description: "FK issuers"}
+  - {name: news_count, type: int32, nullable: false, description: "Items that day"}
+  - {name: news_count_z, type: float64, nullable: true, description: "Attention z-score vs own 90d (coverage-adjusted log count; null on degraded-coverage days)"}
+  - {name: sentiment_mean, type: float64, nullable: true, description: "Mean sentiment_score that day"}
+  - {name: sentiment_ewm_7d, type: float64, nullable: true, description: "EWM halflife 7d of daily mean (count-weighted)"}
+  - {name: sentiment_ewm_30d, type: float64, nullable: true, description: "EWM halflife 30d"}
+  - {name: gdelt_tone_ewm_7d, type: float64, nullable: true, description: "From gdelt_company_daily: mention-weighted EWM (halflife 7d) of avg_tone minus the universe mean tone of the trailing 30 days (relative tone, v2 note)"}
+  - {name: lazy_prices_sim, type: float64, nullable: true, description: "Latest periodic-filing cosine similarity vs prior (from filing_text_changes)"}
+  - {name: lazy_prices_pct, type: float64, nullable: true, description: "Percentile of similarity within universe that quarter (low = big change = bearish)"}
+  - {name: sentiment_score, type: float64, nullable: true, description: "0..100 sentiment factor input"}
+  - {name: computed_at, type: datetime, nullable: false, description: "Write time UTC"}
+  - {name: sentiment_z, type: float64, nullable: true, description: "sentiment_ewm_7d z-score vs the security's own trailing 365 days (added v2)"}
+  - {name: sentiment_momentum, type: float64, nullable: true, description: "sentiment_ewm_7d - sentiment_ewm_30d (added v2)"}
+  - {name: ret_20d, type: float64, nullable: true, description: "20-session total return at the date (for divergence) (added v2)"}
+  - {name: price_divergence, type: int8, nullable: true, description: "+1 sentiment momentum up while 20d return down; -1 the opposite; 0 none (added v2)"}
+  - {name: coverage_ok, type: bool, nullable: true, description: "False when a news source's universe volume that day < 50% of its trailing 30-day median (feed outage); attention z is null then (added v2)"}
+  - {name: relevance_sum, type: float64, nullable: true, description: "Sum of item relevance that day (added v2)"}
+  - {name: n_sources, type: int32, nullable: true, description: "Distinct news sources that day (added v2)"}
+  - {name: provider_sentiment_mean, type: float64, nullable: true, description: "Mean provider (Polygon insights) sentiment -1/0/+1 that day (added v2)"}
+  - {name: lazy_prices_large_change, type: bool, nullable: true, description: "Latest periodic filing flagged large_change in filing_text_changes (added v2)"}

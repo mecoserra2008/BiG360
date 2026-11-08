@@ -1,0 +1,142 @@
+{
+ "title": "ElasticNet: macro drivers of tech-sector returns",
+ "description": "Monthly equal-weight return of mvp_us technology stocks on last month's changes in the 10Y yield, the 10Y-2Y slope, Baa credit spread, VIX, CPI inflation and IP growth (all lagged one month, so the model is a real forecast). ElasticNet with the penalty chosen by expanding-window CV; coefficient paths and OOS metrics vs OLS.",
+ "tags": [
+  "ML",
+  "ElasticNet",
+  "macro",
+  "sectors"
+ ],
+ "study": {
+  "name": "Tech returns ~ lagged macro (ElasticNet)",
+  "method": "regularized",
+  "y": "tech",
+  "x": [
+   "d10y_l1",
+   "dslope_l1",
+   "dbaa_l1",
+   "dvix_l1",
+   "infl_l1",
+   "ip_l1"
+  ],
+  "params": {
+   "model": "elasticnet",
+   "l1_ratio": 0.5,
+   "cv": {
+    "folds": 5
+   }
+  },
+  "dataset": {
+   "kind": "timeseries",
+   "frequency": "M",
+   "start": "2000-01-01",
+   "variables": [
+    {
+     "name": "tech",
+     "source": "prices",
+     "field": "ret",
+     "entity_agg": "mean",
+     "entities": {
+      "universe": "mvp_us",
+      "sectors": [
+       "TECH"
+      ]
+     },
+     "pre_transforms": [
+      {
+       "op": "clip",
+       "lower": -0.5,
+       "upper": 1.0
+      }
+     ]
+    },
+    {
+     "name": "d10y_l1",
+     "source": "macro",
+     "field": "fred:DGS10",
+     "transforms": [
+      {
+       "op": "diff"
+      },
+      {
+       "op": "lag",
+       "k": 1
+      }
+     ]
+    },
+    {
+     "name": "dslope_l1",
+     "source": "macro",
+     "field": "fred:T10Y2Y",
+     "transforms": [
+      {
+       "op": "diff"
+      },
+      {
+       "op": "lag",
+       "k": 1
+      }
+     ]
+    },
+    {
+     "name": "dbaa_l1",
+     "source": "macro",
+     "field": "fred:BAA10Y",
+     "transforms": [
+      {
+       "op": "diff"
+      },
+      {
+       "op": "lag",
+       "k": 1
+      }
+     ]
+    },
+    {
+     "name": "dvix_l1",
+     "source": "macro",
+     "field": "fred:VIXCLS",
+     "transforms": [
+      {
+       "op": "diff"
+      },
+      {
+       "op": "lag",
+       "k": 1
+      }
+     ]
+    },
+    {
+     "name": "infl_l1",
+     "source": "macro",
+     "field": "fred:CPIAUCSL",
+     "transforms": [
+      {
+       "op": "log_diff",
+       "k": 12
+      },
+      {
+       "op": "lag",
+       "k": 1
+      }
+     ]
+    },
+    {
+     "name": "ip_l1",
+     "source": "macro",
+     "field": "fred:INDPRO",
+     "transforms": [
+      {
+       "op": "log_diff",
+       "k": 12
+      },
+      {
+       "op": "lag",
+       "k": 1
+      }
+     ]
+    }
+   ]
+  }
+ }
+}

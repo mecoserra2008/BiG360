@@ -1,0 +1,44 @@
+table: bond_reference
+version: 1
+zone: reference
+owner: rates-w3 (app.rates.bonds, jobs bonds_reference / bonds_us_openfigi)
+description: >
+  Listed bond reference data. EU / EEA venues: ESMA FIRDS FULINS_D (weekly full file of every debt instrument
+  admitted to trading on an EU / EEA venue: ISIN, issuer LEI, name, CFI, currency, total issued nominal, maturity,
+  fixed coupon or floating reference + spread, seniority, venue), joined to our issuers by LEI (issuer_id). Matured
+  bonds are kept while FIRDS lists them. US: bonds of our US issuers from the OpenFIGI API (Bloomberg Open
+  Symbology; securityType2 Corp, exchCode TRACE): coupon and maturity are PARSED from the FIGI security description
+  ('AAPL 3 1/4 08/08/29'); no amounts, no ISIN (CUSIP / ISIN redistribution is licensed). FINRA bond pages are not
+  used (terms of use forbid automated copying).
+storage: {path: reference/bond_reference, format: parquet, partition_by: [source], write_mode: upsert, sort_by: [issuer_lei, maturity_date, bond_id], compression_level: 9}
+primary_key: [source, bond_id]
+pit: {knowledge_column: knowledge_date, rule: "reference data as of the FIRDS file date / OpenFIGI fetch date (current-only, not versioned)"}
+columns:
+  - {name: source, type: enum, nullable: false, values: [firds, openfigi], description: "Partition: data source"}
+  - {name: bond_id, type: string, nullable: false, description: "ISIN (firds) or FIGI (openfigi)"}
+  - {name: isin, type: string, nullable: true, description: "ISIN (FIRDS)"}
+  - {name: figi, type: string, nullable: true, description: "FIGI (OpenFIGI)"}
+  - {name: issuer_lei, type: string, nullable: true, description: "Issuer LEI (FIRDS Issr)"}
+  - {name: issuer_id, type: string, nullable: true, description: "Our issuer (issuers.lei = issuer_lei, or the OpenFIGI query issuer)"}
+  - {name: issuer_name, type: string, nullable: true, description: "Issuer name (OpenFIGI name / FIRDS full name prefix)"}
+  - {name: full_name, type: string, nullable: true, description: "Instrument full name (FIRDS FullNm) / FIGI security description"}
+  - {name: short_name, type: string, nullable: true, description: "FIRDS ShrtNm / FIGI ticker"}
+  - {name: cfi, type: string, nullable: true, description: "CFI code (D... debt)"}
+  - {name: security_type, type: string, nullable: true, description: "OpenFIGI securityType (GLOBAL, EURO MTN, ...) / FIRDS CFI group"}
+  - {name: currency, type: string, nullable: true, description: "Notional currency"}
+  - {name: coupon_type, type: enum, nullable: true, values: [fixed, floating, zero, other], description: "Interest type"}
+  - {name: coupon_bp_x100, type: int32, nullable: true, unit: bp_x100, description: "Fixed coupon (bp x 100)"}
+  - {name: floating_reference, type: string, nullable: true, description: "Floating reference rate (EURI, SOFR, ESTR ...) and term"}
+  - {name: floating_spread_bp, type: float32, nullable: true, unit: bp, description: "Spread over the floating reference (bp)"}
+  - {name: maturity_date, type: date, nullable: true, description: "Maturity date (null = perpetual / undated)"}
+  - {name: first_trade_date, type: date, nullable: true, description: "First trading date on the venue (FIRDS FrstTradDt)"}
+  - {name: issue_amount, type: float64, nullable: true, unit: currency, description: "Total issued nominal amount (FIRDS TtlIssdNmnlAmt)"}
+  - {name: issue_amount_currency, type: string, nullable: true, description: "Currency of issue_amount"}
+  - {name: nominal_per_unit, type: float64, nullable: true, unit: currency, description: "Nominal value per unit / minimum denomination"}
+  - {name: seniority, type: enum, nullable: true, values: [senior, mezzanine, subordinated, junior, other], description: "FIRDS DebtSnrty"}
+  - {name: venue_mic, type: string, nullable: true, description: "Most relevant trading venue (FIRDS) / exchange code (OpenFIGI)"}
+  - {name: n_venues, type: int16, nullable: true, description: "Number of FIRDS venue records of the ISIN"}
+  - {name: country, type: string, nullable: true, description: "ISIN country prefix (FIRDS) / US"}
+  - {name: as_of, type: date, nullable: false, description: "FIRDS file date / OpenFIGI fetch date"}
+  - {name: knowledge_date, type: date, nullable: false, description: "= as_of"}
+  - {name: ingested_at, type: datetime, nullable: false, description: "Write time UTC"}

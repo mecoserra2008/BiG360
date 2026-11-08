@@ -1,0 +1,40 @@
+table: regulatory_coverage
+version: 1
+zone: ops
+owner: ingest-register (app.qa.regulatory_coverage)
+description: >
+  Coverage v2 W2: per register issuer (regulatory_register, status active), what the app has - in the universe
+  (securities_master), prices, latest annual and interim statements (fundamentals_canonical, point in time as of
+  `as_of`), sector - and a reason code for every missing cell (docs/DATA_COMPLETENESS.md reason codes: ok, no_source,
+  not_yet_published, out_of_scope, pipeline_bug, needs_key, source_unavailable, stale, unmapped). Recomputed by job
+  regulatory_coverage after the nightly fundamentals; the per-market summary goes to
+  data/state/regulatory_coverage.json and docs/DATA_COMPLETENESS.md "Regulator coverage".
+storage: {path: ops/regulatory_coverage, format: parquet, partition_by: [market], write_mode: overwrite_partition}
+primary_key: [market, register, issuer_key]
+columns:
+  - {name: market, type: enum, nullable: false, values: [US, EU, UK], description: "Partition"}
+  - {name: register, type: enum, nullable: false, values: [sec_listed, esma_rm, fca_official_list, lse_aim], description: "Register"}
+  - {name: issuer_key, type: string, nullable: false, description: "CIK10 / LEI"}
+  - {name: issuer_name, type: string, nullable: false, description: "Register name"}
+  - {name: country, type: string, nullable: true, description: "ISO2 country"}
+  - {name: issuer_id, type: string, nullable: true, description: "FK issuers"}
+  - {name: security_id, type: string, nullable: true, description: "Primary security"}
+  - {name: in_universe, type: bool, nullable: false, description: "Issuer with an active primary security in securities_master"}
+  - {name: has_prices, type: bool, nullable: false, description: "Daily bar within the last 10 calendar days of the newest price session of its region"}
+  - {name: last_price_date, type: date, nullable: true, description: "Newest bar"}
+  - {name: annual_period_end, type: date, nullable: true, description: "Latest FY period end known as of as_of"}
+  - {name: annual_source, type: string, nullable: true, description: "source_id of that annual (sec_edgar, esef_xbrl_org, companies_house, yfinance, ...)"}
+  - {name: annual_official, type: bool, nullable: true, description: "True when the annual comes from a regulator / OAM / registry filing (not yfinance)"}
+  - {name: has_annual, type: bool, nullable: false, description: "Latest annual is current: period_end within 12 months + the filing deadline of the register (US 10-K 3 m, 20-F / EU / UK Official List 4 m, AIM 6 m) of as_of"}
+  - {name: interim_period_end, type: date, nullable: true, description: "Latest interim (Q1-Q3 / H1) period end"}
+  - {name: interim_source, type: string, nullable: true, description: "source_id of that interim"}
+  - {name: has_interim, type: bool, nullable: false, description: "Latest interim is current (US quarterly: within 5 months; EU / UK half-yearly: within 10.5 months)"}
+  - {name: has_sector, type: bool, nullable: false, description: "issuers.sector_id set"}
+  - {name: reason_universe, type: string, nullable: true, description: "Reason code + note when not in the universe (null = ok)"}
+  - {name: reason_prices, type: string, nullable: true, description: "Reason code + note when no current prices"}
+  - {name: reason_annual, type: string, nullable: true, description: "Reason code + note when no current annual"}
+  - {name: reason_interim, type: string, nullable: true, description: "Reason code + note when no current interim"}
+  - {name: reason_sector, type: string, nullable: true, description: "Reason code + note when no sector"}
+  - {name: as_of, type: date, nullable: false, description: "Coverage date"}
+  - {name: computed_at, type: datetime, nullable: false, description: "Write time UTC"}
+  - {name: run_id, type: string, nullable: true, description: "Producing run"}

@@ -1,0 +1,118 @@
+{
+ "title": "Value factor test (Fama-MacBeth)",
+ "description": "Does cheapness predict next-month returns in the US large-cap universe? Monthly cross-sectional regressions of the 1-month forward return on standardized earnings yield, FCF yield and gross-profit-to-EV, Newey-West over dates.",
+ "question": "factors",
+ "tags": [
+  "factors",
+  "value",
+  "Fama-MacBeth"
+ ],
+ "method_note": "Fama-MacBeth (1973): one OLS per month across stocks, then the time-series mean of each slope is the premium with a Newey-West (3 lags) standard error. Predictors are winsorized and z-scored within each month, so a slope is the return of a one-standard-deviation tilt. Caveat: the universe is today's constituents (membership history starts 2026-10), so early years carry survivorship bias; read the premium as an upper bound.",
+ "expected_outputs": [
+  "average monthly premium per value signal with NW t-stats",
+  "slope time series",
+  "average cross-sectional R2"
+ ],
+ "runtime_s": 4.3,
+ "validated": "2026-11-06 on snapshot R20261106T010757G9ZB",
+ "result": {
+  "run_id": "SR20261106T023459SRF0T",
+  "n_obs": 44145,
+  "metrics": {
+   "avg_r2": 0.056391451222648395
+  },
+  "coefficients": [
+   {
+    "term": "earnings_yield",
+    "estimate": -0.010500065865047222,
+    "statistic": -2.6663267684836414,
+    "p_value": 0.008305568036483838
+   },
+   {
+    "term": "fcf_yield",
+    "estimate": 0.00107376561795146,
+    "statistic": 0.9208928018329195,
+    "p_value": 0.3582327246475234
+   },
+   {
+    "term": "gp_to_ev",
+    "estimate": 0.0008413050819591674,
+    "statistic": 1.4111328112325197,
+    "p_value": 0.15978275026493233
+   }
+  ]
+ },
+ "study": {
+  "name": "Value factor test (Fama-MacBeth)",
+  "method": "fama_macbeth",
+  "y": "fwd_ret_1m",
+  "x": [
+   "earnings_yield",
+   "fcf_yield",
+   "gp_to_ev"
+  ],
+  "params": {
+   "nw_lags": 3
+  },
+  "dataset": {
+   "kind": "panel",
+   "frequency": "M",
+   "start": "2010-01-01",
+   "entities": {
+    "universe": "mvp_us"
+   },
+   "variables": [
+    {
+     "name": "fwd_ret_1m",
+     "source": "prices",
+     "field": "ret",
+     "transforms": [
+      {
+       "op": "fwd_compound",
+       "k": 1
+      },
+      {
+       "op": "winsorize"
+      }
+     ]
+    },
+    {
+     "name": "earnings_yield",
+     "source": "valuation",
+     "field": "earnings_yield",
+     "transforms": [
+      {
+       "op": "cs_rank"
+      }
+     ]
+    },
+    {
+     "name": "fcf_yield",
+     "source": "valuation",
+     "field": "fcf_yield",
+     "transforms": [
+      {
+       "op": "winsorize"
+      },
+      {
+       "op": "cs_zscore"
+      }
+     ]
+    },
+    {
+     "name": "gp_to_ev",
+     "source": "valuation",
+     "field": "gp_to_ev",
+     "transforms": [
+      {
+       "op": "winsorize"
+      },
+      {
+       "op": "cs_zscore"
+      }
+     ]
+    }
+   ]
+  }
+ }
+}

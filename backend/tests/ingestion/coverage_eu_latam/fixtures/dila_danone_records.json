@@ -1,0 +1,60 @@
+{
+"total_count": 5,
+"results": [
+{
+"informationdeposee_inf_dat_emt": "2026-03-04T09:11:55+00:00",
+"informationdeposee_inf_stp_inf": "[\"300005\", \"003000\"]",
+"subtype_of_information": "Registration document",
+"informationdeposee_inf_tit_inf": "Document d'enregistrement universel 2025",
+"url_de_recuperation": "https://fr.ftp.opendatasoft.com/datadila/INFOFI/124/8888/01/FC124616831_20260304.xbri",
+"informationdeposee_inf_lng_inf": "Français",
+"informationdeposee_inf_upg_inf_inf_upg_sts": "NEW",
+"uin_idt_uin": "616831_20260304",
+"identificationsociete_iso_cd_lei": "969500KMUQ2B6CBAF162"
+},
+{
+"informationdeposee_inf_dat_emt": "2025-03-11T13:43:20+00:00",
+"informationdeposee_inf_stp_inf": "[\"300005\", \"003000\"]",
+"subtype_of_information": "Registration document",
+"informationdeposee_inf_tit_inf": "Document d'Enregistrement Universel 2024",
+"url_de_recuperation": "https://fr.ftp.opendatasoft.com/datadila/INFOFI/124/8888/01/FC124573106_20250311.zip",
+"informationdeposee_inf_lng_inf": "Français",
+"informationdeposee_inf_upg_inf_inf_upg_sts": "NEW",
+"uin_idt_uin": "573106_20250311",
+"identificationsociete_iso_cd_lei": "969500KMUQ2B6CBAF162"
+},
+{
+"informationdeposee_inf_dat_emt": "2024-03-12T11:27:21+00:00",
+"informationdeposee_inf_stp_inf": "[\"300005\", \"003000\"]",
+"subtype_of_information": "Registration document",
+"informationdeposee_inf_tit_inf": "Document d'Enregistrement Universel 2023",
+"url_de_recuperation": "https://fr.ftp.opendatasoft.com/datadila/INFOFI/124/8888/01/FC124523106_20240312.zip",
+"informationdeposee_inf_lng_inf": "Français",
+"informationdeposee_inf_upg_inf_inf_upg_sts": "NEW",
+"uin_idt_uin": "523106_20240312",
+"identificationsociete_iso_cd_lei": "969500KMUQ2B6CBAF162"
+},
+{
+"informationdeposee_inf_dat_emt": "2023-03-16T12:18:28+00:00",
+"informationdeposee_inf_stp_inf": "[\"300005\", \"003000\"]",
+"subtype_of_information": "Registration document",
+"informationdeposee_inf_tit_inf": "Document d'Enregistrement Universel 2022",
+"url_de_recuperation": "https://fr.ftp.opendatasoft.com/datadila/INFOFI/124/8888/01/FC124476335_20230316.zip",
+"informationdeposee_inf_lng_inf": "Français",
+"informationdeposee_inf_upg_inf_inf_upg_sts": "NEW",
+"uin_idt_uin": "476335_20230316",
+"identificationsociete_iso_cd_lei": "969500KMUQ2B6CBAF162"
+},
+{
+"informationdeposee_inf_dat_emt": "2022-03-16T16:33:57+00:00",
+"informationdeposee_inf_stp_inf": "[\"300005\", \"003000\"]",
+"subtype_of_information": "Registration document",
+"informationdeposee_inf_tit_inf": "Dépôt d'un URD",
+"url_de_recuperation": "https://fr.ftp.opendatasoft.com/datadila/INFOFI/124/8888/01/FC124436480_20220316.zip",
+"informationdeposee_inf_lng_inf": "Français",
+"informationdeposee_inf_upg_inf_inf_upg_sts": "NEW",
+"uin_idt_uin": "436480_20220316",
+"identificationsociete_iso_cd_lei": "969500KMUQ2B6CBAF162"
+}
+]
+}

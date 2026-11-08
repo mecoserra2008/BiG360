@@ -1,0 +1,122 @@
+{
+ "title": "K-means peer discovery: MVP companies on profitability/growth/valuation ratios",
+ "description": "Latest point-in-time TTM ratios for the mvp_us universe (ROIC, operating and gross margin, revenue and EPS growth, earnings and FCF yield), winsorized cross-sectionally and standardized; k chosen by silhouette over 3..10. Clusters are data-driven peer groups with profiles and member lists.",
+ "tags": [
+  "clustering",
+  "k-means",
+  "peers",
+  "ratios"
+ ],
+ "study": {
+  "name": "MVP US peer clusters",
+  "method": "kmeans",
+  "x": [
+   "roic",
+   "op_margin",
+   "gross_margin",
+   "rev_growth",
+   "eps_growth",
+   "earnings_yield",
+   "fcf_yield"
+  ],
+  "params": {
+   "k_min": 3,
+   "k_max": 10,
+   "standardize": true,
+   "impute": "median"
+  },
+  "dataset": {
+   "kind": "cross_section",
+   "frequency": "M",
+   "entities": {
+    "universe": "mvp_us"
+   },
+   "variables": [
+    {
+     "name": "roic",
+     "source": "ratios",
+     "field": "roic",
+     "transforms": [
+      {
+       "op": "winsorize",
+       "lower": 0.02,
+       "upper": 0.98
+      }
+     ]
+    },
+    {
+     "name": "op_margin",
+     "source": "ratios",
+     "field": "operating_margin",
+     "transforms": [
+      {
+       "op": "winsorize",
+       "lower": 0.02,
+       "upper": 0.98
+      }
+     ]
+    },
+    {
+     "name": "gross_margin",
+     "source": "ratios",
+     "field": "gross_margin",
+     "transforms": [
+      {
+       "op": "winsorize",
+       "lower": 0.02,
+       "upper": 0.98
+      }
+     ]
+    },
+    {
+     "name": "rev_growth",
+     "source": "ratios",
+     "field": "revenue_growth_yoy",
+     "transforms": [
+      {
+       "op": "winsorize",
+       "lower": 0.02,
+       "upper": 0.98
+      }
+     ]
+    },
+    {
+     "name": "eps_growth",
+     "source": "ratios",
+     "field": "eps_growth_yoy",
+     "transforms": [
+      {
+       "op": "winsorize",
+       "lower": 0.02,
+       "upper": 0.98
+      }
+     ]
+    },
+    {
+     "name": "earnings_yield",
+     "source": "valuation",
+     "field": "earnings_yield",
+     "transforms": [
+      {
+       "op": "winsorize",
+       "lower": 0.02,
+       "upper": 0.98
+      }
+     ]
+    },
+    {
+     "name": "fcf_yield",
+     "source": "valuation",
+     "field": "fcf_yield",
+     "transforms": [
+      {
+       "op": "winsorize",
+       "lower": 0.02,
+       "upper": 0.98
+      }
+     ]
+    }
+   ]
+  }
+ }
+}

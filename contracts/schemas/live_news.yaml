@@ -1,0 +1,32 @@
+table: live_news
+version: 1
+zone: normalized
+owner: realtime (app.realtime.compact)
+description: >
+  News items seen by the real-time layer (R1): official central-bank / statistics press RSS (Fed, ECB, BoE, BoJ, BLS,
+  BEA, Eurostat, ONS) and Polygon news, enriched online (themes, story id, FinBERT sentiment). item_id = news_items
+  item_id (sha1 of the normalised URL) for dedupe with the nightly news_ingest. knowledge_ts = first seen (PIT).
+storage: {path: normalized/live_news, format: parquet, partition_by: [date], write_mode: append, retention: "forever"}
+primary_key: [item_id]
+pit: {knowledge_column: knowledge_ts, rule: "first seen by the real-time path"}
+columns:
+  - {name: item_id, type: string, nullable: false, description: "= news_items.item_id"}
+  - {name: date, type: date, nullable: false, description: "Partition: UTC date of knowledge_ts"}
+  - {name: source_id, type: string, nullable: false, description: "rss_fed | rss_ecb | ... | polygon_news"}
+  - {name: category, type: string, nullable: true, description: "central_bank | statistics | news"}
+  - {name: publisher, type: string, nullable: true, description: "Publisher"}
+  - {name: title, type: string, nullable: false, description: "Headline"}
+  - {name: url, type: string, nullable: true, description: "Article URL"}
+  - {name: language, type: string, nullable: true, description: "ISO 639-1"}
+  - {name: issuer_ids, type: list<string>, nullable: true, description: "Linked issuers"}
+  - {name: tickers, type: list<string>, nullable: true, description: "Provider tickers"}
+  - {name: countries, type: list<string>, nullable: true, description: "Countries (ISO2 / EA)"}
+  - {name: themes, type: list<string>, nullable: true, description: "events_v2 market theme ids from the headline"}
+  - {name: story_id, type: string, nullable: true, description: "Live story cluster id (48 h window)"}
+  - {name: sentiment_label, type: string, nullable: true, description: "FinBERT label"}
+  - {name: sentiment_score, type: float64, nullable: true, description: "P(pos) - P(neg)"}
+  - {name: source_ts, type: datetime, nullable: true, description: "Published time UTC"}
+  - {name: knowledge_ts, type: datetime, nullable: false, description: "First seen by the real-time path, UTC"}
+  - {name: bus_id, type: int64, nullable: false, description: "Hot-store message id"}
+  - {name: payload, type: json, nullable: true, description: "Full live payload"}
+  - {name: compacted_at, type: datetime, nullable: false, description: "Write time UTC"}

@@ -1,0 +1,94 @@
+{
+ "title": "Term premium and long-duration equities",
+ "description": "Do changes in the ACM 10Y term premium hit technology stocks more than the market?",
+ "question": "macro",
+ "tags": [
+  "macro",
+  "rates",
+  "term premium"
+ ],
+ "method_note": "Splits the 10Y yield change into the NY Fed ACM term premium and the risk-neutral expected-rate part. Long-duration (growth / tech) equities should load on the term premium. The dependent variable is the equal-weight tech-sector return. Caveat: the universe is today's constituents (membership history starts 2026-10), so early years carry survivorship bias; read the premium as an upper bound.",
+ "expected_outputs": [
+  "betas to term premium vs expected rates (HAC)",
+  "residual diagnostics"
+ ],
+ "runtime_s": 2.9,
+ "validated": "2026-11-06 on snapshot R20261106T010757G9ZB",
+ "result": {
+  "run_id": "SR20261106T021246HKJM0",
+  "n_obs": 322,
+  "metrics": {
+   "r2": 0.047708067518068664,
+   "adj_r2": 0.04173758518275872,
+   "aic": -709.675404360084,
+   "oos_rmse": 0.06516573272593879
+  },
+  "coefficients": [
+   {
+    "term": "d_tp10",
+    "estimate": 0.011355493841267742,
+    "statistic": 0.4186431296042342,
+    "p_value": 0.6754769641035168
+   },
+   {
+    "term": "d_rn10",
+    "estimate": 0.10630795023140575,
+    "statistic": 2.6178679006936263,
+    "p_value": 0.008848105073763534
+   }
+  ]
+ },
+ "study": {
+  "name": "Term premium and long-duration equities",
+  "method": "ols",
+  "y": "tech_ret",
+  "x": [
+   "d_tp10",
+   "d_rn10"
+  ],
+  "params": {
+   "cov_type": "HAC"
+  },
+  "dataset": {
+   "kind": "timeseries",
+   "frequency": "M",
+   "start": "2000-01-01",
+   "variables": [
+    {
+     "name": "tech_ret",
+     "source": "prices",
+     "field": "ret",
+     "entity_agg": "mean",
+     "entities": {
+      "universe": "mvp_us",
+      "sectors": [
+       "TECH"
+      ]
+     }
+    },
+    {
+     "name": "d_tp10",
+     "source": "macro",
+     "field": "nyfed:ACMTP10",
+     "transforms": [
+      {
+       "op": "diff"
+      }
+     ],
+     "agg": "last"
+    },
+    {
+     "name": "d_rn10",
+     "source": "macro",
+     "field": "nyfed:ACMRNY10",
+     "transforms": [
+      {
+       "op": "diff"
+      }
+     ],
+     "agg": "last"
+    }
+   ]
+  }
+ }
+}

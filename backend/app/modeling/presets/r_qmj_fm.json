@@ -1,0 +1,140 @@
+{
+ "title": "Quality minus junk (Fama-MacBeth)",
+ "description": "Profitability, safety and stability components of quality (Asness-Frazzini-Pedersen) as predictors of the next-month return.",
+ "question": "factors",
+ "tags": [
+  "factors",
+  "quality",
+  "QMJ"
+ ],
+ "method_note": "QMJ ranks stocks on profitability (gross profits / assets, ROIC), safety (low leverage) and stability (low margin volatility). Point-in-time ratios (filing knowledge dates) avoid look-ahead. Expect positive profitability slopes and negative leverage / margin-volatility slopes. Caveat: the universe is today's constituents (membership history starts 2026-10), so early years carry survivorship bias; read the premium as an upper bound.",
+ "expected_outputs": [
+  "premium per quality component",
+  "slope time series"
+ ],
+ "runtime_s": 5.3,
+ "validated": "2026-11-06 on snapshot R20261106T010757G9ZB",
+ "result": {
+  "run_id": "SR20261106T015700GJTWJ",
+  "n_obs": 46552,
+  "metrics": {
+   "avg_r2": 0.051594876835142675
+  },
+  "coefficients": [
+   {
+    "term": "gross_prof",
+    "estimate": 0.0004965412397414853,
+    "statistic": 0.6436574204624874,
+    "p_value": 0.5205778647916682
+   },
+   {
+    "term": "roic",
+    "estimate": -0.0006305295077738983,
+    "statistic": -0.9991008556105029,
+    "p_value": 0.3190232610128848
+   },
+   {
+    "term": "leverage",
+    "estimate": 0.0012569688102583155,
+    "statistic": 2.269526332499845,
+    "p_value": 0.02436561552903202
+   },
+   {
+    "term": "margin_vol",
+    "estimate": 0.0006615267944021386,
+    "statistic": 0.8147773613038806,
+    "p_value": 0.41622524097495545
+   }
+  ]
+ },
+ "study": {
+  "name": "Quality minus junk (Fama-MacBeth)",
+  "method": "fama_macbeth",
+  "y": "fwd_ret_1m",
+  "x": [
+   "gross_prof",
+   "roic",
+   "leverage",
+   "margin_vol"
+  ],
+  "params": {
+   "nw_lags": 3
+  },
+  "dataset": {
+   "kind": "panel",
+   "frequency": "M",
+   "start": "2005-01-01",
+   "entities": {
+    "universe": "mvp_us"
+   },
+   "variables": [
+    {
+     "name": "fwd_ret_1m",
+     "source": "prices",
+     "field": "ret",
+     "transforms": [
+      {
+       "op": "fwd_compound",
+       "k": 1
+      },
+      {
+       "op": "winsorize"
+      }
+     ]
+    },
+    {
+     "name": "gross_prof",
+     "source": "ratios",
+     "field": "gross_profitability",
+     "transforms": [
+      {
+       "op": "winsorize"
+      },
+      {
+       "op": "cs_zscore"
+      }
+     ]
+    },
+    {
+     "name": "roic",
+     "source": "ratios",
+     "field": "roic",
+     "transforms": [
+      {
+       "op": "winsorize"
+      },
+      {
+       "op": "cs_zscore"
+      }
+     ]
+    },
+    {
+     "name": "leverage",
+     "source": "ratios",
+     "field": "liabilities_to_assets",
+     "transforms": [
+      {
+       "op": "winsorize"
+      },
+      {
+       "op": "cs_zscore"
+      }
+     ]
+    },
+    {
+     "name": "margin_vol",
+     "source": "ratios",
+     "field": "op_margin_stdev_5y",
+     "transforms": [
+      {
+       "op": "winsorize"
+      },
+      {
+       "op": "cs_zscore"
+      }
+     ]
+    }
+   ]
+  }
+ }
+}

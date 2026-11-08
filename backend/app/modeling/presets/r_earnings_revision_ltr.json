@@ -1,0 +1,122 @@
+{
+ "title": "Earnings-revision ranking (learning to rank)",
+ "description": "Rank stocks each month on fundamental revision signals (3-month change in TTM EPS growth, revenue-growth acceleration) plus momentum and value; LightGBM LambdaRank by date.",
+ "question": "factors",
+ "tags": [
+  "ML",
+  "ranking",
+  "earnings revisions"
+ ],
+ "method_note": "There are no analyst-consensus revisions in the Studio catalog, so the revision signal is a fundamental proxy: the 3-month change in point-in-time TTM EPS growth (it moves when a new filing arrives). LambdaRank optimizes NDCG of return grades within each date; scored by rank IC and top-minus-bottom quintile spread. Caveat: the universe is today's constituents (membership history starts 2026-10), so early years carry survivorship bias; read the premium as an upper bound.",
+ "expected_outputs": [
+  "rank IC / NDCG by fold",
+  "quintile spreads",
+  "feature importance"
+ ],
+ "runtime_s": 25.4,
+ "validated": "2026-11-06 on snapshot R20261106T010757G9ZB",
+ "result": {
+  "run_id": "SR20261106T0224426WYYH",
+  "verdict": "LambdaRank does not significantly beat pointwise LightGBM on rank IC (DM p = 0.379)",
+  "metrics": {
+   "oos_rank_ic": 0.008003439004911704
+  },
+  "coefficients": []
+ },
+ "study": {
+  "name": "Earnings-revision ranking (learning to rank)",
+  "method": "ltr",
+  "y": "fwd_ret_1m",
+  "x": [
+   "eps_rev_3m",
+   "rev_accel",
+   "mom_12_1",
+   "earnings_yield"
+  ],
+  "params": {
+   "cv": {
+    "folds": 5,
+    "scheme": "purged_kfold",
+    "purge": 1,
+    "embargo": 1
+   }
+  },
+  "dataset": {
+   "kind": "panel",
+   "frequency": "M",
+   "start": "2010-01-01",
+   "entities": {
+    "universe": "mvp_us"
+   },
+   "variables": [
+    {
+     "name": "fwd_ret_1m",
+     "source": "prices",
+     "field": "ret",
+     "transforms": [
+      {
+       "op": "fwd_compound",
+       "k": 1
+      },
+      {
+       "op": "winsorize"
+      }
+     ]
+    },
+    {
+     "name": "eps_rev_3m",
+     "source": "ratios",
+     "field": "eps_growth_yoy",
+     "transforms": [
+      {
+       "op": "diff",
+       "k": 3
+      },
+      {
+       "op": "winsorize"
+      },
+      {
+       "op": "cs_zscore"
+      }
+     ]
+    },
+    {
+     "name": "rev_accel",
+     "source": "ratios",
+     "field": "revenue_growth_accel",
+     "transforms": [
+      {
+       "op": "winsorize"
+      },
+      {
+       "op": "cs_zscore"
+      }
+     ]
+    },
+    {
+     "name": "mom_12_1",
+     "source": "tech_factors",
+     "field": "mom",
+     "transforms": [
+      {
+       "op": "winsorize"
+      },
+      {
+       "op": "cs_zscore"
+      }
+     ]
+    },
+    {
+     "name": "earnings_yield",
+     "source": "valuation",
+     "field": "earnings_yield",
+     "transforms": [
+      {
+       "op": "cs_rank"
+      }
+     ]
+    }
+   ]
+  }
+ }
+}

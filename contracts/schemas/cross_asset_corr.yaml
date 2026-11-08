@@ -1,0 +1,19 @@
+table: cross_asset_corr
+version: 1
+zone: scores
+owner: cross-asset (app.analytics.cross_asset, job cross_asset_signals)
+description: >
+  Correlation matrices of the cross-asset regime basket (cross_asset_regime.basket) for the correlation-matrix chart:
+  the latest complete window and the windows ending ~21 and ~252 complete rows earlier, for 60 and 120 days of daily
+  log returns. Overwritten nightly.
+storage: {path: scores/cross_asset_corr, format: parquet, partition_by: [], write_mode: overwrite}
+primary_key: [snapshot, window, asset_i, asset_j]
+columns:
+  - {name: snapshot, type: enum, nullable: false, values: [latest, 1m, 1y], description: "Window end: latest, ~1 month or ~1 year earlier"}
+  - {name: window, type: int16, nullable: false, description: "Window length (rows)"}
+  - {name: as_of, type: date, nullable: false, description: "Last date of the window"}
+  - {name: asset_i, type: string, nullable: false, description: "Row asset_id"}
+  - {name: asset_j, type: string, nullable: false, description: "Column asset_id"}
+  - {name: corr, type: float32, nullable: false, description: "Pearson correlation"}
+  - {name: n_obs, type: int16, nullable: false, description: "Complete rows used"}
+  - {name: computed_at, type: datetime, nullable: false, description: "Write time UTC"}

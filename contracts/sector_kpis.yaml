@@ -1,0 +1,425 @@
+# Fundamental metric registry: generic metrics (-> table `ratios`), accounting scores (-> `ratios`),
+# and sector KPI sets (-> table `sector_kpis`). Consumed by app.analytics.ratios / sector_kpis / scoring.
+version: 1
+
+formula_language:
+  syntax: "Python expression over canonical item ids and metric ids (AST-whitelisted; see canonical_line_items.yaml expression_language)."
+  evaluation_period: >
+    Each metric is evaluated per (issuer, period_kind in {TTM, FY}, period_end). Duration items take the row's value
+    (TTM sum or FY); instant items take the balance at period_end. Metric ids may reference other metric ids (DAG, no cycles).
+  functions:
+    avg(x):          "mean of instant x at period_end and at period_end - 1y (falls back to x if prior missing)"
+    lag(x, n):       "value of x n years earlier for the same period_kind (TTM rows: 4n quarters back)"
+    growth_yoy(x):   "x / lag(x,1) - 1; null if lag <= 0"
+    cagr(x, n):      "(x / lag(x,n))**(1/n) - 1; null if either <= 0"
+    stdev_fy(x, n):  "sample stdev of x over last n FY observations (min n-1 obs)"
+    mean_fy(x, n):   "mean of x over last n FY observations"
+    safe_div(a, b):  "a/b, null if b <= 0"
+    div(a, b):       "a/b, null if b == 0"
+    clip(x, lo, hi, default): "x clipped to [lo,hi]; default when x null"
+    nz(x), coalesce(...), abs, min, max: "as in canonical_line_items"
+    mcap():          "PIT market cap (USD) at knowledge_date, from valuation_daily (only allowed in accounting_scores)"
+  units: [ratio, pct, x, days, currency_usd, score, count, years]
+  direction: >
+    higher_is_better: true | false. For band metrics higher_is_better: null and target: value
+    (score = -abs(x - target)). Direction is applied before percentiling so 100 = best.
+
+# ------------------------------------------------------------------ GENERIC METRICS (all issuers unless excluded by set)
+generic_metrics:
+  # profitability
+  - {id: gross_margin,        formula: "div(gross_profit, revenue)",                     unit: pct, higher_is_better: true}
+  - {id: operating_margin,    formula: "div(ebit, revenue)",                             unit: pct, higher_is_better: true}
+  - {id: ebitda_margin,       formula: "div(ebitda, revenue)",                           unit: pct, higher_is_better: true}
+  - {id: net_margin,          formula: "div(net_income_parent, revenue)",                unit: pct, higher_is_better: true}
+  - {id: fcf_margin,          formula: "div(fcf, revenue)",                              unit: pct, higher_is_better: true}
+  - {id: tax_rate_norm,       formula: "clip(safe_div(income_tax, pretax_income), 0.0, 0.40, 0.25)", unit: pct, higher_is_better: null, target: 0.21, score: false}
+  - {id: nopat,               formula: "ebit * (1 - tax_rate_norm)",                     unit: currency_usd, score: false}
+  - {id: roe,                 formula: "safe_div(net_income_parent, avg(total_equity_parent))", unit: pct, higher_is_better: true}
+  - {id: roa,                 formula: "div(net_income, avg(total_assets))",            unit: pct, higher_is_better: true}
+  - {id: roic,                formula: "safe_div(nopat, avg(invested_capital))",         unit: pct, higher_is_better: true}
+  - {id: croic,               formula: "safe_div(fcf, avg(invested_capital))",           unit: pct, higher_is_better: true}
+  - {id: gross_profitability, formula: "div(gross_profit, avg(total_assets))",           unit: pct, higher_is_better: true, note: "Novy-Marx"}
+  # quality / earnings quality
+  - {id: cfo_to_net_income,   formula: "safe_div(cfo, net_income)",                      unit: x,   higher_is_better: true}
+  - {id: fcf_conversion,      formula: "safe_div(fcf, net_income_parent)",               unit: x,   higher_is_better: true}
+  - {id: gm_stdev_5y,         formula: "stdev_fy(gross_margin, 5)",                      unit: pct, higher_is_better: false}
+  - {id: op_margin_stdev_5y,  formula: "stdev_fy(operating_margin, 5)",                  unit: pct, higher_is_better: false}
+  - {id: roic_mean_5y,        formula: "mean_fy(roic, 5)",                               unit: pct, higher_is_better: true}
+  - {id: sbc_to_revenue,      formula: "div(nz(sbc), revenue)",                          unit: pct, higher_is_better: false}
+  - {id: asset_turnover,      formula: "safe_div(revenue, avg(total_assets))",           unit: x,   higher_is_better: true}
+  - {id: rnd_to_revenue,      formula: "div(nz(rnd), revenue)",                          unit: pct, higher_is_better: true, note: "scored only where set rnd_expected"}
+  # growth
+  - {id: revenue_growth_yoy,  formula: "growth_yoy(revenue)",                            unit: pct, higher_is_better: true}
+  - {id: revenue_cagr_3y,     formula: "cagr(revenue, 3)",                               unit: pct, higher_is_better: true}
+  - {id: revenue_cagr_5y,     formula: "cagr(revenue, 5)",                               unit: pct, higher_is_better: true}
+  - {id: gross_profit_growth_yoy, formula: "growth_yoy(gross_profit)",                   unit: pct, higher_is_better: true}
+  - {id: ebit_growth_yoy,     formula: "growth_yoy(ebit)",                               unit: pct, higher_is_better: true}
+  - {id: eps_growth_yoy,      formula: "growth_yoy(eps_diluted)",                        unit: pct, higher_is_better: true}
+  - {id: eps_cagr_3y,         formula: "cagr(eps_diluted, 3)",                           unit: pct, higher_is_better: true}
+  - {id: fcf_per_share_cagr_3y, formula: "cagr(fcf / shares_diluted_weighted, 3)",       unit: pct, higher_is_better: true}
+  - {id: bvps_cagr_3y,        formula: "cagr(total_equity_parent / shares_outstanding, 3)", unit: pct, higher_is_better: true}
+  - {id: dps_cagr_3y,         formula: "cagr(dividends_per_share, 3)",                   unit: pct, higher_is_better: true}
+  - {id: revenue_growth_accel, formula: "revenue_growth_yoy - lag(revenue_growth_yoy, 1)", unit: pct, higher_is_better: true}
+  # balance sheet
+  - {id: debt_to_equity,      formula: "safe_div(total_debt, total_equity)",             unit: x,   higher_is_better: false}
+  - {id: net_debt_to_ebitda,  formula: "safe_div(net_debt, ebitda)",                     unit: x,   higher_is_better: false, note: "null if EBITDA<=0 -> imputed worst decile"}
+  - {id: net_debt_incl_leases_to_ebitda, formula: "safe_div(net_debt + nz(operating_lease_liabilities), ebitda)", unit: x, higher_is_better: false}
+  - {id: interest_coverage,   formula: "clip(safe_div(ebit, interest_expense), -50, 100, 100)", unit: x, higher_is_better: true}
+  - {id: current_ratio,       formula: "safe_div(total_current_assets, total_current_liabilities)", unit: x, higher_is_better: true}
+  - {id: quick_ratio,         formula: "safe_div(cash_and_st_investments + nz(accounts_receivable), total_current_liabilities)", unit: x, higher_is_better: true}
+  - {id: liabilities_to_assets, formula: "div(total_liabilities, total_assets)",         unit: pct, higher_is_better: false}
+  - {id: cash_to_assets,      formula: "div(cash_and_st_investments, total_assets)",     unit: pct, higher_is_better: true}
+  # capital allocation / efficiency
+  - {id: capex_to_revenue,    formula: "div(capex, revenue)",                            unit: pct, higher_is_better: false}
+  - {id: capex_to_da,         formula: "safe_div(capex, depreciation_amortization)",     unit: x,   higher_is_better: null, target: 1.3}
+  - {id: payout_ratio,        formula: "safe_div(dividends_paid, net_income_parent)",    unit: pct, higher_is_better: null, target: 0.45}
+  - {id: share_count_change_yoy, formula: "growth_yoy(shares_diluted_weighted)",         unit: pct, higher_is_better: false}
+  - {id: dso,                 formula: "safe_div(avg(accounts_receivable), revenue) * 365", unit: days, higher_is_better: false}
+  - {id: dio,                 formula: "safe_div(avg(inventory), cost_of_revenue) * 365", unit: days, higher_is_better: false}
+  - {id: dpo,                 formula: "safe_div(avg(accounts_payable), cost_of_revenue) * 365", unit: days, higher_is_better: true}
+  - {id: cash_conversion_cycle, formula: "nz(dso) + nz(dio) - nz(dpo)",                 unit: days, higher_is_better: false}
+  - {id: inventory_turns,     formula: "safe_div(cost_of_revenue, avg(inventory))",      unit: x,   higher_is_better: true}
+
+# ------------------------------------------------------------------ ACCOUNTING SCORES (FY basis -> ratios)
+accounting_scores:
+  - id: piotroski_f
+    unit: score
+    higher_is_better: true
+    applies_to: non_financial
+    formula: "sum of 9 binary components"
+    components:
+      f_roa_pos:        "net_income / lag_assets > 0   (lag_assets = lag(total_assets,1))"
+      f_cfo_pos:        "cfo > 0"
+      f_droa:           "roa > lag(roa, 1)"
+      f_accrual:        "cfo > net_income"
+      f_dleverage:      "div(long_term_debt, avg(total_assets)) < lag(div(long_term_debt, avg(total_assets)), 1)"
+      f_dliquidity:     "current_ratio > lag(current_ratio, 1)"
+      f_no_dilution:    "shares_outstanding <= lag(shares_outstanding, 1) * 1.005"
+      f_dmargin:        "gross_margin > lag(gross_margin, 1)"
+      f_dturnover:      "asset_turnover > lag(asset_turnover, 1)"
+  - id: altman_z2
+    unit: score
+    higher_is_better: true
+    applies_to: non_financial
+    formula: "6.56*div(working_capital,total_assets) + 3.26*div(retained_earnings,total_assets) + 6.72*div(ebit,total_assets) + 1.05*div(total_equity,total_liabilities)"
+    note: "Altman Z'' (book-equity version) — price independent, valid for non-manufacturers and non-US. Zones: <1.1 distress, >2.6 safe."
+  - id: altman_z
+    unit: score
+    higher_is_better: true
+    applies_to: [industrial_mfg, autos, chemicals, hardware, semis]
+    formula: "1.2*div(working_capital,total_assets) + 1.4*div(retained_earnings,total_assets) + 3.3*div(ebit,total_assets) + 0.6*div(mcap(),total_liabilities_usd) + 1.0*div(revenue,total_assets)"
+    note: "Original Z for manufacturers; mcap() at knowledge_date; total_liabilities_usd from USD basis. Zones: <1.81 distress, >2.99 safe."
+  - id: beneish_m
+    unit: score
+    higher_is_better: false
+    applies_to: non_financial
+    formula: "-4.84 + 0.920*dsri + 0.528*gmi + 0.404*aqi + 0.892*sgi + 0.115*depi - 0.172*sgai + 4.679*tata - 0.327*lvgi"
+    components:
+      dsri: "div(div(accounts_receivable, revenue), lag(div(accounts_receivable, revenue), 1))"
+      gmi:  "div(lag(gross_margin, 1), gross_margin)"
+      aqi:  "div(1 - div(total_current_assets + ppe_net, total_assets), lag(1 - div(total_current_assets + ppe_net, total_assets), 1))"
+      sgi:  "div(revenue, lag(revenue, 1))"
+      depi: "div(lag(div(depreciation_amortization, depreciation_amortization + ppe_net), 1), div(depreciation_amortization, depreciation_amortization + ppe_net))"
+      sgai: "div(div(sga, revenue), lag(div(sga, revenue), 1))"
+      tata: "div(net_income_continuing - cfo, total_assets)"
+      lvgi: "div(div(total_liabilities, total_assets), lag(div(total_liabilities, total_assets), 1))"
+    note: "> -1.78 flags likely manipulator. Missing component -> 1.0 (neutral) for index components, 0 for tata; >2 missing -> null."
+  - id: sloan_accruals
+    unit: pct
+    higher_is_better: false
+    applies_to: non_financial
+    formula: "div(net_income - cfo, avg(total_assets))"
+
+# ------------------------------------------------------------------ SECTOR KPI SETS
+# Every subsector in sector_taxonomy.yaml belongs to exactly ONE kpi set (validated by tests).
+# kpis: computed into `sector_kpis`. quality_weights: weights (sum 1) over generic+set metric ids -> sector quality score
+# (factor 'quality' in scoring.yaml uses these per issuer). peer_metrics: shown in Company 360 peers tab and used for
+# peer comparison tables (ordered by relevance). excluded_generic: generic metrics not scored for this set.
+kpi_sets:
+  - id: software_internet
+    subsectors: [software_application, software_infrastructure, internet_platforms, video_games, payments_fintech]
+    rnd_expected: true
+    kpis:
+      - {id: rule_of_40,              label: "Rule of 40",               formula: "revenue_growth_yoy + fcf_margin", unit: pct, higher_is_better: true}
+      - {id: fcf_margin_after_sbc,    label: "FCF margin after SBC",     formula: "div(fcf - nz(sbc), revenue)",    unit: pct, higher_is_better: true}
+      - {id: deferred_revenue_growth, label: "Deferred revenue growth",  formula: "growth_yoy(deferred_revenue)",    unit: pct, higher_is_better: true}
+      - {id: rpo_growth,              label: "RPO growth",               formula: "growth_yoy(remaining_performance_obligation)", unit: pct, higher_is_better: true}
+      - {id: opex_leverage,           label: "Opex leverage",            formula: "revenue_growth_yoy - growth_yoy(sga + nz(rnd))", unit: pct, higher_is_better: true}
+    quality_weights: {rule_of_40: 0.25, gross_margin: 0.15, fcf_margin_after_sbc: 0.20, sbc_to_revenue: 0.10, roic: 0.10, revenue_cagr_3y: 0.10, rnd_to_revenue: 0.05, share_count_change_yoy: 0.05}
+    peer_metrics: [revenue_growth_yoy, rule_of_40, gross_margin, fcf_margin_after_sbc, sbc_to_revenue, rnd_to_revenue, operating_margin, ev_sales, ev_ebitda, fcf_yield]
+    excluded_generic: [dio, inventory_turns, capex_to_da]
+
+  - id: semis
+    subsectors: [semiconductors, semi_equipment]
+    rnd_expected: true
+    kpis:
+      - {id: rnd_intensity_3y, label: "R&D intensity (3y avg)", formula: "mean_fy(rnd_to_revenue, 3)", unit: pct, higher_is_better: true}
+      - {id: inventory_days_change, label: "Inventory days change", formula: "dio - lag(dio, 1)", unit: days, higher_is_better: false}
+      - {id: capex_intensity, label: "Capex intensity", formula: "div(capex, revenue)", unit: pct, higher_is_better: null, target: 0.10}
+    quality_weights: {gross_margin: 0.20, operating_margin: 0.15, roic: 0.20, rnd_intensity_3y: 0.10, inventory_days_change: 0.10, fcf_margin: 0.15, gm_stdev_5y: 0.10}
+    peer_metrics: [revenue_growth_yoy, gross_margin, operating_margin, rnd_to_revenue, dio, roic, fcf_margin, pe_ttm, ev_ebitda]
+    excluded_generic: []
+
+  - id: hardware
+    subsectors: [hardware_networking, electronic_components]
+    rnd_expected: true
+    kpis:
+      - {id: inventory_days_change, label: "Inventory days change", formula: "dio - lag(dio, 1)", unit: days, higher_is_better: false}
+    quality_weights: {gross_margin: 0.15, operating_margin: 0.15, roic: 0.25, fcf_conversion: 0.15, inventory_turns: 0.10, rnd_to_revenue: 0.10, gm_stdev_5y: 0.10}
+    peer_metrics: [revenue_growth_yoy, gross_margin, operating_margin, roic, inventory_turns, fcf_margin, pe_ttm, ev_ebitda]
+    excluded_generic: []
+
+  - id: services
+    subsectors: [it_services, business_services, consumer_services, health_providers_services, insurance_brokers, real_estate_services]
+    rnd_expected: false
+    kpis:
+      - {id: revenue_per_employee, label: "Revenue per employee (USD)", formula: "safe_div(revenue, employees)", unit: currency_usd, higher_is_better: true}
+    quality_weights: {operating_margin: 0.20, roic: 0.25, fcf_conversion: 0.20, revenue_cagr_3y: 0.15, dso: 0.10, op_margin_stdev_5y: 0.10}
+    peer_metrics: [revenue_growth_yoy, operating_margin, roic, fcf_margin, dso, revenue_per_employee, pe_ttm, ev_ebitda]
+    excluded_generic: [dio, inventory_turns, rnd_to_revenue]
+
+  - id: telecom
+    subsectors: [telecom_operators]
+    rnd_expected: false
+    kpis:
+      - {id: dividend_fcf_coverage, label: "Dividend FCF coverage", formula: "safe_div(fcf, dividends_paid)", unit: x, higher_is_better: true}
+    quality_weights: {ebitda_margin: 0.20, capex_to_revenue: 0.15, fcf_margin: 0.20, net_debt_incl_leases_to_ebitda: 0.20, dividend_fcf_coverage: 0.15, roic: 0.10}
+    peer_metrics: [ebitda_margin, capex_to_revenue, fcf_margin, net_debt_incl_leases_to_ebitda, dividend_yield, ev_ebitda, fcf_yield]
+    excluded_generic: [dio, inventory_turns, rnd_to_revenue, gross_margin]
+
+  - id: media
+    subsectors: [media_entertainment, advertising_publishing]
+    rnd_expected: false
+    kpis: []
+    quality_weights: {operating_margin: 0.20, fcf_margin: 0.25, roic: 0.20, revenue_cagr_3y: 0.15, net_debt_to_ebitda: 0.20}
+    peer_metrics: [revenue_growth_yoy, operating_margin, fcf_margin, net_debt_to_ebitda, ev_ebitda, fcf_yield]
+    excluded_generic: [dio, inventory_turns]
+
+  - id: autos_durables
+    subsectors: [autos, auto_parts, household_durables_leisure]
+    rnd_expected: true
+    kpis:
+      - {id: rnd_plus_capex_intensity, label: "R&D + capex / revenue", formula: "div(nz(rnd) + capex, revenue)", unit: pct, higher_is_better: null, target: 0.10}
+    quality_weights: {operating_margin: 0.20, roic: 0.25, inventory_turns: 0.15, fcf_margin: 0.20, net_debt_to_ebitda: 0.10, op_margin_stdev_5y: 0.10}
+    peer_metrics: [revenue_growth_yoy, operating_margin, roic, inventory_turns, fcf_margin, pe_ttm, ev_ebitda]
+    excluded_generic: []
+
+  - id: homebuilders
+    subsectors: [homebuilders]
+    rnd_expected: false
+    kpis:
+      - {id: inventory_to_equity, label: "Inventory / equity", formula: "safe_div(inventory, total_equity)", unit: x, higher_is_better: false}
+    quality_weights: {gross_margin: 0.20, roe: 0.25, debt_to_equity: 0.20, inventory_turns: 0.15, bvps_cagr_3y: 0.20}
+    peer_metrics: [revenue_growth_yoy, gross_margin, roe, debt_to_equity, bvps_cagr_3y, pb, pe_ttm]
+    excluded_generic: [dio, rnd_to_revenue]
+
+  - id: retail
+    subsectors: [ecommerce, specialty_retail, staples_retail]
+    rnd_expected: false
+    kpis:
+      - {id: inventory_turns_change, label: "Inventory turns change", formula: "inventory_turns - lag(inventory_turns, 1)", unit: x, higher_is_better: true}
+      - {id: gmroi, label: "GMROI", formula: "safe_div(gross_profit, avg(inventory))", unit: x, higher_is_better: true}
+    quality_weights: {inventory_turns: 0.20, gmroi: 0.15, operating_margin: 0.15, roic: 0.25, cash_conversion_cycle: 0.10, revenue_growth_yoy: 0.15}
+    peer_metrics: [revenue_growth_yoy, gross_margin, operating_margin, inventory_turns, gmroi, roic, cash_conversion_cycle, pe_ttm, ev_ebitda]
+    excluded_generic: [rnd_to_revenue]
+
+  - id: consumer_brands
+    subsectors: [apparel_luxury, beverages, packaged_food, tobacco, household_personal_products]
+    rnd_expected: false
+    kpis:
+      - {id: pricing_power, label: "Gross margin vs 5y mean", formula: "gross_margin - mean_fy(gross_margin, 5)", unit: pct, higher_is_better: true}
+    quality_weights: {gross_margin: 0.20, gm_stdev_5y: 0.15, roic: 0.25, fcf_conversion: 0.15, revenue_cagr_3y: 0.15, pricing_power: 0.10}
+    peer_metrics: [revenue_growth_yoy, gross_margin, operating_margin, roic, fcf_margin, dividend_yield, pe_ttm, ev_ebitda]
+    excluded_generic: [rnd_to_revenue]
+
+  - id: restaurants_leisure
+    subsectors: [restaurants, hotels_travel_leisure]
+    rnd_expected: false
+    kpis: []
+    quality_weights: {operating_margin: 0.20, roic: 0.25, revenue_growth_yoy: 0.15, net_debt_incl_leases_to_ebitda: 0.20, fcf_margin: 0.20}
+    peer_metrics: [revenue_growth_yoy, operating_margin, ebitda_margin, roic, net_debt_incl_leases_to_ebitda, ev_ebitda, fcf_yield]
+    excluded_generic: [dio, inventory_turns, rnd_to_revenue]
+
+  - id: pharma_biotech
+    subsectors: [pharma, biotech]
+    rnd_expected: true
+    kpis:
+      - {id: cash_runway_years, label: "Cash runway (years)", formula: "clip(safe_div(cash_and_st_investments, -fcf), 0, 20, 20)", unit: years, higher_is_better: true}
+      - {id: rnd_to_opex, label: "R&D share of opex", formula: "div(rnd, nz(sga) + rnd)", unit: pct, higher_is_better: true}
+    quality_weights: {gross_margin: 0.15, operating_margin: 0.15, rnd_to_revenue: 0.15, cash_runway_years: 0.20, revenue_cagr_3y: 0.15, roic: 0.10, sbc_to_revenue: 0.10}
+    peer_metrics: [revenue_growth_yoy, gross_margin, operating_margin, rnd_to_revenue, cash_runway_years, fcf_margin, pe_ttm, ev_sales]
+    excluded_generic: [dio, inventory_turns]
+
+  - id: medtech
+    subsectors: [medtech, life_science_tools]
+    rnd_expected: true
+    kpis: []
+    quality_weights: {gross_margin: 0.20, operating_margin: 0.15, roic: 0.20, rnd_to_revenue: 0.10, revenue_cagr_3y: 0.15, fcf_conversion: 0.10, gm_stdev_5y: 0.10}
+    peer_metrics: [revenue_growth_yoy, gross_margin, operating_margin, rnd_to_revenue, roic, pe_ttm, ev_ebitda]
+    excluded_generic: []
+
+  - id: managed_care
+    subsectors: [managed_care]
+    rnd_expected: false
+    kpis:
+      - {id: medical_cost_ratio, label: "Medical cost ratio", formula: "div(coalesce(losses_and_lae, cost_of_revenue), coalesce(premiums_earned, revenue))", unit: pct, higher_is_better: false}
+    quality_weights: {medical_cost_ratio: 0.25, operating_margin: 0.20, roe: 0.20, revenue_growth_yoy: 0.20, fcf_conversion: 0.15}
+    peer_metrics: [revenue_growth_yoy, medical_cost_ratio, operating_margin, roe, pe_ttm]
+    excluded_generic: [gross_margin, dio, inventory_turns, rnd_to_revenue]
+
+  - id: banks
+    subsectors: [banks_global, banks_regional]
+    rnd_expected: false
+    revenue_rule: "revenue = net_interest_income + noninterest_income (canonical derive preferred)"
+    kpis:
+      - {id: nim, label: "Net interest margin", formula: "safe_div(net_interest_income, avg(loans_net + nz(investment_securities) + nz(cash_and_equivalents)))", unit: pct, higher_is_better: true}
+      - {id: efficiency_ratio, label: "Efficiency ratio", formula: "safe_div(noninterest_expense, net_interest_income + nz(noninterest_income))", unit: pct, higher_is_better: false}
+      - {id: loans_to_deposits, label: "Loans / deposits", formula: "safe_div(loans_net, deposits)", unit: pct, higher_is_better: null, target: 0.85}
+      - {id: npl_ratio, label: "NPL ratio", formula: "safe_div(nonperforming_loans, loans_gross)", unit: pct, higher_is_better: false}
+      - {id: npl_coverage, label: "Allowance / NPL", formula: "safe_div(allowance_loan_losses, nonperforming_loans)", unit: x, higher_is_better: true}
+      - {id: cost_of_risk, label: "Cost of risk", formula: "safe_div(provision_credit_losses, avg(loans_gross))", unit: pct, higher_is_better: false}
+      - {id: rote, label: "Return on tangible equity", formula: "safe_div(net_income_common, avg(tangible_book))", unit: pct, higher_is_better: true}
+      - {id: fee_income_share, label: "Fee income share", formula: "div(noninterest_income, net_interest_income + noninterest_income)", unit: pct, higher_is_better: true}
+      - {id: ppop_to_assets, label: "Pre-provision profit / assets", formula: "div(net_interest_income + nz(noninterest_income) - noninterest_expense, avg(total_assets))", unit: pct, higher_is_better: true}
+      - {id: equity_to_assets, label: "Equity / assets", formula: "div(total_equity_parent, total_assets)", unit: pct, higher_is_better: true}
+      - {id: cet1, label: "CET1 ratio", formula: "cet1_ratio", unit: pct, higher_is_better: true}
+      - {id: loan_growth_yoy, label: "Loan growth", formula: "growth_yoy(loans_net)", unit: pct, higher_is_better: null, target: 0.07}
+      - {id: deposit_growth_yoy, label: "Deposit growth", formula: "growth_yoy(deposits)", unit: pct, higher_is_better: true}
+    quality_weights: {rote: 0.25, efficiency_ratio: 0.20, nim: 0.15, cost_of_risk: 0.15, npl_ratio: 0.10, equity_to_assets: 0.10, fee_income_share: 0.05}
+    peer_metrics: [rote, roe, nim, efficiency_ratio, cost_of_risk, npl_ratio, loans_to_deposits, cet1, p_tbv, pe_ttm, dividend_yield]
+    excluded_generic: [gross_margin, operating_margin, ebitda_margin, fcf_margin, roic, croic, gross_profitability, cfo_to_net_income, fcf_conversion, gm_stdev_5y, op_margin_stdev_5y, roic_mean_5y, asset_turnover, rnd_to_revenue, debt_to_equity, net_debt_to_ebitda, net_debt_incl_leases_to_ebitda, interest_coverage, current_ratio, quick_ratio, liabilities_to_assets, cash_to_assets, capex_to_revenue, capex_to_da, dso, dio, dpo, cash_conversion_cycle, inventory_turns, gross_profit_growth_yoy, ebit_growth_yoy, fcf_per_share_cagr_3y, piotroski_f, altman_z2, altman_z, beneish_m, sloan_accruals]
+
+  - id: consumer_finance
+    subsectors: [consumer_specialty_finance]
+    rnd_expected: false
+    kpis:
+      - {id: nim, label: "Net interest margin", formula: "safe_div(net_interest_income, avg(loans_net))", unit: pct, higher_is_better: true}
+      - {id: cost_of_risk, label: "Cost of risk", formula: "safe_div(provision_credit_losses, avg(loans_gross))", unit: pct, higher_is_better: false}
+      - {id: leverage, label: "Assets / equity", formula: "safe_div(total_assets, total_equity)", unit: x, higher_is_better: false}
+    quality_weights: {roe: 0.30, nim: 0.20, cost_of_risk: 0.25, leverage: 0.15, revenue_growth_yoy: 0.10}
+    peer_metrics: [roe, nim, cost_of_risk, leverage, revenue_growth_yoy, pb, pe_ttm]
+    excluded_generic: [gross_margin, ebitda_margin, roic, croic, current_ratio, quick_ratio, net_debt_to_ebitda, net_debt_incl_leases_to_ebitda, interest_coverage, dio, inventory_turns, rnd_to_revenue, altman_z2, altman_z]
+
+  - id: insurance_pc
+    subsectors: [insurance_pc_reinsurance]
+    rnd_expected: false
+    kpis:
+      - {id: loss_ratio, label: "Loss ratio", formula: "safe_div(losses_and_lae, premiums_earned)", unit: pct, higher_is_better: false}
+      - {id: expense_ratio, label: "Expense ratio", formula: "safe_div(underwriting_expenses, premiums_earned)", unit: pct, higher_is_better: false}
+      - {id: combined_ratio, label: "Combined ratio", formula: "safe_div(losses_and_lae + nz(underwriting_expenses), premiums_earned)", unit: pct, higher_is_better: false}
+      - {id: investment_yield, label: "Investment yield", formula: "safe_div(net_investment_income, avg(investment_securities))", unit: pct, higher_is_better: true}
+      - {id: premium_growth_yoy, label: "Premium growth", formula: "growth_yoy(premiums_earned)", unit: pct, higher_is_better: true}
+      - {id: reserves_to_equity, label: "Reserves / equity", formula: "safe_div(insurance_reserves, total_equity)", unit: x, higher_is_better: false}
+    quality_weights: {combined_ratio: 0.35, roe: 0.25, bvps_cagr_3y: 0.15, premium_growth_yoy: 0.10, investment_yield: 0.10, reserves_to_equity: 0.05}
+    peer_metrics: [combined_ratio, loss_ratio, roe, premium_growth_yoy, bvps_cagr_3y, pb, pe_ttm, dividend_yield]
+    excluded_generic: [gross_margin, operating_margin, ebitda_margin, fcf_margin, roic, croic, current_ratio, quick_ratio, net_debt_to_ebitda, net_debt_incl_leases_to_ebitda, dio, dso, dpo, cash_conversion_cycle, inventory_turns, rnd_to_revenue, capex_to_revenue, capex_to_da, altman_z2, altman_z, beneish_m]
+
+  - id: insurance_life
+    subsectors: [insurance_life_health]
+    rnd_expected: false
+    kpis:
+      - {id: benefits_ratio, label: "Benefits ratio", formula: "safe_div(losses_and_lae, premiums_earned)", unit: pct, higher_is_better: false}
+      - {id: investment_yield, label: "Investment yield", formula: "safe_div(net_investment_income, avg(investment_securities))", unit: pct, higher_is_better: true}
+      - {id: leverage, label: "Assets / equity", formula: "safe_div(total_assets, total_equity)", unit: x, higher_is_better: false}
+      - {id: premium_growth_yoy, label: "Premium growth", formula: "growth_yoy(premiums_earned)", unit: pct, higher_is_better: true}
+    quality_weights: {roe: 0.30, bvps_cagr_3y: 0.20, investment_yield: 0.15, leverage: 0.15, premium_growth_yoy: 0.10, benefits_ratio: 0.10}
+    peer_metrics: [roe, bvps_cagr_3y, investment_yield, leverage, premium_growth_yoy, pb, pe_ttm, dividend_yield]
+    excluded_generic: [gross_margin, operating_margin, ebitda_margin, fcf_margin, roic, croic, current_ratio, quick_ratio, net_debt_to_ebitda, net_debt_incl_leases_to_ebitda, dio, dso, dpo, cash_conversion_cycle, inventory_turns, rnd_to_revenue, capex_to_revenue, capex_to_da, altman_z2, altman_z, beneish_m]
+
+  - id: asset_light_fin
+    subsectors: [asset_managers, capital_markets_exchanges]
+    rnd_expected: false
+    kpis:
+      - {id: comp_ratio_proxy, label: "Opex / revenue", formula: "div(total_operating_expenses, revenue)", unit: pct, higher_is_better: false}
+    quality_weights: {operating_margin: 0.25, roe: 0.25, revenue_cagr_3y: 0.20, fcf_margin: 0.15, op_margin_stdev_5y: 0.15}
+    peer_metrics: [revenue_growth_yoy, operating_margin, roe, fcf_margin, pe_ttm, dividend_yield]
+    excluded_generic: [gross_margin, dio, inventory_turns, rnd_to_revenue, current_ratio, quick_ratio, altman_z]
+
+  - id: holdings
+    subsectors: [diversified_holdings]
+    rnd_expected: false
+    kpis: []
+    quality_weights: {bvps_cagr_3y: 0.40, roe: 0.30, debt_to_equity: 0.15, fcf_conversion: 0.15}
+    peer_metrics: [bvps_cagr_3y, roe, debt_to_equity, pb, pe_ttm]
+    excluded_generic: [gross_margin, dio, inventory_turns, rnd_to_revenue]
+
+  - id: industrials
+    subsectors: [aerospace_defense, industrial_machinery, electrical_equipment, construction_building, industrial_conglomerates]
+    rnd_expected: false
+    kpis:
+      - {id: backlog_growth, label: "Backlog (RPO) growth", formula: "growth_yoy(remaining_performance_obligation)", unit: pct, higher_is_better: true}
+      - {id: book_to_bill_proxy, label: "Backlog / revenue", formula: "safe_div(remaining_performance_obligation, revenue)", unit: x, higher_is_better: true}
+    quality_weights: {operating_margin: 0.20, roic: 0.25, fcf_conversion: 0.20, asset_turnover: 0.10, op_margin_stdev_5y: 0.10, cash_conversion_cycle: 0.10, backlog_growth: 0.05}
+    peer_metrics: [revenue_growth_yoy, operating_margin, roic, fcf_conversion, backlog_growth, net_debt_to_ebitda, pe_ttm, ev_ebitda]
+    excluded_generic: []
+
+  - id: distributors
+    subsectors: [trading_distributors, health_distribution]
+    rnd_expected: false
+    kpis:
+      - {id: gross_profit_to_working_capital, label: "Gross profit / op. working capital", formula: "safe_div(gross_profit, avg(operating_working_capital))", unit: x, higher_is_better: true}
+    quality_weights: {roic: 0.30, operating_margin: 0.15, cash_conversion_cycle: 0.20, gross_profit_to_working_capital: 0.15, fcf_conversion: 0.20}
+    peer_metrics: [revenue_growth_yoy, gross_margin, operating_margin, roic, cash_conversion_cycle, pe_ttm, ev_ebitda]
+    excluded_generic: [rnd_to_revenue]
+
+  - id: transport
+    subsectors: [airlines, logistics_freight, rail_marine_infra]
+    rnd_expected: false
+    kpis: []
+    quality_weights: {operating_margin: 0.20, roic: 0.25, net_debt_incl_leases_to_ebitda: 0.20, asset_turnover: 0.10, fcf_margin: 0.15, op_margin_stdev_5y: 0.10}
+    peer_metrics: [revenue_growth_yoy, operating_margin, ebitda_margin, roic, net_debt_incl_leases_to_ebitda, ev_ebitda, fcf_yield]
+    excluded_generic: [dio, inventory_turns, rnd_to_revenue]
+
+  - id: materials
+    subsectors: [chemicals_diversified, chemicals_specialty, steel_aluminum, metals_mining, precious_metals, construction_materials, packaging_paper, agri_products, coal_uranium]
+    rnd_expected: false
+    kpis:
+      - {id: reinvestment_rate, label: "Capex / CFO", formula: "safe_div(capex, cfo)", unit: pct, higher_is_better: null, target: 0.5}
+      - {id: through_cycle_roic, label: "ROIC 5y mean", formula: "mean_fy(roic, 5)", unit: pct, higher_is_better: true}
+    quality_weights: {through_cycle_roic: 0.25, ebitda_margin: 0.15, net_debt_to_ebitda: 0.20, fcf_margin: 0.15, op_margin_stdev_5y: 0.10, reinvestment_rate: 0.15}
+    peer_metrics: [revenue_growth_yoy, ebitda_margin, roic, net_debt_to_ebitda, fcf_margin, ev_ebitda, pb, dividend_yield]
+    excluded_generic: [rnd_to_revenue]
+
+  - id: energy
+    subsectors: [integrated_oil_gas, exploration_production, refining_marketing, midstream, oilfield_services]
+    rnd_expected: false
+    kpis:
+      - {id: reinvestment_rate, label: "Capex / CFO", formula: "safe_div(capex, cfo)", unit: pct, higher_is_better: null, target: 0.5}
+      - {id: through_cycle_roic, label: "ROIC 5y mean", formula: "mean_fy(roic, 5)", unit: pct, higher_is_better: true}
+      - {id: shareholder_return_cfo, label: "(Dividends + buybacks) / CFO", formula: "safe_div(nz(dividends_paid) + nz(buybacks), cfo)", unit: pct, higher_is_better: true}
+    quality_weights: {through_cycle_roic: 0.25, net_debt_to_ebitda: 0.20, fcf_margin: 0.15, reinvestment_rate: 0.15, shareholder_return_cfo: 0.15, ebitda_margin: 0.10}
+    peer_metrics: [ebitda_margin, roic, net_debt_to_ebitda, fcf_yield, shareholder_yield, ev_ebitda, dividend_yield]
+    excluded_generic: [rnd_to_revenue, dio, inventory_turns, gross_margin]
+
+  - id: utilities
+    subsectors: [electric_utilities, gas_utilities, water_utilities, multi_utilities, renewable_ipp]
+    rnd_expected: false
+    kpis:
+      - {id: ffo_to_debt, label: "FFO / debt (rating-agency style)", formula: "safe_div(cfo - nz(change_in_working_capital), total_debt)", unit: pct, higher_is_better: true}
+      - {id: rate_base_growth_proxy, label: "PP&E growth", formula: "growth_yoy(ppe_net)", unit: pct, higher_is_better: true}
+    quality_weights: {roe: 0.20, net_debt_to_ebitda: 0.25, ffo_to_debt: 0.20, interest_coverage: 0.15, rate_base_growth_proxy: 0.10, payout_ratio: 0.10}
+    peer_metrics: [roe, net_debt_to_ebitda, ffo_to_debt, rate_base_growth_proxy, dividend_yield, pe_ttm, ev_ebitda]
+    excluded_generic: [rnd_to_revenue, dio, inventory_turns, fcf_margin, croic, gross_margin, current_ratio, quick_ratio]
+
+  - id: reits
+    subsectors: [reit_residential, reit_industrial, reit_office_retail, reit_specialty]
+    rnd_expected: false
+    kpis:
+      - {id: ffo_margin, label: "FFO margin", formula: "div(ffo, revenue)", unit: pct, higher_is_better: true}
+      - {id: ffo_per_share_growth, label: "FFO/share growth", formula: "growth_yoy(ffo / shares_diluted_weighted)", unit: pct, higher_is_better: true}
+      - {id: affo_per_share_growth, label: "AFFO/share growth", formula: "growth_yoy(affo / shares_diluted_weighted)", unit: pct, higher_is_better: true}
+      - {id: affo_payout, label: "Dividends / AFFO", formula: "safe_div(dividends_paid, affo)", unit: pct, higher_is_better: null, target: 0.75}
+      - {id: debt_to_gross_assets, label: "Debt / assets", formula: "div(total_debt, total_assets)", unit: pct, higher_is_better: false}
+    quality_weights: {ffo_per_share_growth: 0.20, ffo_margin: 0.15, net_debt_to_ebitda: 0.20, debt_to_gross_assets: 0.15, interest_coverage: 0.15, affo_payout: 0.15}
+    peer_metrics: [ffo_per_share_growth, ffo_margin, net_debt_to_ebitda, debt_to_gross_assets, affo_payout, p_ffo, dividend_yield]
+    excluded_generic: [gross_margin, roic, croic, rnd_to_revenue, dio, inventory_turns, eps_growth_yoy, eps_cagr_3y, current_ratio, quick_ratio, altman_z, beneish_m]
+
+  - id: real_estate_dev
+    subsectors: [real_estate_development]
+    rnd_expected: false
+    kpis:
+      - {id: inventory_to_equity, label: "Inventory / equity", formula: "safe_div(inventory, total_equity)", unit: x, higher_is_better: false}
+      - {id: net_gearing, label: "Net debt / equity", formula: "safe_div(net_debt, total_equity)", unit: x, higher_is_better: false}
+    quality_weights: {roe: 0.25, net_gearing: 0.25, gross_margin: 0.15, cash_to_assets: 0.15, bvps_cagr_3y: 0.20}
+    peer_metrics: [roe, net_gearing, gross_margin, bvps_cagr_3y, pb, pe_ttm, dividend_yield]
+    excluded_generic: [rnd_to_revenue, dio, inventory_turns]

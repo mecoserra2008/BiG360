@@ -1,0 +1,212 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xbrl xmlns="http://www.xbrl.org/2003/instance" xmlns:ifrs="http://xbrl.iasb.org/taxonomy/2010-04-30/ifrs" xmlns:iso4217="http://www.xbrl.org/2003/iso4217" xmlns:link="http://www.xbrl.org/2003/linkbase" xmlns:tifrs-SCF="http://www.xbrl.org/tifrs/scf/2013-03-31" xmlns:tifrs-SCF-ci="http://www.xbrl.org/tifrs/scf/ci/2013-03-31" xmlns:tifrs-ar="http://www.xbrl.org/tifrs/ar/2013-03-31" xmlns:tifrs-bsci-ci="http://www.xbrl.org/tifrs/bsci/ci/2013-03-31" xmlns:tifrs-ci-cr="http://www.xbrl.org/tifrs/ci/cr/2013-03-31" xmlns:tifrs-es="http://www.xbrl.org/tifrs/es/2013-03-31" xmlns:tifrs-es-cr="http://www.xbrl.org/tifrs/es/cr/2013-03-31" xmlns:tifrs-notes="http://www.xbrl.org/tifrs/notes/2013-03-31" xmlns:tifrs-notes-ci="http://www.xbrl.org/tifrs/notes/ci/2013-03-31" xmlns:xbrldi="http://xbrl.org/2006/xbrldi" xmlns:xbrldt="http://xbrl.org/2005/xbrldt" xmlns:xbrli="http://www.xbrl.org/2003/instance" xmlns:xlink="http://www.w3.org/1999/xlink">
+	<link:schemaRef xlink:arcrole="http://www.w3.org/1999/xlink/properties/linkbase" xlink:href="tifrs-ci-cr-2013-03-31.xsd" xlink:type="simple"/>	<context id="From20120101To20120331_TotalEquityMember">
+		<entity>
+			<identifier scheme="http://www.twse.com.tw">2330</identifier>
+		</entity>
+		<period>
+			<startDate>2012-01-01</startDate>
+			<endDate>2012-03-31</endDate>
+		</period>
+		<scenario>
+			<xbrldi:explicitMember dimension="ifrs:ComponentsOfEquityAxis">tifrs-es:TotalEquityMember</xbrldi:explicitMember>
+		</scenario>
+	</context>
+<context id="From20120101To20120331_NonControllingInterestsMember">
+		<entity>
+			<identifier scheme="http://www.twse.com.tw">2330</identifier>
+		</entity>
+		<period>
+			<startDate>2012-01-01</startDate>
+			<endDate>2012-03-31</endDate>
+		</period>
+		<scenario>
+			<xbrldi:explicitMember dimension="ifrs:ComponentsOfEquityAxis">tifrs-es:NonControllingInterestsMember</xbrldi:explicitMember>
+		</scenario>
+	</context>
+<context id="From20120101To20120331_TotalEquityAttributableToOwnersOfParentMember">
+		<entity>
+			<identifier scheme="http://www.twse.com.tw">2330</identifier>
+		</entity>
+		<period>
+			<startDate>2012-01-01</startDate>
+			<endDate>2012-03-31</endDate>
+		</period>
+		<scenario>
+			<xbrldi:explicitMember dimension="ifrs:ComponentsOfEquityAxis">tifrs-es:TotalEquityAttributableToOwnersOfParentMember</xbrldi:explicitMember>
+		</scenario>
+	</context>
+<context id="From20120101To20120331_TotalRetainedEarningsMember">
+		<entity>
+			<identifier scheme="http://www.twse.com.tw">2330</identifier>
+		</entity>
+		<period>
+			<startDate>2012-01-01</startDate>
+			<endDate>2012-03-31</endDate>
+		</period>
+		<scenario>
+			<xbrldi:explicitMember dimension="ifrs:ComponentsOfEquityAxis">tifrs-es:TotalRetainedEarningsMember</xbrldi:explicitMember>
+		</scenario>
+	</context>
+<context id="From20120101To20120331_UnappropriatedRetainedEarningsAccumulatedDeficitMember">
+		<entity>
+			<identifier scheme="http://www.twse.com.tw">2330</identifier>
+		</entity>
+		<period>
+			<startDate>2012-01-01</startDate>
+			<endDate>2012-03-31</endDate>
+		</period>
+		<scenario>
+			<xbrldi:explicitMember dimension="ifrs:ComponentsOfEquityAxis">tifrs-es:UnappropriatedRetainedEarningsAccumulatedDeficitMember</xbrldi:explicitMember>
+		</scenario>
+	</context>
+<context id="From20130101To20130331_NonControllingInterestsMember">
+		<entity>
+			<identifier scheme="http://www.twse.com.tw">2330</identifier>
+		</entity>
+		<period>
+			<startDate>2013-01-01</startDate>
+			<endDate>2013-03-31</endDate>
+		</period>
+		<scenario>
+			<xbrldi:explicitMember dimension="ifrs:ComponentsOfEquityAxis">tifrs-es:NonControllingInterestsMember</xbrldi:explicitMember>
+		</scenario>
+	</context>
+<context id="From20130101To20130331_TotalRetainedEarningsMember">
+		<entity>
+			<identifier scheme="http://www.twse.com.tw">2330</identifier>
+		</entity>
+		<period>
+			<startDate>2013-01-01</startDate>
+			<endDate>2013-03-31</endDate>
+		</period>
+		<scenario>
+			<xbrldi:explicitMember dimension="ifrs:ComponentsOfEquityAxis">tifrs-es:TotalRetainedEarningsMember</xbrldi:explicitMember>
+		</scenario>
+	</context>
+<context id="From20130101To20130331_UnappropriatedRetainedEarningsAccumulatedDeficitMember">
+		<entity>
+			<identifier scheme="http://www.twse.com.tw">2330</identifier>
+		</entity>
+		<period>
+			<startDate>2013-01-01</startDate>
+			<endDate>2013-03-31</endDate>
+		</period>
+		<scenario>
+			<xbrldi:explicitMember dimension="ifrs:ComponentsOfEquityAxis">tifrs-es:UnappropriatedRetainedEarningsAccumulatedDeficitMember</xbrldi:explicitMember>
+		</scenario>
+	</context>
+<context id="From20130101To20130331_TotalEquityMember">
+		<entity>
+			<identifier scheme="http://www.twse.com.tw">2330</identifier>
+		</entity>
+		<period>
+			<startDate>2013-01-01</startDate>
+			<endDate>2013-03-31</endDate>
+		</period>
+		<scenario>
+			<xbrldi:explicitMember dimension="ifrs:ComponentsOfEquityAxis">tifrs-es:TotalEquityMember</xbrldi:explicitMember>
+		</scenario>
+	</context>
+<context id="From20130101To20130331_TotalEquityAttributableToOwnersOfParentMember">
+		<entity>
+			<identifier scheme="http://www.twse.com.tw">2330</identifier>
+		</entity>
+		<period>
+			<startDate>2013-01-01</startDate>
+			<endDate>2013-03-31</endDate>
+		</period>
+		<scenario>
+			<xbrldi:explicitMember dimension="ifrs:ComponentsOfEquityAxis">tifrs-es:TotalEquityAttributableToOwnersOfParentMember</xbrldi:explicitMember>
+		</scenario>
+	</context>
+<context id="AsOf20120101">
+		<entity>
+			<identifier scheme="http://www.twse.com.tw">2330</identifier>
+		</entity>
+		<period>
+			<instant>2012-01-01</instant>
+		</period>
+	</context>
+<context id="AsOf20121231">
+		<entity>
+			<identifier scheme="http://www.twse.com.tw">2330</identifier>
+		</entity>
+		<period>
+			<instant>2012-12-31</instant>
+		</period>
+	</context>
+<context id="From20120101To20120331">
+		<entity>
+			<identifier scheme="http://www.twse.com.tw">2330</identifier>
+		</entity>
+		<period>
+			<startDate>2012-01-01</startDate>
+			<endDate>2012-03-31</endDate>
+		</period>
+	</context>
+<context id="AsOf20120331">
+		<entity>
+			<identifier scheme="http://www.twse.com.tw">2330</identifier>
+		</entity>
+		<period>
+			<instant>2012-03-31</instant>
+		</period>
+	</context>
+<context id="From20130101To20130331">
+		<entity>
+			<identifier scheme="http://www.twse.com.tw">2330</identifier>
+		</entity>
+		<period>
+			<startDate>2013-01-01</startDate>
+			<endDate>2013-03-31</endDate>
+		</period>
+	</context>
+<context id="AsOf20130331">
+		<entity>
+			<identifier scheme="http://www.twse.com.tw">2330</identifier>
+		</entity>
+		<period>
+			<instant>2013-03-31</instant>
+		</period>
+	</context>
+<unit id="TWD">
+		<measure>iso4217:TWD</measure>
+	</unit>
+<unit id="Shares">
+		<measure>xbrli:shares</measure>
+	</unit>
+<unit id="EarningsPerShare">
+		<divide>
+			<unitNumerator>
+				<measure>iso4217:TWD</measure>
+			</unitNumerator>
+			<unitDenominator>
+				<measure>xbrli:shares</measure>
+			</unitDenominator>
+		</divide>
+	</unit>
+<unit id="Pure">
+		<measure>xbrli:pure</measure>
+	</unit>
+<ifrs:Assets contextRef="AsOf20130331" decimals="-3" unitRef="TWD">1061629726000</ifrs:Assets>
+<ifrs:Assets contextRef="AsOf20121231" decimals="-3" unitRef="TWD">961354508000</ifrs:Assets>
+<ifrs:Assets contextRef="AsOf20120331" decimals="-3" unitRef="TWD">837495295000</ifrs:Assets>
+<ifrs:Assets contextRef="AsOf20120101" decimals="-3" unitRef="TWD">779550815000</ifrs:Assets>
+<tifrs-bsci-ci:OperatingRevenue contextRef="From20130101To20130331" decimals="-3" unitRef="TWD">132754996000</tifrs-bsci-ci:OperatingRevenue>
+<tifrs-bsci-ci:OperatingRevenue contextRef="From20120101To20120331" decimals="-3" unitRef="TWD">105614831000</tifrs-bsci-ci:OperatingRevenue>
+<ifrs:ProfitLoss contextRef="From20130101To20130331" decimals="-3" unitRef="TWD">39535543000</ifrs:ProfitLoss>
+<ifrs:ProfitLoss contextRef="From20120101To20120331" decimals="-3" unitRef="TWD">33382936000</ifrs:ProfitLoss>
+<ifrs:BasicEarningsLossPerShare contextRef="From20130101To20130331" decimals="2" unitRef="TWD">1.53</ifrs:BasicEarningsLossPerShare>
+<ifrs:BasicEarningsLossPerShare contextRef="From20120101To20120331" decimals="2" unitRef="TWD">1.29</ifrs:BasicEarningsLossPerShare>
+<ifrs:ProfitLoss contextRef="From20130101To20130331_UnappropriatedRetainedEarningsAccumulatedDeficitMember" decimals="-3" unitRef="TWD">39576876000</ifrs:ProfitLoss>
+<ifrs:ProfitLoss contextRef="From20130101To20130331_TotalRetainedEarningsMember" decimals="-3" unitRef="TWD">39576876000</ifrs:ProfitLoss>
+<ifrs:ProfitLoss contextRef="From20130101To20130331_TotalEquityAttributableToOwnersOfParentMember" decimals="-3" unitRef="TWD">39576876000</ifrs:ProfitLoss>
+<ifrs:ProfitLoss contextRef="From20130101To20130331_NonControllingInterestsMember" decimals="-3" unitRef="TWD">-41333000</ifrs:ProfitLoss>
+<ifrs:ProfitLoss contextRef="From20130101To20130331_TotalEquityMember" decimals="-3" unitRef="TWD">39535543000</ifrs:ProfitLoss>
+<ifrs:ProfitLoss contextRef="From20120101To20120331_UnappropriatedRetainedEarningsAccumulatedDeficitMember" decimals="-3" unitRef="TWD">33491634000</ifrs:ProfitLoss>
+<ifrs:ProfitLoss contextRef="From20120101To20120331_TotalRetainedEarningsMember" decimals="-3" unitRef="TWD">33491634000</ifrs:ProfitLoss>
+<ifrs:ProfitLoss contextRef="From20120101To20120331_TotalEquityAttributableToOwnersOfParentMember" decimals="-3" unitRef="TWD">33491634000</ifrs:ProfitLoss>
+<ifrs:ProfitLoss contextRef="From20120101To20120331_NonControllingInterestsMember" decimals="-3" unitRef="TWD">-108698000</ifrs:ProfitLoss>
+<ifrs:ProfitLoss contextRef="From20120101To20120331_TotalEquityMember" decimals="-3" unitRef="TWD">33382936000</ifrs:ProfitLoss>
+</xbrl>

@@ -1,0 +1,4 @@
+# Manual overrides for ticker-reuse breaks (app.normalize.price_integrity, read by prices_finalize). Owner: ingest-market.
+# key = security_id or source symbol (Polygon ticker / Yahoo symbol); source_id = polygon | yfinance | ... | * (all sources)
+# action = force (drop that source's bars before break_date) | suppress (keep the series; break_date empty = every detected break)
+key,source_id,break_date,action,note

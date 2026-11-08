@@ -1,0 +1,120 @@
+{
+ "title": "Momentum, residual momentum and reversal (Fama-MacBeth)",
+ "description": "12-1 momentum, residual momentum and 1-month reversal as cross-sectional predictors of the next-month return (technical factors, 2004 on).",
+ "question": "factors",
+ "tags": [
+  "factors",
+  "momentum",
+  "Fama-MacBeth"
+ ],
+ "method_note": "Jegadeesh-Titman momentum (t-12..t-2), Blitz-Huij residual momentum and short-term reversal, all point-in-time from tech_factors, z-scored each month. Expect a positive momentum slope and a negative reversal slope; residual momentum usually has the higher t-stat. Caveat: the universe is today's constituents (membership history starts 2026-10), so early years carry survivorship bias; read the premium as an upper bound.",
+ "expected_outputs": [
+  "premium per signal with NW t-stats",
+  "slope time series"
+ ],
+ "runtime_s": 4.9,
+ "validated": "2026-11-06 on snapshot R20261106T010757G9ZB",
+ "result": {
+  "run_id": "SR20261106T015648Z52NX",
+  "n_obs": 105536,
+  "metrics": {
+   "avg_r2": 0.07215738054320199
+  },
+  "coefficients": [
+   {
+    "term": "mom_12_1",
+    "estimate": -2.308234710161527e-05,
+    "statistic": -0.015646545185886918,
+    "p_value": 0.9875283721765875
+   },
+   {
+    "term": "rmom",
+    "estimate": -0.00021100653034097127,
+    "statistic": -0.34378579808859,
+    "p_value": 0.731285234496044
+   },
+   {
+    "term": "strev",
+    "estimate": -0.00030032669830672707,
+    "statistic": -0.38675314354961776,
+    "p_value": 0.699255314507403
+   }
+  ]
+ },
+ "study": {
+  "name": "Momentum, residual momentum and reversal (Fama-MacBeth)",
+  "method": "fama_macbeth",
+  "y": "fwd_ret_1m",
+  "x": [
+   "mom_12_1",
+   "rmom",
+   "strev"
+  ],
+  "params": {
+   "nw_lags": 3
+  },
+  "dataset": {
+   "kind": "panel",
+   "frequency": "M",
+   "start": "2005-01-01",
+   "entities": {
+    "universe": "mvp_us"
+   },
+   "variables": [
+    {
+     "name": "fwd_ret_1m",
+     "source": "prices",
+     "field": "ret",
+     "transforms": [
+      {
+       "op": "fwd_compound",
+       "k": 1
+      },
+      {
+       "op": "winsorize"
+      }
+     ]
+    },
+    {
+     "name": "mom_12_1",
+     "source": "tech_factors",
+     "field": "mom",
+     "transforms": [
+      {
+       "op": "winsorize"
+      },
+      {
+       "op": "cs_zscore"
+      }
+     ]
+    },
+    {
+     "name": "rmom",
+     "source": "tech_factors",
+     "field": "rmom",
+     "transforms": [
+      {
+       "op": "winsorize"
+      },
+      {
+       "op": "cs_zscore"
+      }
+     ]
+    },
+    {
+     "name": "strev",
+     "source": "tech_factors",
+     "field": "strev",
+     "transforms": [
+      {
+       "op": "winsorize"
+      },
+      {
+       "op": "cs_zscore"
+      }
+     ]
+    }
+   ]
+  }
+ }
+}

@@ -1,0 +1,89 @@
+{
+ "title": "GMM regimes of US macro states",
+ "description": "Monthly US macro state since 1990 (IP growth y/y, CPI inflation y/y, 10Y-3M slope, Baa spread, unemployment change y/y), standardized; Gaussian mixture with the number of states chosen by BIC and soft state probabilities.",
+ "tags": [
+  "clustering",
+  "GMM",
+  "macro",
+  "regimes"
+ ],
+ "study": {
+  "name": "Macro states (GMM)",
+  "method": "gmm",
+  "x": [
+   "ip_g",
+   "infl",
+   "slope",
+   "baa",
+   "d_unrate"
+  ],
+  "params": {
+   "k_min": 1,
+   "k_max": 6,
+   "covariance_type": "full"
+  },
+  "dataset": {
+   "kind": "timeseries",
+   "frequency": "M",
+   "start": "1990-01-01",
+   "macro_alignment": "period",
+   "variables": [
+    {
+     "name": "ip_g",
+     "source": "macro",
+     "field": "fred:INDPRO",
+     "transforms": [
+      {
+       "op": "log_diff",
+       "k": 12
+      },
+      {
+       "op": "scale",
+       "factor": 100
+      }
+     ]
+    },
+    {
+     "name": "infl",
+     "source": "macro",
+     "field": "fred:CPIAUCSL",
+     "transforms": [
+      {
+       "op": "log_diff",
+       "k": 12
+      },
+      {
+       "op": "scale",
+       "factor": 100
+      }
+     ]
+    },
+    {
+     "name": "slope",
+     "source": "macro",
+     "field": "fred:T10Y3M",
+     "transforms": [],
+     "agg": "mean"
+    },
+    {
+     "name": "baa",
+     "source": "macro",
+     "field": "fred:BAA10Y",
+     "transforms": [],
+     "agg": "mean"
+    },
+    {
+     "name": "d_unrate",
+     "source": "macro",
+     "field": "fred:UNRATE",
+     "transforms": [
+      {
+       "op": "diff",
+       "k": 12
+      }
+     ]
+    }
+   ]
+  }
+ }
+}

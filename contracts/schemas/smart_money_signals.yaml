@@ -1,0 +1,53 @@
+table: smart_money_signals
+version: 1
+zone: scores
+owner: smart-money (app.analytics.smart_money)
+description: >
+  MODEL-BASED combined smart-money score per security x as_of_date (weekly Fridays + run dates), for the backtesting
+  lab and the Smart-money page. Every input is known on as_of_date (knowledge_date <= as_of_date): 13F flow
+  (inst_ownership latest cutoff, period end within 200 days), smart-cohort flow, insider signal (insider_signals,
+  at most 35 days old - the insider history is month-end), FINRA short interest (si_signals, published within 45 days) and EU / UK disclosed net short %
+  (eu_short_positions; regulator aggregate where published, else the sum of active >= 0.5% holder positions; 30-day
+  change). Raw inputs are winsorised 1/99% and robust-z-scored within the date ((x - median) / (1.4826 MAD), clipped to +-4; v2026-10-27), signed higher = more bullish (short interest
+  and EU shorts negative), averaged into groups g_inst, g_smart, g_insider, g_short_interest, g_eu_short; score = mean
+  of available groups, score_pct = percentile 0..100 within the date. Forward-label-free (no future returns).
+storage: {path: scores/smart_money_signals, format: parquet, partition_by: [year], write_mode: upsert, sort_by: [as_of_date, security_id], compression_level: 9}
+primary_key: [security_id, as_of_date]
+pit: {knowledge_column: as_of_date, rule: "all inputs have knowledge_date <= as_of_date"}
+columns:
+  - {name: as_of_date, type: date, nullable: false, description: "Signal date"}
+  - {name: year, type: int16, nullable: false, description: "Partition: year(as_of_date)"}
+  - {name: security_id, type: string, nullable: false, description: "FK securities_master"}
+  - {name: issuer_id, type: string, nullable: true, description: "FK issuers"}
+  - {name: region, type: string, nullable: true, description: "Issuer region"}
+  - {name: sector_id, type: string, nullable: true, description: "Issuer sector"}
+  - {name: knowledge_date, type: date, nullable: false, description: "Latest input knowledge date used (<= as_of_date)"}
+  - {name: inst_period_end, type: date, nullable: true, description: "13F quarter used"}
+  - {name: inst_flow, type: float64, nullable: true, description: "13F net flow / shares out (else change in 13F shares)"}
+  - {name: inst_breadth, type: float64, nullable: true, description: "13F breadth"}
+  - {name: smart_flow, type: float64, nullable: true, description: "Smart-cohort flow / shares out (else / previous 13F shares)"}
+  - {name: insider_signal, type: float64, nullable: true, description: "insider_signals.signal_score (0..100)"}
+  - {name: si_pct_out, type: float64, nullable: true, description: "Short interest / shares outstanding"}
+  - {name: si_chg_pct, type: float64, nullable: true, description: "Short interest change vs previous settlement"}
+  - {name: si_settlement_date, type: date, nullable: true, description: "FINRA settlement used"}
+  - {name: eu_short_pct, type: float64, nullable: true, description: "Disclosed EU / UK net short % of capital (percent)"}
+  - {name: eu_short_chg_30d, type: float64, nullable: true, description: "Change of eu_short_pct over 30 days (percent points)"}
+  - {name: eu_short_holders, type: int32, nullable: true, description: "Active disclosed holders"}
+  - {name: z_inst_flow, type: float64, nullable: true, description: "z (cross-section)"}
+  - {name: z_inst_breadth, type: float64, nullable: true, description: "z"}
+  - {name: z_smart_flow, type: float64, nullable: true, description: "z"}
+  - {name: z_insider, type: float64, nullable: true, description: "z"}
+  - {name: z_si_level, type: float64, nullable: true, description: "minus z of si_pct_out"}
+  - {name: z_si_chg, type: float64, nullable: true, description: "minus z of si_chg_pct"}
+  - {name: z_eu_level, type: float64, nullable: true, description: "minus z of eu_short_pct"}
+  - {name: z_eu_chg, type: float64, nullable: true, description: "minus z of eu_short_chg_30d"}
+  - {name: g_inst, type: float64, nullable: true, description: "Group: 13F flows"}
+  - {name: g_smart, type: float64, nullable: true, description: "Group: smart cohort"}
+  - {name: g_insider, type: float64, nullable: true, description: "Group: insiders"}
+  - {name: g_short_interest, type: float64, nullable: true, description: "Group: short interest"}
+  - {name: g_eu_short, type: float64, nullable: true, description: "Group: EU / UK short disclosures"}
+  - {name: n_components, type: int32, nullable: false, description: "Groups available"}
+  - {name: score, type: float64, nullable: true, description: "MODEL-BASED composite (mean group z)"}
+  - {name: score_pct, type: float64, nullable: true, description: "Percentile 0..100 within the date"}
+  - {name: computed_at, type: datetime, nullable: false, description: "Write time UTC"}
+  - {name: run_id, type: string, nullable: true, description: "job_runs.run_id"}

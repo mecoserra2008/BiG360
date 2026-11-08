@@ -1,0 +1,27 @@
+table: macro_revisions
+version: 2
+zone: scores
+owner: macro-w1 (app.macro.revisions, job macro_cells)
+description: >
+  First release vs latest value per period for vintage-enabled macro series: alfred (FRED/ALFRED real-time vintages,
+  every period) and first_seen (revisions recorded by the ingest reconcile step, revised periods only). Native values
+  plus the canonical measure (first_value_tf computed point-in-time). Overwritten nightly.
+storage: {path: scores/macro_revisions, format: parquet, partition_by: [], write_mode: overwrite}
+primary_key: [series_id, date]
+columns:
+  - {name: series_id, type: string, nullable: false, description: "FK macro_series"}
+  - {name: date, type: date, nullable: false, description: "Observation period"}
+  - {name: vintage_kind, type: enum, nullable: false, values: [alfred, first_seen], description: "Vintage source"}
+  - {name: first_value, type: float64, nullable: true, description: "Value of the earliest vintage (native units)"}
+  - {name: first_knowledge_date, type: date, nullable: true, description: "First release date"}
+  - {name: first_estimated, type: bool, nullable: true, description: "First release date imputed (pre-archive ALFRED periods)"}
+  - {name: latest_value, type: float64, nullable: true, description: "Latest vintage value"}
+  - {name: latest_knowledge_date, type: date, nullable: true, description: "Latest vintage date"}
+  - {name: n_vintages, type: int32, nullable: false, description: "Distinct vintages for the period"}
+  - {name: revision, type: float64, nullable: true, description: "latest_value - first_value"}
+  - {name: transform, type: enum, nullable: false, values: [yoy, qoq, level], description: "Canonical transform of the *_tf columns"}
+  - {name: first_value_tf, type: float64, nullable: true, description: "Canonical value as first released (PIT)"}
+  - {name: latest_value_tf, type: float64, nullable: true, description: "Canonical value from the latest vintage"}
+  - {name: revision_tf, type: float64, nullable: true, description: "latest_value_tf - first_value_tf"}
+  - {name: rebased, type: bool, nullable: true, description: "Index/level base change between first and latest vintage (|latest/first - 1| > 5%); native revision not comparable. Added v2."}
+  - {name: computed_at, type: datetime, nullable: false, description: "Write time UTC"}

@@ -1,0 +1,25 @@
+table: corporate_actions_staging
+version: 2
+zone: normalized
+owner: ingest-market (app.ingestion.corporate_actions / yf_prices)
+description: >
+  Source-native corporate actions keyed by the SOURCE symbol (Polygon ticker / yfinance symbol). The
+  corporate_actions job resolves symbols to security_id and writes corporate_actions; prices_finalize uses the
+  staged rows directly (so adjustment works before identity resolution). yfinance dividend amounts are
+  split-adjusted (amount_basis=split_adjusted); Polygon amounts are as declared (raw).
+storage: {path: normalized/corporate_actions_staging, format: parquet, partition_by: [source_id], write_mode: upsert}
+primary_key: [source_id, symbol, ex_date, action_type]
+columns:
+  - {name: source_id, type: enum, nullable: false, values: [polygon, yfinance, baostock, twse, tpex, other], description: "Partition: source adapter (baostock: derived from the exchange reference price on ex-dates; twse/tpex: ex-rights/ex-dividend result tables)"}
+  - {name: symbol, type: string, nullable: false, description: "Source-native symbol"}
+  - {name: ex_date, type: date, nullable: false, description: "Ex date"}
+  - {name: action_type, type: enum, nullable: false, values: [split, cash_dividend, special_dividend, stock_dividend, spinoff, rights, symbol_change], description: "Action"}
+  - {name: ratio, type: float64, nullable: true, description: "Split ratio new/old (2.0 = 2-for-1)"}
+  - {name: amount, type: float64, nullable: true, description: "Cash amount per share"}
+  - {name: amount_basis, type: enum, nullable: true, values: [raw, split_adjusted], description: "Basis of amount"}
+  - {name: currency, type: string, nullable: true, description: "Currency of amount"}
+  - {name: record_date, type: date, nullable: true, description: "Record date"}
+  - {name: pay_date, type: date, nullable: true, description: "Payment date"}
+  - {name: declared_date, type: date, nullable: true, description: "Declaration date"}
+  - {name: details, type: json, nullable: true, description: "Extra source fields (frequency, distribution_type, historical_adjustment_factor, split_from/split_to)"}
+  - {name: ingested_at, type: datetime, nullable: false, description: "Write time UTC"}

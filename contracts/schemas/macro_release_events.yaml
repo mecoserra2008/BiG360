@@ -1,0 +1,31 @@
+table: macro_release_events
+version: 1
+zone: normalized
+owner: macro-w2 (app.macro.calendar, job macro_calendar)
+description: >
+  Outcome of each (release, linked series): the value published for the new reference period (in the series release
+  measure, e.g. m/m % for US CPI, change in thousands for payrolls, level for rates and y/y series), the prior period as
+  known just before the release, the prior as revised by the release, and when we first saw it. Point-in-time: ALFRED
+  vintages (observed knowledge dates) for US vintage series, otherwise the realtime knowledge_date of macro_observations
+  (estimated = imputed release lag; flagged).
+storage: {path: normalized/macro_release_events, format: parquet, partition_by: [], write_mode: overwrite}
+primary_key: [release_event_id, series_id]
+columns:
+  - {name: release_event_id, type: string, nullable: false, description: "FK macro_releases"}
+  - {name: series_id, type: string, nullable: false, description: "FK macro_series"}
+  - {name: country, type: string, nullable: false, description: "ISO2 or EA"}
+  - {name: theme, type: enum, nullable: false, values: [growth, inflation, labor], description: "Surprise-index theme"}
+  - {name: measure, type: string, nullable: false, description: "Release measure: level | mom_pct | qoq_pct | diff"}
+  - {name: release_date, type: date, nullable: false, description: "Local release date"}
+  - {name: scheduled_at, type: datetime, nullable: false, description: "Scheduled release time UTC"}
+  - {name: period, type: date, nullable: true, description: "Reference period released or expected (period start, FRED convention)"}
+  - {name: status, type: enum, nullable: false, values: [released, pending, not_published], description: "released = new period seen; pending = release in the future or not yet ingested; not_published = release passed but no new period appeared (e.g. a revision-only release)"}
+  - {name: actual, type: float64, nullable: true, description: "Published value of the new period, in measure units"}
+  - {name: actual_raw, type: float64, nullable: true, description: "Published raw series value"}
+  - {name: prior, type: float64, nullable: true, description: "Previous period as known before the release (measure units)"}
+  - {name: prior_revised, type: float64, nullable: true, description: "Previous period as revised by this release (measure units)"}
+  - {name: prior_revision, type: float64, nullable: true, description: "prior_revised - prior"}
+  - {name: knowledge_date, type: date, nullable: true, description: "Knowledge date of the actual in macro_observations"}
+  - {name: knowledge_date_estimated, type: bool, nullable: true, description: "True when that knowledge date was imputed (period end + release lag)"}
+  - {name: first_seen_at, type: datetime, nullable: true, description: "When the actual was first available (UTC): the scheduled time for vintage-dated history, else the ingestion time"}
+  - {name: computed_at, type: datetime, nullable: false, description: "Write time UTC"}

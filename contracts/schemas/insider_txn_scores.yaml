@@ -1,0 +1,34 @@
+table: insider_txn_scores
+version: 1
+zone: scores
+owner: signals-alt (app.analytics.insider)
+description: >
+  Per open-market insider transaction (buys/sells, non-derivative, not superseded) scores and event features, joined
+  to insider_transactions on txn_id by the API (InsiderTransaction.anomaly_score / cluster_id, insider feed).
+  Features are point-in-time as of the row's knowledge_date (filing date). cluster_id: open-market buys of one issuer
+  chained while consecutive trade dates are <= 30 days apart, set when the episode has >= 2 distinct insiders.
+storage: {path: scores/insider_txn_scores, format: parquet, partition_by: [year], write_mode: upsert}
+primary_key: [txn_id]
+pit: {knowledge_column: knowledge_date, rule: "features use only filings with knowledge_date <= this row's knowledge_date; cluster_id is a descriptive episode label and may extend after later filings"}
+columns:
+  - {name: txn_id, type: string, nullable: false, description: "FK insider_transactions.txn_id"}
+  - {name: year, type: int16, nullable: false, description: "Partition: year(knowledge_date)"}
+  - {name: issuer_id, type: string, nullable: true, description: "Resolved issuer (null until identity resolves the source key)"}
+  - {name: security_id, type: string, nullable: true, description: "Primary security of the issuer"}
+  - {name: source_entity_id, type: string, nullable: false, description: "Issuer native id (CIK, ...)"}
+  - {name: knowledge_date, type: date, nullable: false, description: "Filing date"}
+  - {name: transaction_date, type: date, nullable: false, description: "Trade date"}
+  - {name: direction, type: int8, nullable: false, description: "+1 open-market buy, -1 open-market sell"}
+  - {name: value_usd, type: float64, nullable: true, description: "Reported USD value, else shares x price / close_usd estimate"}
+  - {name: role_weight, type: float64, nullable: true, description: "CEO 3.0, Chair 2.75, CFO 2.5, President 2.25, COO 2.0, other officer 1.5, director 1.25, 10% owner 0.75"}
+  - {name: n_insiders_same_dir_30d, type: int32, nullable: true, description: "Distinct insiders trading the same direction filed within the last 30 days (incl. this one)"}
+  - {name: first_buy_2y, type: bool, nullable: true, description: "Buy and the insider had no open-market buy at this issuer in the prior 2 years"}
+  - {name: routine, type: bool, nullable: true, description: "Cohen-Malloy-Pomorski routine trader (same calendar month in each of the 3 prior years)"}
+  - {name: size_vs_hist, type: float64, nullable: true, description: "log(1+value) minus the mean log(1+value) of the insider's prior same-direction trades"}
+  - {name: pre_drawdown_252d, type: float64, nullable: true, description: "Close at filing vs 252-session high - 1"}
+  - {name: pre_ret_126d, type: float64, nullable: true, description: "126-session return up to the filing date"}
+  - {name: cluster_id, type: string, nullable: true, description: "Cluster-buy episode id (buys only)"}
+  - {name: cluster_n_insiders, type: int32, nullable: true, description: "Distinct insiders in the episode"}
+  - {name: anomaly_score, type: float64, nullable: true, description: "IsolationForest anomaly 0..1 (ECDF of the training scores; 1 = most anomalous)"}
+  - {name: computed_at, type: datetime, nullable: false, description: "Write time UTC"}
+  - {name: run_id, type: string, nullable: true, description: "Producing run"}

@@ -1,0 +1,50 @@
+{
+ "title": "Hierarchical clustering of sectors by return correlation",
+ "description": "Equal-weighted monthly returns per sector (full universe, 2012 onwards); sectors are clustered with average linkage on 1 - correlation of their return series. Dendrogram, correlation heatmap and the best-silhouette cut.",
+ "tags": [
+  "clustering",
+  "hierarchical",
+  "sectors",
+  "correlation"
+ ],
+ "study": {
+  "name": "Sector return-correlation dendrogram",
+  "method": "hierarchical",
+  "x": [
+   "ret"
+  ],
+  "params": {
+   "layout": "pivot",
+   "pivot_var": "ret",
+   "metric": "correlation",
+   "linkage": "average",
+   "standardize": false,
+   "k_max": 6
+  },
+  "dataset": {
+   "kind": "panel",
+   "frequency": "M",
+   "start": "2012-01-01",
+   "entity_level": "sector",
+   "max_entities": 8000,
+   "entities": {
+    "universe": "full"
+   },
+   "variables": [
+    {
+     "name": "ret",
+     "source": "prices",
+     "field": "ret",
+     "entity_agg": "mean",
+     "pre_transforms": [
+      {
+       "op": "clip",
+       "lower": -0.9,
+       "upper": 3.0
+      }
+     ]
+    }
+   ]
+  }
+ }
+}

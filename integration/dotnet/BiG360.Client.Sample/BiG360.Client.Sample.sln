@@ -1,0 +1,36 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 16
+VisualStudioVersion = 16.0.30114.105
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src", "src", "{9EB2A8CE-9810-482D-9BF4-EEF9E332F81B}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BiG360.Client", "src\BiG360.Client\BiG360.Client.csproj", "{2A656015-0030-4E6A-902B-C2F79B8A857C}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "samples", "samples", "{714F5401-D5CC-4A87-B178-E7B67B6FB4DB}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BiG360.Console", "samples\BiG360.Console\BiG360.Console.csproj", "{17E5F629-571C-4FF0-AF42-B6A96F1840A0}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{2A656015-0030-4E6A-902B-C2F79B8A857C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{2A656015-0030-4E6A-902B-C2F79B8A857C}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{2A656015-0030-4E6A-902B-C2F79B8A857C}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{2A656015-0030-4E6A-902B-C2F79B8A857C}.Release|Any CPU.Build.0 = Release|Any CPU
+		{17E5F629-571C-4FF0-AF42-B6A96F1840A0}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{17E5F629-571C-4FF0-AF42-B6A96F1840A0}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{17E5F629-571C-4FF0-AF42-B6A96F1840A0}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{17E5F629-571C-4FF0-AF42-B6A96F1840A0}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{2A656015-0030-4E6A-902B-C2F79B8A857C} = {9EB2A8CE-9810-482D-9BF4-EEF9E332F81B}
+		{17E5F629-571C-4FF0-AF42-B6A96F1840A0} = {714F5401-D5CC-4A87-B178-E7B67B6FB4DB}
+	EndGlobalSection
+EndGlobal

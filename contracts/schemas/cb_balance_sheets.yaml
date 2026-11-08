@@ -1,0 +1,22 @@
+table: cb_balance_sheets
+version: 1
+zone: scores
+owner: macro-w3 (app.macro.cb.balance_sheets, job cb_balance_sheets)
+description: >
+  Central-bank balance-sheet components (official: Fed H.4.1 via FRED, ECB weekly financial statement ILM, BoE weekly
+  IADB, BoJ Accounts) in billions of local currency, with QT pace (method bs_v1): change vs ~13 weeks earlier,
+  annualised, and change vs ~1 year earlier. Overwritten nightly.
+storage: {path: scores/cb_balance_sheets, format: parquet, partition_by: [], write_mode: overwrite}
+primary_key: [bank, component, date]
+columns:
+  - {name: bank, type: string, nullable: false, description: "fed | ecb | boe | boj"}
+  - {name: date, type: date, nullable: false, description: "Reference date (Fed Wednesday, ECB week Friday, BoE Wednesday, BoJ month start)"}
+  - {name: component, type: string, nullable: false, description: "total_assets, treasuries, mbs, reserves, tga, on_rrp, securities_mp, lending_mpo, deposit_facility, banknotes, short_term_repo, indexed_long_term_repo, jgbs"}
+  - {name: value_bn, type: float64, nullable: false, description: "Billions of local currency"}
+  - {name: source, type: string, nullable: false, description: "Official source / series"}
+  - {name: change_13w_bn, type: float64, nullable: true, description: "Change vs ~91 days earlier (bn)"}
+  - {name: pace_annualized_bn, type: float64, nullable: true, description: "change_13w_bn x 365/91 (negative = QT / run-off)"}
+  - {name: change_1y_bn, type: float64, nullable: true, description: "Change vs ~1 year earlier (bn)"}
+  - {name: currency, type: string, nullable: true, description: "Local currency"}
+  - {name: method_version, type: string, nullable: false, description: "bs_v1"}
+  - {name: computed_at, type: datetime, nullable: false, description: "Write time UTC"}

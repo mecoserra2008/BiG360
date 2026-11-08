@@ -1,0 +1,39 @@
+{
+ "title": "GARCH: S&P 500 volatility and 1-day VaR",
+ "description": "Daily S&P 500 index returns (IDX:^GSPC) since 2000: GJR-GARCH(1,1) with Student-t errors, conditional volatility, simulated 10-day volatility band and 1-day VaR at 1% / 5% with a Kupiec backtest.",
+ "tags": [
+  "volatility",
+  "GARCH",
+  "VaR",
+  "market"
+ ],
+ "study": {
+  "name": "S&P 500 GJR-GARCH",
+  "method": "garch",
+  "y": "spx",
+  "x": [],
+  "params": {
+   "vol": "gjr",
+   "dist": "t",
+   "horizon": 10
+  },
+  "dataset": {
+   "kind": "timeseries",
+   "frequency": "D",
+   "start": "2000-01-01",
+   "variables": [
+    {
+     "name": "spx",
+     "source": "prices",
+     "field": "ret",
+     "entities": {
+      "security_ids": [
+       "IDX:^GSPC"
+      ]
+     },
+     "transforms": []
+    }
+   ]
+  }
+ }
+}

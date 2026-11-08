@@ -1,0 +1,25 @@
+table: macro_cell_history
+version: 1
+zone: scores
+owner: macro-w1 (app.macro.indicators, job macro_cells)
+description: >
+  Canonical-measure history (latest revised values) of every macro series of the 24 coverage countries and the
+  WLD/G7/EM aggregates (official sources only; AKShare excluded): one row per (series, measure, period). measure = the
+  catalog indicator (canonical transform per app.macro.indicators) or tf:yoy / tf:level for series without an
+  indicator. Daily/weekly series are calendar-month means. is_primary marks the series chosen for the macro_cells
+  cell. Rows derived:{CC}.curve_2s10s hold the 10Y-2Y slope. Overwritten nightly. Feeds the cycle clock, country
+  pages, compare and sparklines.
+storage: {path: scores/macro_cell_history, format: parquet, partition_by: [], write_mode: overwrite}
+primary_key: [series_id, measure, date]
+columns:
+  - {name: series_id, type: string, nullable: false, description: "FK macro_series (or derived:{CC}.curve_2s10s)"}
+  - {name: measure, type: string, nullable: false, description: "Indicator key or tf:yoy / tf:level"}
+  - {name: country, type: string, nullable: false, description: "ISO2 / EA / WLD / G7 / EM"}
+  - {name: indicator, type: string, nullable: true, description: "Indicator key (null for series without one)"}
+  - {name: date, type: date, nullable: false, description: "Period (month start for D/W/M; quarter/year start)"}
+  - {name: value, type: float64, nullable: true, description: "Canonical value"}
+  - {name: transform, type: enum, nullable: false, values: [yoy, qoq, level], description: "Transform applied"}
+  - {name: units, type: string, nullable: true, description: "Units of value"}
+  - {name: frequency, type: enum, nullable: false, values: [D, W, M, Q, A], description: "Native frequency"}
+  - {name: is_primary, type: bool, nullable: false, description: "Primary series of its macro_cells cell"}
+  - {name: computed_at, type: datetime, nullable: false, description: "Write time UTC"}

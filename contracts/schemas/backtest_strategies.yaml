@@ -1,0 +1,29 @@
+table: backtest_strategies
+version: 1
+zone: app_state
+owner: backtest (app.backtest.store via app.api.routers.backtest)
+description: >
+  Saved backtesting-lab strategies (roadmap v2 item #4): a named BacktestSpec (universe -> signal -> construction ->
+  costs -> period / OOS -> robustness) that can be re-run, compared, exported and scheduled as a paper strategy
+  (weekly re-run by the backtest_scheduled job with drift / decay alerts). Carries the strategy-level multiple-testing
+  counter used by the deflated Sharpe ratio. Mutable state lives in data/db/app_state.duckdb.
+storage: {path: app_state.duckdb, format: duckdb_table, partition_by: [], write_mode: upsert}
+primary_key: [strategy_id]
+columns:
+  - {name: strategy_id, type: string, nullable: false, description: "BS + UTC timestamp + 6 random base32 chars"}
+  - {name: name, type: string, nullable: false, description: "Display name"}
+  - {name: description, type: string, nullable: true, description: "Notes"}
+  - {name: spec, type: json, nullable: false, description: "BacktestSpec JSON (app.backtest.spec.BacktestSpec)"}
+  - {name: mode, type: enum, nullable: false, values: [rank, event], description: "Rank / quantile portfolio or event-driven"}
+  - {name: tags, type: json, nullable: true, description: "JSON array of strings"}
+  - {name: origin, type: json, nullable: true, description: "Where the strategy came from: {kind: screener|studio|cross_asset|cftc|preset|manual, ref}"}
+  - {name: last_run_id, type: string, nullable: true, description: "Most recent backtest_runs.run_id"}
+  - {name: schedule, type: enum, nullable: true, values: [none, weekly], description: "weekly = paper strategy re-run by backtest_scheduled"}
+  - {name: drift_threshold, type: float64, nullable: true, description: "Relative Sharpe / CAGR degradation that fires a drift alert (default 0.3)"}
+  - {name: last_scheduled_at, type: datetime, nullable: true, description: "UTC time of the last scheduled re-run"}
+  - {name: alert_id, type: string, nullable: true, description: "alerts row (rule_type backtest_drift) that carries this strategy's drift / decay events"}
+  - {name: n_trials, type: int64, nullable: false, description: "Multiple-testing counter: configurations tested under this strategy (distinct spec hashes x sweep grid sizes)"}
+  - {name: trials, type: json, nullable: true, description: "Per distinct spec hash: {hash, n, sharpes (per-period in-sample SRs)} used by the deflated Sharpe ratio"}
+  - {name: n_oos_views, type: int64, nullable: false, description: "Completed runs that reported the out-of-sample holdout (each look erodes its independence)"}
+  - {name: created_at, type: datetime, nullable: false, description: "UTC"}
+  - {name: updated_at, type: datetime, nullable: false, description: "UTC"}

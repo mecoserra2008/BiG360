@@ -1,0 +1,120 @@
+{
+ "title": "Short interest and future returns",
+ "description": "Do heavily shorted stocks (short interest % of shares) underperform? Smart-money panel (2023 on).",
+ "question": "events",
+ "tags": [
+  "events",
+  "short interest",
+  "smart money"
+ ],
+ "method_note": "Short sellers are informed traders (Boehmer et al. 2008). FINRA short interest is point-in-time on its publication date; the sample is short (2023 on), so treat t-stats as indicative. Caveat: the universe is today's constituents (membership history starts 2026-10), so early years carry survivorship bias; read the premium as an upper bound.",
+ "expected_outputs": [
+  "premium per short-interest signal",
+  "slope time series"
+ ],
+ "runtime_s": 2.2,
+ "validated": "2026-11-06 on snapshot R20261106T010757G9ZB",
+ "result": {
+  "run_id": "SR20261106T020606GQG3J",
+  "n_obs": 17824,
+  "metrics": {
+   "avg_r2": 0.048335673197418765
+  },
+  "coefficients": [
+   {
+    "term": "si_level",
+    "estimate": 0.004602866297683974,
+    "statistic": 1.6644345763410826,
+    "p_value": 0.10425149730621382
+   },
+   {
+    "term": "si_change",
+    "estimate": -0.000644758643332947,
+    "statistic": -0.6927581787493605,
+    "p_value": 0.492673610183145
+   },
+   {
+    "term": "log_mcap",
+    "estimate": -0.004509200256546049,
+    "statistic": -3.042588777663154,
+    "p_value": 0.004238913105322439
+   }
+  ]
+ },
+ "study": {
+  "name": "Short interest and future returns",
+  "method": "fama_macbeth",
+  "y": "fwd_ret_1m",
+  "x": [
+   "si_level",
+   "si_change",
+   "log_mcap"
+  ],
+  "params": {
+   "nw_lags": 2
+  },
+  "dataset": {
+   "kind": "panel",
+   "frequency": "M",
+   "start": "2023-06-01",
+   "entities": {
+    "universe": "mvp_us"
+   },
+   "variables": [
+    {
+     "name": "fwd_ret_1m",
+     "source": "prices",
+     "field": "ret",
+     "transforms": [
+      {
+       "op": "fwd_compound",
+       "k": 1
+      },
+      {
+       "op": "winsorize"
+      }
+     ]
+    },
+    {
+     "name": "si_level",
+     "source": "smart_money",
+     "field": "si_pct_out",
+     "transforms": [
+      {
+       "op": "winsorize"
+      },
+      {
+       "op": "cs_zscore"
+      }
+     ]
+    },
+    {
+     "name": "si_change",
+     "source": "smart_money",
+     "field": "si_chg_pct",
+     "transforms": [
+      {
+       "op": "winsorize"
+      },
+      {
+       "op": "cs_zscore"
+      }
+     ]
+    },
+    {
+     "name": "log_mcap",
+     "source": "valuation",
+     "field": "market_cap_usd",
+     "transforms": [
+      {
+       "op": "log"
+      },
+      {
+       "op": "cs_zscore"
+      }
+     ]
+    }
+   ]
+  }
+ }
+}

@@ -1,0 +1,48 @@
+table: earnings_expectations
+version: 2
+zone: scores
+owner: earnings (app.earnings.expectations)
+description: >
+  MODEL-BASED EXPECTATIONS (NOT CONSENSUS) for quarterly / half-yearly revenue and diluted EPS, and the surprise when
+  the actual lands. Per issuer x item x period x model, fitted only on values first reported before the period's
+  release (fundamentals_canonical first knowledge_date < release_date; EPS split-adjusted to the share basis at
+  the origin with corporate_actions splits). Models: sarima = Foster (1977) seasonal model, SARIMA(1,0,0)x(0,1,0)s
+  with drift on EPS and on log revenue (s = 4 quarterly, 2 half-yearly), airline SARIMA(0,1,1)x(0,1,1)s on log
+  revenue when >= 5 seasons; seasonal_naive = same period a year earlier (+ trailing seasonal growth for revenue),
+  interval from its past errors; forecast_path = next-FY base / bear / bull forecast (forecasts table) x the period's
+  seasonal share (upcoming periods only). primary = the headline expectation per issuer x item x period. Q4 values
+  are FY - 9M (derived_period) and quarterly EPS of a derived Q4 are approximate (share counts change), flagged.
+  surprise = actual - expectation; surprise_pct = surprise / |expectation|; surprise_z = surprise / sigma.
+storage: {path: scores/earnings_expectations, format: parquet, partition_by: [item_id], write_mode: upsert, sort_by: [issuer_id, period_end, model]}
+primary_key: [issuer_id, item_id, period_end, model]
+pit: {knowledge_column: origin_date, rule: "expectation known at origin_date (< release); actual / surprise known at actual_knowledge_date"}
+columns:
+  - {name: issuer_id, type: string, nullable: false, description: "FK issuers"}
+  - {name: item_id, type: enum, nullable: false, values: [revenue, eps_diluted], description: "Canonical item (eps_diluted falls back to eps_basic: see eps_basis)"}
+  - {name: period_end, type: date, nullable: false, description: "Target fiscal period end"}
+  - {name: fiscal_period, type: enum, nullable: true, values: [Q1, Q2, Q3, Q4, H1, H2], description: "Target fiscal period"}
+  - {name: fiscal_year, type: int16, nullable: true, description: "Target fiscal year"}
+  - {name: model, type: enum, nullable: false, values: [sarima, seasonal_naive, forecast_path, seasonal_rw], description: "Model; v2 seasonal_rw = same period a year earlier without estimation (issuers with a short history: TDnet tanshin, new listings, half-yearly reporters), no interval; model_spec says when the year-ago value is the prior-year comparative published in the release"}
+  - {name: model_spec, type: string, nullable: true, description: "e.g. SARIMA(1,0,0)x(0,1,0,4) drift on log revenue"}
+  - {name: is_primary, type: bool, nullable: false, description: "Headline expectation for this issuer x item x period"}
+  - {name: expectation, type: float64, nullable: true, description: "Point expectation (reporting currency; EPS per share)"}
+  - {name: lo80, type: float64, nullable: true, description: "80% interval low"}
+  - {name: hi80, type: float64, nullable: true, description: "80% interval high"}
+  - {name: lo95, type: float64, nullable: true, description: "95% interval low"}
+  - {name: hi95, type: float64, nullable: true, description: "95% interval high"}
+  - {name: sigma, type: float64, nullable: true, description: "Forecast standard error (value units)"}
+  - {name: n_train, type: int16, nullable: true, description: "Training observations"}
+  - {name: currency, type: string, nullable: true, description: "Reporting currency"}
+  - {name: eps_basis, type: enum, nullable: true, values: [diluted, basic], description: "EPS series used"}
+  - {name: derived_q4, type: bool, nullable: true, description: "Target value is a derived Q4 (FY - 9M)"}
+  - {name: origin_date, type: date, nullable: false, description: "Forecast origin: data known through this date (day before release, or run date for upcoming)"}
+  - {name: release_date, type: date, nullable: true, description: "Release date of the target period (earnings_events / calendar)"}
+  - {name: actual, type: float64, nullable: true, description: "First-reported actual (null while pending)"}
+  - {name: actual_knowledge_date, type: date, nullable: true, description: "Knowledge date of the actual"}
+  - {name: surprise, type: float64, nullable: true, description: "actual - expectation"}
+  - {name: surprise_pct, type: float64, nullable: true, description: "surprise / |expectation|"}
+  - {name: surprise_z, type: float64, nullable: true, description: "surprise / sigma"}
+  - {name: status, type: enum, nullable: false, values: [pending, released], description: "released when the actual is known"}
+  - {name: label, type: string, nullable: false, description: "'Model-based expectation (not consensus)'"}
+  - {name: computed_at, type: datetime, nullable: false, description: "Write time UTC"}
+  - {name: run_id, type: string, nullable: true, description: "job_runs.run_id"}

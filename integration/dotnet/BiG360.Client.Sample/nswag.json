@@ -1,0 +1,37 @@
+{
+  "runtime": "Net80",
+  "defaultVariables": null,
+  "documentGenerator": {
+    "fromDocument": {
+      "url": "../api.v30.json",
+      "output": null,
+      "newLineBehavior": "Auto"
+    }
+  },
+  "codeGenerators": {
+    "openApiToCSharpClient": {
+      "className": "Big360GeneratedClient",
+      "namespace": "BiG360.Client.Generated",
+      "generateClientInterfaces": true,
+      "generateDtoTypes": true,
+      "injectHttpClient": true,
+      "disposeHttpClient": false,
+      "useBaseUrl": false,
+      "generateBaseUrlProperty": false,
+      "operationGenerationMode": "SingleClientFromOperationId",
+      "jsonLibrary": "SystemTextJson",
+      "generateNullableReferenceTypes": true,
+      "generateOptionalPropertiesAsNullable": true,
+      "dateType": "System.DateTimeOffset",
+      "dateTimeType": "System.DateTimeOffset",
+      "arrayType": "System.Collections.Generic.ICollection",
+      "dictionaryType": "System.Collections.Generic.IDictionary",
+      "generateExceptionClasses": true,
+      "exceptionClass": "Big360GeneratedApiException",
+      "wrapDtoExceptions": true,
+      "generateJsonMethods": false,
+      "generateDefaultValues": true,
+      "output": "src/BiG360.Client.Generated/Big360GeneratedClient.g.cs"
+    }
+  }
+}

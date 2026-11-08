@@ -1,0 +1,49 @@
+# Data Ops settings (docs/OPERATIONS_ROADMAP.md O1). Owner: platform (app.ops). Values here override the built-in
+# defaults of app.ops.governor.DEFAULTS / app.ops.housekeeping.DEFAULTS; restart the gap filler to apply.
+version: 1
+
+governor:                    # resource governor of the gap filler (python -m app.ops.filler)
+  ram_cap_gb: 4.0            # RAM of the filler's process tree: no new task above it (a task may always run alone)
+  hard_factor: 1.5           # above ram_cap_gb * hard_factor the least urgent preemptible task is stopped
+  min_free_ram_gb: 3.0       # pause (stop every filler task) when the machine has less free RAM ...
+  resume_free_ram_gb: 3.5    # ... and resume only above this (hysteresis)
+  max_concurrency: 2
+  priority: below_normal     # CPU priority of every filler child (inherited by its own workers)
+  pause_on_battery: true
+  pause_on_metered: true     # metered connection / phone hotspot
+  min_disk_free_gb: 15
+  yield_to_dags: [nightly, weekly, monthly, sync]   # stop heavy tasks while a refresh DAG or the startup sync (pass 1) runs
+  tick_s: 15
+  # incident 2026-10-24 (docs/INCIDENT_2026-10-24.md)
+  heavy_ram_gb: 3.0          # tasks estimated at >= this (and module campaigns: E6, CC-NEWS) run alone
+  pagefile_growth_gb: 1.0    # machine guard: pause when the pagefile grows by more than this ...
+  pagefile_window_s: 300     # ... within this window while free RAM < 6 GB
+  pause_grace_s: 180         # pause / RAM stop: graceful window (STOP file / CTRL+BREAK) before the task's job is killed
+
+filler:
+  detect_every_h: 24         # full gap detection (the nightly DAG also runs data_gaps_detect after build_serving_db)
+
+housekeeping:                # every_h hours from the filler
+  every_h: 6
+  log_max_mb: 50             # copy-truncate rotation of data/logs/**/*.log above this size
+  log_keep: 3
+  job_logs_max_age_days: 45  # data/logs/jobs/<job>/<run>.log
+  snapshots_keep: 2          # serving snapshots (CURRENT is never deleted)
+  disk_warn_gb: 25
+  disk_min_gb: 15
+
+sync:                        # startup sync (docs/STARTUP_SYNC_PLAN.md A; app.ops.sync, started by the supervisor)
+  enabled: true              # env BIG360_SYNC=0 or supervisor --no-sync turns it off
+  start_delay_s: 90          # after the API is ready (the dashboard opens first)
+  interval_min: 30           # while the app is open, counted from the end of the previous sync
+  passes: 2                  # 1 = core only (fetch + headline analytics); 2 = + extended analytics (slow models)
+  stop_grace_s: 120          # supervisor shutdown: STOP file, then the sync's job object is killed
+  # coverage v3 A3 (app.ops.sync.caps; env BIG360_SYNC_CAPS=0 turns these off): budget per sync, history timeouts
+  max_wall_min: 120          # wall-clock budget of an interval / manual sync; the rest is deferred to the next sync
+  startup_max_wall_min: 240  # ... of the first sync after the app starts (more to catch up)
+  pass_max_jobs: 45          # jobs started per pass (pass 1 core, pass 2 extended)
+  timeout_p95_factor: 1.5    # per-job timeout = p95 of its successful runs x this ...
+  timeout_floor_min: 10      # ... clamped to at least this ...
+  timeout_ceiling_min: 180   # ... and at most max(this, the contract timeout_min); < 3 runs -> the contract timeout
+  stale_heartbeat_s: 900     # a sync holding the lock without a status heartbeat this long (or > 8 h old) is hung:
+  stale_confirm_s: 120       # ... confirmed this long, then STOP, then its job object is killed after stop_grace_s

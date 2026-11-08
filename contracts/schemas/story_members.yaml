@@ -1,0 +1,19 @@
+table: story_members
+version: 1
+zone: normalized
+owner: events-v2 (app.events_v2.stories)
+description: >
+  T2 story membership (E4): one row per article (any news source) in a story. Pruned by events_retention after the
+  T2 window (default 180 d); older stories keep only their representative URLs on news_stories.
+storage: {path: normalized/story_members, format: parquet, partition_by: [year_month], write_mode: append, retention: "180 d"}
+primary_key: [url_hash, date]
+columns:
+  - {name: year_month, type: string, nullable: false, description: "Partition YYYY-MM"}
+  - {name: date, type: date, nullable: false, description: "UTC date"}
+  - {name: story_id, type: int64, nullable: false, description: "news_stories story id"}
+  - {name: url_hash, type: int64, nullable: false, description: "blake2b-64 of the normalised URL"}
+  - {name: source_id, type: int8, nullable: false, description: "event_labels source id"}
+  - {name: domain_id, type: int32, nullable: true, description: "event_labels domain id"}
+  - {name: minute, type: int16, nullable: false, description: "Minute of day (UTC)"}
+  - {name: tone_x100, type: int16, nullable: true, description: "GDELT tone x 100 (null for non-GDELT sources)"}
+  - {name: lang_id, type: int8, nullable: true, description: "event_labels lang id"}

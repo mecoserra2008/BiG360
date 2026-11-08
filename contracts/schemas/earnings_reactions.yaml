@@ -1,0 +1,46 @@
+table: earnings_reactions
+version: 1
+zone: features
+owner: earnings (app.earnings.reactions)
+description: >
+  Price reaction to each earnings release (earnings_events) of the primary security, event day 0 = reaction_date.
+  Abnormal returns from a market model estimated on trading days [-250, -30] against the country index (ACWI
+  fallback), the method of the Model Studio event study (app.modeling._algos.car_study): CAR (sum of abnormal simple
+  returns) and BHAR (buy-and-hold return minus buy-and-hold expected return) over [-1,+1], [0,+5] and [+1,+20].
+  Realised-volatility baseline: sigma of the estimation-window residuals x sqrt(window length) = the "normal" move
+  for the window (no options data, so no option-implied move); move_ratio = |CAR[-1,+1]| / baseline. Gap: open of day
+  0 vs close of day -1; gap_filled = the price traded back through the day -1 close within days 0..+5; drift
+  continuation = sign(CAR[+1,+20]) equals sign(CAR[-1,+1]). PIT: a window's values are known after its last day
+  (knowledge_date = day +20 close for the full row; partial windows are null until complete).
+storage: {path: features/earnings_reactions, format: parquet, partition_by: [region], write_mode: overwrite, sort_by: [issuer_id, period_end]}
+primary_key: [issuer_id, period_end]
+pit: {knowledge_column: knowledge_date, rule: "each window is known after its last trading day; knowledge_date = last complete window end"}
+columns:
+  - {name: issuer_id, type: string, nullable: false, description: "FK issuers"}
+  - {name: security_id, type: string, nullable: false, description: "Primary security"}
+  - {name: region, type: string, nullable: false, description: "Partition"}
+  - {name: period_end, type: date, nullable: false, description: "Fiscal period (FK earnings_events)"}
+  - {name: release_date, type: date, nullable: false, description: "From earnings_events"}
+  - {name: reaction_date, type: date, nullable: false, description: "Event day 0 (a trading day of the security)"}
+  - {name: benchmark_id, type: string, nullable: true, description: "Market-model benchmark security"}
+  - {name: alpha, type: float64, nullable: true, description: "Market-model intercept (daily)"}
+  - {name: beta, type: float64, nullable: true, description: "Market-model beta"}
+  - {name: sigma_daily, type: float64, nullable: true, description: "Residual daily sigma in the estimation window"}
+  - {name: n_est, type: int16, nullable: true, description: "Estimation-window observations"}
+  - {name: ret_m1_p1, type: float64, nullable: true, description: "Raw compounded return days -1..+1"}
+  - {name: car_m1_p1, type: float64, nullable: true, description: "CAR [-1,+1]"}
+  - {name: car_0_p5, type: float64, nullable: true, description: "CAR [0,+5]"}
+  - {name: car_p1_p20, type: float64, nullable: true, description: "CAR [+1,+20] (post-earnings drift window)"}
+  - {name: bhar_m1_p1, type: float64, nullable: true, description: "BHAR [-1,+1]"}
+  - {name: bhar_0_p5, type: float64, nullable: true, description: "BHAR [0,+5]"}
+  - {name: bhar_p1_p20, type: float64, nullable: true, description: "BHAR [+1,+20]"}
+  - {name: ar_day0, type: float64, nullable: true, description: "Abnormal return on day 0"}
+  - {name: baseline_move_m1_p1, type: float64, nullable: true, description: "Realised-vol baseline for [-1,+1]: sigma_daily x sqrt(3)"}
+  - {name: move_ratio, type: float64, nullable: true, description: "|CAR[-1,+1]| / baseline_move_m1_p1"}
+  - {name: gap_pct, type: float64, nullable: true, description: "open(day 0) / close(day -1) - 1"}
+  - {name: gap_filled, type: bool, nullable: true, description: "Price traded back to the day -1 close within days 0..+5 (null when |gap| < 0.5 x sigma or no OHLC)"}
+  - {name: drift_continuation, type: bool, nullable: true, description: "sign(CAR[+1,+20]) == sign(CAR[-1,+1])"}
+  - {name: complete, type: bool, nullable: false, description: "All windows complete"}
+  - {name: knowledge_date, type: date, nullable: false, description: "Last complete window end"}
+  - {name: computed_at, type: datetime, nullable: false, description: "Write time UTC"}
+  - {name: run_id, type: string, nullable: true, description: "job_runs.run_id"}

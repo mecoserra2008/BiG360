@@ -1,0 +1,21 @@
+table: cb_projections
+version: 1
+zone: scores
+owner: macro-w3 (app.macro.cb.projections, job cb_projections)
+description: >
+  Official central-bank projections ("what the bank says"): Fed SEP (median / central tendency / range by year and
+  longer run, from FRED/ALFRED vintages - one set per SEP release) and ECB/Eurosystem staff macroeconomic projections
+  (ECB Data Portal MPD, incl. market-based short/long rate technical assumptions). Overwritten nightly.
+storage: {path: scores/cb_projections, format: parquet, partition_by: [], write_mode: overwrite}
+primary_key: [bank, release_date, variable, horizon, stat]
+columns:
+  - {name: bank, type: string, nullable: false, description: "fed | ecb"}
+  - {name: release_date, type: date, nullable: false, description: "Publication date (SEP: FOMC meeting day; ECB: Governing Council meeting of the exercise month)"}
+  - {name: exercise, type: string, nullable: false, description: "Projection exercise label"}
+  - {name: variable, type: string, nullable: false, description: "policy_rate, pce_inflation, core_pce_inflation, unemployment, gdp_growth, hicp_inflation, core_hicp_inflation, hicp_ex_energy_inflation, short_rate_assumption, long_rate_assumption"}
+  - {name: horizon, type: string, nullable: false, description: "Year (YYYY) or longer_run"}
+  - {name: stat, type: string, nullable: false, description: "median, central_low/high, range_low/high (Fed); baseline (ECB)"}
+  - {name: value, type: float64, nullable: false, unit: percent, description: "Projection value (Fed policy rate: year-end target-range midpoint; growth/inflation: Q4/Q4 (Fed) or annual average (ECB))"}
+  - {name: unit, type: string, nullable: false, description: "percent"}
+  - {name: source, type: string, nullable: false, description: "Official series id"}
+  - {name: computed_at, type: datetime, nullable: false, description: "Write time UTC"}

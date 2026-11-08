@@ -1,0 +1,28 @@
+<Project>
+  <!--
+    BiG360 .NET sample - shared build settings.
+
+    Target: net8.0 (LTS). The code is kept C# 10 compatible so it can also be verified with an older SDK:
+      dotnet build -p:Big360TargetFramework=net6.0 -p:Big360Offline=true      (no NuGet packages needed)
+    (a plain -p:TargetFramework=... override does not reach project references; Big360TargetFramework does)
+
+    Big360Offline=true  : no package references; built-in retry handler instead of Polly / HttpClientFactory.
+    Big360Offline=false : (default) Microsoft.Extensions.Http + Microsoft.Extensions.Http.Resilience (Polly v8)
+                          + Microsoft.Extensions.DependencyInjection; ServiceCollection extensions compiled in.
+    Big360UseMsal=true  : adds Microsoft.Identity.Client and the MSAL token provider (Entra ID client credentials).
+  -->
+  <PropertyGroup>
+    <TargetFramework>net8.0</TargetFramework>
+    <TargetFramework Condition="'$(Big360TargetFramework)' != ''">$(Big360TargetFramework)</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <LangVersion>10.0</LangVersion>
+    <TreatWarningsAsErrors>false</TreatWarningsAsErrors>
+    <Big360Offline Condition="'$(Big360Offline)' == ''">false</Big360Offline>
+    <Big360UseMsal Condition="'$(Big360UseMsal)' == ''">false</Big360UseMsal>
+    <DefineConstants Condition="'$(Big360Offline)' == 'true'">$(DefineConstants);BIG360_OFFLINE</DefineConstants>
+    <DefineConstants Condition="'$(Big360UseMsal)' == 'true' And '$(Big360Offline)' != 'true'">$(DefineConstants);BIG360_MSAL</DefineConstants>
+    <Version>1.31.0</Version>
+    <Authors>BiG Equity 360</Authors>
+  </PropertyGroup>
+</Project>

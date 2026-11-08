@@ -1,0 +1,71 @@
+{
+ "title": "VAR: rates / inflation / IP impulse responses",
+ "description": "Monthly US industrial-production growth, CPI inflation (100 x log changes) and the change in the 10Y Treasury yield since 1990. Lag order by BIC, Cholesky-orthogonalized impulse responses over 24 months (ordering IP -> inflation -> rates), FEVD and Granger causality.",
+ "tags": [
+  "multivariate",
+  "VAR",
+  "macro",
+  "rates"
+ ],
+ "study": {
+  "name": "IP / CPI / 10Y VAR",
+  "method": "var",
+  "x": [
+   "ip_g",
+   "infl",
+   "d10y"
+  ],
+  "params": {
+   "maxlags": 6,
+   "ic": "bic",
+   "irf_periods": 24
+  },
+  "dataset": {
+   "kind": "timeseries",
+   "frequency": "M",
+   "start": "1990-01-01",
+   "macro_alignment": "period",
+   "variables": [
+    {
+     "name": "ip_g",
+     "source": "macro",
+     "field": "fred:INDPRO",
+     "transforms": [
+      {
+       "op": "log_diff"
+      },
+      {
+       "op": "scale",
+       "factor": 100
+      }
+     ]
+    },
+    {
+     "name": "infl",
+     "source": "macro",
+     "field": "fred:CPIAUCSL",
+     "transforms": [
+      {
+       "op": "log_diff"
+      },
+      {
+       "op": "scale",
+       "factor": 100
+      }
+     ]
+    },
+    {
+     "name": "d10y",
+     "source": "macro",
+     "field": "fred:DGS10",
+     "transforms": [
+      {
+       "op": "diff"
+      }
+     ],
+     "agg": "mean"
+    }
+   ]
+  }
+ }
+}

@@ -1,0 +1,39 @@
+table: cftc_markets
+version: 1
+zone: reference
+owner: cftc (app.ingestion.cftc)
+description: >
+  One row per CFTC contract market (Commitments of Traders, official CFTC Public Reporting Environment). Latest
+  published name / exchange / commodity group of the market code, the report types that cover it, history span, and the
+  mapping to our futures instruments (curated table app.ingestion.cftc_mapping, then normalized-name matching against
+  securities_master futures) and to an asset class. Rebuilt (overwrite) after every cftc_cot run.
+storage: {path: reference/cftc_markets, format: parquet, partition_by: [], write_mode: overwrite, sort_by: [market_code]}
+primary_key: [market_code]
+columns:
+  - {name: market_code, type: string, nullable: false, description: "CFTC contract market code (cftc_contract_market_code, 6 chars, e.g. 067651 WTI, 13874A E-mini S&P 500)"}
+  - {name: market_name, type: string, nullable: false, description: "Latest contract_market_name"}
+  - {name: market_and_exchange, type: string, nullable: true, description: "Latest market_and_exchange_names as published"}
+  - {name: exchange, type: string, nullable: true, description: "Exchange name (part after ' - ')"}
+  - {name: commodity_name, type: string, nullable: true, description: "CFTC commodity_name"}
+  - {name: commodity_code, type: string, nullable: true, description: "CFTC cftc_commodity_code"}
+  - {name: commodity_group, type: string, nullable: true, description: "CFTC commodity_group_name (AGRICULTURE, NATURAL RESOURCES, FINANCIAL INSTRUMENTS)"}
+  - {name: commodity_subgroup, type: string, nullable: true, description: "CFTC commodity_subgroup_name"}
+  - {name: contract_units, type: string, nullable: true, description: "Contract units as published"}
+  - {name: asset_class, type: enum, nullable: false, values: [energy, metals, ags, softs, livestock, rates, equity, fx, crypto, other], description: "Our asset class (curated, else from CFTC subgroup / name)"}
+  - {name: short_name, type: string, nullable: true, description: "Display label (curated, e.g. 'WTI crude') else title-cased market name"}
+  - {name: root, type: string, nullable: true, description: "Futures root when mapped (CL, GC, ES, 6E ...)"}
+  - {name: security_id, type: string, nullable: true, description: "Mapped futures instrument (securities_master, e.g. IDX:CL=F)"}
+  - {name: price_security_id, type: string, nullable: true, description: "Instrument used for prices: security_id, else a labelled proxy (FX pair, index) when no futures series exists"}
+  - {name: price_is_proxy, type: bool, nullable: true, description: "True when price_security_id is a proxy (not the futures contract itself)"}
+  - {name: linked_security_ids, type: "list<string>", nullable: true, description: "Instruments whose page links to this market (e.g. CL=F, QM=F for 067651)"}
+  - {name: mapping_method, type: enum, nullable: false, values: [curated, name_match, none], description: "How security_id was assigned"}
+  - {name: is_major, type: bool, nullable: false, description: "Curated headline market (heatmap default set)"}
+  - {name: primary_report, type: enum, nullable: false, values: [legacy, disagg, tff], description: "Report family used for headline signals: disagg for physical commodities, tff for financials, legacy otherwise"}
+  - {name: report_types, type: "list<string>", nullable: false, description: "cftc_positions.report_type values with rows for this market"}
+  - {name: first_report_date, type: date, nullable: true, description: "First report date (any report type)"}
+  - {name: last_report_date, type: date, nullable: true, description: "Last report date (any report type)"}
+  - {name: n_weeks, type: int32, nullable: true, description: "Distinct report dates (any report type)"}
+  - {name: latest_open_interest, type: int64, nullable: true, description: "Open interest on last_report_date (legacy futures-only, else combined / first available)"}
+  - {name: is_active, type: bool, nullable: false, description: "Reported within 21 days of the latest report date in the dataset"}
+  - {name: source_id, type: string, nullable: false, description: "cftc"}
+  - {name: updated_at, type: datetime, nullable: false, description: "Write time UTC"}

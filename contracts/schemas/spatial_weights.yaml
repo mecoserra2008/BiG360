@@ -1,0 +1,25 @@
+table: spatial_weights
+version: 1
+zone: features
+owner: linkage (app.linkage.weights)
+description: >
+  A7 versioned spatial / network weight matrices, long format (one row per non-zero cell), raw and row-standardized.
+  Country level: contiguity_queen, contiguity_rook, inv_distance, knn5 (Natural Earth), trade, trade_exports (IMF
+  IMTS / Comtrade), io_upstream (OECD ICIO), bank_claims (BIS LBS). country_sector level: io_upstream (latest ICIO
+  year). issuer level: customer (company_links), comention (GDELT, trailing 12 months). issuer_country level
+  (bipartite): exposure = revenue share by country (company_geo_revenue; regions spread by GDP). Read with
+  app.linkage.weights.get_W(kind, level, as_of) -> libpysal W / scipy sparse. Diagonal is always empty.
+storage: {path: features/spatial_weights, format: parquet, partition_by: [kind], write_mode: upsert, retention: "last 3 versions"}
+primary_key: [kind, level, period, version, i, j]
+pit: {knowledge_column: as_of, rule: "a matrix may be used for dates >= as_of (source publication lag rules)"}
+columns:
+  - {name: kind, type: string, nullable: false, description: "Matrix kind (see description)"}
+  - {name: level, type: enum, nullable: false, values: [country, country_sector, issuer, issuer_country], description: "Node level"}
+  - {name: period, type: string, nullable: false, description: "static | YYYY | YYYY-Qn | YYYY-MM"}
+  - {name: as_of, type: date, nullable: false, description: "First date the matrix is known (PIT)"}
+  - {name: version, type: string, nullable: false, description: "Build version (YYYYMMDD)"}
+  - {name: i, type: string, nullable: false, description: "Row node (ISO2 | ISO2:SECTOR | issuer_id)"}
+  - {name: j, type: string, nullable: false, description: "Column node (ISO2 | ISO2:SECTOR | issuer_id)"}
+  - {name: w_raw, type: float64, nullable: false, description: "Raw weight (binary, 1/1000 km, USD, USD millions, share, count)"}
+  - {name: w_row, type: float64, nullable: false, description: "Row-standardized weight (sum over j = 1)"}
+  - {name: built_at, type: datetime, nullable: false, description: "Write time UTC"}

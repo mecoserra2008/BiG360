@@ -1,0 +1,22 @@
+table: ml_scope_status
+version: 1
+zone: ml
+owner: ml (app.ml.full_scope)
+description: >
+  Full-universe ML coverage (2026-10-30): one row per security outside the MVP model universe x horizon with the
+  outcome of the latest ml_predict_full run. status served = an extrapolated prediction of the production model is in
+  ml_predictions (scope extrapolated) because the out-of-sample check of extrapolation passed for the security's
+  segment (region x size bucket); no_prediction = withheld, with the reason (suppressed: no validated skill for the
+  segment; insufficient_data: features missing; stale: no recent price). Replaced on every run.
+storage: {path: ml/ml_scope_status, format: parquet, partition_by: [], write_mode: overwrite}
+primary_key: [security_id, horizon]
+columns:
+  - {name: as_of_date, type: date, nullable: false, description: "Feature date of the run"}
+  - {name: security_id, type: string, nullable: false, description: "FK securities_master"}
+  - {name: horizon, type: enum, nullable: false, values: ["1M", "3M", "6M"], description: "Horizon"}
+  - {name: model_run_id, type: string, nullable: true, description: "Production model used (served rows)"}
+  - {name: segment, type: string, nullable: true, description: "region|size bucket used by the gate"}
+  - {name: status, type: enum, nullable: false, values: [served, no_prediction], description: "Outcome"}
+  - {name: reason, type: enum, nullable: true, values: [suppressed, insufficient_data, stale], description: "Why no prediction (availability code)"}
+  - {name: detail, type: string, nullable: true, description: "Human-readable reason / validation numbers"}
+  - {name: computed_at, type: datetime, nullable: false, description: "Write time UTC"}

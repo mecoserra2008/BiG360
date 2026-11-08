@@ -1,0 +1,65 @@
+{
+ "data": [
+  {
+   "figi": "BBG004HST0K7",
+   "name": "APPLE INC",
+   "ticker": "AAPL 3.85 05/04/43",
+   "exchCode": "TRACE",
+   "compositeFIGI": null,
+   "securityType": "GLOBAL",
+   "marketSector": "Corp",
+   "shareClassFIGI": null,
+   "securityType2": "Corp",
+   "securityDescription": "AAPL 3.85 05/04/43"
+  },
+  {
+   "figi": "BBG007GL4B56",
+   "name": "APPLE INC",
+   "ticker": "AAPL 1 11/10/22 EMTN",
+   "exchCode": "ALL GERMAN SE",
+   "compositeFIGI": null,
+   "securityType": "EURO MTN",
+   "marketSector": "Corp",
+   "shareClassFIGI": null,
+   "securityType2": "Corp",
+   "securityDescription": "AAPL 1 11/10/22"
+  },
+  {
+   "figi": "BBG0191F26Z0",
+   "name": "APPLE INC",
+   "ticker": "AAPL 3.25 08/08/29",
+   "exchCode": "TRACE",
+   "compositeFIGI": null,
+   "securityType": "GLOBAL",
+   "marketSector": "Corp",
+   "shareClassFIGI": null,
+   "securityType2": "Corp",
+   "securityDescription": "AAPL 3 1/4 08/08/29"
+  },
+  {
+   "figi": "BBG009T72B24",
+   "name": "APPLE INC",
+   "ticker": "AAPL F 08/28/19 MTn",
+   "exchCode": "ALL GERMAN SE",
+   "compositeFIGI": null,
+   "securityType": "DOMESTIC MTN",
+   "marketSector": "Corp",
+   "shareClassFIGI": null,
+   "securityType2": "Corp",
+   "securityDescription": "AAPL Float 08/28/19"
+  },
+  {
+   "figi": "BBG01TV6YQ66",
+   "name": "APPLE INC",
+   "ticker": "AAPL 4 05/12/28",
+   "exchCode": "TRACE",
+   "compositeFIGI": null,
+   "securityType": "GLOBAL",
+   "marketSector": "Corp",
+   "shareClassFIGI": null,
+   "securityType2": "Corp",
+   "securityDescription": "AAPL 4 05/12/28"
+  }
+ ],
+ "next": "QW9JSVFMZThTU3hDUWtjd01EUklVMVF3TmpNPSAx"
+}

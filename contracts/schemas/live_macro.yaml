@@ -1,0 +1,32 @@
+table: live_macro
+version: 1
+zone: normalized
+owner: realtime (app.realtime.compact)
+description: >
+  Macro releases captured live (R1 macro capture): the official source polled from the W2 scheduled time until the
+  target period appeared; actual in the release measure, surprise vs the stored primary MODEL-BASED expectation (not
+  consensus; W2 z rule). Keys = macro_release_events (release_event_id, series_id) for dedupe with the nightly
+  macro_calendar. knowledge_ts = capture time (first seen; PIT), source_ts = scheduled release time.
+storage: {path: normalized/live_macro, format: parquet, partition_by: [date], write_mode: append, retention: "forever"}
+primary_key: [release_event_id, series_id]
+pit: {knowledge_column: knowledge_ts, rule: "first seen by the real-time path"}
+columns:
+  - {name: release_event_id, type: string, nullable: false, description: "= macro_release_events.release_event_id"}
+  - {name: series_id, type: string, nullable: false, description: "Tracked series"}
+  - {name: date, type: date, nullable: false, description: "Partition: UTC date of knowledge_ts"}
+  - {name: country, type: string, nullable: true, description: "ISO2 / EA"}
+  - {name: release_name, type: string, nullable: true, description: "Release title"}
+  - {name: period, type: date, nullable: true, description: "Reference period released"}
+  - {name: measure, type: string, nullable: true, description: "level | diff | mom_pct | qoq_pct | yoy_pct"}
+  - {name: actual, type: float64, nullable: true, description: "Released value in the measure"}
+  - {name: prior, type: float64, nullable: true, description: "Prior period as known before the release"}
+  - {name: expectation, type: float64, nullable: true, description: "Primary model-based expectation (not consensus)"}
+  - {name: surprise_z, type: float64, nullable: true, description: "clip((actual - expectation) / scale, -5, 5)"}
+  - {name: signed_z, type: float64, nullable: true, description: "surprise_z x direction"}
+  - {name: importance, type: int8, nullable: true, description: "Tier 1-3"}
+  - {name: capture_delay_s, type: float64, nullable: true, description: "Capture time - scheduled time, seconds"}
+  - {name: source_ts, type: datetime, nullable: true, description: "Scheduled release time UTC"}
+  - {name: knowledge_ts, type: datetime, nullable: false, description: "First seen by the real-time path, UTC"}
+  - {name: bus_id, type: int64, nullable: false, description: "Hot-store message id"}
+  - {name: payload, type: json, nullable: true, description: "Full live payload"}
+  - {name: compacted_at, type: datetime, nullable: false, description: "Write time UTC"}

@@ -1,0 +1,45 @@
+table: regulatory_register
+version: 1
+zone: reference
+owner: ingest-register (app.ingestion.regulatory_register)
+description: >
+  Coverage v2 W2 (docs/COVERAGE_V2_PLAN.md): the securities regulators' registers of listed equity issuers, the
+  denominator of the per-market coverage report. One row per (market, register, issuer). US = SEC registrants with an
+  exchange-listed ticker (company_tickers_exchange.json: Nasdaq / NYSE / Cboe / TXSE) that file 10-K / 10-Q / 20-F /
+  40-F (EDGAR full-index, last 9 quarters); OTC-only and non-periodic registrants are kept with status `excluded` and a
+  reason. EU = issuers (LEI) of shares admitted to an EEA regulated market at the issuer's request (ESMA FIRDS weekly
+  full file, RM venues from ISO 10383 RMKT + the ESMA regulated-market register). UK = issuers of shares admitted to a
+  UK regulated market (FCA FIRDS, LSE Main Market = the FCA Official List of equity) and of AIM shares (FCA FIRDS
+  venue AIMX). Names / country / company number from GLEIF. issuer_id / security_id are the reference matches
+  (identifier_map: CIK, LEI, ISIN); null = not (yet) in securities_master.
+storage: {path: reference/regulatory_register, format: parquet, partition_by: [market], write_mode: overwrite_partition}
+primary_key: [market, register, issuer_key]
+columns:
+  - {name: market, type: enum, nullable: false, values: [US, EU, UK], description: "Partition: regulator market"}
+  - {name: register, type: enum, nullable: false, values: [sec_listed, esma_rm, fca_official_list, lse_aim], description: "Register: SEC exchange-listed periodic filers | ESMA FIRDS EEA regulated markets | FCA FIRDS UK regulated market (Official List) | AIM (MTF, FCA FIRDS AIMX)"}
+  - {name: issuer_key, type: string, nullable: false, description: "Native issuer key: CIK10 (US) or LEI (EU / UK)"}
+  - {name: issuer_name, type: string, nullable: false, description: "Registrant name (SEC) / GLEIF legal name (else the FIRDS instrument name)"}
+  - {name: lei, type: string, nullable: true, description: "Legal Entity Identifier"}
+  - {name: cik, type: string, nullable: true, description: "SEC CIK, 10 digits"}
+  - {name: company_number, type: string, nullable: true, description: "National company register number (GLEIF registeredAs); Companies House number for GB-registered entities"}
+  - {name: country, type: string, nullable: true, description: "Country of the legal address / incorporation (ISO2; GLEIF, SEC submissions for US)"}
+  - {name: jurisdiction, type: string, nullable: true, description: "GLEIF legal jurisdiction (e.g. GB, JE, DE, US-DE)"}
+  - {name: instruments, type: list<string>, nullable: true, description: "ISINs of the admitted equity instruments (EU / UK); null for US (no ISIN in the SEC lists)"}
+  - {name: tickers, type: list<string>, nullable: true, description: "Exchange tickers (US: SEC company_tickers_exchange)"}
+  - {name: venues, type: list<string>, nullable: true, description: "Trading-venue MICs of the admissions (RM / AIM segment MICs; US exchange MICs)"}
+  - {name: primary_venue, type: string, nullable: true, description: "FIRDS most relevant venue (if regulated) or the first admission venue; US: primary exchange MIC"}
+  - {name: competent_authority, type: string, nullable: true, description: "FIRDS relevant competent authority (country code of the NCA)"}
+  - {name: first_admission, type: date, nullable: true, description: "Earliest admission approval / first trading date of the instruments (FIRDS)"}
+  - {name: filer_category, type: enum, nullable: true, values: [domestic, foreign_private_20f, foreign_40f, non_sec], description: "US: from the latest periodic form (10-K / 10-Q domestic, 20-F, 40-F)"}
+  - {name: last_annual_form, type: string, nullable: true, description: "US: latest 10-K / 20-F / 40-F (+/A) form type"}
+  - {name: last_annual_filed, type: date, nullable: true, description: "US: filing date of that form"}
+  - {name: last_interim_filed, type: date, nullable: true, description: "US: latest 10-Q filing date"}
+  - {name: status, type: enum, nullable: false, values: [active, excluded, removed], description: "active = counts in the denominator; excluded = listed but outside the register definition (status_reason); removed = left the register (kept 365 days)"}
+  - {name: status_reason, type: string, nullable: true, description: "Why excluded / removed (OTC quotation, investment company N-CSR filer, no periodic report yet, ...)"}
+  - {name: issuer_id, type: string, nullable: true, description: "FK issuers (reference match), null = not in securities_master"}
+  - {name: security_id, type: string, nullable: true, description: "Primary active security of the matched issuer"}
+  - {name: match_method, type: enum, nullable: true, values: [cik, lei, isin, ticker, none], description: "How issuer_id was found"}
+  - {name: as_of, type: date, nullable: false, description: "Register snapshot date (SEC list date / FIRDS file date)"}
+  - {name: source_file, type: string, nullable: true, description: "Source snapshot (FIRDS file set, company_tickers_exchange date)"}
+  - {name: updated_at, type: datetime, nullable: false, description: "Write time UTC"}
+  - {name: run_id, type: string, nullable: true, description: "Producing run"}

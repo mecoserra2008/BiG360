@@ -1,0 +1,105 @@
+{
+ "title": "Value premium by sector (hierarchical partial pooling)",
+ "description": "Is the earnings-yield premium different across sectors? Sector-specific slopes shrunk toward the cross-sector mean by a Gibbs sampler.",
+ "question": "factors",
+ "tags": [
+  "probabilistic",
+  "hierarchical",
+  "value"
+ ],
+ "method_note": "Varying intercepts and slopes by sector, beta_s ~ N(mu, tau^2), tau with a half-Cauchy prior; blocked Gibbs (4 chains) with split R-hat and ESS. Small or noisy sectors borrow strength from the rest; out of fold it is compared with one pooled OLS and per-sector OLS. Caveat: the universe is today's constituents (membership history starts 2026-10), so early years carry survivorship bias; read the premium as an upper bound.",
+ "expected_outputs": [
+  "per-sector slopes: no / partial / complete pooling",
+  "forest plot",
+  "R-hat / ESS",
+  "CRPS / PIT"
+ ],
+ "runtime_s": 11.2,
+ "validated": "2026-11-06 on snapshot R20261106T010757G9ZB",
+ "result": {
+  "run_id": "SR20261106T023843MMS2M",
+  "beats_baseline": false,
+  "beats_linear": false,
+  "verdict": "partial pooling does not significantly beat linear-Gaussian baseline on CRPS (DM p = 0.869); point forecast: partial pooling does not significantly beat linear baseline (DM p = 0.387)",
+  "n_obs": 59526,
+  "metrics": {
+   "oos_rmse": 0.09514995299245722,
+   "oos_r2_oos": -0.00046143526129127643,
+   "oos_rank_ic": 0.021950206711789225,
+   "crps": 0.051005667571459835,
+   "crps_linear": 0.051007437323000546,
+   "crps_skill_vs_linear": 3.469595089644617e-05,
+   "coverage_90": 0.910963276551423,
+   "dm_p_crps_vs_linear": 0.8690709569787207,
+   "max_rhat": 1.0059565829457764,
+   "dm_p_vs_linear": 0.3873172548584897
+  },
+  "coefficients": [
+   {
+    "term": "mu[const]",
+    "estimate": 0.016452759637091773,
+    "statistic": null,
+    "p_value": null
+   },
+   {
+    "term": "mu[earnings_yield]",
+    "estimate": -0.004691020030265165,
+    "statistic": null,
+    "p_value": null
+   }
+  ]
+ },
+ "study": {
+  "name": "Value premium by sector (hierarchical partial pooling)",
+  "method": "hier_pool",
+  "y": "fwd_ret_1m",
+  "x": [
+   "earnings_yield"
+  ],
+  "params": {
+   "group": "sector_id",
+   "estimator": "gibbs",
+   "n_iter": 2000,
+   "burn": 1000,
+   "cv": {
+    "folds": 5,
+    "scheme": "purged_kfold",
+    "purge": 1
+   }
+  },
+  "dataset": {
+   "kind": "panel",
+   "frequency": "M",
+   "start": "2015-01-01",
+   "entities": {
+    "universe": "mvp_us"
+   },
+   "variables": [
+    {
+     "name": "fwd_ret_1m",
+     "source": "prices",
+     "field": "ret",
+     "transforms": [
+      {
+       "op": "fwd_compound",
+       "k": 1
+      },
+      {
+       "op": "winsorize"
+      }
+     ]
+    },
+    {
+     "name": "earnings_yield",
+     "source": "valuation",
+     "field": "earnings_yield",
+     "transforms": [
+      {
+       "op": "cs_rank"
+      }
+     ]
+    }
+   ]
+  }
+ }
+}

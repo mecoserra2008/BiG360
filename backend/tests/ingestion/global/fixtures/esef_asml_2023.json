@@ -1,0 +1,277 @@
+{
+"documentInfo": {
+"documentType": "https://xbrl.org/2021/xbrl-json",
+"features": {
+"xbrl:canonicalValues": true
+},
+"namespaces": {
+"asml": "http://www.asml.com/20231231",
+"ifrs-full": "https://xbrl.ifrs.org/taxonomy/2022-03-24/ifrs-full",
+"iso4217": "http://www.xbrl.org/2003/iso4217",
+"scheme": "http://standards.iso.org/iso/17442",
+"xbrl": "https://xbrl.org/2021",
+"xbrli": "http://www.xbrl.org/2003/instance"
+},
+"taxonomy": [
+"http://www.asml.com/20231231/asml-2023-12-31.xsd"
+]
+},
+"facts": {
+"f-1": {
+"value": "13652800000",
+"decimals": -5,
+"dimensions": {
+"concept": "asml:NetSystemSales",
+"entity": "scheme:724500Y6DUVHQD6OXN27",
+"period": "2021-01-01T00:00:00/2022-01-01T00:00:00",
+"unit": "iso4217:EUR"
+}
+},
+"f-2": {
+"value": "15430300000",
+"decimals": -5,
+"dimensions": {
+"concept": "asml:NetSystemSales",
+"entity": "scheme:724500Y6DUVHQD6OXN27",
+"period": "2022-01-01T00:00:00/2023-01-01T00:00:00",
+"unit": "iso4217:EUR"
+}
+},
+"f-3": {
+"value": "21938600000",
+"decimals": -5,
+"dimensions": {
+"concept": "asml:NetSystemSales",
+"entity": "scheme:724500Y6DUVHQD6OXN27",
+"period": "2023-01-01T00:00:00/2024-01-01T00:00:00",
+"unit": "iso4217:EUR"
+}
+},
+"f-7": {
+"value": "18611000000",
+"decimals": -5,
+"dimensions": {
+"concept": "ifrs-full:Revenue",
+"entity": "scheme:724500Y6DUVHQD6OXN27",
+"period": "2021-01-01T00:00:00/2022-01-01T00:00:00",
+"unit": "iso4217:EUR"
+}
+},
+"f-8": {
+"value": "21173400000",
+"decimals": -5,
+"dimensions": {
+"concept": "ifrs-full:Revenue",
+"entity": "scheme:724500Y6DUVHQD6OXN27",
+"period": "2022-01-01T00:00:00/2023-01-01T00:00:00",
+"unit": "iso4217:EUR"
+}
+},
+"f-9": {
+"value": "27558500000",
+"decimals": -5,
+"dimensions": {
+"concept": "ifrs-full:Revenue",
+"entity": "scheme:724500Y6DUVHQD6OXN27",
+"period": "2023-01-01T00:00:00/2024-01-01T00:00:00",
+"unit": "iso4217:EUR"
+}
+},
+"f-52": {
+"value": "6134600000",
+"decimals": -5,
+"dimensions": {
+"concept": "ifrs-full:ProfitLoss",
+"entity": "scheme:724500Y6DUVHQD6OXN27",
+"period": "2021-01-01T00:00:00/2022-01-01T00:00:00",
+"unit": "iso4217:EUR"
+}
+},
+"f-53": {
+"value": "6395800000",
+"decimals": -5,
+"dimensions": {
+"concept": "ifrs-full:ProfitLoss",
+"entity": "scheme:724500Y6DUVHQD6OXN27",
+"period": "2022-01-01T00:00:00/2023-01-01T00:00:00",
+"unit": "iso4217:EUR"
+}
+},
+"f-54": {
+"value": "8115200000",
+"decimals": -5,
+"dimensions": {
+"concept": "ifrs-full:ProfitLoss",
+"entity": "scheme:724500Y6DUVHQD6OXN27",
+"period": "2023-01-01T00:00:00/2024-01-01T00:00:00",
+"unit": "iso4217:EUR"
+}
+},
+"f-55": {
+"value": "14.97",
+"decimals": 2,
+"dimensions": {
+"concept": "ifrs-full:BasicEarningsLossPerShare",
+"entity": "scheme:724500Y6DUVHQD6OXN27",
+"period": "2021-01-01T00:00:00/2022-01-01T00:00:00",
+"unit": "iso4217:EUR/xbrli:shares"
+}
+},
+"f-56": {
+"value": "16.08",
+"decimals": 2,
+"dimensions": {
+"concept": "ifrs-full:BasicEarningsLossPerShare",
+"entity": "scheme:724500Y6DUVHQD6OXN27",
+"period": "2022-01-01T00:00:00/2023-01-01T00:00:00",
+"unit": "iso4217:EUR/xbrli:shares"
+}
+},
+"f-57": {
+"value": "20.61",
+"decimals": 2,
+"dimensions": {
+"concept": "ifrs-full:BasicEarningsLossPerShare",
+"entity": "scheme:724500Y6DUVHQD6OXN27",
+"period": "2023-01-01T00:00:00/2024-01-01T00:00:00",
+"unit": "iso4217:EUR/xbrli:shares"
+}
+},
+"f-67": {
+"value": "6134600000",
+"decimals": -5,
+"dimensions": {
+"concept": "ifrs-full:ProfitLoss",
+"entity": "scheme:724500Y6DUVHQD6OXN27",
+"period": "2021-01-01T00:00:00/2022-01-01T00:00:00",
+"unit": "iso4217:EUR"
+}
+},
+"f-68": {
+"value": "6395800000",
+"decimals": -5,
+"dimensions": {
+"concept": "ifrs-full:ProfitLoss",
+"entity": "scheme:724500Y6DUVHQD6OXN27",
+"period": "2022-01-01T00:00:00/2023-01-01T00:00:00",
+"unit": "iso4217:EUR"
+}
+},
+"f-69": {
+"value": "8115200000",
+"decimals": -5,
+"dimensions": {
+"concept": "ifrs-full:ProfitLoss",
+"entity": "scheme:724500Y6DUVHQD6OXN27",
+"period": "2023-01-01T00:00:00/2024-01-01T00:00:00",
+"unit": "iso4217:EUR"
+}
+},
+"f-122": {
+"value": "7268300000",
+"decimals": -5,
+"dimensions": {
+"concept": "ifrs-full:CashAndCashEquivalents",
+"entity": "scheme:724500Y6DUVHQD6OXN27",
+"period": "2023-01-01T00:00:00",
+"unit": "iso4217:EUR"
+}
+},
+"f-123": {
+"value": "7004700000",
+"decimals": -5,
+"dimensions": {
+"concept": "ifrs-full:CashAndCashEquivalents",
+"entity": "scheme:724500Y6DUVHQD6OXN27",
+"period": "2024-01-01T00:00:00",
+"unit": "iso4217:EUR"
+}
+},
+"f-142": {
+"value": "38826000000",
+"decimals": -5,
+"dimensions": {
+"concept": "ifrs-full:Assets",
+"entity": "scheme:724500Y6DUVHQD6OXN27",
+"period": "2023-01-01T00:00:00",
+"unit": "iso4217:EUR"
+}
+},
+"f-143": {
+"value": "43078600000",
+"decimals": -5,
+"dimensions": {
+"concept": "ifrs-full:Assets",
+"entity": "scheme:724500Y6DUVHQD6OXN27",
+"period": "2024-01-01T00:00:00",
+"unit": "iso4217:EUR"
+}
+},
+"f-189": {
+"value": "0",
+"decimals": -5,
+"dimensions": {
+"concept": "ifrs-full:ProfitLoss",
+"entity": "scheme:724500Y6DUVHQD6OXN27",
+"period": "2021-01-01T00:00:00/2022-01-01T00:00:00",
+"ifrs-full:ComponentsOfEquityAxis": "ifrs-full:IssuedCapitalMember",
+"unit": "iso4217:EUR"
+}
+},
+"f-190": {
+"value": "0",
+"decimals": -5,
+"dimensions": {
+"concept": "ifrs-full:ProfitLoss",
+"entity": "scheme:724500Y6DUVHQD6OXN27",
+"period": "2021-01-01T00:00:00/2022-01-01T00:00:00",
+"ifrs-full:ComponentsOfEquityAxis": "ifrs-full:SharePremiumMember",
+"unit": "iso4217:EUR"
+}
+},
+"f-191": {
+"value": "0",
+"decimals": -5,
+"dimensions": {
+"concept": "ifrs-full:ProfitLoss",
+"entity": "scheme:724500Y6DUVHQD6OXN27",
+"period": "2021-01-01T00:00:00/2022-01-01T00:00:00",
+"ifrs-full:ComponentsOfEquityAxis": "ifrs-full:TreasurySharesMember",
+"unit": "iso4217:EUR"
+}
+},
+"f-192": {
+"value": "0",
+"decimals": -5,
+"dimensions": {
+"concept": "ifrs-full:ProfitLoss",
+"entity": "scheme:724500Y6DUVHQD6OXN27",
+"period": "2021-01-01T00:00:00/2022-01-01T00:00:00",
+"ifrs-full:ComponentsOfEquityAxis": "ifrs-full:RetainedEarningsMember",
+"unit": "iso4217:EUR"
+}
+},
+"f-193": {
+"value": "0",
+"decimals": -5,
+"dimensions": {
+"concept": "ifrs-full:ProfitLoss",
+"entity": "scheme:724500Y6DUVHQD6OXN27",
+"period": "2021-01-01T00:00:00/2022-01-01T00:00:00",
+"ifrs-full:ComponentsOfEquityAxis": "ifrs-full:OtherReservesMember",
+"unit": "iso4217:EUR"
+}
+},
+"f-194": {
+"value": "6134600000",
+"decimals": -5,
+"dimensions": {
+"concept": "ifrs-full:ProfitLoss",
+"entity": "scheme:724500Y6DUVHQD6OXN27",
+"period": "2021-01-01T00:00:00/2022-01-01T00:00:00",
+"ifrs-full:ComponentsOfEquityAxis": "asml:NetIncomeMember",
+"unit": "iso4217:EUR"
+}
+}
+}
+}

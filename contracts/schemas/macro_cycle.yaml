@@ -1,0 +1,26 @@
+table: macro_cycle
+version: 1
+zone: scores
+owner: macro-w1 (app.macro.cycle, job macro_cycle)
+description: >
+  Cycle clock per country and month: growth momentum x inflation momentum composites (z-scored 6-month changes of the
+  GDP/IP/retail/PMI-proxy and CPI/core CPI/PPI cells, trailing 120-month std, clipped to +-3, averaged, 3-month moving
+  average). Quadrants: recovery (G>0, I<=0), expansion (G>0, I>0), slowdown (G<=0, I>0), contraction (G<=0, I<=0).
+  Method in the app.macro.cycle docstring. Built from macro_cell_history (latest revised data); overwritten nightly.
+storage: {path: scores/macro_cycle, format: parquet, partition_by: [], write_mode: overwrite}
+primary_key: [country, date]
+columns:
+  - {name: country, type: string, nullable: false, description: "ISO2 / EA"}
+  - {name: date, type: date, nullable: false, description: "Month (month start)"}
+  - {name: growth_momentum, type: float64, nullable: true, description: "Smoothed growth composite (z units)"}
+  - {name: inflation_momentum, type: float64, nullable: true, description: "Smoothed inflation composite (z units)"}
+  - {name: growth_raw, type: float64, nullable: true, description: "Unsmoothed growth composite"}
+  - {name: inflation_raw, type: float64, nullable: true, description: "Unsmoothed inflation composite"}
+  - {name: quadrant, type: enum, nullable: true, values: [recovery, expansion, slowdown, contraction], description: "Clock quadrant (null when a composite is missing)"}
+  - {name: angle_deg, type: float64, nullable: true, description: "atan2(inflation, growth) in degrees"}
+  - {name: magnitude, type: float64, nullable: true, description: "sqrt(G^2 + I^2)"}
+  - {name: n_growth, type: int8, nullable: false, description: "Growth inputs available"}
+  - {name: n_inflation, type: int8, nullable: false, description: "Inflation inputs available"}
+  - {name: inputs, type: json, nullable: true, description: "{indicator: z} per input"}
+  - {name: method_version, type: string, nullable: false, description: "cycle_v1"}
+  - {name: computed_at, type: datetime, nullable: false, description: "Write time UTC"}

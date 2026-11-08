@@ -1,0 +1,105 @@
+{
+ "title": "Logit: probability of 3M outperformance from factor scores",
+ "description": "Monthly panel of mvp_us stocks: y = 1 if the next-3-month return beats the cross-sectional mean (a forward window, allowed only as the target); x = cross-sectionally standardized quality, value, momentum, growth and profitability scores known at month end. Binomial GLM with date-clustered errors (overlapping windows), odds ratios, marginal effects, AUC and calibration.",
+ "tags": [
+  "GLM",
+  "logit",
+  "factors",
+  "panel"
+ ],
+ "study": {
+  "name": "3M outperformance logit",
+  "method": "glm",
+  "y": "outperf_3m",
+  "x": [
+   "quality",
+   "value",
+   "momentum",
+   "growth",
+   "profitability"
+  ],
+  "params": {
+   "family": "binomial",
+   "cov_type": "cluster",
+   "cluster_by": "date"
+  },
+  "dataset": {
+   "kind": "panel",
+   "frequency": "M",
+   "start": "2017-06-01",
+   "entities": {
+    "universe": "mvp_us"
+   },
+   "variables": [
+    {
+     "name": "outperf_3m",
+     "source": "prices",
+     "field": "ret",
+     "transforms": [
+      {
+       "op": "fwd_compound",
+       "k": 3
+      },
+      {
+       "op": "cs_demean"
+      },
+      {
+       "op": "binarize",
+       "threshold": 0
+      }
+     ]
+    },
+    {
+     "name": "quality",
+     "source": "factor_scores",
+     "field": "quality",
+     "transforms": [
+      {
+       "op": "cs_zscore"
+      }
+     ]
+    },
+    {
+     "name": "value",
+     "source": "factor_scores",
+     "field": "value",
+     "transforms": [
+      {
+       "op": "cs_zscore"
+      }
+     ]
+    },
+    {
+     "name": "momentum",
+     "source": "factor_scores",
+     "field": "momentum",
+     "transforms": [
+      {
+       "op": "cs_zscore"
+      }
+     ]
+    },
+    {
+     "name": "growth",
+     "source": "factor_scores",
+     "field": "growth",
+     "transforms": [
+      {
+       "op": "cs_zscore"
+      }
+     ]
+    },
+    {
+     "name": "profitability",
+     "source": "factor_scores",
+     "field": "profitability",
+     "transforms": [
+      {
+       "op": "cs_zscore"
+      }
+     ]
+    }
+   ]
+  }
+ }
+}

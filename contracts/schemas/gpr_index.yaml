@@ -1,0 +1,29 @@
+table: gpr_index
+version: 1
+zone: scores
+owner: event-models (app.events_models.gpr, job event_gpr)
+description: >
+  C3 MODEL-BASED geopolitical-risk index per country (and GLOBAL) from labelled GDELT coverage, in the spirit of
+  Caldara & Iacoviello (2022, AER) "GPR": share of the day's labelled articles + events that carry geopolitical
+  themes (threats: geopolitical_tension, sanctions, trade_tariffs; acts: conflict_military, terrorism,
+  coup_regime), scaled so that the base-window mean = 100 (base = the first 365 days available, or all days while
+  history is shorter; base_start / base_end on each row). Country rows use the country's labelled items; GLOBAL
+  uses all labelled items. reference_gpr carries the PUBLISHED Caldara-Iacoviello daily GPR (GPRD, matteoiacoviello.com,
+  downloaded for validation) on GLOBAL rows where available; the correlation report is written to
+  data/logs/reports/gpr_validation_<date>.json. Not an official statistic.
+storage: {path: scores/gpr_index, format: parquet, partition_by: [], write_mode: overwrite, retention: "forever"}
+primary_key: [iso2, date]
+columns:
+  - {name: iso2, type: string, nullable: false, description: "Country ISO2 or GLOBAL"}
+  - {name: date, type: date, nullable: false, description: "UTC day"}
+  - {name: gpr, type: float64, nullable: true, description: "Index (base mean = 100)"}
+  - {name: gpr_threats, type: float64, nullable: true, description: "Threats sub-index (base mean = 100)"}
+  - {name: gpr_acts, type: float64, nullable: true, description: "Acts sub-index (base mean = 100)"}
+  - {name: gpr_ma7, type: float64, nullable: true, description: "7-day trailing mean of gpr"}
+  - {name: share, type: float64, nullable: true, description: "Raw share of geopolitical items"}
+  - {name: n_items, type: int64, nullable: false, description: "Labelled items (articles + events) of the day"}
+  - {name: reference_gpr, type: float64, nullable: true, description: "Published Caldara-Iacoviello daily GPR (GLOBAL rows only; validation)"}
+  - {name: base_start, type: date, nullable: false, description: "Base window start"}
+  - {name: base_end, type: date, nullable: false, description: "Base window end"}
+  - {name: model_based, type: bool, nullable: false, description: "Always true"}
+  - {name: computed_at, type: datetime, nullable: false, description: "Write time UTC"}

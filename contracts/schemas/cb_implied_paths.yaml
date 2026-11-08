@@ -1,0 +1,32 @@
+table: cb_implied_paths
+version: 1
+zone: scores
+owner: macro-w3 (app.macro.cb.implied, job cb_curves_implied)
+description: >
+  Market-implied policy-rate path per central bank and curve date (APPROXIMATION from OFFICIAL curves, method
+  implied_v1, see app.macro.cb.curves): implied rate at each upcoming official meeting (when the curve resolves
+  meetings) and at 3/6/12/24m horizons = average forward over the period minus a basis anchoring the stub before the
+  next decision to today's policy rate. US also term-premium-adjusted with NY Fed ACM term premia (model-based).
+  History of ~2 years; overwritten nightly.
+storage: {path: scores/cb_implied_paths, format: parquet, partition_by: [], write_mode: overwrite}
+primary_key: [bank, as_of, point_type, label]
+columns:
+  - {name: bank, type: string, nullable: false, description: "Bank code"}
+  - {name: as_of, type: date, nullable: false, description: "Curve date"}
+  - {name: point_type, type: enum, nullable: false, values: [meeting, horizon], description: "Meeting date or fixed horizon"}
+  - {name: label, type: string, nullable: false, description: "Meeting date (ISO) or horizon (3m, 6m, 12m, 24m)"}
+  - {name: target_date, type: date, nullable: false, description: "Meeting date / as_of + horizon"}
+  - {name: t_start_years, type: float64, nullable: false, description: "Start of the averaging window (years from as_of)"}
+  - {name: t_end_years, type: float64, nullable: false, description: "End of the averaging window"}
+  - {name: implied_rate, type: float64, nullable: false, unit: percent, description: "Implied policy rate (raw forwards, basis-adjusted)"}
+  - {name: implied_rate_tp_adj, type: float64, nullable: true, unit: percent, description: "Term-premium-adjusted implied rate (US: NY Fed ACM, model-based)"}
+  - {name: policy_rate, type: float64, nullable: false, unit: percent, description: "Policy rate in force on as_of"}
+  - {name: change_bp, type: float64, nullable: false, unit: bp, description: "implied_rate - policy_rate"}
+  - {name: moves_priced, type: float64, nullable: false, description: "change_bp / step (25bp; PBoC 10bp); negative = cuts"}
+  - {name: incremental_bp, type: float64, nullable: true, unit: bp, description: "Meeting points: change vs the previous meeting (or the policy rate for the first)"}
+  - {name: basis_bp, type: float64, nullable: false, unit: bp, description: "Stub basis subtracted from forwards"}
+  - {name: anchor, type: enum, nullable: false, values: [stub_to_next_meeting, first_month], description: "Basis window"}
+  - {name: change_1w_bp, type: float64, nullable: true, unit: bp, description: "implied_rate change vs the same point ~1 week earlier"}
+  - {name: change_1m_bp, type: float64, nullable: true, unit: bp, description: "implied_rate change vs the same point ~1 month earlier"}
+  - {name: method_version, type: string, nullable: false, description: "implied_v1"}
+  - {name: computed_at, type: datetime, nullable: false, description: "Write time UTC"}

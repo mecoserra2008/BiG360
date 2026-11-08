@@ -1,0 +1,13 @@
+# kind,key,value,note   (owner: ref-identity; read by app.normalize.identity_universe.load_overrides)
+# kinds: link (same issuer) | block (never link) | subsector (key -> subsector id) | confirm (fuzzy mapping confirmed) | exclude_universe (key)
+# key/value forms: cik:0000320193  lei:<20>  isin:<12>  ticker:SYM@MIC  seed:SYM@MIC  grp:<issuer_group>  edinet:E01234  cvm:9512
+kind,key,value,note
+subsector,ticker:BRK.B@XNYS,diversified_holdings,Berkshire (also in contract overrides)
+subsector,ticker:9984@XTKS,diversified_holdings,SoftBank Group is an investment holding
+subsector,ticker:PRX@XAMS,diversified_holdings,Prosus = Tencent stake holding
+subsector,ticker:INVE B@XSTO,diversified_holdings,Investor AB
+subsector,ticker:ITSA4@BVMF,diversified_holdings,Itausa holding
+subsector,ticker:III@XLON,asset_managers,3i Group
+link,seed:RO@XSWX,seed:ROG@XSWX,Roche: seed moved from ROG (Genussschein) to RO (bearer) - keep issuer_id
+link,seed:TEF@XMAD,cik:0000814052,Telefonica S.A. 20-F filer CIK (SEC submissions TELEFONICA S A; NYSE ADS TEF delisted and now OTC TELFY so the seed adr_ticker no longer links it) - coverage-A for sec_fsds
+link,lei:9695007ZQTEMPGIL5N67,seed:CS@XPAR,AXA ESEF filer LEI (coverage-B EXTRA_FILER_LEIS)

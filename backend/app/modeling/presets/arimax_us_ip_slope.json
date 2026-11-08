@@ -1,0 +1,71 @@
+{
+ "title": "ARIMAX: US industrial production with lagged yield-curve slope",
+ "description": "Monthly growth of US industrial production (100 x log change, indexed by period, latest vintage) with the 10Y-3M Treasury slope lagged 12 months as exogenous regressor. Bounded ARMA order search by BIC. The 12-month lag makes the next 12 regressor values known, so the dataset extends a year ahead and the forecast uses those rows.",
+ "tags": [
+  "time series",
+  "ARIMAX",
+  "macro",
+  "yield curve"
+ ],
+ "study": {
+  "name": "US IP growth ARIMAX (slope lag 12)",
+  "method": "arima",
+  "y": "ip_growth",
+  "x": [
+   "slope_l12"
+  ],
+  "params": {
+   "auto": true,
+   "auto_d": false,
+   "order": [
+    1,
+    0,
+    0
+   ],
+   "max_p": 3,
+   "max_q": 2,
+   "criterion": "bic",
+   "forecast_steps": 12,
+   "exog_future": "dataset",
+   "eval_folds": 24
+  },
+  "dataset": {
+   "kind": "timeseries",
+   "frequency": "M",
+   "start": "1990-01-01",
+   "end": "2027-08-31",
+   "macro_alignment": "period",
+   "missing": {
+    "ffill_limit": 0
+   },
+   "variables": [
+    {
+     "name": "ip_growth",
+     "source": "macro",
+     "field": "fred:INDPRO",
+     "transforms": [
+      {
+       "op": "log_diff"
+      },
+      {
+       "op": "scale",
+       "factor": 100
+      }
+     ]
+    },
+    {
+     "name": "slope_l12",
+     "source": "macro",
+     "field": "fred:T10Y3M",
+     "transforms": [
+      {
+       "op": "lag",
+       "k": 12
+      }
+     ],
+     "agg": "mean"
+    }
+   ]
+  }
+ }
+}

@@ -1,0 +1,23 @@
+table: composite_scores
+version: 1
+zone: scores
+owner: analytics-scoring (app.analytics.scoring)
+description: >
+  Composite score per security/day for each stored weight profile (scoring.yaml composite.profiles).
+  Custom user weights from the Screener are computed on the fly in the API from factor_scores; not stored.
+storage: {path: scores/composite_scores, format: parquet, partition_by: [year], write_mode: upsert}
+primary_key: [as_of_date, security_id, profile_id]
+columns:
+  - {name: as_of_date, type: date, nullable: false, description: "Scoring date"}
+  - {name: year, type: int16, nullable: false, description: "Partition"}
+  - {name: security_id, type: string, nullable: false, description: "FK securities_master"}
+  - {name: issuer_id, type: string, nullable: false, description: "FK issuers"}
+  - {name: profile_id, type: string, nullable: false, description: "Weight profile id (balanced, quality_value, growth, momentum, defensive, ml_blend)"}
+  - {name: score, type: float64, nullable: true, description: "0..100"}
+  - {name: grade, type: enum, nullable: true, values: [A, B, C, D, E], description: "Quintile grade within global universe (A = top 20%)"}
+  - {name: rank_global, type: int32, nullable: true, description: "Rank in full scored universe"}
+  - {name: rank_sector, type: int32, nullable: true, description: "Rank within sector x region"}
+  - {name: coverage, type: float32, nullable: false, description: "Weighted coverage of factors"}
+  - {name: dq_score, type: float32, nullable: false, description: "Data quality 0..1 of inputs"}
+  - {name: computed_at, type: datetime, nullable: false, description: "Write time UTC"}
+  - {name: run_id, type: string, nullable: true, description: "Producing run"}

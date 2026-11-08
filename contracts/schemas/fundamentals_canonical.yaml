@@ -1,0 +1,37 @@
+table: fundamentals_canonical
+version: 1
+zone: normalized
+owner: ref-identity (app.normalize.fundamentals)
+description: >
+  Canonical line items (contracts/canonical_line_items.yaml) in LONG format, point-in-time versioned.
+  One row per (issuer, item, period, knowledge_date). A restatement creates a new row with a later
+  knowledge_date; the original stays. Flow items are stored as DISCRETE periods (Q4 = FY - 9M; H2 = FY - H1)
+  plus FY and TTM rows. Values in reporting currency AND USD.
+storage: {path: normalized/fundamentals_canonical, format: parquet, partition_by: [fiscal_year], write_mode: upsert}
+primary_key: [issuer_id, item_id, period_end, period_kind, knowledge_date]
+pit: {knowledge_column: knowledge_date, rule: "as-of value = row with max(knowledge_date) <= D per (issuer_id,item_id,period_end,period_kind)"}
+columns:
+  - {name: issuer_id, type: string, nullable: false, description: "FK issuers"}
+  - {name: item_id, type: string, nullable: false, description: "canonical_line_items.yaml item id"}
+  - {name: fiscal_year, type: int16, nullable: false, description: "Partition: fiscal year"}
+  - {name: fiscal_period, type: enum, nullable: false, values: [FY, Q1, Q2, Q3, Q4, H1, H2, TTM], description: "Fiscal period"}
+  - {name: period_kind, type: enum, nullable: false, values: [FY, Q, H, TTM, INSTANT], description: "FY annual, Q discrete quarter, H discrete half, TTM trailing 12m, INSTANT balance-sheet point"}
+  - {name: period_start, type: date, nullable: true, description: "Null for INSTANT"}
+  - {name: period_end, type: date, nullable: false, description: "Period end / instant date"}
+  - {name: value, type: float64, nullable: false, description: "Value in reporting currency (sign per canonical item convention)"}
+  - {name: currency, type: string, nullable: true, description: "Reporting currency; null for non-monetary (shares, ratios, employees)"}
+  - {name: value_usd, type: float64, nullable: true, description: "USD value; null for non-monetary"}
+  - {name: fx_rate, type: float64, nullable: true, description: "usd_per_unit applied"}
+  - {name: fx_method, type: enum, nullable: true, values: [period_end, period_average, none], description: "period_end for INSTANT items, period_average for flows"}
+  - {name: fx_source, type: string, nullable: true, description: "fx_rates.source_id used (most frequent in window)"}
+  - {name: gaap, type: enum, nullable: false, values: [us_gaap, ifrs, jgaap, jmis, kifrs, cas, brgaap, ukgaap, other], description: "Accounting framework of the source fact"}
+  - {name: derivation, type: enum, nullable: false, values: [reported, fallback_tag, derived_formula, derived_period, ttm_sum, source_summary], description: "How the value was produced"}
+  - {name: source_concept, type: string, nullable: true, description: "Winning raw concept (or formula id for derived)"}
+  - {name: source_id, type: string, nullable: false, description: "Adapter that supplied the winning fact"}
+  - {name: filing_id, type: string, nullable: true, description: "Filing of the winning fact"}
+  - {name: knowledge_date, type: date, nullable: false, description: "Date public"}
+  - {name: knowledge_date_estimated, type: bool, nullable: false, description: "Imputed knowledge date"}
+  - {name: is_restatement, type: bool, nullable: false, description: "True if a previous knowledge_date exists for the same key with different value"}
+  - {name: dq_score, type: float32, nullable: false, description: "0..1 item-level quality (1 reported+consistent; penalties for fallback/derived/estimated/inconsistency)"}
+  - {name: ingested_at, type: datetime, nullable: false, description: "Write time UTC"}
+  - {name: run_id, type: string, nullable: true, description: "Producing run"}

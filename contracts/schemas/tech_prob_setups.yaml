@@ -1,0 +1,46 @@
+table: tech_prob_setups
+version: 1
+zone: scores
+owner: technicals (app.techprob.job:run, nightly technicals_probabilities)
+description: >
+  T2 probabilistic trade setup per security (MODEL-BASED, calibrated on history): P(T1 before invalidation within H),
+  P(loss), P(neither), expected R after costs and the break-even P(win), from the latest tech_prob_surfaces fit at the
+  setup's standardised barrier distances (conformal EWMA sigma_H, own vol regime, earnings window).
+storage: {path: scores/tech_prob_setups, format: parquet, partition_by: [], write_mode: overwrite, retention: "latest + month-end snapshots"}
+primary_key: [as_of_date, security_id, horizon]
+columns:
+  - {name: as_of_date, type: date, nullable: false, description: "tech_setups as_of"}
+  - {name: security_id, type: string, nullable: false, description: "FK securities_master"}
+  - {name: horizon, type: int16, nullable: false, description: "H sessions (5 / 10 / 20 / 40 / 60)"}
+  - {name: is_setup_horizon, type: bool, nullable: false, description: "The setup's own horizon: first H with the target within one sigma_H"}
+  - {name: direction, type: int8, nullable: false, description: "+1 long / -1 short"}
+  - {name: bias, type: string, nullable: true, description: "Setup bias"}
+  - {name: close, type: float64, nullable: false, description: "Close (barriers are measured from the close: market entry)"}
+  - {name: entry, type: float64, nullable: true, description: "Setup entry"}
+  - {name: target1, type: float64, nullable: true, description: "T1"}
+  - {name: invalidation, type: float64, nullable: true, description: "Invalidation"}
+  - {name: reward_risk, type: float64, nullable: true, description: "Setup R:R from the entry (as shown on the card)"}
+  - {name: reward_risk_close, type: float64, nullable: true, description: "R:R from the close (used for expected R)"}
+  - {name: a, type: float64, nullable: true, description: "Standardised distance to the upper barrier"}
+  - {name: b, type: float64, nullable: true, description: "Standardised distance to the lower barrier"}
+  - {name: sigma_h, type: float64, nullable: true, description: "sqrt(V(H))"}
+  - {name: p_win, type: float64, nullable: true, description: "P(T1 before invalidation within H)"}
+  - {name: p_loss, type: float64, nullable: true, description: "P(invalidation first or same bar)"}
+  - {name: p_neither, type: float64, nullable: true, description: "P(neither by H)"}
+  - {name: expected_r, type: float64, nullable: true, description: "P(win) R:R - P(loss) - costs (R units)"}
+  - {name: expected_r_mtm, type: float64, nullable: true, description: "expected_r + P(neither) x E[R | neither] (time exit marked to market)"}
+  - {name: break_even_p, type: float64, nullable: true, description: "risk / (reward + risk)"}
+  - {name: break_even_p_costs, type: float64, nullable: true, description: "(1 + cost_R) / (1 + R:R)"}
+  - {name: cost_r, type: float64, nullable: true, description: "Round-trip cost in R units (Backtest Lab cost model)"}
+  - {name: cost_round_trip, type: float64, nullable: true, description: "Round-trip cost, fraction"}
+  - {name: p_win_naive, type: float64, nullable: true, description: "Baseline 'R:R only' 1 / (1 + R:R)"}
+  - {name: p_win_bm, type: float64, nullable: true, description: "Baseline driftless Brownian two-barrier P(win)"}
+  - {name: vol_regime, type: enum, nullable: true, values: [low, mid, high], description: "Vol regime pool"}
+  - {name: earn_window, type: bool, nullable: true, description: "Earnings day within H"}
+  - {name: region_pool, type: string, nullable: true, description: "Region of the surface pool"}
+  - {name: region_fallback, type: bool, nullable: true, description: "All-region pool used"}
+  - {name: n_pool, type: int64, nullable: true, description: "Origins behind the pool"}
+  - {name: clamped, type: bool, nullable: true, description: "Distances outside the grid (clamped)"}
+  - {name: fit_date, type: string, nullable: true, description: "Surface fit date"}
+  - {name: gate, type: enum, nullable: false, values: [production, experimental], description: "gate verdict of this output from tech_prob_gates (docs/TECHNICALS_V2_VALIDATION.md): production = passed the T6 gate; experimental = failed or not validated (hidden by default in the UI)"}
+  - {name: computed_at, type: datetime, nullable: false, description: "Write time UTC"}

@@ -1,0 +1,25 @@
+table: yield_curve_params
+version: 1
+zone: normalized
+owner: rates-w3 (app.rates.curves_job, jobs rates_curves / rates_curves_backfill)
+description: >
+  Published Svensson / Nelson-Siegel parameters of fitted government curves (ECB euro area AAA and all-issuer curves,
+  Bundesbank listed Federal securities). The full curve at any maturity is s(t) = b0 + b1 g1 + b2 (g1 - e1) +
+  b3 (g2 - e2) (continuously compounded spot, percent; app.rates.svensson); yield_curves stores the reconstruction on
+  a standard tenor grid.
+storage: {path: normalized/yield_curve_params, format: parquet, partition_by: [curve_id], write_mode: upsert, sort_by: [date]}
+primary_key: [curve_id, date]
+pit: {knowledge_column: knowledge_date, rule: "as yield_curves"}
+columns:
+  - {name: curve_id, type: string, nullable: false, description: "Partition: EA_AAA, EA_ALL, DE_BUND"}
+  - {name: date, type: date, nullable: false, description: "Curve date"}
+  - {name: model, type: enum, nullable: false, values: [svensson, nelson_siegel], description: "Functional form (beta3 = 0 -> Nelson-Siegel)"}
+  - {name: beta0, type: float64, nullable: false, unit: percent, description: "Level"}
+  - {name: beta1, type: float64, nullable: false, unit: percent, description: "Slope"}
+  - {name: beta2, type: float64, nullable: false, unit: percent, description: "Curvature 1"}
+  - {name: beta3, type: float64, nullable: false, unit: percent, description: "Curvature 2 (0 for Nelson-Siegel)"}
+  - {name: tau1, type: float64, nullable: false, unit: years, description: "Decay 1"}
+  - {name: tau2, type: float64, nullable: true, unit: years, description: "Decay 2"}
+  - {name: source, type: string, nullable: false, description: "ecb | bundesbank"}
+  - {name: knowledge_date, type: date, nullable: false, description: "Date public"}
+  - {name: ingested_at, type: datetime, nullable: false, description: "Write time UTC"}

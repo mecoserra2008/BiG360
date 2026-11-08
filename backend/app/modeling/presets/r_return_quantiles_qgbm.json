@@ -1,0 +1,133 @@
+{
+ "title": "Conditional return distribution (quantile GBM)",
+ "description": "Quantiles (5 %..95 %) of the next-month stock return given volatility, momentum, size and value; CQR 90 % intervals.",
+ "question": "factors",
+ "tags": [
+  "probabilistic",
+  "quantile",
+  "risk"
+ ],
+ "method_note": "One LightGBM per quantile level with the pinball loss; crossing removed by monotone rearrangement. Volatility should widen the predicted distribution (heteroskedasticity). Scored by pinball loss vs climatological quantiles, CRPS vs a linear-Gaussian baseline and PIT; conformalized quantile regression fixes the interval coverage. Caveat: the universe is today's constituents (membership history starts 2026-10), so early years carry survivorship bias; read the premium as an upper bound.",
+ "expected_outputs": [
+  "pinball per level vs climatology",
+  "PIT histogram",
+  "calibration curve",
+  "CQR coverage"
+ ],
+ "runtime_s": 18.1,
+ "validated": "2026-11-06 on snapshot R20261106T010757G9ZB",
+ "result": {
+  "run_id": "SR20261106T0226431F7WH",
+  "beats_baseline": true,
+  "beats_linear": false,
+  "verdict": "quantile GBM beats linear-Gaussian baseline on CRPS (DM p = 0); point forecast: quantile GBM (median) is worse than linear baseline out of sample (mean loss 0.009024 vs 0.009007)",
+  "n_obs": 59310,
+  "metrics": {
+   "oos_rmse": 0.09499311313858495,
+   "oos_r2_oos": -0.0022073021050952324,
+   "oos_rank_ic": 0.03055395224278213,
+   "crps": 0.044429052072634305,
+   "crps_linear": 0.05086687775623171,
+   "crps_skill_vs_linear": 0.1265622339639021,
+   "coverage_90": 0.8845220030349014,
+   "dm_p_crps_vs_linear": 0.0,
+   "conformal_coverage": 0.8932894958691621,
+   "dm_p_vs_linear": 0.07309807024227737
+  },
+  "coefficients": []
+ },
+ "study": {
+  "name": "Conditional return distribution (quantile GBM)",
+  "method": "quantile_gbm",
+  "y": "fwd_ret_1m",
+  "x": [
+   "ivol",
+   "mom_12_1",
+   "log_mcap",
+   "earnings_yield"
+  ],
+  "params": {
+   "n_estimators": 200,
+   "min_child_samples": 300,
+   "cv": {
+    "folds": 4,
+    "scheme": "purged_kfold",
+    "purge": 1,
+    "conformal_alpha": 0.1
+   }
+  },
+  "dataset": {
+   "kind": "panel",
+   "frequency": "M",
+   "start": "2015-01-01",
+   "entities": {
+    "universe": "mvp_us"
+   },
+   "variables": [
+    {
+     "name": "fwd_ret_1m",
+     "source": "prices",
+     "field": "ret",
+     "transforms": [
+      {
+       "op": "fwd_compound",
+       "k": 1
+      },
+      {
+       "op": "winsorize"
+      }
+     ]
+    },
+    {
+     "name": "ivol",
+     "source": "tech_factors",
+     "field": "ivol",
+     "transforms": [
+      {
+       "op": "winsorize"
+      },
+      {
+       "op": "cs_zscore"
+      }
+     ]
+    },
+    {
+     "name": "mom_12_1",
+     "source": "tech_factors",
+     "field": "mom",
+     "transforms": [
+      {
+       "op": "winsorize"
+      },
+      {
+       "op": "cs_zscore"
+      }
+     ]
+    },
+    {
+     "name": "log_mcap",
+     "source": "valuation",
+     "field": "market_cap_usd",
+     "transforms": [
+      {
+       "op": "log"
+      },
+      {
+       "op": "cs_zscore"
+      }
+     ]
+    },
+    {
+     "name": "earnings_yield",
+     "source": "valuation",
+     "field": "earnings_yield",
+     "transforms": [
+      {
+       "op": "cs_rank"
+      }
+     ]
+    }
+   ]
+  }
+ }
+}

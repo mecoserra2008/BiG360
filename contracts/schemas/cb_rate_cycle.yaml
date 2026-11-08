@@ -1,0 +1,19 @@
+table: cb_rate_cycle
+version: 1
+zone: scores
+owner: macro-w3 (app.macro.cb.rates, job cb_rates)
+description: >
+  Rate-cycle phase per central bank and business day (method cycle_v1; consumed by macro-w4 regime performance):
+  hiking / cutting when the most recent policy-rate change within the trailing 183 days was a hike / cut, otherwise
+  pausing (no change in the last 183 days, including long holds). Derived from cb_decisions (official rates).
+storage: {path: scores/cb_rate_cycle, format: parquet, partition_by: [], write_mode: overwrite}
+primary_key: [bank, date]
+columns:
+  - {name: bank, type: string, nullable: false, description: "Bank code"}
+  - {name: date, type: date, nullable: false, description: "Business day"}
+  - {name: phase, type: enum, nullable: false, values: [hiking, pausing, cutting], description: "Rate-cycle phase"}
+  - {name: last_change_date, type: date, nullable: true, description: "Decision date of the most recent change on or before date"}
+  - {name: last_change_bp, type: float64, nullable: true, unit: bp, description: "Size of that change"}
+  - {name: policy_rate, type: float64, nullable: true, unit: percent, description: "Policy rate in force"}
+  - {name: method_version, type: string, nullable: false, description: "cycle_v1"}
+  - {name: computed_at, type: datetime, nullable: false, description: "Write time UTC"}

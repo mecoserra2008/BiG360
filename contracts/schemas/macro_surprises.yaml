@@ -1,0 +1,35 @@
+table: macro_surprises
+version: 1
+zone: scores
+owner: macro-w2 (app.macro.surprise, job macro_surprise)
+description: >
+  Per-release surprise vs our MODEL-BASED expectation (not consensus): error = actual - expectation (primary model);
+  surprise_z = error / std of that series' past forecast errors (errors of releases strictly before this one, last 36,
+  min 6; otherwise the std of the series' historical one-step changes), clipped to +-5. signed_z = surprise_z *
+  direction (+1 when a higher value means stronger growth / higher inflation / tighter labor; -1 for unemployment and
+  jobless claims).
+storage: {path: scores/macro_surprises, format: parquet, partition_by: [], write_mode: overwrite}
+primary_key: [release_event_id, series_id]
+columns:
+  - {name: release_event_id, type: string, nullable: false, description: "FK macro_releases"}
+  - {name: series_id, type: string, nullable: false, description: "FK macro_series"}
+  - {name: country, type: string, nullable: false, description: "ISO2 or EA"}
+  - {name: theme, type: enum, nullable: false, values: [growth, inflation, labor], description: "Theme"}
+  - {name: importance, type: int8, nullable: false, description: "Release tier"}
+  - {name: release_date, type: date, nullable: false, description: "Local release date"}
+  - {name: scheduled_at, type: datetime, nullable: false, description: "Release time UTC"}
+  - {name: period, type: date, nullable: false, description: "Reference period"}
+  - {name: measure, type: string, nullable: false, description: "Measure"}
+  - {name: actual, type: float64, nullable: false, description: "Published value"}
+  - {name: expectation, type: float64, nullable: false, description: "Model-based expectation (primary)"}
+  - {name: lo80, type: float64, nullable: true, description: "Expectation 80% interval low"}
+  - {name: hi80, type: float64, nullable: true, description: "Expectation 80% interval high"}
+  - {name: model, type: string, nullable: false, description: "Model of the primary expectation"}
+  - {name: error, type: float64, nullable: false, description: "actual - expectation"}
+  - {name: error_std, type: float64, nullable: true, description: "Scale used for z"}
+  - {name: n_hist_errors, type: int32, nullable: false, description: "Past errors in the scale window"}
+  - {name: surprise_z, type: float64, nullable: true, description: "error / error_std (clipped to +-5)"}
+  - {name: direction, type: int8, nullable: false, description: "+1 / -1 economic direction"}
+  - {name: signed_z, type: float64, nullable: true, description: "surprise_z * direction"}
+  - {name: model_based, type: bool, nullable: false, description: "Always true"}
+  - {name: computed_at, type: datetime, nullable: false, description: "Write time UTC"}

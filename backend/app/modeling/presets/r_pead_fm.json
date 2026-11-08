@@ -1,0 +1,120 @@
+{
+ "title": "Post-earnings drift (PEAD) with an SUE proxy",
+ "description": "Do stocks with the largest year-over-year jump in TTM EPS keep outperforming over the next 3 months?",
+ "question": "events",
+ "tags": [
+  "events",
+  "earnings",
+  "PEAD"
+ ],
+ "method_note": "Bernard & Thomas (1989) drift. Standardized unexpected earnings are proxied by the seasonal-random-walk surprise (TTM EPS growth year over year), point-in-time on the filing knowledge date and z-scored each month; momentum and size are controls. A positive slope over the 3-month window is the drift. Caveat: the universe is today's constituents (membership history starts 2026-10), so early years carry survivorship bias; read the premium as an upper bound.",
+ "expected_outputs": [
+  "SUE premium (3M) with NW t",
+  "slope time series"
+ ],
+ "runtime_s": 4.8,
+ "validated": "2026-11-06 on snapshot R20261106T010757G9ZB",
+ "result": {
+  "run_id": "SR20261106T015656WXA18",
+  "n_obs": 72810,
+  "metrics": {
+   "avg_r2": 0.06309988704861441
+  },
+  "coefficients": [
+   {
+    "term": "sue_proxy",
+    "estimate": -0.003405891873655094,
+    "statistic": -2.9775079365613477,
+    "p_value": 0.003268795948357601
+   },
+   {
+    "term": "mom_12_1",
+    "estimate": 0.002906312443604203,
+    "statistic": 0.9422940018285721,
+    "p_value": 0.3471904213081534
+   },
+   {
+    "term": "log_mcap",
+    "estimate": -0.010658852500728986,
+    "statistic": -5.695788279396864,
+    "p_value": 4.3919857403255455e-08
+   }
+  ]
+ },
+ "study": {
+  "name": "Post-earnings drift (PEAD) with an SUE proxy",
+  "method": "fama_macbeth",
+  "y": "fwd_ret_3m",
+  "x": [
+   "sue_proxy",
+   "mom_12_1",
+   "log_mcap"
+  ],
+  "params": {
+   "nw_lags": 4
+  },
+  "dataset": {
+   "kind": "panel",
+   "frequency": "M",
+   "start": "2005-01-01",
+   "entities": {
+    "universe": "mvp_us"
+   },
+   "variables": [
+    {
+     "name": "fwd_ret_3m",
+     "source": "prices",
+     "field": "ret",
+     "transforms": [
+      {
+       "op": "fwd_compound",
+       "k": 3
+      },
+      {
+       "op": "winsorize"
+      }
+     ]
+    },
+    {
+     "name": "sue_proxy",
+     "source": "ratios",
+     "field": "eps_growth_yoy",
+     "transforms": [
+      {
+       "op": "winsorize"
+      },
+      {
+       "op": "cs_zscore"
+      }
+     ]
+    },
+    {
+     "name": "mom_12_1",
+     "source": "tech_factors",
+     "field": "mom",
+     "transforms": [
+      {
+       "op": "winsorize"
+      },
+      {
+       "op": "cs_zscore"
+      }
+     ]
+    },
+    {
+     "name": "log_mcap",
+     "source": "valuation",
+     "field": "market_cap_usd",
+     "transforms": [
+      {
+       "op": "log"
+      },
+      {
+       "op": "cs_zscore"
+      }
+     ]
+    }
+   ]
+  }
+ }
+}

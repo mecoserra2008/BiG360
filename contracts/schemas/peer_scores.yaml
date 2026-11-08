@@ -1,0 +1,32 @@
+table: peer_scores
+version: 2
+zone: scores
+owner: analytics-scoring (app.analytics.scoring)
+description: >
+  Per-metric scores for each security at as_of_date (contracts/scoring.yaml): percentile vs peer group,
+  z-score vs own history, market-cap/valuation adjusted score, and the blended metric score (0..100).
+  Retention: daily rows for last 35 days; older dates kept only for Fridays and month-ends.
+storage: {path: scores/peer_scores, format: parquet, partition_by: [as_of_month], write_mode: upsert, retention: "daily 35d, then weekly(Fri)+month-end"}
+primary_key: [as_of_date, security_id, metric_id]
+pit: {knowledge_column: as_of_date, rule: "computed only from inputs with knowledge_date <= as_of_date"}
+columns:
+  - {name: as_of_date, type: date, nullable: false, description: "Scoring date"}
+  - {name: as_of_month, type: string, nullable: false, description: "Partition YYYY-MM"}
+  - {name: security_id, type: string, nullable: false, description: "FK securities_master (primary security of issuer)"}
+  - {name: issuer_id, type: string, nullable: false, description: "FK issuers"}
+  - {name: metric_id, type: string, nullable: false, description: "scoring.yaml metric id"}
+  - {name: factor_id, type: string, nullable: false, description: "Factor family the metric belongs to (first if multiple)"}
+  - {name: raw_value, type: float64, nullable: true, description: "Metric value used"}
+  - {name: peer_group_key, type: string, nullable: true, description: "e.g. sub:semiconductors|US|large  or  sec:TECH|GLOBAL|all"}
+  - {name: peer_group_level, type: enum, nullable: true, values: [subsector_region_size, subsector_region, subsector_global, sector_region, sector_global, region_all, global_all], description: "Fallback level used (region_all/global_all: market, sentiment and macro metrics; v2)"}
+  - {name: peer_count, type: int32, nullable: true, description: "Number of peers with valid value"}
+  - {name: peer_percentile, type: float64, nullable: true, description: "0..100, direction-adjusted (100 = best)"}
+  - {name: peer_median, type: float64, nullable: true, description: "Peer median raw value"}
+  - {name: self_z, type: float64, nullable: true, description: "Direction-adjusted z vs own history window (clipped ±3)"}
+  - {name: self_hist_n, type: int32, nullable: true, description: "Observations in self-history window"}
+  - {name: self_score, type: float64, nullable: true, description: "0..100 = norm.cdf(self_z)*100"}
+  - {name: mcap_adj_score, type: float64, nullable: true, description: "0..100 residual percentile after regressing metric on log(mcap) within peers (only for valuation metrics)"}
+  - {name: metric_score, type: float64, nullable: true, description: "0..100 blended per scoring.yaml metric_blend"}
+  - {name: imputed, type: bool, nullable: false, description: "True if metric_score was imputed per missing-data policy"}
+  - {name: computed_at, type: datetime, nullable: false, description: "Write time UTC"}
+  - {name: run_id, type: string, nullable: true, description: "Producing run"}

@@ -1,0 +1,37 @@
+table: news_stories
+version: 1
+zone: normalized
+owner: events-v2 (app.events_v2.stories)
+description: >
+  T3 stories (E4): near-duplicate articles from ALL news sources (GDELT GKG titles, Polygon, RSS, GDELT DOC) clustered
+  with a 64-bit SimHash of the cleaned title (Hamming <= 3, 4-band LSH) inside a 72 h window. One row per story per
+  day (story-day); a story spans days through its shared story_id (first/last seen = min/max over its rows).
+  Canonical headline, counts, top domains, up to 3 representative URLs, mean tone, per-story FinBERT / XLM-R sentiment
+  (computed once per story), labels with relevance. Old singleton unlinked stories are pruned by events_retention.
+storage: {path: normalized/news_stories, format: parquet, partition_by: [year_month], write_mode: append, retention: "salient stories forever; others 180 d"}
+primary_key: [story_id, date]
+pit: {knowledge_column: date, rule: "UTC date of the members"}
+columns:
+  - {name: year_month, type: string, nullable: false, description: "Partition YYYY-MM"}
+  - {name: date, type: date, nullable: false, description: "UTC date of this story-day row"}
+  - {name: story_id, type: int64, nullable: false, description: "Stable story id (shared across days)"}
+  - {name: title, type: string, nullable: false, description: "Canonical cleaned headline (most common member title)"}
+  - {name: title_hash, type: int64, nullable: false, description: "64-bit SimHash of the canonical title"}
+  - {name: lang_id, type: int8, nullable: true, description: "event_labels lang id"}
+  - {name: first_ts, type: datetime, nullable: false, description: "First member timestamp that day (UTC)"}
+  - {name: last_ts, type: datetime, nullable: false, description: "Last member timestamp that day (UTC)"}
+  - {name: n_articles, type: int32, nullable: false, description: "Members that day"}
+  - {name: n_sources, type: int16, nullable: false, description: "Distinct domains that day"}
+  - {name: source_mask, type: int16, nullable: false, description: "Bit per event_labels source id"}
+  - {name: domain_ids, type: list<int32>, nullable: false, description: "Top-5 domains"}
+  - {name: urls, type: list<string>, nullable: false, description: "Up to 3 representative URLs"}
+  - {name: tone_x100, type: int16, nullable: true, description: "Mean GDELT tone x 100"}
+  - {name: sentiment_x100, type: int8, nullable: true, description: "Model sentiment P(pos)-P(neg) x 100 of the canonical title"}
+  - {name: sentiment_model, type: string, nullable: true, description: "Model id"}
+  - {name: theme_mask, type: int64, nullable: false, description: "OR of member theme masks"}
+  - {name: sector_mask, type: int16, nullable: false, description: "OR of member sector masks"}
+  - {name: countries, type: list<int16>, nullable: false, description: "Top-3 member countries (+ GLOBAL)"}
+  - {name: issuer_ids, type: list<int32>, nullable: false, description: "Linked issuers"}
+  - {name: issuer_rel, type: list<int8>, nullable: false, description: "Relevance x 100 per issuer: max link confidence x sqrt(member share); 100 when named in the headline"}
+  - {name: n_events, type: int16, nullable: false, description: "GDELT events coded from the members"}
+  - {name: salience, type: float32, nullable: false, description: "log1p(n_articles) + log1p(n_sources) + log1p(n_events) + |tone|/5 + issuer bonus"}

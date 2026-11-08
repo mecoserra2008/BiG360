@@ -1,0 +1,40 @@
+table: spatial_spillovers
+version: 1
+zone: scores
+owner: event-models (app.events_models.spillovers, job event_spillovers)
+description: >
+  B2 spatial spillover models of event shocks onto country equity index returns, realized volatility and macro
+  surprise changes. Panel of countries x periods (daily when < 26 weeks of event history, else weekly), balanced,
+  within (entity FE) transform. Shocks: country attention_z / tone_z (all themes) and the geo-theme attention.
+  Models ols (pooled FE), slx (X, W X; cluster-robust), sar (spatial lag), sem (spatial error), sdm (spatial
+  Durbin), fitted by ML (app.modeling._spatial, Elhorst panels). Effect rows: rho / lambda (spatial parameter),
+  beta / theta (coefficient on X / W X), direct / indirect / total (LeSage-Pace average effects, Monte-Carlo
+  inference with 500 draws), transmit / receive (per-country spillover from the impact matrix
+  S = (I - rho W)^-1 (beta I + theta W): off-diagonal column sum = effect of a unit shock in the country on all
+  others, off-diagonal row sum = effect on the country of unit shocks everywhere else), lm_lag / lm_error /
+  rlm_lag / rlm_error (Anselin LM diagnostics; estimate = statistic). Model-based. One snapshot per run (as_of).
+storage: {path: scores/spatial_spillovers, format: parquet, partition_by: [], write_mode: upsert, retention: "last 52 snapshots"}
+primary_key: [as_of, response, shock, model, w_kind, effect, iso2]
+columns:
+  - {name: as_of, type: date, nullable: false, description: "Run date (last period used)"}
+  - {name: window_start, type: date, nullable: false, description: "First period"}
+  - {name: window_end, type: date, nullable: false, description: "Last period"}
+  - {name: freq, type: enum, nullable: false, values: [D, W], description: "Panel frequency"}
+  - {name: response, type: enum, nullable: false, values: [ret, vol, macro_surprise], description: "Index log return (%), realized vol (abs return %), change of macro_surprise_index (theme all)"}
+  - {name: shock, type: string, nullable: false, description: "attention_all | tone_all | attention_geo"}
+  - {name: model, type: enum, nullable: false, values: [ols, slx, sar, sem, sdm], description: "Model"}
+  - {name: w_kind, type: string, nullable: false, description: "Weights kind"}
+  - {name: w_source, type: string, nullable: false, description: "linkage | natural_earth_fallback"}
+  - {name: effect, type: enum, nullable: false, values: [rho, lambda, beta, theta, direct, indirect, total, transmit, receive, lm_lag, lm_error, rlm_lag, rlm_error], description: "Row kind"}
+  - {name: iso2, type: string, nullable: false, description: "'*' for panel-level rows, else country (transmit / receive)"}
+  - {name: estimate, type: float64, nullable: true, description: "Estimate (LM rows: statistic)"}
+  - {name: std_error, type: float64, nullable: true, description: "Standard error"}
+  - {name: ci_low, type: float64, nullable: true, description: "95% lower"}
+  - {name: ci_high, type: float64, nullable: true, description: "95% upper"}
+  - {name: p_value, type: float64, nullable: true, description: "p-value"}
+  - {name: n_units, type: int16, nullable: false, description: "Countries"}
+  - {name: n_periods, type: int32, nullable: false, description: "Periods"}
+  - {name: llf, type: float64, nullable: true, description: "Log-likelihood of the model"}
+  - {name: aic, type: float64, nullable: true, description: "AIC"}
+  - {name: pseudo_r2, type: float64, nullable: true, description: "Squared corr(fitted, y), within"}
+  - {name: computed_at, type: datetime, nullable: false, description: "Write time UTC"}

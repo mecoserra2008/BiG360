@@ -1,0 +1,22 @@
+table: dq_results
+version: 1
+zone: ops
+owner: platform (app.core.dq)
+description: >
+  Data-quality check results per table/partition/run. Checks: schema_conformance, pk_unique, null_rate,
+  freshness, row_count_delta, value_range, cross_source_agreement, accounting_identity (assets = liabilities + equity ±2%),
+  pit_violation (knowledge_date < period_end), fx_coverage.
+storage: {path: ops/dq_results, format: parquet, partition_by: [year_month], write_mode: append}
+primary_key: [run_id, table_name, check_id, partition_key]
+columns:
+  - {name: run_id, type: string, nullable: false, description: "FK job_runs"}
+  - {name: year_month, type: string, nullable: false, description: "Partition"}
+  - {name: table_name, type: string, nullable: false, description: "Table checked"}
+  - {name: partition_key, type: string, nullable: false, description: "'' for whole table, else 'col=val/...'"}
+  - {name: check_id, type: string, nullable: false, description: "Check name"}
+  - {name: severity, type: enum, nullable: false, values: [info, warn, error], description: "Severity"}
+  - {name: passed, type: bool, nullable: false, description: "Pass/fail"}
+  - {name: metric_value, type: float64, nullable: true, description: "Observed value"}
+  - {name: threshold, type: float64, nullable: true, description: "Threshold"}
+  - {name: details, type: json, nullable: true, description: "Sample offending keys"}
+  - {name: checked_at, type: datetime, nullable: false, description: "UTC"}

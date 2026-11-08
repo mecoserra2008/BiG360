@@ -1,0 +1,411 @@
+<?xml version='1.0' encoding='utf-8'?>
+<xbrli:xbrl xmlns:xbrli="http://www.xbrl.org/2003/instance" xmlns:xbrll="http://www.xbrl.org/2003/linkbase" xmlns:xlink="http://www.w3.org/1999/xlink" xmlns:ipp-gen="http://www.cnmv.es/ipp/gen/1-2008/2008-01-01" xmlns:es-be-fs="http://www.bde.es/es/fr/ifrs/basi/bde/4-2004/2006-01-01" xmlns:ipp-com="http://www.cnmv.es/ipp/com/1-2008/2008-01-01" xmlns:dgi-lc-es="http://www.xbrl.org.es/es/2007/dgi/gp/lc-es/2007-05-30" xmlns:dgi-lc-int="http://www.xbrl.org.es/es/2007/dgi/gp/lc-int/2007-05-30" xmlns:ifrs-gp="http://xbrl.iasb.org/int/fr/ifrs/gp/2005-05-15" xmlns:dgi-est-gen="http://www.xbrl.org.es/es/2007/dgi/gp/est-gen/2007-05-30" xmlns:iso4217="http://www.xbrl.org/2003/iso4217" xmlns:ipp="http://www.cnmv.es/ipp/2008">
+  <xbrll:schemaRef xlink:type="simple" xlink:href="ipp-gen-2008-01-01.xsd" xlink:arcrole="http://www.w3.org/1999/xlink/properties/linkbase"/>
+  <xbrli:context id="S22015_A-28015865_dci">
+    <xbrli:entity>
+      <xbrli:identifier scheme="http://www.cnmv.es/xbrl/ipp/A-28015865">TELEFONICA, S.A.</xbrli:identifier>
+      <xbrli:segment>
+        <ipp:version>6.0.1</ipp:version>
+      </xbrli:segment>
+    </xbrli:entity>
+    <xbrli:period>
+      <xbrli:startDate>2015-01-01</xbrli:startDate>
+      <xbrli:endDate>2015-12-31</xbrli:endDate>
+    </xbrli:period>
+    <xbrli:scenario>
+      <ipp:Modelo>GE</ipp:Modelo>
+      <ipp:Apartado>Individual</ipp:Apartado>
+    </xbrli:scenario>
+  </xbrli:context>
+  <xbrli:context id="S22015_A-28015865_dcc">
+    <xbrli:entity>
+      <xbrli:identifier scheme="http://www.cnmv.es/xbrl/ipp/A-28015865">TELEFONICA, S.A.</xbrli:identifier>
+      <xbrli:segment>
+        <ipp:version>6.0.1</ipp:version>
+      </xbrli:segment>
+    </xbrli:entity>
+    <xbrli:period>
+      <xbrli:startDate>2015-01-01</xbrli:startDate>
+      <xbrli:endDate>2015-12-31</xbrli:endDate>
+    </xbrli:period>
+    <xbrli:scenario>
+      <ipp:Modelo>GE</ipp:Modelo>
+      <ipp:Apartado>Consolidado</ipp:Apartado>
+    </xbrli:scenario>
+  </xbrli:context>
+  <xbrli:context id="S22014_A-28015865_dpai">
+    <xbrli:entity>
+      <xbrli:identifier scheme="http://www.cnmv.es/xbrl/ipp/A-28015865">TELEFONICA, S.A.</xbrli:identifier>
+      <xbrli:segment>
+        <ipp:version>6.0.1</ipp:version>
+      </xbrli:segment>
+    </xbrli:entity>
+    <xbrli:period>
+      <xbrli:startDate>2014-01-01</xbrli:startDate>
+      <xbrli:endDate>2014-12-31</xbrli:endDate>
+    </xbrli:period>
+    <xbrli:scenario>
+      <ipp:Modelo>GE</ipp:Modelo>
+      <ipp:Apartado>Individual</ipp:Apartado>
+    </xbrli:scenario>
+  </xbrli:context>
+  <xbrli:context id="S22014_A-28015865_dpac">
+    <xbrli:entity>
+      <xbrli:identifier scheme="http://www.cnmv.es/xbrl/ipp/A-28015865">TELEFONICA, S.A.</xbrli:identifier>
+      <xbrli:segment>
+        <ipp:version>6.0.1</ipp:version>
+      </xbrli:segment>
+    </xbrli:entity>
+    <xbrli:period>
+      <xbrli:startDate>2014-01-01</xbrli:startDate>
+      <xbrli:endDate>2014-12-31</xbrli:endDate>
+    </xbrli:period>
+    <xbrli:scenario>
+      <ipp:Modelo>GE</ipp:Modelo>
+      <ipp:Apartado>Consolidado</ipp:Apartado>
+    </xbrli:scenario>
+  </xbrli:context>
+  <xbrli:context id="S22015_A-28015865_dcoi">
+    <xbrli:entity>
+      <xbrli:identifier scheme="http://www.cnmv.es/xbrl/ipp/A-28015865">TELEFONICA, S.A.</xbrli:identifier>
+      <xbrli:segment>
+        <ipp:version>6.0.1</ipp:version>
+      </xbrli:segment>
+    </xbrli:entity>
+    <xbrli:period>
+      <xbrli:startDate>2015-07-01</xbrli:startDate>
+      <xbrli:endDate>2015-12-31</xbrli:endDate>
+    </xbrli:period>
+    <xbrli:scenario>
+      <ipp:Modelo>GE</ipp:Modelo>
+      <ipp:Apartado>Individual</ipp:Apartado>
+    </xbrli:scenario>
+  </xbrli:context>
+  <xbrli:context id="S22015_A-28015865_dcoc">
+    <xbrli:entity>
+      <xbrli:identifier scheme="http://www.cnmv.es/xbrl/ipp/A-28015865">TELEFONICA, S.A.</xbrli:identifier>
+      <xbrli:segment>
+        <ipp:version>6.0.1</ipp:version>
+      </xbrli:segment>
+    </xbrli:entity>
+    <xbrli:period>
+      <xbrli:startDate>2015-07-01</xbrli:startDate>
+      <xbrli:endDate>2015-12-31</xbrli:endDate>
+    </xbrli:period>
+    <xbrli:scenario>
+      <ipp:Modelo>GE</ipp:Modelo>
+      <ipp:Apartado>Consolidado</ipp:Apartado>
+    </xbrli:scenario>
+  </xbrli:context>
+  <xbrli:context id="S22014_A-28015865_dpoi">
+    <xbrli:entity>
+      <xbrli:identifier scheme="http://www.cnmv.es/xbrl/ipp/A-28015865">TELEFONICA, S.A.</xbrli:identifier>
+      <xbrli:segment>
+        <ipp:version>6.0.1</ipp:version>
+      </xbrli:segment>
+    </xbrli:entity>
+    <xbrli:period>
+      <xbrli:startDate>2014-07-01</xbrli:startDate>
+      <xbrli:endDate>2014-12-31</xbrli:endDate>
+    </xbrli:period>
+    <xbrli:scenario>
+      <ipp:Modelo>GE</ipp:Modelo>
+      <ipp:Apartado>Individual</ipp:Apartado>
+    </xbrli:scenario>
+  </xbrli:context>
+  <xbrli:context id="S22014_A-28015865_dpoc">
+    <xbrli:entity>
+      <xbrli:identifier scheme="http://www.cnmv.es/xbrl/ipp/A-28015865">TELEFONICA, S.A.</xbrli:identifier>
+      <xbrli:segment>
+        <ipp:version>6.0.1</ipp:version>
+      </xbrli:segment>
+    </xbrli:entity>
+    <xbrli:period>
+      <xbrli:startDate>2014-07-01</xbrli:startDate>
+      <xbrli:endDate>2014-12-31</xbrli:endDate>
+    </xbrli:period>
+    <xbrli:scenario>
+      <ipp:Modelo>GE</ipp:Modelo>
+      <ipp:Apartado>Consolidado</ipp:Apartado>
+    </xbrli:scenario>
+  </xbrli:context>
+  <xbrli:context id="S22015_A-28015865_ici">
+    <xbrli:entity>
+      <xbrli:identifier scheme="http://www.cnmv.es/xbrl/ipp/A-28015865">TELEFONICA, S.A.</xbrli:identifier>
+      <xbrli:segment>
+        <ipp:version>6.0.1</ipp:version>
+      </xbrli:segment>
+    </xbrli:entity>
+    <xbrli:period>
+      <xbrli:instant>2015-12-31</xbrli:instant>
+    </xbrli:period>
+    <xbrli:scenario>
+      <ipp:Modelo>GE</ipp:Modelo>
+      <ipp:Apartado>Individual</ipp:Apartado>
+    </xbrli:scenario>
+  </xbrli:context>
+  <xbrli:context id="S22015_A-28015865_icc">
+    <xbrli:entity>
+      <xbrli:identifier scheme="http://www.cnmv.es/xbrl/ipp/A-28015865">TELEFONICA, S.A.</xbrli:identifier>
+      <xbrli:segment>
+        <ipp:version>6.0.1</ipp:version>
+      </xbrli:segment>
+    </xbrli:entity>
+    <xbrli:period>
+      <xbrli:instant>2015-12-31</xbrli:instant>
+    </xbrli:period>
+    <xbrli:scenario>
+      <ipp:Modelo>GE</ipp:Modelo>
+      <ipp:Apartado>Consolidado</ipp:Apartado>
+    </xbrli:scenario>
+  </xbrli:context>
+  <xbrli:context id="S22014_A-28015865_ipai">
+    <xbrli:entity>
+      <xbrli:identifier scheme="http://www.cnmv.es/xbrl/ipp/A-28015865">TELEFONICA, S.A.</xbrli:identifier>
+      <xbrli:segment>
+        <ipp:version>6.0.1</ipp:version>
+      </xbrli:segment>
+    </xbrli:entity>
+    <xbrli:period>
+      <xbrli:instant>2014-12-31</xbrli:instant>
+    </xbrli:period>
+    <xbrli:scenario>
+      <ipp:Modelo>GE</ipp:Modelo>
+      <ipp:Apartado>Individual</ipp:Apartado>
+    </xbrli:scenario>
+  </xbrli:context>
+  <xbrli:context id="S22014_A-28015865_ipac">
+    <xbrli:entity>
+      <xbrli:identifier scheme="http://www.cnmv.es/xbrl/ipp/A-28015865">TELEFONICA, S.A.</xbrli:identifier>
+      <xbrli:segment>
+        <ipp:version>6.0.1</ipp:version>
+      </xbrli:segment>
+    </xbrli:entity>
+    <xbrli:period>
+      <xbrli:instant>2014-12-31</xbrli:instant>
+    </xbrli:period>
+    <xbrli:scenario>
+      <ipp:Modelo>GE</ipp:Modelo>
+      <ipp:Apartado>Consolidado</ipp:Apartado>
+    </xbrli:scenario>
+  </xbrli:context>
+  <xbrli:unit id="euro">
+    <xbrli:measure>iso4217:EUR</xbrli:measure>
+  </xbrli:unit>
+  <xbrli:unit id="pure">
+    <xbrli:measure>xbrli:pure</xbrli:measure>
+  </xbrli:unit>
+  <ipp-gen:InformeFinancieroGeneral>
+    <ipp-com:IdentificacionInforme>
+      </ipp-com:IdentificacionInforme>
+    <ipp-com:DatosIdentificativos>
+      <dgi-est-gen:EntityName>
+        <dgi-est-gen:LegalName>
+          </dgi-est-gen:LegalName>
+      </dgi-est-gen:EntityName>
+      <dgi-est-gen:EntityAddress>
+        <dgi-est-gen:Address>
+          </dgi-est-gen:Address>
+      </dgi-est-gen:EntityAddress>
+      <dgi-est-gen:Identifier>
+        </dgi-est-gen:Identifier>
+    </ipp-com:DatosIdentificativos>
+    <ipp-gen:InformacionFinancieraSeleccionada>
+      <ipp-gen:BalanceIndividual>
+        <ipp-gen:TotalActivoNacional decimals="0" contextRef="S22015_A-28015865_ici" unitRef="euro">85012621000</ipp-gen:TotalActivoNacional>
+        <ipp-gen:TotalActivoNacional decimals="0" contextRef="S22014_A-28015865_ipai" unitRef="euro">85847186000</ipp-gen:TotalActivoNacional>
+        </ipp-gen:BalanceIndividual>
+      <ipp-gen:CuentaPerdidasGananciasIndividual>
+        <ifrs-gp:RevenueTotalByNature decimals="0" contextRef="S22015_A-28015865_dcoi" unitRef="euro">1592321000</ifrs-gp:RevenueTotalByNature>
+        <ifrs-gp:RevenueTotalByNature decimals="0" contextRef="S22014_A-28015865_dpai" unitRef="euro">7388768000</ifrs-gp:RevenueTotalByNature>
+        <ifrs-gp:RevenueTotalByNature decimals="0" contextRef="S22014_A-28015865_dpoi" unitRef="euro">3869462000</ifrs-gp:RevenueTotalByNature>
+        <ifrs-gp:RevenueTotalByNature decimals="0" contextRef="S22015_A-28015865_dci" unitRef="euro">5900087000</ifrs-gp:RevenueTotalByNature>
+        <ifrs-gp:DepreciationAndAmortisation decimals="0" contextRef="S22015_A-28015865_dcoi" unitRef="euro">-20985000</ifrs-gp:DepreciationAndAmortisation>
+        <ifrs-gp:DepreciationAndAmortisation decimals="0" contextRef="S22014_A-28015865_dpoi" unitRef="euro">-31051000</ifrs-gp:DepreciationAndAmortisation>
+        <ifrs-gp:DepreciationAndAmortisation decimals="0" contextRef="S22015_A-28015865_dci" unitRef="euro">-42849000</ifrs-gp:DepreciationAndAmortisation>
+        <ifrs-gp:DepreciationAndAmortisation decimals="0" contextRef="S22014_A-28015865_dpai" unitRef="euro">-63778000</ifrs-gp:DepreciationAndAmortisation>
+        </ipp-gen:CuentaPerdidasGananciasIndividual>
+      <ipp-gen:EstadoTotalCambiosPatrimonioNetoIndividual>
+        <ipp-com:SaldoInicial>
+          </ipp-com:SaldoInicial>
+        <ipp-com:SaldoInicialAjustado>
+          </ipp-com:SaldoInicialAjustado>
+        <ipp-com:IngresosGastosReconocidos>
+          </ipp-com:IngresosGastosReconocidos>
+        <ipp-com:OperacionesSociosPropietarios>
+          </ipp-com:OperacionesSociosPropietarios>
+        <ipp-com:AumentosReduccionesCapital>
+          </ipp-com:AumentosReduccionesCapital>
+        <ipp-com:DistribucionDividendos>
+          </ipp-com:DistribucionDividendos>
+        <ipp-com:OperacionesAccionesPropias>
+          </ipp-com:OperacionesAccionesPropias>
+        <ipp-com:OtrasOperacionesSociosPropietarios>
+          </ipp-com:OtrasOperacionesSociosPropietarios>
+        <ipp-com:OtrasVariacionesPatrimonioNeto>
+          </ipp-com:OtrasVariacionesPatrimonioNeto>
+        <ipp-com:TraspasosPartidasPatrimonioNeto>
+          </ipp-com:TraspasosPartidasPatrimonioNeto>
+        <ipp-com:OtrasVariaciones>
+          </ipp-com:OtrasVariaciones>
+        <ipp-com:SaldoFinal>
+          </ipp-com:SaldoFinal>
+        <ipp-com:SaldoInicial>
+          </ipp-com:SaldoInicial>
+        <ipp-com:SaldoInicialAjustado>
+          </ipp-com:SaldoInicialAjustado>
+        <ipp-com:IngresosGastosReconocidos>
+          </ipp-com:IngresosGastosReconocidos>
+        <ipp-com:OperacionesSociosPropietarios>
+          </ipp-com:OperacionesSociosPropietarios>
+        <ipp-com:DistribucionDividendos>
+          </ipp-com:DistribucionDividendos>
+        <ipp-com:OperacionesAccionesPropias>
+          </ipp-com:OperacionesAccionesPropias>
+        <ipp-com:OtrasOperacionesSociosPropietarios>
+          </ipp-com:OtrasOperacionesSociosPropietarios>
+        <ipp-com:OtrasVariacionesPatrimonioNeto>
+          </ipp-com:OtrasVariacionesPatrimonioNeto>
+        <ipp-com:PagosBasadosAcciones>
+          </ipp-com:PagosBasadosAcciones>
+        <ipp-com:TraspasosPartidasPatrimonioNeto>
+          </ipp-com:TraspasosPartidasPatrimonioNeto>
+        <ipp-com:SaldoFinal>
+          </ipp-com:SaldoFinal>
+      </ipp-gen:EstadoTotalCambiosPatrimonioNetoIndividual>
+      <ipp-gen:EstadoFlujosEfectivoIndividual>
+        <ifrs-gp:DepreciationAndAmortisation decimals="0" contextRef="S22015_A-28015865_dci" unitRef="euro">42849000</ifrs-gp:DepreciationAndAmortisation>
+        <ifrs-gp:DepreciationAndAmortisation decimals="0" contextRef="S22014_A-28015865_dpai" unitRef="euro">63778000</ifrs-gp:DepreciationAndAmortisation>
+        </ipp-gen:EstadoFlujosEfectivoIndividual>
+      <ipp-gen:BalanceConsolidado>
+        <ipp-gen:TotalActivoNiif decimals="0" contextRef="S22015_A-28015865_icc" unitRef="euro">122973855000</ipp-gen:TotalActivoNiif>
+        <ipp-gen:TotalActivoNiif decimals="0" contextRef="S22014_A-28015865_ipac" unitRef="euro">122348223000</ipp-gen:TotalActivoNiif>
+        </ipp-gen:BalanceConsolidado>
+      <ipp-gen:CuentaPerdidasGananciasConsolidada>
+        <ifrs-gp:RevenueTotalByNature decimals="0" contextRef="S22015_A-28015865_dcoc" unitRef="euro">23800184000</ifrs-gp:RevenueTotalByNature>
+        <ifrs-gp:RevenueTotalByNature decimals="0" contextRef="S22014_A-28015865_dpoc" unitRef="euro">21762624000</ifrs-gp:RevenueTotalByNature>
+        <ifrs-gp:RevenueTotalByNature decimals="0" contextRef="S22015_A-28015865_dcc" unitRef="euro">47218758000</ifrs-gp:RevenueTotalByNature>
+        <ifrs-gp:RevenueTotalByNature decimals="0" contextRef="S22014_A-28015865_dpac" unitRef="euro">43458246000</ifrs-gp:RevenueTotalByNature>
+        <ifrs-gp:DepreciationAndAmortisation decimals="0" contextRef="S22015_A-28015865_dcoc" unitRef="euro">-4265009000</ifrs-gp:DepreciationAndAmortisation>
+        <ifrs-gp:DepreciationAndAmortisation decimals="0" contextRef="S22014_A-28015865_dpoc" unitRef="euro">-3819803000</ifrs-gp:DepreciationAndAmortisation>
+        <ifrs-gp:DepreciationAndAmortisation decimals="0" contextRef="S22015_A-28015865_dcc" unitRef="euro">-8517164000</ifrs-gp:DepreciationAndAmortisation>
+        <ifrs-gp:DepreciationAndAmortisation decimals="0" contextRef="S22014_A-28015865_dpac" unitRef="euro">-7430058000</ifrs-gp:DepreciationAndAmortisation>
+        <ifrs-gp:ProfitLossAttributableToEquityHoldersOfParent decimals="0" contextRef="S22015_A-28015865_dcoc" unitRef="euro">-948786000</ifrs-gp:ProfitLossAttributableToEquityHoldersOfParent>
+        <ifrs-gp:ProfitLossAttributableToEquityHoldersOfParent decimals="0" contextRef="S22014_A-28015865_dpoc" unitRef="euro">1098364000</ifrs-gp:ProfitLossAttributableToEquityHoldersOfParent>
+        <ifrs-gp:ProfitLossAttributableToEquityHoldersOfParent decimals="0" contextRef="S22015_A-28015865_dcc" unitRef="euro">2744678000</ifrs-gp:ProfitLossAttributableToEquityHoldersOfParent>
+        <ifrs-gp:ProfitLossAttributableToEquityHoldersOfParent decimals="0" contextRef="S22014_A-28015865_dpac" unitRef="euro">3000899000</ifrs-gp:ProfitLossAttributableToEquityHoldersOfParent>
+        <ifrs-gp:BasicEarningsLossPerShare decimals="2" contextRef="S22015_A-28015865_dcoc" unitRef="pure">0.21</ifrs-gp:BasicEarningsLossPerShare>
+        <ifrs-gp:BasicEarningsLossPerShare decimals="2" contextRef="S22015_A-28015865_dcc" unitRef="pure">0.51</ifrs-gp:BasicEarningsLossPerShare>
+        <ifrs-gp:BasicEarningsLossPerShare decimals="2" contextRef="S22014_A-28015865_dpac" unitRef="pure">0.60</ifrs-gp:BasicEarningsLossPerShare>
+        </ipp-gen:CuentaPerdidasGananciasConsolidada>
+      <ipp-gen:EstadoTotalCambiosPatrimonioNetoConsolidado>
+        <ipp-com:SaldoInicial>
+          <ipp-com:PatrimonioNeto>
+            </ipp-com:PatrimonioNeto>
+        </ipp-com:SaldoInicial>
+        <ipp-com:SaldoInicial>
+          <ipp-com:PatrimonioNeto>
+            </ipp-com:PatrimonioNeto>
+        </ipp-com:SaldoInicial>
+        <ipp-com:SaldoInicialAjustado>
+          <ipp-com:PatrimonioNeto>
+            </ipp-com:PatrimonioNeto>
+        </ipp-com:SaldoInicialAjustado>
+        <ipp-com:IngresosGastosReconocidos>
+          <ipp-com:PatrimonioNeto>
+            </ipp-com:PatrimonioNeto>
+        </ipp-com:IngresosGastosReconocidos>
+        <ipp-com:OperacionesSociosPropietarios>
+          <ipp-com:PatrimonioNeto>
+            </ipp-com:PatrimonioNeto>
+        </ipp-com:OperacionesSociosPropietarios>
+        <ipp-com:AumentosReduccionesCapital>
+          </ipp-com:AumentosReduccionesCapital>
+        <ipp-com:DistribucionDividendos>
+          <ipp-com:PatrimonioNeto>
+            </ipp-com:PatrimonioNeto>
+        </ipp-com:DistribucionDividendos>
+        <ipp-com:OperacionesAccionesPropias>
+          </ipp-com:OperacionesAccionesPropias>
+        <ipp-com:IncrementoReduccionCombinacionesNegocios>
+          <ipp-com:PatrimonioNeto>
+            </ipp-com:PatrimonioNeto>
+        </ipp-com:IncrementoReduccionCombinacionesNegocios>
+        <ipp-com:OtrasOperacionesSociosPropietarios>
+          <ipp-com:PatrimonioNeto>
+            </ipp-com:PatrimonioNeto>
+        </ipp-com:OtrasOperacionesSociosPropietarios>
+        <ipp-com:OtrasVariacionesPatrimonioNeto>
+          <ipp-com:PatrimonioNeto>
+            </ipp-com:PatrimonioNeto>
+        </ipp-com:OtrasVariacionesPatrimonioNeto>
+        <ipp-com:TraspasosPartidasPatrimonioNeto>
+          </ipp-com:TraspasosPartidasPatrimonioNeto>
+        <ipp-com:OtrasVariaciones>
+          <ipp-com:PatrimonioNeto>
+            </ipp-com:PatrimonioNeto>
+        </ipp-com:OtrasVariaciones>
+        <ipp-com:SaldoFinal>
+          <ipp-com:PatrimonioNeto>
+            </ipp-com:PatrimonioNeto>
+        </ipp-com:SaldoFinal>
+        <ipp-com:SaldoInicialAjustado>
+          <ipp-com:PatrimonioNeto>
+            </ipp-com:PatrimonioNeto>
+        </ipp-com:SaldoInicialAjustado>
+        <ipp-com:IngresosGastosReconocidos>
+          <ipp-com:PatrimonioNeto>
+            </ipp-com:PatrimonioNeto>
+        </ipp-com:IngresosGastosReconocidos>
+        <ipp-com:OperacionesSociosPropietarios>
+          <ipp-com:PatrimonioNeto>
+            </ipp-com:PatrimonioNeto>
+        </ipp-com:OperacionesSociosPropietarios>
+        <ipp-com:DistribucionDividendos>
+          <ipp-com:PatrimonioNeto>
+            </ipp-com:PatrimonioNeto>
+        </ipp-com:DistribucionDividendos>
+        <ipp-com:OperacionesAccionesPropias>
+          </ipp-com:OperacionesAccionesPropias>
+        <ipp-com:IncrementoReduccionCombinacionesNegocios>
+          <ipp-com:PatrimonioNeto>
+            </ipp-com:PatrimonioNeto>
+        </ipp-com:IncrementoReduccionCombinacionesNegocios>
+        <ipp-com:OtrasOperacionesSociosPropietarios>
+          </ipp-com:OtrasOperacionesSociosPropietarios>
+        <ipp-com:OtrasVariacionesPatrimonioNeto>
+          <ipp-com:PatrimonioNeto>
+            </ipp-com:PatrimonioNeto>
+        </ipp-com:OtrasVariacionesPatrimonioNeto>
+        <ipp-com:TraspasosPartidasPatrimonioNeto>
+          </ipp-com:TraspasosPartidasPatrimonioNeto>
+        <ipp-com:OtrasVariaciones>
+          <ipp-com:PatrimonioNeto>
+            </ipp-com:PatrimonioNeto>
+        </ipp-com:OtrasVariaciones>
+        <ipp-com:SaldoFinal>
+          <ipp-com:PatrimonioNeto>
+            </ipp-com:PatrimonioNeto>
+        </ipp-com:SaldoFinal>
+      </ipp-gen:EstadoTotalCambiosPatrimonioNetoConsolidado>
+      <ipp-com:DividendosPagados>
+        <ipp-com:AccionesOrdinarias>
+          </ipp-com:AccionesOrdinarias>
+        <ipp-com:TotalAcciones>
+          </ipp-com:TotalAcciones>
+        <ipp-com:DividendosCargoResultados>
+          </ipp-com:DividendosCargoResultados>
+        <ipp-com:DividendosCargoReservasPrimaEmision>
+          </ipp-com:DividendosCargoReservasPrimaEmision>
+      </ipp-com:DividendosPagados>
+      <ipp-com:InformacionSegmentada>
+        </ipp-com:InformacionSegmentada>
+      <ipp-com:PlantillaMediaTupla>
+        <ipp-com:PlantillaMedia decimals="0" contextRef="S22015_A-28015865_ici" unitRef="euro">1060</ipp-com:PlantillaMedia>
+        <ipp-com:PlantillaMedia decimals="0" contextRef="S22014_A-28015865_ipai" unitRef="euro">1012</ipp-com:PlantillaMedia>
+        <ipp-com:PlantillaMedia decimals="0" contextRef="S22015_A-28015865_icc" unitRef="euro">125892</ipp-com:PlantillaMedia>
+        <ipp-com:PlantillaMedia decimals="0" contextRef="S22014_A-28015865_ipac" unitRef="euro">112921</ipp-com:PlantillaMedia>
+        </ipp-com:PlantillaMediaTupla>
+    </ipp-gen:InformacionFinancieraSeleccionada>
+  </ipp-gen:InformeFinancieroGeneral>
+</xbrli:xbrl>

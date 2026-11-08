@@ -1,0 +1,26 @@
+table: thesis_snapshots
+version: 1
+zone: app_state
+owner: theses (app.theses.store / app.theses.evaluate via app.api.routers.theses)
+description: >
+  Accountability snapshots of a thesis: close of price_id, benchmark and sector-benchmark closes, composite score /
+  grade (balanced profile, securities) and every KPI value captured at creation, activation, each review and close (and
+  on demand). kpi_values = [{kpi_id, label, value, ok, threshold}]; extra = JSON (reasons, serving run id).
+storage: {path: app_state.duckdb, format: duckdb_table, partition_by: [], write_mode: append}
+primary_key: [snapshot_id]
+columns:
+  - {name: snapshot_id, type: string, nullable: false, description: "TS + UTC timestamp + 6 random base32 chars"}
+  - {name: thesis_id, type: string, nullable: false, description: "FK theses"}
+  - {name: kind, type: enum, nullable: false, values: [creation, activation, review, close, manual], description: "Why it was captured"}
+  - {name: taken_at, type: datetime, nullable: false, description: "UTC"}
+  - {name: as_of, type: date, nullable: true, description: "Serving snapshot data date"}
+  - {name: price_date, type: date, nullable: true, description: "Date of the price used"}
+  - {name: price, type: float64, nullable: true, description: "Close of price_id (price_currency)"}
+  - {name: price_usd, type: float64, nullable: true, description: "Close in USD (serving prices.close_usd)"}
+  - {name: benchmark_price, type: float64, nullable: true, description: "Adjusted close of benchmark_id"}
+  - {name: sector_price, type: float64, nullable: true, description: "Adjusted close of sector_benchmark_id"}
+  - {name: composite_score, type: float64, nullable: true, description: "Composite score 0..100 (balanced profile)"}
+  - {name: grade, type: string, nullable: true, description: "Composite grade A..E"}
+  - {name: kpi_values, type: json, nullable: true, description: "KPI values (see description)"}
+  - {name: auto_status, type: string, nullable: true, description: "Automatic status at capture"}
+  - {name: extra, type: json, nullable: true, description: "Other context"}

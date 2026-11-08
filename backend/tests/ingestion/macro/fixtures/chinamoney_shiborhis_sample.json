@@ -1,0 +1,176 @@
+{
+ "head": {
+  "version": "2.0",
+  "provider": "CWAP",
+  "req_code": "",
+  "rep_code": "200",
+  "rep_message": "",
+  "ts": 1794015027588,
+  "producer": "",
+  "tstext": "2026-11-07 09:30:27"
+ },
+ "data": {
+  "baseCurveCfgList": [
+   {
+    "srNoId": 5,
+    "cfgTp": 12,
+    "cfgItemTp": "4",
+    "cfgItem": "O/N",
+    "cfgItemNm": "ON",
+    "cfgItemEnNm": "1",
+    "dsplySwtch": "1",
+    "sqncCd": 1,
+    "crtUsrCd": "admin",
+    "crtTm": 1501516800000,
+    "updUsrCd": "admin",
+    "updTm": 1501516800000
+   },
+   {
+    "srNoId": 6,
+    "cfgTp": 12,
+    "cfgItemTp": "4",
+    "cfgItem": "1W",
+    "cfgItemNm": "1W",
+    "cfgItemEnNm": "7",
+    "dsplySwtch": "1",
+    "sqncCd": 2,
+    "crtUsrCd": "admin",
+    "crtTm": 1501516800000,
+    "updUsrCd": "admin",
+    "updTm": 1501516800000
+   },
+   {
+    "srNoId": 7,
+    "cfgTp": 12,
+    "cfgItemTp": "4",
+    "cfgItem": "2W",
+    "cfgItemNm": "2W",
+    "cfgItemEnNm": "14",
+    "dsplySwtch": "1",
+    "sqncCd": 3,
+    "crtUsrCd": "admin",
+    "crtTm": 1501516800000,
+    "updUsrCd": "admin",
+    "updTm": 1501516800000
+   },
+   {
+    "srNoId": 8,
+    "cfgTp": 12,
+    "cfgItemTp": "4",
+    "cfgItem": "1M",
+    "cfgItemNm": "1M",
+    "cfgItemEnNm": "30",
+    "dsplySwtch": "1",
+    "sqncCd": 4,
+    "crtUsrCd": "admin",
+    "crtTm": 1501516800000,
+    "updUsrCd": "admin",
+    "updTm": 1501516800000
+   },
+   {
+    "srNoId": 9,
+    "cfgTp": 12,
+    "cfgItemTp": "4",
+    "cfgItem": "3M",
+    "cfgItemNm": "3M",
+    "cfgItemEnNm": "90",
+    "dsplySwtch": "1",
+    "sqncCd": 5,
+    "crtUsrCd": "admin",
+    "crtTm": 1501516800000,
+    "updUsrCd": "admin",
+    "updTm": 1501516800000
+   },
+   {
+    "srNoId": 10,
+    "cfgTp": 12,
+    "cfgItemTp": "4",
+    "cfgItem": "6M",
+    "cfgItemNm": "6M",
+    "cfgItemEnNm": "180",
+    "dsplySwtch": "1",
+    "sqncCd": 6,
+    "crtUsrCd": "admin",
+    "crtTm": 1501516800000,
+    "updUsrCd": "admin",
+    "updTm": 1501516800000
+   },
+   {
+    "srNoId": 11,
+    "cfgTp": 12,
+    "cfgItemTp": "4",
+    "cfgItem": "9M",
+    "cfgItemNm": "9M",
+    "cfgItemEnNm": "270",
+    "dsplySwtch": "1",
+    "sqncCd": 7,
+    "crtUsrCd": "admin",
+    "crtTm": 1501516800000,
+    "updUsrCd": "admin",
+    "updTm": 1501516800000
+   },
+   {
+    "srNoId": 12,
+    "cfgTp": 12,
+    "cfgItemTp": "4",
+    "cfgItem": "1Y",
+    "cfgItemNm": "1Y",
+    "cfgItemEnNm": "360",
+    "dsplySwtch": "1",
+    "sqncCd": 8,
+    "crtUsrCd": "admin",
+    "crtTm": 1501516800000,
+    "updUsrCd": "admin",
+    "updTm": 1501516800000
+   }
+  ],
+  "endDateCN": "2026-11-06",
+  "endDateEN": "06 Nov 2026",
+  "startDateEN": "07 Nov 2025",
+  "startDateCN": "2025-11-07",
+  "messageEn": "",
+  "message": ""
+ },
+ "records": [
+  {
+   "9M": "1.4280",
+   "2W": "1.3450",
+   "1W": "1.3460",
+   "6M": "1.4180",
+   "1Y": "1.4370",
+   "3M": "1.3980",
+   "1M": "1.3770",
+   "showDateEN": "06 Nov 2026",
+   "showDateCN": "2026-11-06",
+   "ON": "1.2830"
+  },
+  {
+   "9M": "1.4280",
+   "2W": "1.3390",
+   "1W": "1.3230",
+   "6M": "1.4180",
+   "1Y": "1.4370",
+   "3M": "1.3980",
+   "1M": "1.3770",
+   "showDateEN": "05 Nov 2026",
+   "showDateCN": "2026-11-05",
+   "ON": "1.2630"
+  },
+  {
+   "9M": "1.4290",
+   "2W": "1.3430",
+   "1W": "1.3290",
+   "6M": "1.4190",
+   "1Y": "1.4370",
+   "3M": "1.4000",
+   "1M": "1.3800",
+   "showDateEN": "04 Nov 2026",
+   "showDateCN": "2026-11-04",
+   "ON": "1.2650"
+  },
+  {
+   "showDateCN": "bad",
+   "ON": "1.0"
+  }
+ ]
+}

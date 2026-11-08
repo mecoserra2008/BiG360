@@ -1,0 +1,24 @@
+table: studies
+version: 2
+zone: app_state
+owner: model-studio (app.modeling.store via app.api.routers.studio)
+description: >
+  Saved Model Studio studies (single-user app): a named StudySpec (dataset spec + method + roles + params) that can be
+  re-run, compared and exported. Mutable state lives in data/db/app_state.duckdb.
+storage: {path: app_state.duckdb, format: duckdb_table, partition_by: [], write_mode: upsert}
+primary_key: [study_id]
+columns:
+  - {name: study_id, type: string, nullable: false, description: "ST + UTC timestamp + 6 random base32 chars"}
+  - {name: name, type: string, nullable: false, description: "Display name"}
+  - {name: description, type: string, nullable: true, description: "Notes"}
+  - {name: spec, type: json, nullable: false, description: "StudySpec JSON (app.modeling.registry.StudySpec)"}
+  - {name: method, type: string, nullable: false, description: "Method id (denormalized from spec)"}
+  - {name: tags, type: json, nullable: true, description: "JSON array of strings"}
+  - {name: preset_id, type: string, nullable: true, description: "Preset the study was created from"}
+  - {name: last_run_id, type: string, nullable: true, description: "Most recent study_runs.run_id"}
+  - {name: schedule, type: enum, nullable: true, values: [none, weekly, monthly], description: "v2: re-run by the studio_scheduled job (weekly DAG; monthly = at most every 27 days)"}
+  - {name: drift_threshold, type: float64, nullable: true, description: "v2: relative metric degradation that fires a drift alert (default 0.2 = 20%)"}
+  - {name: last_scheduled_at, type: datetime, nullable: true, description: "v2: UTC time of the last scheduled re-run"}
+  - {name: alert_id, type: string, nullable: true, description: "v2: alerts row (rule_type studio_drift) that carries this study's drift events"}
+  - {name: created_at, type: datetime, nullable: false, description: "UTC"}
+  - {name: updated_at, type: datetime, nullable: false, description: "UTC"}

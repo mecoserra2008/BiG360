@@ -1,0 +1,239 @@
+{
+ "title": "Factor zoo with ARD (which signals survive?)",
+ "description": "Automatic relevance determination over 10 point-in-time ratios: which ones keep a non-zero posterior coefficient for the next-month return?",
+ "question": "factors",
+ "tags": [
+  "probabilistic",
+  "Bayesian",
+  "factors"
+ ],
+ "method_note": "ARD gives each feature its own prior precision, estimated by evidence maximization; irrelevant features get a huge precision and collapse to zero. Reported with posterior sds, CRPS / PIT out of fold vs a linear-Gaussian baseline. Caveat: the universe is today's constituents (membership history starts 2026-10), so early years carry survivorship bias; read the premium as an upper bound.",
+ "expected_outputs": [
+  "posterior coefficients",
+  "prior precision per feature",
+  "PIT / calibration",
+  "CRPS vs baseline"
+ ],
+ "runtime_s": 6.6,
+ "validated": "2026-11-06 on snapshot R20261106T010757G9ZB",
+ "result": {
+  "run_id": "SR20261106T022426N86BC",
+  "beats_baseline": true,
+  "beats_linear": false,
+  "verdict": "ARD beats linear-Gaussian baseline on CRPS (DM p = 0.022); point forecast: ARD does not significantly beat linear baseline (DM p = 0.868)",
+  "n_obs": 42120,
+  "metrics": {
+   "oos_rmse": 0.08973143868204976,
+   "oos_r2_oos": -0.0006597109804968859,
+   "oos_rank_ic": null,
+   "crps": 0.048248393238422504,
+   "crps_linear": 0.04827656696129255,
+   "crps_skill_vs_linear": 0.00058359002396835,
+   "coverage_90": 0.908309591642925,
+   "dm_p_crps_vs_linear": 0.02197613750348563,
+   "dm_p_vs_linear": 0.8675108421349889
+  },
+  "coefficients": [
+   {
+    "term": "gross_prof",
+    "estimate": 0.0,
+    "statistic": null,
+    "p_value": null
+   },
+   {
+    "term": "roic",
+    "estimate": 0.0,
+    "statistic": null,
+    "p_value": null
+   },
+   {
+    "term": "leverage",
+    "estimate": 0.0,
+    "statistic": null,
+    "p_value": null
+   },
+   {
+    "term": "accruals",
+    "estimate": 0.0,
+    "statistic": null,
+    "p_value": null
+   }
+  ]
+ },
+ "study": {
+  "name": "Factor zoo with ARD (which signals survive?)",
+  "method": "bayes_ridge",
+  "y": "fwd_ret_1m",
+  "x": [
+   "gross_prof",
+   "roic",
+   "leverage",
+   "accruals",
+   "fscore",
+   "rev_growth",
+   "eps_growth",
+   "earnings_yield",
+   "mom_12_1",
+   "ivol"
+  ],
+  "params": {
+   "model": "ard",
+   "cv": {
+    "folds": 5,
+    "scheme": "purged_kfold",
+    "purge": 1
+   }
+  },
+  "dataset": {
+   "kind": "panel",
+   "frequency": "M",
+   "start": "2012-01-01",
+   "entities": {
+    "universe": "mvp_us"
+   },
+   "variables": [
+    {
+     "name": "fwd_ret_1m",
+     "source": "prices",
+     "field": "ret",
+     "transforms": [
+      {
+       "op": "fwd_compound",
+       "k": 1
+      },
+      {
+       "op": "winsorize"
+      }
+     ]
+    },
+    {
+     "name": "gross_prof",
+     "source": "ratios",
+     "field": "gross_profitability",
+     "transforms": [
+      {
+       "op": "winsorize"
+      },
+      {
+       "op": "cs_zscore"
+      }
+     ]
+    },
+    {
+     "name": "roic",
+     "source": "ratios",
+     "field": "roic",
+     "transforms": [
+      {
+       "op": "winsorize"
+      },
+      {
+       "op": "cs_zscore"
+      }
+     ]
+    },
+    {
+     "name": "leverage",
+     "source": "ratios",
+     "field": "liabilities_to_assets",
+     "transforms": [
+      {
+       "op": "winsorize"
+      },
+      {
+       "op": "cs_zscore"
+      }
+     ]
+    },
+    {
+     "name": "accruals",
+     "source": "ratios",
+     "field": "sloan_accruals",
+     "transforms": [
+      {
+       "op": "winsorize"
+      },
+      {
+       "op": "cs_zscore"
+      }
+     ]
+    },
+    {
+     "name": "fscore",
+     "source": "ratios",
+     "field": "piotroski_f",
+     "transforms": [
+      {
+       "op": "winsorize"
+      },
+      {
+       "op": "cs_zscore"
+      }
+     ]
+    },
+    {
+     "name": "rev_growth",
+     "source": "ratios",
+     "field": "revenue_growth_yoy",
+     "transforms": [
+      {
+       "op": "winsorize"
+      },
+      {
+       "op": "cs_zscore"
+      }
+     ]
+    },
+    {
+     "name": "eps_growth",
+     "source": "ratios",
+     "field": "eps_growth_yoy",
+     "transforms": [
+      {
+       "op": "winsorize"
+      },
+      {
+       "op": "cs_zscore"
+      }
+     ]
+    },
+    {
+     "name": "earnings_yield",
+     "source": "valuation",
+     "field": "earnings_yield",
+     "transforms": [
+      {
+       "op": "cs_rank"
+      }
+     ]
+    },
+    {
+     "name": "mom_12_1",
+     "source": "tech_factors",
+     "field": "mom",
+     "transforms": [
+      {
+       "op": "winsorize"
+      },
+      {
+       "op": "cs_zscore"
+      }
+     ]
+    },
+    {
+     "name": "ivol",
+     "source": "tech_factors",
+     "field": "ivol",
+     "transforms": [
+      {
+       "op": "winsorize"
+      },
+      {
+       "op": "cs_zscore"
+      }
+     ]
+    }
+   ]
+  }
+ }
+}

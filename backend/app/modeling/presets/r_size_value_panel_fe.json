@@ -1,0 +1,114 @@
+{
+ "title": "Size and value with time fixed effects (panel)",
+ "description": "Panel regression of the next-month return on size, earnings yield and their interaction with month fixed effects and clustered errors.",
+ "question": "factors",
+ "tags": [
+  "panel",
+  "size",
+  "value"
+ ],
+ "method_note": "Time effects absorb the market return of each month, so slopes are purely cross-sectional (like Fama-MacBeth); two-way clustering handles both cross-sectional and serial correlation. The interaction asks whether value works better in smaller stocks. Caveat: the universe is today's constituents (membership history starts 2026-10), so early years carry survivorship bias; read the premium as an upper bound.",
+ "expected_outputs": [
+  "coefficients with 2-way clustered SEs",
+  "within R2"
+ ],
+ "runtime_s": 7.4,
+ "validated": "2026-11-06 on snapshot R20261106T010757G9ZB",
+ "result": {
+  "run_id": "SR20261106T022732X5HE6",
+  "n_obs": 72071,
+  "metrics": {
+   "r2": 0.0034688184233258035
+  },
+  "coefficients": [
+   {
+    "term": "log_mcap",
+    "estimate": -0.006302777289773929,
+    "statistic": -4.167779419374867,
+    "p_value": 3.0794068012873765e-05
+   },
+   {
+    "term": "earnings_yield",
+    "estimate": -0.004356737140883096,
+    "statistic": -1.102370169494669,
+    "p_value": 0.27030446507355066
+   },
+   {
+    "term": "log_mcap_x_earnings_yield",
+    "estimate": 0.004290859519875629,
+    "statistic": 2.5933071709929014,
+    "p_value": 0.009507708648379909
+   }
+  ]
+ },
+ "study": {
+  "name": "Size and value with time fixed effects (panel)",
+  "method": "panel",
+  "y": "fwd_ret_1m",
+  "x": [
+   "log_mcap",
+   "earnings_yield",
+   "log_mcap_x_earnings_yield"
+  ],
+  "params": {
+   "estimator": "fe",
+   "entity_effects": false,
+   "time_effects": true,
+   "cluster_entity": true,
+   "cluster_time": true
+  },
+  "dataset": {
+   "kind": "panel",
+   "frequency": "M",
+   "start": "2012-01-01",
+   "entities": {
+    "universe": "mvp_us"
+   },
+   "variables": [
+    {
+     "name": "fwd_ret_1m",
+     "source": "prices",
+     "field": "ret",
+     "transforms": [
+      {
+       "op": "fwd_compound",
+       "k": 1
+      },
+      {
+       "op": "winsorize"
+      }
+     ]
+    },
+    {
+     "name": "log_mcap",
+     "source": "valuation",
+     "field": "market_cap_usd",
+     "transforms": [
+      {
+       "op": "log"
+      },
+      {
+       "op": "cs_zscore"
+      }
+     ]
+    },
+    {
+     "name": "earnings_yield",
+     "source": "valuation",
+     "field": "earnings_yield",
+     "transforms": [
+      {
+       "op": "cs_rank"
+      }
+     ]
+    }
+   ],
+   "interactions": [
+    [
+     "log_mcap",
+     "earnings_yield"
+    ]
+   ]
+  }
+ }
+}

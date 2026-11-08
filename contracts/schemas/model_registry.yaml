@@ -1,0 +1,36 @@
+table: model_registry
+version: 1
+zone: app_state
+owner: model-studio (app.modeling.model_registry via app.api.routers.studio)
+description: >
+  Studio v2 S3 (roadmap v3 item S) Model Registry: a Model Studio run promoted to a named, versioned model. Each row pins
+  the run (run_id), its StudySpec (spec + spec_hash), the data snapshot and dataset key it was fitted on, the owner and the
+  monitoring baseline (feature decile edges / shares and the prediction distribution at promotion, the out-of-sample
+  metric). Monitoring (POST /studio/registry/{model_id}/monitor or the weekly studio_scheduled job when monitor =
+  weekly | monthly) re-evaluates the model on the current snapshot: expanding out-of-sample IC / metric, PSI drift of the
+  features and of the predictions; breaches append events to the model's studio_drift alert (alert_id).
+storage: {path: app_state.duckdb, format: duckdb_table, partition_by: [], write_mode: upsert}
+primary_key: [model_id]
+columns:
+  - {name: model_id, type: string, nullable: false, description: "MR + UTC timestamp + 6 random base32 chars"}
+  - {name: name, type: string, nullable: false, description: "Model name (versions share it)"}
+  - {name: version, type: int32, nullable: false, description: "1, 2, ... per name"}
+  - {name: run_id, type: string, nullable: false, description: "study_runs.run_id that was promoted"}
+  - {name: method, type: string, nullable: false, description: "Method id"}
+  - {name: spec, type: json, nullable: false, description: "StudySpec JSON of the run"}
+  - {name: spec_hash, type: string, nullable: false, description: "sha1 of the normalized StudySpec"}
+  - {name: snapshot_id, type: string, nullable: true, description: "Data snapshot the run was pinned to"}
+  - {name: dataset_key, type: string, nullable: true, description: "Dataset cache key of the run"}
+  - {name: owner, type: string, nullable: false, description: "Who promoted it (free text; default the OS user)"}
+  - {name: description, type: string, nullable: true, description: "Notes"}
+  - {name: stage, type: enum, nullable: false, values: [candidate, production, archived], description: "Lifecycle stage"}
+  - {name: metrics, type: json, nullable: false, description: "Flat numeric metrics of the promoted run"}
+  - {name: baseline, type: json, nullable: false, description: "{features: {name: {edges, shares}}, prediction: {edges, shares}, end_date, oos_metric}"}
+  - {name: monitor, type: enum, nullable: false, values: [none, weekly, monthly], description: "Scheduled monitoring"}
+  - {name: psi_threshold, type: float64, nullable: false, description: "PSI above this = drift (default 0.25)"}
+  - {name: metric_floor, type: float64, nullable: true, description: "Alert when the monitored OOS metric (rank IC for panels, R2_oos otherwise) falls below"}
+  - {name: alert_id, type: string, nullable: true, description: "alerts row (rule_type studio_drift, params {model_id, model_name, version}) carrying drift events"}
+  - {name: last_monitor, type: json, nullable: true, description: "Latest monitoring result (expanding metric, PSI tables, breaches)"}
+  - {name: last_monitored_at, type: datetime, nullable: true, description: "UTC"}
+  - {name: created_at, type: datetime, nullable: false, description: "UTC"}
+  - {name: updated_at, type: datetime, nullable: false, description: "UTC"}

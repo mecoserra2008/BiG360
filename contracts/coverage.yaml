@@ -1,0 +1,364 @@
+# Coverage registry (docs/OPERATIONS_ROADMAP.md O1.1). Owner: platform (app.ops). Consumed by the gap detector
+# (job data_gaps_detect -> ops/data_gaps), the gap filler (python -m app.ops.filler) and GET /system/data-health.
+#
+# datasets[]: what data the app should have.
+#   check       detector routine (app.ops.gaps.CHECKS): sessions | currency_dates | macro_releases | gdelt_days | live_news |
+#               daily_counts | latest_date | cftc_weekly | quarterly_13f | finra_settlements | sentinel_rows | null_share
+#   calendar    expected dates: exchange MIC (exchange_calendars) | weekdays | cftc | 13f | finra
+#   sla         freshness SLA in sessions/days on the DAILY profile; the effective SLA is max(sla, profile sla_days)
+#   entities    expected entity set (per-session bar counts, currency list, ...) and partial thresholds
+#   live_job    jobs.yaml job that keeps it current; fill = how the gap filler repairs a gap (same ingestion code)
+#   priority    1 = most urgent ... 100 = whenever idle; cost = filler budget units per gap item
+# sources{}: per-source filler rate budgets (on top of the shared token buckets in app.core.ratelimit, which the
+#   live jobs and the filler share). The filler never spends more than `per_hour` units in a sliding hour.
+# campaigns[]: long resumable backfills folded into the filler (state files keep their progress).
+# known_gaps[]: seeded from docs/PHASE3_TODO.md and docs/AUDIT_2026-10-19.md (upserted by the detector).
+version: 1
+
+defaults: {priority: 50, sla: 1, max_attempts: 6, backoff_min: 30, backoff_max_h: 24, lookback_days: 45}
+
+sources:
+  polygon:       {limiter: polygon, budget: {unit: requests, per_hour: 120}, note: "free tier 5/min shared with the nightly; the filler takes <= 2/min"}
+  yfinance:      {limiter: yfinance, budget: {unit: symbols, per_hour: 3000}, note: "unofficial; 250-symbol batches; shared cross-process bucket"}
+  sec_edgar:     {limiter: sec_edgar, budget: {unit: requests, per_hour: 14400}, note: "SEC fair access 10 req/s per user; filler <= 4/s on average"}
+  gdelt_files:   {budget: {unit: gb, per_hour: 15}, note: "GDELT 2.0 raw files (data.gdeltproject.org); E6 runs 4 download threads"}
+  fred:          {limiter: fred, budget: {unit: requests, per_hour: 3000}, note: "documented 120 req/min"}
+  ecb:           {limiter: ecb, budget: {unit: requests, per_hour: 2000}}
+  eurostat:      {limiter: eurostat, budget: {unit: requests, per_hour: 1000}}
+  oecd:          {limiter: oecd, budget: {unit: requests, per_hour: 20}, note: "60 downloads/h hard limit shared with the nightly"}
+  cftc_socrata:  {budget: {unit: requests, per_hour: 200}, note: "publicreporting.cftc.gov Socrata"}
+  finra:         {limiter: finra, budget: {unit: requests, per_hour: 2000}}
+  baostock:      {limiter: baostock, budget: {unit: symbols, per_hour: 600}, note: "IP-ban sensitive: one worker"}
+  local:         {budget: {unit: runs, per_hour: 30}, note: "CPU-only maintenance (no network)"}
+  commoncrawl:   {budget: {unit: files, per_hour: 400}, note: "data.commoncrawl.org CC-NEWS WARCs (~1 GB each), <= 6 polite connections, back-off on 503 Slow Down (N1)"}
+  rates_official: {budget: {unit: requests, per_hour: 600}, note: "W3 official curve / auction hosts (treasury.gov, ECB, Bundesbank, BoE, MoF, BdE, BPstat, SNB, BoC, RBA, Riksbank, Norges Bank, Fiscal Data, DMO); <= 1 request / s per host"}
+  esma_firds:    {budget: {unit: files, per_hour: 10}, note: "ESMA FIRDS FULINS_D weekly full file (4 zip parts)"}
+  openfigi:      {budget: {unit: requests, per_hour: 300}, note: "OpenFIGI /v3/search without key: 5 requests / minute"}
+  filings_eu:    {budget: {unit: requests, per_hour: 3000}, note: "W2 ESEF filings.xbrl.org / FCA NSM / national OAM downloads (<= 1 request / s per host)"}
+  companies_house_bulk: {budget: {unit: requests, per_hour: 3000}, note: "W2 download.companieshouse.gov.uk Accounts Data Product: HTTP Range reads (central directory + matched members), <= 2 requests / s"}
+
+datasets:
+  # ---------------------------------------------------------------- prices (exchange calendars)
+  - {id: prices.US,    label: "Prices US",     group: prices, table: prices_daily, check: sessions, region: US,    calendar: XNYS, sla: 1, priority: 10, live_job: prices_us_polygon, fill: {kind: polygon_dates},  entities: {min_expected: 3000, partial_below: 0.8, missing_below: 0.05}, cost: {source: polygon, units: 1}}
+  - {id: prices.CA,    label: "Prices Canada", group: prices, table: prices_daily, check: sessions, region: CA,    calendar: XTSE, sla: 1, priority: 14, live_job: prices_global_yf,  fill: {kind: yf_refetch},     entities: {min_expected: 3,    partial_below: 0.6, missing_below: 0.05}, cost: {source: yfinance, units: region_symbols}}
+  - {id: prices.EU,    label: "Prices Europe", group: prices, table: prices_daily, check: sessions, region: EU,    calendar: XETR, sla: 1, priority: 11, live_job: prices_global_yf,  fill: {kind: yf_refetch},     entities: {min_expected: 500,  partial_below: 0.8, missing_below: 0.05}, cost: {source: yfinance, units: region_symbols}}
+  - {id: prices.UK,    label: "Prices UK",     group: prices, table: prices_daily, check: sessions, region: UK,    calendar: XLON, sla: 1, priority: 11, live_job: prices_global_yf,  fill: {kind: yf_refetch},     entities: {min_expected: 150,  partial_below: 0.8, missing_below: 0.05}, cost: {source: yfinance, units: region_symbols}}
+  - {id: prices.JP,    label: "Prices Japan",  group: prices, table: prices_daily, check: sessions, region: JP,    calendar: XTKS, sla: 1, priority: 11, live_job: prices_global_yf,  fill: {kind: yf_refetch},     entities: {min_expected: 1500, partial_below: 0.8, missing_below: 0.05}, cost: {source: yfinance, units: region_symbols}}
+  - {id: prices.KR,    label: "Prices Korea",  group: prices, table: prices_daily, check: sessions, region: KR,    calendar: XKRX, sla: 1, priority: 12, live_job: prices_global_yf,  fill: {kind: yf_refetch},     entities: {min_expected: 1000, partial_below: 0.8, missing_below: 0.05}, cost: {source: yfinance, units: region_symbols}}
+  - {id: prices.HK,    label: "Prices HK",     group: prices, table: prices_daily, check: sessions, region: HK,    calendar: XHKG, sla: 1, priority: 12, live_job: prices_global_yf,  fill: {kind: yf_refetch},     entities: {min_expected: 800,  partial_below: 0.8, missing_below: 0.05}, cost: {source: yfinance, units: region_symbols}}
+  - {id: prices.CN,    label: "Prices China",  group: prices, table: prices_daily, check: sessions, region: CN,    calendar: XSHG, sla: 1, priority: 13, live_job: prices_cn_baostock, fill: {kind: yf_refetch},    entities: {min_expected: 1500, partial_below: 0.7, missing_below: 0.05}, cost: {source: yfinance, units: region_symbols}, note: "BaoStock IP ban: 424 SH names missing, 349 names Yahoo-only"}
+  - {id: prices.LATAM, label: "Prices LATAM",  group: prices, table: prices_daily, check: sessions, region: LATAM, calendar: BVMF, sla: 2, priority: 15, live_job: prices_br_b3,      fill: {kind: yf_refetch},     entities: {min_expected: 100,  partial_below: 0.5, missing_below: 0.05}, cost: {source: yfinance, units: region_symbols}, note: "mixed markets (BR/MX/CL/PE/CO/AR): lenient thresholds"}
+  - {id: prices.APAC,  label: "Prices APAC",   group: prices, table: prices_daily, check: sessions, region: APAC,  calendar: XTAI, sla: 2, priority: 15, live_job: prices_tw,         fill: {kind: yf_refetch},     entities: {min_expected: 100,  partial_below: 0.5, missing_below: 0.05}, cost: {source: yfinance, units: region_symbols}, note: "TW/IN/AU/SG mix: lenient thresholds"}
+  - {id: prices.history, label: "Price history depth", group: prices, check: unpriced_securities, sla: 30, priority: 70, live_job: prices_global_yf, fill: {kind: campaign, campaign: yahoo_price_history}, note: "securities in the universe without any daily bar (serving sec.close is null)"}
+  # ---------------------------------------------------------------- FX
+  - {id: fx.rates, label: "FX rates", group: fx, table: fx_rates, check: currency_dates, calendar: weekdays, sla: 2, priority: 15, live_job: fx_rates, fill: {kind: job, jobs: [{job: fx_rates}]}, entities: {lookback_days: 60, slow_sources: {TWD: "weekly Fed H.10 (FRED DEXTAUS) only: needs the CBC Taiwan daily rate (PHASE3_TODO)"}, retired: {BGN: "2026-01-01 euro adoption: BG listings convert via EUR"}}, cost: {source: fred, units: 40}}
+  # ---------------------------------------------------------------- macro (official release calendar)
+  - {id: macro.releases, label: "Macro releases", group: macro, table: macro_release_events, check: macro_releases, calendar: macro_calendar, sla: 3, priority: 20, live_job: macro_global, fill: {kind: job, jobs: [{job: macro_fred}, {job: macro_global, params: {run_all: true}}, {job: macro_calendar}]}, cost: {source: fred, units: 200}, note: "releases dated in the last 30 days (macro_releases calendar) still pending after 2 days"}
+  - {id: macro.ingest, label: "Macro ingestion", group: macro, table: macro_observations, check: latest_ingest, by: source_id, sla: 3, priority: 22, live_job: macro_global, fill: {kind: job, jobs: [{job: macro_global, params: {run_all: true}}]}, cost: {source: fred, units: 200}, entities: {ignore: [worldbank, imf_weo, oecd_eo], weekly: [bis, oecd, imf, cvm]}}
+  # ---------------------------------------------------------------- events / news
+  - {id: gdelt.days, label: "GDELT daily files", group: events, check: gdelt_days, calendar: daily, sla: 2, priority: 30, live_job: gdelt_stream, fill: {kind: gdelt_redo}, entities: {files_per_day: 576, stream_lookback_days: 14, history_start: "2015-02-19", outage_attempts: 3}, cost: {source: gdelt_files, units: 3}}
+  - {id: news.live, label: "Live news (service + hourly fold)", group: events, check: live_news, calendar: daily, sla: 1, priority: 25, live_job: news_hourly, fill: {kind: job, jobs: [{job: news_hourly}, {job: news_finalise}]}, entities: {max_heartbeat_age_s: 120, max_fold_age_h: 3, finalise_after_h: 26}, cost: {source: local, units: 1}, note: "roadmap v3 N2-N3: realtime supervisor child up when switched on (tray), hourly fold (job news_hourly) < 3 h old, complete UTC days with hot data finalised (job news_finalise); heatmap = folded hours / 24 (1 = finalised)"}
+  - {id: news.items, label: "News items", group: events, table: news_items, check: daily_counts, date_column: knowledge_date, calendar: weekdays, sla: 2, priority: 35, live_job: news_ingest, fill: {kind: job, jobs: [{job: news_ingest}]}, entities: {lookback_days: 21, missing_below: 0.05, partial_below: 0.2}, cost: {source: polygon, units: 10}}
+  # ---------------------------------------------------------------- filings / insiders (US business days)
+  - {id: filings.sec, label: "SEC filings index", group: filings, table: filings_index, check: latest_date, date_column: knowledge_date, parts: {source_id: [sec_edgar]}, calendar: XNYS, sla: 1, priority: 18, live_job: sec_filings_index, fill: {kind: job, jobs: [{job: sec_filings_index}]}, cost: {source: sec_edgar, units: 10}}
+  - {id: insider.us, label: "Insider Form 4 (US)", group: filings, table: insider_transactions, check: latest_date, date_column: knowledge_date, parts: {region: [US]}, calendar: XNYS, sla: 2, priority: 25, live_job: sec_form4, fill: {kind: job, jobs: [{job: sec_filings_index}, {job: sec_form4}]}, cost: {source: sec_edgar, units: 2000}}
+  - {id: corporate_actions, label: "Corporate actions", group: prices, table: corporate_actions, check: latest_ingest, sla: 3, priority: 30, live_job: corporate_actions, fill: null}
+  # ---------------------------------------------------------------- positioning / smart money
+  - {id: cftc.cot, label: "CFTC COT (weekly)", group: positioning, table: cftc_positions, check: cftc_weekly, calendar: cftc, sla: 7, priority: 30, live_job: cftc_cot, fill: {kind: job, jobs: [{job: cftc_cot_history}]}, entities: {report_type: legacy_fut, history_weeks: 104, min_markets: 150}, cost: {source: cftc_socrata, units: 25}}
+  - {id: inst.13f, label: "13F holdings", group: positioning, table: institutional_holdings, check: quarterly_13f, calendar: 13f, sla: 14, priority: 40, live_job: sec_13f, fill: {kind: campaign, campaign: sec_13f_history}, entities: {quarters: 8, partial_below: 0.8, null_security_max: 0.3}, cost: {source: sec_edgar, units: 600}}
+  - {id: short_interest, label: "FINRA short interest", group: positioning, table: short_interest, check: finra_settlements, date_column: settlement_date, calendar: finra, sla: 10, priority: 40, live_job: finra_short_interest, fill: {kind: job, jobs: [{job: finra_short_interest}]}, cost: {source: finra, units: 20}}
+  # ---------------------------------------------------------------- earnings
+  - {id: earnings.dates, label: "Earnings dates", group: earnings, table: earnings_announcements, check: sentinel_rows, date_column: event_date, sentinel: "1900-01-01", sla: 7, priority: 45, live_job: earnings_dates_fetch, fill: {kind: campaign, campaign: earnings_dates_history}, note: "F26 fixed (O2.2c): empty Yahoo answers go to data/state/earnings/yahoo_fetch_log.json; legacy 1900-01-01 marker rows are purged by the next earnings_dates_fetch run"}
+  # ---------------------------------------------------------------- regulator registers + statements (coverage v2 W2, ingest-register)
+  - {id: register.US, label: "Register US (SEC listed filers)", group: filings, table: regulatory_register, check: latest_ingest, ingest_column: updated_at, parts: {market: [US]}, calendar: weekdays, sla: 2, priority: 40, live_job: regulatory_register, fill: {kind: job, jobs: [{job: regulatory_register, params: {markets: [US], seeds: false}}]}, cost: {source: sec_edgar, units: 12}, note: "SEC company_tickers_exchange (daily) + EDGAR full-index master.gz (current quarter re-read daily, closed quarters cached)"}
+  - {id: register.EU, label: "Register EU (ESMA FIRDS regulated markets)", group: filings, table: regulatory_register, check: latest_ingest, ingest_column: updated_at, parts: {market: [EU]}, calendar: daily, sla: 9, priority: 42, live_job: regulatory_register, fill: {kind: job, jobs: [{job: regulatory_register, params: {markets: [EU]}}]}, cost: {source: esma_firds, units: 2}, note: "ESMA publishes FULINS_E weekly (Saturday); the nightly job re-parses only a new file set"}
+  - {id: register.UK, label: "Register UK (FCA FIRDS Official List + AIM)", group: filings, table: regulatory_register, check: latest_ingest, ingest_column: updated_at, parts: {market: [UK]}, calendar: daily, sla: 9, priority: 42, live_job: regulatory_register, fill: {kind: job, jobs: [{job: regulatory_register, params: {markets: [UK]}}]}, cost: {source: esma_firds, units: 1}, note: "FCA FIRDS FULINS_E weekly; FCA Official List web search is robots-disallowed (not used)"}
+  - {id: filings.uk_ch, label: "Companies House bulk accounts (iXBRL)", group: filings, table: filings_index, check: latest_ingest, ingest_column: ingested_at, parts: {source_id: [companies_house]}, calendar: weekdays, sla: 3, priority: 46, live_job: ch_accounts, fill: {kind: job, jobs: [{job: ch_accounts}]}, cost: {source: companies_house_bulk, units: 3}, note: "daily Accounts Data Product files (Tue-Sat); only matched register / issuer company numbers are range-read"}
+  - {id: filings.br_cvm, label: "CVM DFP / ITR filings (BR, every cvm_code)", group: filings, table: filings_index, check: latest_ingest, ingest_column: ingested_at, parts: {source_id: [cvm]}, calendar: daily, sla: 9, priority: 47, live_job: cvm_filings, fill: {kind: job, jobs: [{job: cvm_filings}]}, note: "COVERAGE_V3 B3: weekly yearly zips (dados.cvm.gov.br, no key) for every cvm_code of the universe + the B3 crosswalk (PN / unit lines -> the registrant of their ON line); history via the manual job cvm_backfill; the weekly run rewrites the last month of receipts, so a quiet week still refreshes ingested_at"}
+  - {id: statements.register.US, label: "Statements of the US register", group: fundamentals, check: register_coverage, market: US, calendar: daily, sla: 2, priority: 58, live_job: regulatory_coverage, entities: {annual_target: 95, interim_target: 85}, fill: {kind: campaign, campaign: register_statements_us}, cost: {source: sec_edgar, units: 600}, note: "share of SEC listed periodic filers with a current annual / interim in fundamentals_canonical (job regulatory_coverage)"}
+  - {id: statements.register.EU, label: "Statements of the EU register", group: fundamentals, check: register_coverage, market: EU, calendar: daily, sla: 2, priority: 60, live_job: regulatory_coverage, entities: {annual_target: 95, interim_target: 85}, fill: {kind: campaign, campaign: register_statements_eu_uk}, cost: {source: filings_eu, units: 300}, note: "ESEF (filings.xbrl.org) + national OAMs + Yahoo fallback; half-year reports are not ESEF-tagged"}
+  - {id: statements.register.UK, label: "Statements of the UK register", group: fundamentals, check: register_coverage, market: UK, calendar: daily, sla: 2, priority: 60, live_job: regulatory_coverage, entities: {annual_target: 95, interim_target: 85}, fill: {kind: campaign, campaign: register_statements_eu_uk}, cost: {source: filings_eu, units: 300}, note: "UK ESEF / UKSEF (filings.xbrl.org, FCA NSM) + Companies House iXBRL + Yahoo fallback; AIM has no tagged filing source"}
+  # ---------------------------------------------------------------- analytics outputs (filled by the DAG, not the filler)
+  - {id: analytics.scores,     label: "Composite scores",  group: analytics, table: composite_scores, check: latest_date, date_column: as_of_date, calendar: XNYS, sla: 1, priority: 50, live_job: scoring,         fill: null}
+  - {id: analytics.valuation,  label: "Valuation daily",   group: analytics, table: valuation_daily,  check: latest_date, date_column: date,       calendar: XNYS, sla: 1, priority: 50, live_job: valuation_daily, fill: null}
+  - {id: analytics.technicals, label: "Technical levels",  group: analytics, table: tech_levels,      check: latest_date, date_column: as_of_date, calendar: XNYS, sla: 1, priority: 50, live_job: tech_levels,     fill: null}
+  - {id: analytics.ml,         label: "ML predictions",    group: analytics, table: ml_predictions,   check: latest_date, date_column: date,       calendar: XNYS, sla: 1, priority: 50, live_job: ml_predict,      fill: null}
+  - {id: analytics.sentiment,  label: "Sentiment daily",   group: analytics, table: sentiment_daily,  check: latest_date, date_column: date,       calendar: weekdays, sla: 2, priority: 55, live_job: sentiment_daily, fill: null}
+  - {id: analytics.moat,       label: "Moat (weekly)",     group: analytics, table: moat,             check: latest_date, date_column: as_of_date, calendar: weekdays, sla: 8, priority: 60, live_job: moat,            fill: null}
+  - {id: analytics.exposures,  label: "Macro exposures (weekly)", group: analytics, table: macro_exposures, check: latest_date, date_column: as_of_date, calendar: weekdays, sla: 35, priority: 60, live_job: macro_exposures, fill: null, note: "PIT month-end exposures"}
+  # conformal sets (docs/CONFORMAL_TECHNICALS_PLAN.md P2; model-based, experimental until the P4 gate)
+  - {id: analytics.conformal_envelopes, label: "Conformal envelopes (A)", group: analytics, table: conformal_envelopes, check: latest_date, date_column: as_of_date, calendar: XNYS, sla: 1, priority: 60, live_job: conformal_envelopes, fill: null}
+  - {id: analytics.conformal_peers, label: "Conformal peer groups (B)", group: analytics, table: conformal_peer_scores, check: latest_date, date_column: as_of_date, calendar: XNYS, sla: 2, priority: 60, live_job: conformal_peer_groups, fill: null}
+  - {id: analytics.conformal_coverage, label: "Conformal coverage audit", group: analytics, table: conformal_coverage, check: conformal_coverage, date_column: as_of_date, calendar: XNYS, sla: 2, priority: 60, live_job: conformal_coverage, fill: null, entities: {overall_tol_pp: 1.5, segment_tol_pp: 5.0, min_segment_n: 2000}, note: "realised joint coverage vs target (rolling audit): overall more than 1.5 pp under, or a region / sector / regime / VIX segment (n >= 2000 sets) more than 5 pp under, raises a manual 'suspicious' gap"}
+
+  # ---------------------------------------------------------------- rates & debt (docs/COVERAGE_V2_PLAN.md W3; owner rates-w3)
+  # check published_dates (app.rates.ops_checks): every entity has its own official publication rule (cal = exchange MIC /
+  # weekdays / target, local publication time `at`, `lag` business days; freq M / batch: lag_days after the month end;
+  # W: weekly on `weekday`). The startup sync fetches an entity right after its publication time (rates.curves: only the
+  # sources of the due curves); entities with their own `job` plan that job instead of the dataset's fetch job.
+  - id: rates.curves
+    label: "Sovereign yield curves (official)"
+    group: rates
+    table: yield_curves
+    check: published_dates
+    key_column: curve_id
+    lookback_days: 800
+    sla: 1
+    priority: 21
+    live_job: rates_curves
+    fill: {kind: job, jobs: [{job: rates_curves}]}
+    cost: {source: rates_official, units: 30}
+    note: "history depth via the filler campaign rates_curves_history; monthly {CC}_LT10 curves grouped per source"
+    entities:
+      curves:
+        US_TSY: {cal: "XNYS", tz: "America/New_York", at: "18:00", lag: 0, source: "ust"}
+        US_TSY_REAL: {cal: "XNYS", tz: "America/New_York", at: "18:00", lag: 0, source: "ust"}
+        US_H15: {cal: "XNYS", tz: "America/New_York", at: "10:00", lag: 1, source: "fred"}
+        US_H15_TIPS: {cal: "XNYS", tz: "America/New_York", at: "10:00", lag: 1, source: "fred"}
+        EA_AAA: {cal: "target", tz: "Europe/Berlin", at: "12:30", lag: 1, source: "ecb"}
+        EA_ALL: {cal: "target", tz: "Europe/Berlin", at: "12:30", lag: 1, source: "ecb"}
+        DE_BUND: {cal: "XETR", tz: "Europe/Berlin", at: "13:00", lag: 1, source: "bundesbank"}
+        GB_GILT: {cal: "XLON", tz: "Europe/London", at: "12:30", lag: 1, source: "boe"}
+        GB_GILT_REAL: {cal: "XLON", tz: "Europe/London", at: "12:30", lag: 1, source: "boe"}
+        GB_INFLATION: {cal: "XLON", tz: "Europe/London", at: "12:30", lag: 1, source: "boe"}
+        GB_OIS: {cal: "XLON", tz: "Europe/London", at: "12:30", lag: 1, source: "boe"}
+        JP_JGB: {cal: "XTKS", tz: "Asia/Tokyo", at: "19:00", lag: 0, source: "mof_jp"}
+        ES_BONO: {cal: "XMAD", tz: "Europe/Madrid", at: "12:00", lag: 3, source: "bde"}
+        PT_OT: {cal: "XLIS", tz: "Europe/Lisbon", at: "18:00", lag: 6, source: "bpstat"}
+        CH_CONF: {cal: "XSWX", tz: "Europe/Zurich", at: "14:30", freq: "batch", lag_days: 5, source: "snb"}
+        CA_GOC: {cal: "XTSE", tz: "America/Toronto", at: "12:00", lag: 1, source: "boc"}
+        AU_ACGB: {cal: "XASX", tz: "Australia/Sydney", at: "17:00", lag: 2, source: "rba"}
+        SE_SGB: {cal: "XSTO", tz: "Europe/Stockholm", at: "17:00", lag: 0, source: "riksbank"}
+        NO_NGB: {cal: "XOSL", tz: "Europe/Oslo", at: "17:00", lag: 1, source: "norges"}
+        EA_EURIBOR: {cal: "target", tz: "Europe/Madrid", at: "12:00", lag: 2, source: "bde"}
+      LT10_ECB: {keys: [AT_LT10, BE_LT10, BG_LT10, CY_LT10, CZ_LT10, DE_LT10, DK_LT10, EE_LT10, ES_LT10, FI_LT10, FR_LT10, GR_LT10, HR_LT10, HU_LT10, IE_LT10, IT_LT10, LT_LT10, LU_LT10, LV_LT10, MT_LT10, NL_LT10, PL_LT10, PT_LT10, RO_LT10, SE_LT10, SI_LT10, SK_LT10], cal: "target", tz: "Europe/Berlin", at: "15:00", freq: "M", lag_days: 25, source: "ecb_irs"}
+      LT10_OECD: {keys: [AU_LT10, BR_LT10, CA_LT10, CH_LT10, CL_LT10, CN_LT10, CO_LT10, GB_LT10, IN_LT10, JP_LT10, KR_LT10, MX_LT10, US_LT10, NZ_LT10, IL_LT10, IS_LT10, NO_LT10, ZA_LT10, CR_LT10, ID_LT10, RU_LT10, TR_LT10], cal: "weekdays", tz: "Europe/Paris", at: "12:00", freq: "M", lag_days: 45, source: "oecd"}
+  - id: rates.money
+    label: "Money-market fixings (SOFR / EFFR / OBFR / EUR STR / SONIA / TONA / CORRA)"
+    group: rates
+    table: macro_observations
+    check: published_dates
+    key_column: series_id
+    lookback_days: 60
+    sla: 1
+    priority: 23
+    live_job: macro_national
+    fill: {kind: job, jobs: [{job: macro_national}, {job: macro_eu}]}
+    cost: {source: fred, units: 20}
+    note: "official overnight benchmarks in macro_observations (existing tables); NY Fed markets API via fetcher nyfed_rates"
+    entities:
+      SOFR: {keys: ["nyfed_rates:SOFR"], cal: "XNYS", tz: "America/New_York", at: "08:30", lag: 1, job: macro_national}
+      EFFR: {keys: ["nyfed_rates:EFFR"], cal: "XNYS", tz: "America/New_York", at: "09:30", lag: 1, job: macro_national}
+      OBFR: {keys: ["nyfed_rates:OBFR"], cal: "XNYS", tz: "America/New_York", at: "09:30", lag: 1, job: macro_national}
+      TGCR_BGCR: {keys: ["nyfed_rates:TGCR", "nyfed_rates:BGCR"], cal: "XNYS", tz: "America/New_York", at: "08:30", lag: 1, job: macro_national}
+      ESTR: {keys: ["ecb:EST.B.EU000A2X2A25.WT"], cal: "target", tz: "Europe/Berlin", at: "08:30", lag: 1, job: macro_eu}
+      SONIA: {keys: ["boe:IUDSOIA"], cal: "XLON", tz: "Europe/London", at: "10:00", lag: 1, job: macro_national}
+      TONA: {keys: ["boj:FM01.STRDCLUCON"], cal: "XTKS", tz: "Asia/Tokyo", at: "10:30", lag: 1, job: macro_national}
+      CORRA: {keys: ["boc:AVG.INTWO"], cal: "XTSE", tz: "America/Toronto", at: "11:00", lag: 1, job: macro_national}
+  - id: credit.oas
+    label: "Credit spreads (ICE BofA OAS, Moody's Aaa / Baa; FRED, personal use)"
+    group: rates
+    table: macro_observations
+    check: published_dates
+    key_column: series_id
+    lookback_days: 60
+    sla: 2
+    priority: 30
+    live_job: macro_fred
+    fill: {kind: job, jobs: [{job: macro_fred}]}
+    cost: {source: fred, units: 40}
+    note: "ICE BofA indices are copyrighted (FRED personal use; local append-only archive data/raw/fred/oas_archive) - licence needed for bank use"
+    entities:
+      ICE_US_IG: {keys: ["fred:BAMLC0A0CM"], cal: "XNYS", tz: "America/New_York", at: "09:00", lag: 1, job: macro_fred}
+      ICE_US_HY: {keys: ["fred:BAMLH0A0HYM2"], cal: "XNYS", tz: "America/New_York", at: "09:00", lag: 1, job: macro_fred}
+      ICE_RATINGS: {keys: ["fred:BAMLC0A1CAAA", "fred:BAMLC0A2CAA", "fred:BAMLC0A3CA", "fred:BAMLC0A4CBBB", "fred:BAMLH0A1HYBB", "fred:BAMLH0A2HYB", "fred:BAMLH0A3HYC"], cal: "XNYS", tz: "America/New_York", at: "09:00", lag: 1, job: macro_fred}
+      MOODYS: {keys: ["fred:DAAA", "fred:DBAA"], cal: "XNYS", tz: "America/New_York", at: "09:00", lag: 1, job: macro_fred}
+  - {id: rates.auctions, label: "Sovereign auctions (US Treasury, UK DMO)", group: rates, table: sovereign_auctions, check: published_dates, date_column: auction_date, key_column: agency, lookback_days: 400, sla: 3, priority: 40, live_job: rates_auctions, fill: {kind: job, jobs: [{job: rates_auctions}]}, cost: {source: rates_official, units: 4}, entities: {us_treasury: {cal: "XNYS", tz: "America/New_York", at: "15:00", lag: 0}, uk_dmo: {cal: "XLON", tz: "Europe/London", at: "12:00", lag: 0}}, note: "US results / calendar from Fiscal Data; UK DMO issuance history (sla 3 sessions: not every day has an operation)"}
+  - {id: credit.bonds_eu, label: "EU listed bond reference (ESMA FIRDS)", group: rates, table: bond_reference, check: published_dates, date_column: as_of, key_column: source, lookback_days: 60, sla: 1, priority: 60, live_job: bonds_reference, fill: {kind: job, jobs: [{job: bonds_reference}]}, cost: {source: esma_firds, units: 5}, entities: {firds: {cal: "weekdays", tz: "Europe/Paris", at: "09:00", freq: "W", weekday: 5, lag_days: 1}}, note: "weekly FULINS_D full file (Saturday); US bonds via the filler campaign us_bonds_openfigi"}
+  - {id: credit.trace, label: "FINRA TRACE aggregates (keyed API)", group: rates, table: credit_market_stats, check: published_dates, key_column: dataset, lookback_days: 30, sla: 2, priority: 70, live_job: credit_trace, fill: {kind: job, jobs: [{job: credit_trace}]}, cost: {source: finra, units: 6}, entities: {corporateAndAgencyDebtMarketBreadth: {cal: "XNYS", tz: "America/New_York", at: "18:30", lag: 0}}, note: "needs FINRA_API_CLIENT_ID / FINRA_API_CLIENT_SECRET (free FINRA API account); the FINRA fixed-income website forbids robots"}
+  - {id: debt.company, label: "Issuer debt from filings (company_debt)", group: analytics, table: company_debt, check: published_dates, date_column: computed_at, lookback_days: 30, sla: 3, priority: 55, live_job: company_debt, fill: {kind: job, jobs: [{job: company_debt}]}, cost: {source: local, units: 1}, rule: {cal: "weekdays", tz: "America/New_York", at: "06:00", lag: 1}, note: "derived from fundamentals_canonical + SEC companyfacts debt tags + ESEF; recomputed nightly"}
+  - {id: sovereign.debt, label: "Sovereign debt / GDP, deficits and TARGET balances", group: macro, table: macro_observations, check: published_dates, key_column: series_id, lookback_days: 900, sla: 3, priority: 60, live_job: macro_eu, fill: {kind: job, jobs: [{job: macro_eu}, {job: macro_intl}]}, cost: {source: eurostat, units: 4}, entities: {EUROSTAT_Q: {keys: ["eurostat:gov_10q_ggdebt.EA.PC_GDP", "eurostat:gov_10q_ggdebt.DE.PC_GDP"], cal: "weekdays", tz: "Europe/Luxembourg", at: "11:00", freq: "M", lag_days: 150, job: macro_eu}, TARGET2: {keys: ["ecb:TGB.M.DE.N.A094T.U2.EUR.E", "ecb:TGB.M.IT.N.A094T.U2.EUR.E"], cal: "target", tz: "Europe/Berlin", at: "10:00", freq: "M", lag_days: 45, job: macro_eu}}, note: "Eurostat quarterly debt (stored at the quarter start, ~5 months to publication), IMF WEO annual via macro_intl, ECB TARGET balances (TGB)"}
+
+campaigns:
+  - id: gdelt_e6
+    label: "GDELT 2015-02 .. 2026-07 deep backfill (E6, extended to the start of GDELT 2.0 by N1)"
+    kind: module
+    module: app.events_v2.backfill
+    args: [--label, e6, --start, "2015-02-19", --end, "2026-07-13", --batch-days, "7", --workers, "3", --dl-threads, "4", --retention]   # N1: start 2020-01-01 -> 2015-02-19 (GDELT 2.0 begins); done days are skipped, so it continues newest-first below the 2020 target
+    stop_file: state/events_v2/STOP        # graceful stop at the next file / batch boundary (relative to data/)
+    lock: events_v2_backfill               # data/.locks/<lock>.lock held by a running instance (adopted, not duplicated)
+    progress: {probe: gdelt_range, label: e6, start: "2015-02-19", end: "2026-07-13"}
+    source: gdelt_files
+    priority: 70
+    est_ram_gb: 4.5
+    preemptible: true
+  - id: gdelt_redo_partial
+    label: "GDELT partial / missing days re-run"
+    kind: gap_queue                        # drains data_gaps rows of dataset gdelt.days (fill gdelt_redo)
+    dataset: gdelt.days
+    lock: events_v2_backfill
+    priority: 35
+    est_ram_gb: 3.0
+  - id: sec_13f_history
+    label: "13F holdings history (2023-Q2 ->)"
+    kind: job
+    job: sec_13f_backfill
+    params: {since: "2023-04-01"}
+    progress: {probe: sec_13f_backfill}
+    every_days: 30                         # resumable: re-run monthly to merge newly published SEC 13F datasets
+    source: sec_edgar
+    priority: 60
+    est_ram_gb: 2.5
+  - id: cftc_history
+    label: "CFTC COT full history (1986 ->)"
+    kind: job
+    job: cftc_cot_history
+    progress: {probe: cftc_history}
+    every_days: 0                          # only when the detector finds missing report weeks
+    source: cftc_socrata
+    priority: 55
+    est_ram_gb: 2.0
+  - id: earnings_dates_history
+    label: "Earnings dates for every security of `full` (Yahoo + official schedules; W1 2026-10-31)"
+    kind: job                              # was the in-process script chain (mvp universes); now the budgeted job
+    job: earnings_dates_fetch              # resumable: the job's due rules skip what was fetched (rows every 150)
+    params: {universes: "mvp_us,mvp_global,eu_broad,full", max_minutes: 240, timeout_min: 260, rate: 1.3, nsm_since: "2018-01-01"}
+    progress: {probe: earnings_dates}
+    every_days: 7                          # re-run weekly until no security is due; the nightly keeps it current
+    source: yfinance
+    priority: 65
+    est_ram_gb: 2.0
+  - id: yahoo_price_history
+    label: "Yahoo price history for unpriced securities"
+    kind: prices_history
+    progress: {probe: price_history}
+    every_days: 7
+    source: yfinance
+    priority: 68
+    est_ram_gb: 1.5
+    params: {batch: 250, max_symbols: 2000}
+  - id: ccnews_history
+    label: "CC-NEWS 2016-08 -> now: derived news metadata into the story layer (N1, newest month first)"
+    kind: module
+    module: app.events_v2.ccnews
+    args: [--start-month, "2016-08", --workers, "6", --yield-to, gdelt_e6]   # add [--file-step, "4"] for a 25% uniform sample (~4x faster)
+    stop_file: state/ccnews/STOP           # graceful stop at the next WARC boundary (relative to data/)
+    lock: ccnews_backfill                  # data/.locks/ccnews_backfill.lock (a hand-started run blocks the filler instance)
+    progress: {probe: ccnews_months, start_month: "2016-08"}
+    source: commoncrawl
+    priority: 72                           # after E6 (70); --yield-to exits (code 3) while E6 waits for the filler
+    est_ram_gb: 2.0                        # downloads ~0.8 GB (6 workers); merge + sentiment run afterwards in child processes
+    preemptible: true
+  - id: filing_news_history
+    label: "SEC 8-K 2001 -> + TDnet / HKEX announcements -> story layer (one-time backfill, N1)"
+    kind: job
+    job: news_filings
+    params: {backfill: true}
+    progress: {probe: news_filings}
+    every_days: 0                          # one-time (run 2026-10-23); the nightly job news_filings keeps it current
+    source: sec_edgar
+    priority: 62
+    est_ram_gb: 2.0
+
+  # W3 rates & debt (owner rates-w3): resumable history backfills under the filler's RAM admission
+  - id: rates_curves_history
+    label: "Official yield curves full history (US 1990 / H.15 1962, Bund 1972, BoE 1979, MoF 1974, ECB 2004, ...)"
+    kind: job
+    job: rates_curves_backfill
+    progress: {probe: rates_backfill}
+    every_days: 30                         # resumable per source (data/state/rates.json backfill.<source>.done); re-run monthly is a cheap no-op
+    source: rates_official
+    priority: 58
+    est_ram_gb: 2.5
+  - id: us_bonds_openfigi
+    label: "US issuers' TRACE bonds from OpenFIGI (coupon / maturity from the FIGI description)"
+    kind: job
+    job: bonds_us_openfigi
+    params: {max_requests: 120, universe: 1500}
+    progress: {probe: openfigi_bonds}
+    every_days: 1                          # 120 searches per run (free tier 5 / min); refresh each issuer every 90 days
+    source: openfigi
+    priority: 75
+    est_ram_gb: 0.8
+
+  # coverage v2 W2 (ingest-register): statements for every regulatory-register issuer, resumable (data/state/register_backfill.json)
+  - id: register_statements_us
+    label: "US register statements: companyfacts for every SEC listed periodic filer + FSDS for 20-F / 40-F filers"
+    kind: job
+    job: register_backfill
+    params: {steps: [us_facts, us_fsds, normalize], max_minutes: 240}
+    progress: {probe: register_backfill, steps: [us_facts, us_fsds, normalize]}
+    every_days: 2                          # new CIKs of the register; a run stopped on its time budget is due again at once
+    source: sec_edgar
+    priority: 58
+    est_ram_gb: 8.0
+  - id: register_statements_eu_uk
+    label: "EU / UK register statements: ESEF (filings.xbrl.org), FCA NSM, Companies House bulk accounts"
+    kind: job
+    job: register_fetch
+    params: {steps: [esef, fca_nsm, ch], max_minutes: 240, ch_months: 24}
+    progress: {probe: register_backfill, steps: [esef, fca_nsm, ch]}
+    every_days: 2
+    source: filings_eu
+    priority: 60
+    est_ram_gb: 3.0
+  - id: register_oam
+    label: "EU national OAMs (DILA, AFM, FSMA, eMarket, Nasdaq Nordic, Oslo, CNMV) for the register issuers"
+    kind: job
+    job: register_fetch
+    params: {steps: [oam], max_minutes: 280}
+    progress: {probe: register_backfill, steps: [oam]}
+    every_days: 7
+    source: filings_eu
+    priority: 64
+    est_ram_gb: 6.0
+  - id: register_profiles
+    label: "Yahoo profiles (sector, currency, market cap) of the EU / UK register issuers without a sector"
+    kind: job
+    job: register_fetch
+    params: {steps: [profile], max_minutes: 120}
+    progress: {probe: register_backfill, steps: [profile]}
+    every_days: 7                          # ref_universe classifies them from the cached profiles on its next run
+    source: yfinance
+    priority: 63
+    est_ram_gb: 2.0
+  - id: register_yf_fallback
+    label: "Yahoo statements fallback (annual + quarterly) for EU / UK register issuers without a current official filing"
+    kind: job
+    job: register_fetch
+    params: {steps: [yf], max_minutes: 240}
+    progress: {probe: register_backfill, steps: [yf]}
+    every_days: 1                          # ~14 s per ticker (7 Yahoo calls at the shared 0.5 / s bucket): runs in budget slices
+    source: yfinance
+    priority: 67
+    est_ram_gb: 6.0
+
+known_gaps:
+  - {id: seed:gdelt:2025-05-13, dataset: gdelt.days, entity: "2025-05-13", start: "2025-05-13", end: "2025-05-13", gap_class: partial, note: "checkpointed with 512/576 files (network loss while the laptop slept) - PHASE3_TODO", resolve: gdelt_day_complete}
+  - {id: seed:prices:10-12-nonus, dataset: prices.EU, entity: EU, start: "2026-10-12", end: "2026-10-12", gap_class: missing, note: "audit F05: EU 14 / UK 1 / HK 9 / KR 8 bars on an open session (detector covers UK/HK/KR too)", resolve: detector}
+  - {id: seed:fx:TWD, dataset: fx.rates, entity: TWD, gap_class: unfillable, note: "TWD only from weekly Fed H.10 (lags up to 7 days); add the CBC Taiwan daily NTD/USD rate (PHASE3_TODO, audit F31)", manual: true}
+  - {id: seed:fx:usd_per_unit:EUR<1999, dataset: fx.rates, entity: EUR, start: "1990-01-01", end: "1998-12-31", gap_class: unfillable, note: "usd_per_unit null for EUR before 1999 (no euro): needs ECU/DEM synthetic history rule", manual: true}
+  - {id: seed:fx:usd_per_unit:ISK, dataset: fx.rates, entity: ISK, start: "2008-01-01", end: "2018-12-31", gap_class: missing, note: "usd_per_unit null for ISK 2008-18: official history source needed (Central Bank of Iceland)", manual: true}
+  - {id: seed:fx:usd_per_unit:IDR<2005, dataset: fx.rates, entity: IDR, start: "1990-01-01", end: "2004-12-31", gap_class: missing, note: "usd_per_unit null for IDR before 2005", manual: true}
+  - {id: seed:fx:scale-glitches, dataset: fx.rates, entity: "yahoo_fx", gap_class: suspicious, note: "86 Yahoo FX scale jumps >3x across 12 pairs (e.g. USDVND=X 2013): needs a scale-jump cleaner", manual: true}
+  - {id: seed:fx:BGN, dataset: fx.rates, entity: BGN, start: "2026-01-01", gap_class: unfillable, note: "BGN ends 2026-01-05 (euro adoption): map BGN->EUR after 2026-01-01 (audit F31)", manual: true}
+  - {id: seed:prices:baostock, dataset: prices.CN, entity: "CN:baostock", gap_class: partial, note: "BaoStock IP ban: 424 Shanghai names missing, 349 CN names priced from Yahoo only; resume with one worker when login works (data/state/price_coverage.json)", fill: {kind: job, jobs: [{job: prices_cn_baostock}]}, cost: {source: baostock, units: 400}}
+  - {id: seed:prices:b3-pre2005, dataset: prices.LATAM, entity: "BR:b3_pre2005", end: "2004-12-31", gap_class: suspicious, note: "B3 COTAHIST pre-2005 unit errors (VULC3 0.00045 vs 45) win over Yahoo by priority: review b3_cotahist scaling", manual: true}
+  - {id: seed:prices:unit-flips, dataset: prices.UK, entity: "100x flips", gap_class: suspicious, note: "audit F32: 538 securities with >3x one-day moves without a corporate action (ROSE.L GBp/GBP, DIA.MC): data-integrity agent", manual: true}
+  - {id: seed:prices:ticker-reuse, dataset: prices.US, entity: "SPCX/BNY/FIG", gap_class: suspicious, note: "audit F04: ticker reuse stitched into one series - data-integrity agent", manual: true}
+  - {id: seed:prices:us-yahoo-polygon-join, dataset: prices.US, entity: "35 securities", gap_class: suspicious, note: "Yahoo history and Polygon don't join cleanly for 35 US securities (PHASE3_TODO)", manual: true}
+  - {id: seed:prices:venue-mapping-gap, dataset: prices.history, entity: "EU:no_venue_symbol", gap_class: unfillable, note: "mapping_gap (coverage v3 A6): 459 listings on XBUL/XZAG/XCYS/XMAL/XBRA/XLJU/XLUX have no Yahoo / Polygon venue symbol; 87 of them carried a US ticker's bars (bare-ticker collision, fixed 2026-11-06): 47 at the repair (134,170 rows removed, backup data/backups/prices_collision_20261106.parquet), 40 already removed by the 2026-11-06 23:19 prices_finalize (no row backup; identified by their valuation_daily closes = the US close x FX). Derived rows: price_collisions purge-derived. Per-listing marks: data/reference/seeds/price_mapping_gaps.csv; re-fetch once a source serves the venue (set listings.yf_ticker)", manual: true}
+  - {id: seed:filings:cnmv, dataset: filings.sec, entity: "ES:cnmv", gap_class: partial, note: "Spain: only 8/72 eu_broad names have official FY2025 (CNMV adapter coverage)", manual: true}
+  - {id: seed:13f:oom, dataset: inst.13f, entity: "sec_13f weekly", gap_class: suspicious, note: "weekly sec_13f upserts via Polars; 2026 partition ~10M rows by early 2027 -> switch to the DuckDB merge path (OOM risk, PHASE3_TODO #7)", manual: true}
+  - {id: seed:13f:cusip, dataset: inst.13f, entity: "security_id", gap_class: partial, note: "audit F29: ~40% of 2025-26 rows without security_id (CUSIP not mapped): needs OPENFIGI_APIKEY or the SEC 13F official list", manual: true}
+  - {id: seed:earnings:sentinel, dataset: earnings.dates, entity: "yahoo 1900-01-01", gap_class: suspicious, note: "audit F26: 11,052 earnings_announcements rows dated 1900-01-01", manual: true}
+  - {id: seed:ml:benchmark-pre2011, dataset: prices.history, entity: "benchmark", end: "2011-10-31", gap_class: missing, note: "ML long-short benchmark: 5/65 month-ends before 2011-10 lack daily bars", manual: true}
+  # COVERAGE_V3 A9 2026-11-07 (docs/it/ROBOTS_COMPLIANCE.md): sources switched off because robots.txt disallows them;
+  # reason code source_disallowed (contracts/field_availability.yaml); rows ingested before the switch are kept
+  - {id: seed:a9:tdnet, dataset: earnings.dates, entity: "JP:tdnet", start: "2026-11-07", gap_class: unfillable, note: "source_disallowed: www.release.tdnet.info robots.txt Disallow: / -> tdnet_disclosures + realtime tdnet off; JP dates from the JPX schedule + Yahoo, statements from EDINET; JP Q1/Q3 tanshin actuals need an allowed source", manual: true}
+  - {id: seed:a9:boe_iadb, dataset: macro.ingest, entity: "boe:IADB", start: "2026-11-07", gap_class: unfillable, note: "source_disallowed: BoE robots.txt disallows the IADB -> gilts (zero-coupon) from the yield-curve archive, Bank Rate from mpcvoting.xlsx, SONIA via FRED IUDSOIA; IADB-only par yields / Bankstats series and cb_balance_sheets boe frozen (history kept)", manual: true}
+  - {id: seed:a9:ccnews, dataset: news.items, entity: "ccnews", start: "2026-11-07", gap_class: unfillable, note: "source_disallowed: data.commoncrawl.org robots.txt Disallow: / -> CC-NEWS backfill (campaign ccnews_history) off; merged ccnews rows kept", manual: true}
+  - {id: seed:a9:dila_fr, dataset: statements.register.EU, entity: "FR:dila_fr", start: "2026-11-07", gap_class: unfillable, note: "source_disallowed: info-financiere.gouv.fr robots.txt Disallow: /api/ (package mirror fr.ftp.opendatasoft.com Disallow: /) -> dila_fr_filings off; FR ESEF annuals from filings.xbrl.org", manual: true}
+  - {id: seed:a9:bafin_dd, dataset: filings.sec, entity: "DE:eu_pdmr_bafin", start: "2026-11-07", gap_class: unfillable, note: "source_disallowed: portal.mvp.bafin.de robots.txt Disallow: / -> eu_pdmr_bafin (DE directors dealings) off; stored notices kept; no other free machine-readable DE PDMR source", manual: true}
+  - {id: seed:a9:istat_cal, dataset: macro.releases, entity: "IT:istat_cal", start: "2026-11-07", gap_class: unfillable, note: "source_disallowed: the ISTAT release calendar is only published as a Google Calendar ICS (calendar.google.com robots.txt Disallow: /) -> istat_cal off; stored entries kept", manual: true}
+  - {id: seed:b3:cvm_mapping, dataset: filings.br_cvm, entity: "BR:WDCN3,EQPA3", gap_class: partial, note: "mapping_gap (COVERAGE_V3 B3, raw/cvm/crosswalk.parquet): WDCN3 (WDC Networks) matches no CVM registrant by B3 name or ticker root; EQPA3/5/7 (Equatorial Para, CVM 18309) only by abbreviation (FCA still lists the old CELP tickers) -> not attached until confirmed: add link,ticker:EQPA3@BVMF,cvm:18309 to seeds/manual_overrides.csv after review", manual: true}

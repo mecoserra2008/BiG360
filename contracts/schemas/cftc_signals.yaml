@@ -1,0 +1,42 @@
+table: cftc_signals
+version: 1
+zone: scores
+owner: cftc (app.analytics.cftc_signals)
+description: >
+  Positioning analytics per report type x market x report date x category, from cftc_positions (+ prices_daily of the
+  mapped instrument for returns / divergence). net = long - short (spreading excluded); COT index = (net - min) /
+  (max - min) over the trailing 52 / 156 reports (inclusive; >= 26 / 78 observations), z-scores over the same
+  windows, percent rank over 156. Pseudo category spec_hedger = speculator net minus hedger net (legacy noncomm - comm;
+  disagg m_money - (prod_merc + swap); tff lev_money - dealer; cit cit - comm). Extremes / crowding / divergence flags
+  are MODEL-BASED heuristics (labelled; not CFTC data). PIT: row usable from knowledge_date (release); returns use
+  closes up to the report Tuesday only.
+storage: {path: scores/cftc_signals, format: parquet, partition_by: [report_type], write_mode: overwrite, sort_by: [market_code, report_date, category], compression_level: 9}
+primary_key: [report_type, market_code, report_date, category]
+pit: {knowledge_column: knowledge_date, rule: "usable from the COT release date"}
+columns:
+  - {name: report_type, type: enum, nullable: false, values: [legacy_fut, legacy_comb, disagg_fut, disagg_comb, tff_fut, tff_comb, cit_comb], description: "As cftc_positions"}
+  - {name: market_code, type: string, nullable: false, description: "FK cftc_markets"}
+  - {name: report_date, type: date, nullable: false, description: "COT as-of Tuesday"}
+  - {name: category, type: enum, nullable: false, values: [noncomm, comm, prod_merc, swap, m_money, other_rept, dealer, asset_mgr, lev_money, cit, tot_rept, nonrept, spec_hedger], description: "Trader category or the spec_hedger spread"}
+  - {name: net, type: int64, nullable: true, description: "Net position long - short (contracts)"}
+  - {name: net_pct_oi, type: float32, nullable: true, description: "net / open interest"}
+  - {name: long_share, type: float32, nullable: true, description: "long / (long + short)"}
+  - {name: chg_1w, type: int64, nullable: true, description: "Change in net vs previous report"}
+  - {name: chg_4w, type: int64, nullable: true, description: "Change in net over 4 reports"}
+  - {name: chg_13w, type: int64, nullable: true, description: "Change in net over 13 reports"}
+  - {name: flow_z, type: float32, nullable: true, description: "chg_1w / std of weekly changes over 52 reports"}
+  - {name: cot_index_1y, type: float32, nullable: true, description: "COT index 0..1 over 52 reports"}
+  - {name: cot_index_3y, type: float32, nullable: true, description: "COT index 0..1 over 156 reports"}
+  - {name: z_1y, type: float32, nullable: true, description: "z-score of net over 52 reports"}
+  - {name: z_3y, type: float32, nullable: true, description: "z-score of net over 156 reports"}
+  - {name: pct_rank_3y, type: float32, nullable: true, description: "Percent rank 0..1 of net within 156 reports"}
+  - {name: extreme, type: enum, nullable: true, values: [long, short], description: "MODEL-BASED: cot_index_3y >= 0.9 (long) or <= 0.1 (short)"}
+  - {name: crowded, type: bool, nullable: true, description: "MODEL-BASED: extreme and |z_3y| >= 1.5"}
+  - {name: ret_13w, type: float32, nullable: true, description: "Log return of the mapped price instrument over 13 weeks to the report date (null when unmapped)"}
+  - {name: ret_26w, type: float32, nullable: true, description: "Log return over 26 weeks"}
+  - {name: divergence_13w, type: float32, nullable: true, description: "MODEL-BASED: z(13w change in net, 156 reports) - z(13w return, 156 reports); large |value| = positioning moving against price"}
+  - {name: divergence_26w, type: float32, nullable: true, description: "MODEL-BASED: same over 26 weeks"}
+  - {name: divergence_flag, type: enum, nullable: true, values: [bullish, bearish], description: "MODEL-BASED: 13w net change and 13w return of opposite sign with both |z| >= 1 (bullish = positioning rising while price falls)"}
+  - {name: knowledge_date, type: date, nullable: false, description: "Release date"}
+  - {name: computed_at, type: datetime, nullable: false, description: "Write time UTC"}
+  - {name: run_id, type: string, nullable: true, description: "job_runs.run_id"}

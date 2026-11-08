@@ -1,0 +1,151 @@
+<?xml version='1.0' encoding='utf-8'?>
+<xbrli:xbrl xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:ipp_ge="http://www.cnmv.es/xbrl/ipp/ge/2016-06-01" xmlns:link="http://www.xbrl.org/2003/linkbase" xmlns:ipp_ge_dim="http://www.cnmv.es/xbrl/ipp/ge/dim/2016-06-01" xmlns:nonnum="http://www.xbrl.org/dtr/type/non-numeric" xmlns:xbrldt="http://xbrl.org/2005/xbrldt" xmlns:xbrldi="http://xbrl.org/2006/xbrldi" xmlns:xbrli="http://www.xbrl.org/2003/instance" xmlns:iso4217="http://www.xbrl.org/2003/iso4217" xmlns:xlink="http://www.w3.org/1999/xlink" xsi:schemaLocation="http://xbrl.org/2006/xbrldi http://www.xbrl.org/2006/xbrldi-2006.xsd">
+  <link:schemaRef xlink:type="simple" xlink:href="http://www.cnmv.es/xbrl/ipp/ge/2016-06-01/ipp_ge_2016-06-01.xsd"/>
+  <xbrli:context id="Icur_PeriodoActualBalanceMiembro">
+    <xbrli:entity>
+      <xbrli:identifier scheme="http://www.cnmv.es/xbrl/ipp/A-28015865">TELEFONICA, S.A.</xbrli:identifier>
+    </xbrli:entity>
+    <xbrli:period>
+      <xbrli:instant>2016-12-31</xbrli:instant>
+    </xbrli:period>
+    <xbrli:scenario>
+      <xbrldi:explicitMember dimension="ipp_ge_dim:PeriodoBalanceEje">ipp_ge_dim:PeriodoActualMiembro</xbrldi:explicitMember>
+    </xbrli:scenario>
+  </xbrli:context>
+  <xbrli:context id="Ipre_PeriodoCierreAnteriorBalanceMiembro">
+    <xbrli:entity>
+      <xbrli:identifier scheme="http://www.cnmv.es/xbrl/ipp/A-28015865">TELEFONICA, S.A.</xbrli:identifier>
+    </xbrli:entity>
+    <xbrli:period>
+      <xbrli:instant>2015-12-31</xbrli:instant>
+    </xbrli:period>
+    <xbrli:scenario>
+      <xbrldi:explicitMember dimension="ipp_ge_dim:PeriodoBalanceEje">ipp_ge_dim:PeriodoCierreAnteriorMiembro</xbrldi:explicitMember>
+    </xbrli:scenario>
+  </xbrli:context>
+  <xbrli:context id="Dcur_PeriodoCorrienteActualMiembro_ImporteMiembro">
+    <xbrli:entity>
+      <xbrli:identifier scheme="http://www.cnmv.es/xbrl/ipp/A-28015865">TELEFONICA, S.A.</xbrli:identifier>
+    </xbrli:entity>
+    <xbrli:period>
+      <xbrli:startDate>2016-07-01</xbrli:startDate>
+      <xbrli:endDate>2016-12-31</xbrli:endDate>
+    </xbrli:period>
+    <xbrli:scenario>
+      <xbrldi:explicitMember dimension="ipp_ge_dim:CuentaPerdidasGananciasEje">ipp_ge_dim:PeriodoCorrienteActualMiembro</xbrldi:explicitMember>
+      <xbrldi:explicitMember dimension="ipp_ge_dim:ImportePorcentajeEje">ipp_ge_dim:ImporteMiembro</xbrldi:explicitMember>
+    </xbrli:scenario>
+  </xbrli:context>
+  <xbrli:context id="Dcur_PeriodoCorrienteActualMiembro_PorcentajeMiembro">
+    <xbrli:entity>
+      <xbrli:identifier scheme="http://www.cnmv.es/xbrl/ipp/A-28015865">TELEFONICA, S.A.</xbrli:identifier>
+    </xbrli:entity>
+    <xbrli:period>
+      <xbrli:startDate>2016-07-01</xbrli:startDate>
+      <xbrli:endDate>2016-12-31</xbrli:endDate>
+    </xbrli:period>
+    <xbrli:scenario>
+      <xbrldi:explicitMember dimension="ipp_ge_dim:CuentaPerdidasGananciasEje">ipp_ge_dim:PeriodoCorrienteActualMiembro</xbrldi:explicitMember>
+      <xbrldi:explicitMember dimension="ipp_ge_dim:ImportePorcentajeEje">ipp_ge_dim:PorcentajeMiembro</xbrldi:explicitMember>
+    </xbrli:scenario>
+  </xbrli:context>
+  <xbrli:context id="Dpre_PeriodoCorrienteAnteriorMiembro_ImporteMiembro">
+    <xbrli:entity>
+      <xbrli:identifier scheme="http://www.cnmv.es/xbrl/ipp/A-28015865">TELEFONICA, S.A.</xbrli:identifier>
+    </xbrli:entity>
+    <xbrli:period>
+      <xbrli:startDate>2015-07-01</xbrli:startDate>
+      <xbrli:endDate>2015-12-31</xbrli:endDate>
+    </xbrli:period>
+    <xbrli:scenario>
+      <xbrldi:explicitMember dimension="ipp_ge_dim:CuentaPerdidasGananciasEje">ipp_ge_dim:PeriodoCorrienteAnteriorMiembro</xbrldi:explicitMember>
+      <xbrldi:explicitMember dimension="ipp_ge_dim:ImportePorcentajeEje">ipp_ge_dim:ImporteMiembro</xbrldi:explicitMember>
+    </xbrli:scenario>
+  </xbrli:context>
+  <xbrli:context id="Dpre_PeriodoCorrienteAnteriorMiembro_PorcentajeMiembro">
+    <xbrli:entity>
+      <xbrli:identifier scheme="http://www.cnmv.es/xbrl/ipp/A-28015865">TELEFONICA, S.A.</xbrli:identifier>
+    </xbrli:entity>
+    <xbrli:period>
+      <xbrli:startDate>2015-07-01</xbrli:startDate>
+      <xbrli:endDate>2015-12-31</xbrli:endDate>
+    </xbrli:period>
+    <xbrli:scenario>
+      <xbrldi:explicitMember dimension="ipp_ge_dim:CuentaPerdidasGananciasEje">ipp_ge_dim:PeriodoCorrienteAnteriorMiembro</xbrldi:explicitMember>
+      <xbrldi:explicitMember dimension="ipp_ge_dim:ImportePorcentajeEje">ipp_ge_dim:PorcentajeMiembro</xbrldi:explicitMember>
+    </xbrli:scenario>
+  </xbrli:context>
+  <xbrli:context id="Dcur_AcumuladoActualMiembro_ImporteMiembro">
+    <xbrli:entity>
+      <xbrli:identifier scheme="http://www.cnmv.es/xbrl/ipp/A-28015865">TELEFONICA, S.A.</xbrli:identifier>
+    </xbrli:entity>
+    <xbrli:period>
+      <xbrli:startDate>2016-01-01</xbrli:startDate>
+      <xbrli:endDate>2016-12-31</xbrli:endDate>
+    </xbrli:period>
+    <xbrli:scenario>
+      <xbrldi:explicitMember dimension="ipp_ge_dim:CuentaPerdidasGananciasEje">ipp_ge_dim:AcumuladoActualMiembro</xbrldi:explicitMember>
+      <xbrldi:explicitMember dimension="ipp_ge_dim:ImportePorcentajeEje">ipp_ge_dim:ImporteMiembro</xbrldi:explicitMember>
+    </xbrli:scenario>
+  </xbrli:context>
+  <xbrli:context id="Dcur_AcumuladoActualMiembro_PorcentajeMiembro">
+    <xbrli:entity>
+      <xbrli:identifier scheme="http://www.cnmv.es/xbrl/ipp/A-28015865">TELEFONICA, S.A.</xbrli:identifier>
+    </xbrli:entity>
+    <xbrli:period>
+      <xbrli:startDate>2016-01-01</xbrli:startDate>
+      <xbrli:endDate>2016-12-31</xbrli:endDate>
+    </xbrli:period>
+    <xbrli:scenario>
+      <xbrldi:explicitMember dimension="ipp_ge_dim:CuentaPerdidasGananciasEje">ipp_ge_dim:AcumuladoActualMiembro</xbrldi:explicitMember>
+      <xbrldi:explicitMember dimension="ipp_ge_dim:ImportePorcentajeEje">ipp_ge_dim:PorcentajeMiembro</xbrldi:explicitMember>
+    </xbrli:scenario>
+  </xbrli:context>
+  <xbrli:context id="Dpre_AcumuladoAnteriorMiembro_ImporteMiembro">
+    <xbrli:entity>
+      <xbrli:identifier scheme="http://www.cnmv.es/xbrl/ipp/A-28015865">TELEFONICA, S.A.</xbrli:identifier>
+    </xbrli:entity>
+    <xbrli:period>
+      <xbrli:startDate>2015-01-01</xbrli:startDate>
+      <xbrli:endDate>2015-12-31</xbrli:endDate>
+    </xbrli:period>
+    <xbrli:scenario>
+      <xbrldi:explicitMember dimension="ipp_ge_dim:CuentaPerdidasGananciasEje">ipp_ge_dim:AcumuladoAnteriorMiembro</xbrldi:explicitMember>
+      <xbrldi:explicitMember dimension="ipp_ge_dim:ImportePorcentajeEje">ipp_ge_dim:ImporteMiembro</xbrldi:explicitMember>
+    </xbrli:scenario>
+  </xbrli:context>
+  <xbrli:context id="Dpre_AcumuladoAnteriorMiembro_PorcentajeMiembro">
+    <xbrli:entity>
+      <xbrli:identifier scheme="http://www.cnmv.es/xbrl/ipp/A-28015865">TELEFONICA, S.A.</xbrli:identifier>
+    </xbrli:entity>
+    <xbrli:period>
+      <xbrli:startDate>2015-01-01</xbrli:startDate>
+      <xbrli:endDate>2015-12-31</xbrli:endDate>
+    </xbrli:period>
+    <xbrli:scenario>
+      <xbrldi:explicitMember dimension="ipp_ge_dim:CuentaPerdidasGananciasEje">ipp_ge_dim:AcumuladoAnteriorMiembro</xbrldi:explicitMember>
+      <xbrldi:explicitMember dimension="ipp_ge_dim:ImportePorcentajeEje">ipp_ge_dim:PorcentajeMiembro</xbrldi:explicitMember>
+    </xbrli:scenario>
+  </xbrli:context>
+  <xbrli:unit id="euro">
+    <xbrli:measure>iso4217:EUR</xbrli:measure>
+  </xbrli:unit>
+  <ipp_ge:I1100 unitRef="euro" decimals="0" contextRef="Icur_PeriodoActualBalanceMiembro">123640778000</ipp_ge:I1100>
+  <ipp_ge:I1100 unitRef="euro" decimals="0" contextRef="Ipre_PeriodoCierreAnteriorBalanceMiembro">120329031000</ipp_ge:I1100>
+  <ipp_ge:I1205 unitRef="euro" decimals="0" contextRef="Dcur_PeriodoCorrienteActualMiembro_ImporteMiembro">26801565000</ipp_ge:I1205>
+  <ipp_ge:I1205 unitRef="euro" decimals="2" contextRef="Dcur_PeriodoCorrienteActualMiembro_PorcentajeMiembro">100.00</ipp_ge:I1205>
+  <ipp_ge:I1205 unitRef="euro" decimals="0" contextRef="Dpre_PeriodoCorrienteAnteriorMiembro_ImporteMiembro">27765099000</ipp_ge:I1205>
+  <ipp_ge:I1205 unitRef="euro" decimals="2" contextRef="Dpre_PeriodoCorrienteAnteriorMiembro_PorcentajeMiembro">100.00</ipp_ge:I1205>
+  <ipp_ge:I1205 unitRef="euro" decimals="0" contextRef="Dcur_AcumuladoActualMiembro_ImporteMiembro">52036241000</ipp_ge:I1205>
+  <ipp_ge:I1205 unitRef="euro" decimals="2" contextRef="Dcur_AcumuladoActualMiembro_PorcentajeMiembro">100.00</ipp_ge:I1205>
+  <ipp_ge:I1205 unitRef="euro" decimals="0" contextRef="Dpre_AcumuladoAnteriorMiembro_ImporteMiembro">54916015000</ipp_ge:I1205>
+  <ipp_ge:I1205 unitRef="euro" decimals="2" contextRef="Dpre_AcumuladoAnteriorMiembro_PorcentajeMiembro">100.00</ipp_ge:I1205>
+  <ipp_ge:I1300 unitRef="euro" decimals="0" contextRef="Dcur_PeriodoCorrienteActualMiembro_ImporteMiembro">1128142000</ipp_ge:I1300>
+  <ipp_ge:I1300 unitRef="euro" decimals="2" contextRef="Dcur_PeriodoCorrienteActualMiembro_PorcentajeMiembro">4.21</ipp_ge:I1300>
+  <ipp_ge:I1300 unitRef="euro" decimals="0" contextRef="Dpre_PeriodoCorrienteAnteriorMiembro_ImporteMiembro">-1526156000</ipp_ge:I1300>
+  <ipp_ge:I1300 unitRef="euro" decimals="2" contextRef="Dpre_PeriodoCorrienteAnteriorMiembro_PorcentajeMiembro">-5.50</ipp_ge:I1300>
+  <ipp_ge:I1300 unitRef="euro" decimals="0" contextRef="Dcur_AcumuladoActualMiembro_ImporteMiembro">2369426000</ipp_ge:I1300>
+  <ipp_ge:I1300 unitRef="euro" decimals="2" contextRef="Dcur_AcumuladoActualMiembro_PorcentajeMiembro">4.55</ipp_ge:I1300>
+  <ipp_ge:I1300 unitRef="euro" decimals="0" contextRef="Dpre_AcumuladoAnteriorMiembro_ImporteMiembro">615977000</ipp_ge:I1300>
+  <ipp_ge:I1300 unitRef="euro" decimals="2" contextRef="Dpre_AcumuladoAnteriorMiembro_PorcentajeMiembro">1.12</ipp_ge:I1300>
+  </xbrli:xbrl>

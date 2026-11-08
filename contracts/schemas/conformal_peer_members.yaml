@@ -1,0 +1,27 @@
+table: conformal_peer_members
+version: 1
+zone: features
+owner: conformal (app.conformal.peer_groups)
+description: >
+  Application B per-member attribution of the group's joint score (documented exact decomposition
+  R = sum_i r_i (Sigma^-1 r)_i, plus marginal and conditional standardised residuals) and the next-session predictive
+  law in compact diagonal + rank-4 form (pair / spread / basket bands at query time). MODEL-BASED.
+storage: {path: features/conformal_peer_members, format: parquet, partition_by: [year], write_mode: upsert, sort_by: [group_id, security_id]}
+primary_key: [as_of_date, group_id, security_id]
+columns:
+  - {name: as_of_date, type: date, nullable: false, description: "Session"}
+  - {name: group_id, type: string, nullable: false, description: "Group"}
+  - {name: security_id, type: string, nullable: false, description: "Member"}
+  - {name: year, type: int16, nullable: false, description: "Partition: year(as_of_date)"}
+  - {name: r, type: float64, storage: float32, nullable: true, description: "Realised log return of as_of_date"}
+  - {name: z_marg, type: float64, storage: float32, nullable: true, description: "r_i / sqrt(Sigma_ii): own standardised move"}
+  - {name: z_cond, type: float64, storage: float32, nullable: true, description: "(Sigma^-1 r)_i / sqrt((Sigma^-1)_ii): standardised residual given the other members (break-away measure)"}
+  - {name: contrib, type: float64, storage: float32, nullable: true, description: "r_i (Sigma^-1 r)_i: exact additive share of the joint score (sums to score; negative = offsets the group)"}
+  - {name: contrib_share, type: float64, storage: float32, nullable: true, description: "contrib / score"}
+  - {name: mu_next, type: float64, storage: float32, nullable: true, description: "Next-session predicted mean log return"}
+  - {name: d_next, type: float64, storage: float32, nullable: true, description: "Next-session diagonal term of Sigma = diag(d) + L L'"}
+  - {name: l1_next, type: float64, storage: float32, nullable: true, description: "Next-session low-rank factor loading 1"}
+  - {name: l2_next, type: float64, storage: float32, nullable: true, description: "Loading 2"}
+  - {name: l3_next, type: float64, storage: float32, nullable: true, description: "Loading 3"}
+  - {name: l4_next, type: float64, storage: float32, nullable: true, description: "Loading 4"}
+  - {name: computed_at, type: datetime, nullable: false, description: "Write time UTC"}

@@ -1,0 +1,194 @@
+{
+    "terms": {
+        "url": "https://www.bankofcanada.ca/terms/"
+    },
+    "groupDetail": {
+        "label": "Selected Treasury Bill Yields",
+        "description": "1, 3, 6 and 12 month Treasury bill data.",
+        "link": "https://www.bankofcanada.ca/?p=39889",
+        "metadata": {}
+    },
+    "seriesDetail": {
+        "V1592248173": {
+            "label": "1 month",
+            "description": "Because the Canadian Dollar Offered Rate (CDOR) ceased publication in June 2024, one-month treasury bills were temporarily issued between May 2024 and July 2025 to support an orderly transition away from Bankers’ Acceptances (BAs).",
+            "dimension": {
+                "key": "d",
+                "name": "Date"
+            },
+            "dateFormat": "weekly",
+            "metadata": {}
+        },
+        "V80691303": {
+            "label": "3 month",
+            "description": "Treasury bill auction - Average yields",
+            "dimension": {
+                "key": "d",
+                "name": "Date"
+            },
+            "dateFormat": "weekly",
+            "metadata": {}
+        },
+        "V80691304": {
+            "label": "6 month",
+            "description": "Treasury bill auction - Average yields",
+            "dimension": {
+                "key": "d",
+                "name": "Date"
+            },
+            "dateFormat": "weekly",
+            "metadata": {}
+        },
+        "V80691305": {
+            "label": "1 year",
+            "description": "Treasury bill auction - Average yields",
+            "dimension": {
+                "key": "d",
+                "name": "Date"
+            },
+            "dateFormat": "weekly",
+            "metadata": {}
+        },
+        "V80691342": {
+            "label": "1 month",
+            "description": "Treasury bills",
+            "dimension": {
+                "key": "d",
+                "name": "Date"
+            },
+            "dateFormat": "weekly",
+            "metadata": {}
+        },
+        "V80691344": {
+            "label": "3 month",
+            "description": "Treasury bills",
+            "dimension": {
+                "key": "d",
+                "name": "Date"
+            },
+            "dateFormat": "weekly",
+            "metadata": {}
+        },
+        "V80691345": {
+            "label": "6 month",
+            "description": "Treasury bills",
+            "dimension": {
+                "key": "d",
+                "name": "Date"
+            },
+            "dateFormat": "weekly",
+            "metadata": {}
+        },
+        "V80691346": {
+            "label": "1 year",
+            "description": "Treasury bills",
+            "dimension": {
+                "key": "d",
+                "name": "Date"
+            },
+            "dateFormat": "weekly",
+            "metadata": {}
+        }
+    },
+    "observations": [
+        {
+            "d": "2026-10-28",
+            "V80691346": {
+                "v": "3.04"
+            },
+            "V80691342": {
+                "v": "2.46"
+            },
+            "V80691344": {
+                "v": "2.53"
+            },
+            "V80691345": {
+                "v": "2.77"
+            }
+        },
+        {
+            "d": "2026-10-21",
+            "V80691346": {
+                "v": "3.01"
+            },
+            "V80691342": {
+                "v": "2.37"
+            },
+            "V80691344": {
+                "v": "2.49"
+            },
+            "V80691345": {
+                "v": "2.70"
+            }
+        },
+        {
+            "d": "2026-10-14",
+            "V80691346": {
+                "v": "2.93"
+            },
+            "V80691342": {
+                "v": "2.28"
+            },
+            "V80691344": {
+                "v": "2.38"
+            },
+            "V80691345": {
+                "v": "2.60"
+            }
+        },
+        {
+            "d": "2025-07-29",
+            "V1592248173": {
+                "v": "2.72"
+            }
+        },
+        {
+            "d": "2025-07-15",
+            "V1592248173": {
+                "v": "2.72"
+            }
+        },
+        {
+            "d": "2025-07-01",
+            "V1592248173": {
+                "v": "2.72"
+            }
+        },
+        {
+            "d": "2026-10-20",
+            "V80691303": {
+                "v": "2.53"
+            },
+            "V80691304": {
+                "v": "2.72"
+            },
+            "V80691305": {
+                "v": "3.03"
+            }
+        },
+        {
+            "d": "2026-10-06",
+            "V80691303": {
+                "v": "2.41"
+            },
+            "V80691304": {
+                "v": "2.62"
+            },
+            "V80691305": {
+                "v": "2.96"
+            }
+        },
+        {
+            "d": "2026-09-22",
+            "V80691303": {
+                "v": "2.39"
+            },
+            "V80691304": {
+                "v": "2.59"
+            },
+            "V80691305": {
+                "v": "2.97"
+            }
+        }
+    ]
+}

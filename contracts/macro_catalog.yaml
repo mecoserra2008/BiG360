@@ -1,0 +1,1726 @@
+# Macro coverage catalog (machine-readable). Owner: macro-coverage. Consumed by app.ingestion.macro_common
+# (load_catalog / expand_entries), app.ingestion.fred (src: fred entries = additions + indicator metadata),
+# app.ingestion.macro_audit (coverage matrix, staleness, cross-source checks) and tests/ingestion/macro.
+#
+# series entry keys
+#   id      series_id ('{src}:{native}')           src     fetcher name (see `sources`)
+#   region  ISO2 / aggregate (EA, G7, EM, WLD)     ind     indicator key(s) (see `indicators`; list allowed)
+#   title, freq (D/W/M/Q/A), units (text), scale (percent|fraction|index|level; default from the indicator or
+#   derived from units), mult (unit multiplier for level series), sa (SA/NSA/SCA/SAAR/TREND), tf (display/model
+#   transform: level|diff|pct_change|yoy|log_diff), lag (release lag days -> estimated knowledge_date),
+#   core (headline series shown in the market overview / regime inputs), rank (1 = primary, 2+ = fallbacks within
+#   region x indicator), requires_key (Settings secret; missing -> skipped with a 'missing key' status)
+#   every other key is a source request parameter (key/flow/dataset/filters/code/...).
+#   each: {REGION: code | {code: .., <overrides>}} expands one entry per region; {code} {region} {name} are
+#   substituted in every string value.
+# Every endpoint was verified live on 2026-10-11; quirks are documented next to each fetcher (app.ingestion.macro_*).
+version: 1
+
+regions:
+  US: {name: United States, currency: USD, iso3: USA, api_region: US}
+  EA: {name: Euro area, currency: EUR, iso3: EMU, api_region: EU}
+  DE: {name: Germany, currency: EUR, iso3: DEU, api_region: EU}
+  FR: {name: France, currency: EUR, iso3: FRA, api_region: EU}
+  IT: {name: Italy, currency: EUR, iso3: ITA, api_region: EU}
+  ES: {name: Spain, currency: EUR, iso3: ESP, api_region: EU}
+  PT: {name: Portugal, currency: EUR, iso3: PRT, api_region: EU}
+  NL: {name: Netherlands, currency: EUR, iso3: NLD, api_region: EU}
+  GB: {name: United Kingdom, currency: GBP, iso3: GBR, api_region: UK}
+  CH: {name: Switzerland, currency: CHF, iso3: CHE, api_region: EU}
+  JP: {name: Japan, currency: JPY, iso3: JPN, api_region: JP}
+  KR: {name: Korea, currency: KRW, iso3: KOR, api_region: KR}
+  CN: {name: China, currency: CNY, iso3: CHN, api_region: CN}
+  HK: {name: Hong Kong, currency: HKD, iso3: HKG, api_region: HK}
+  TW: {name: Taiwan, currency: TWD, iso3: TWN, api_region: APAC}
+  IN: {name: India, currency: INR, iso3: IND, api_region: APAC}
+  AU: {name: Australia, currency: AUD, iso3: AUS, api_region: APAC}
+  CA: {name: Canada, currency: CAD, iso3: CAN, api_region: CA}
+  BR: {name: Brazil, currency: BRL, iso3: BRA, api_region: LATAM}
+  MX: {name: Mexico, currency: MXN, iso3: MEX, api_region: LATAM}
+  CL: {name: Chile, currency: CLP, iso3: CHL, api_region: LATAM}
+  CO: {name: Colombia, currency: COP, iso3: COL, api_region: LATAM}
+  PE: {name: Peru, currency: PEN, iso3: PER, api_region: LATAM}
+  AR: {name: Argentina, currency: ARS, iso3: ARG, api_region: LATAM}
+  G7: {name: G7, currency: null, iso3: G7, api_region: null}
+  EM: {name: Emerging markets, currency: USD, iso3: null, api_region: null}
+  WLD: {name: World, currency: USD, iso3: WLD, api_region: null}
+  # not in the coverage target (used for cost-of-capital 10y yields only)
+  SE: {name: Sweden, currency: SEK, iso3: SWE, api_region: EU, target: false}
+  "NO": {name: Norway, currency: NOK, iso3: NOR, api_region: EU, target: false}
+  ZA: {name: South Africa, currency: ZAR, iso3: ZAF, api_region: OTHER, target: false}
+  # W3 rates & debt (rates-w3): curve / policy-rate / sovereign-debt countries outside the coverage target
+  AT: {name: Austria, currency: EUR, iso3: AUT, api_region: EU, target: false}
+  BE: {name: Belgium, currency: EUR, iso3: BEL, api_region: EU, target: false}
+  BG: {name: Bulgaria, currency: EUR, iso3: BGR, api_region: EU, target: false}
+  HR: {name: Croatia, currency: EUR, iso3: HRV, api_region: EU, target: false}
+  CY: {name: Cyprus, currency: EUR, iso3: CYP, api_region: EU, target: false}
+  CZ: {name: Czechia, currency: CZK, iso3: CZE, api_region: EU, target: false}
+  DK: {name: Denmark, currency: DKK, iso3: DNK, api_region: EU, target: false}
+  EE: {name: Estonia, currency: EUR, iso3: EST, api_region: EU, target: false}
+  FI: {name: Finland, currency: EUR, iso3: FIN, api_region: EU, target: false}
+  GR: {name: Greece, currency: EUR, iso3: GRC, api_region: EU, target: false}
+  HU: {name: Hungary, currency: HUF, iso3: HUN, api_region: EU, target: false}
+  IE: {name: Ireland, currency: EUR, iso3: IRL, api_region: EU, target: false}
+  LV: {name: Latvia, currency: EUR, iso3: LVA, api_region: EU, target: false}
+  LT: {name: Lithuania, currency: EUR, iso3: LTU, api_region: EU, target: false}
+  LU: {name: Luxembourg, currency: EUR, iso3: LUX, api_region: EU, target: false}
+  MT: {name: Malta, currency: EUR, iso3: MLT, api_region: EU, target: false}
+  PL: {name: Poland, currency: PLN, iso3: POL, api_region: EU, target: false}
+  RO: {name: Romania, currency: RON, iso3: ROU, api_region: EU, target: false}
+  SK: {name: Slovakia, currency: EUR, iso3: SVK, api_region: EU, target: false}
+  SI: {name: Slovenia, currency: EUR, iso3: SVN, api_region: EU, target: false}
+  IS: {name: Iceland, currency: ISK, iso3: ISL, api_region: EU, target: false}
+  RS: {name: Serbia, currency: RSD, iso3: SRB, api_region: OTHER, target: false}
+  MK: {name: North Macedonia, currency: MKD, iso3: MKD, api_region: OTHER, target: false}
+  TR: {name: Turkey, currency: TRY, iso3: TUR, api_region: OTHER, target: false}
+  RU: {name: Russia, currency: RUB, iso3: RUS, api_region: OTHER, target: false}
+  IL: {name: Israel, currency: ILS, iso3: ISR, api_region: OTHER, target: false}
+  NZ: {name: New Zealand, currency: NZD, iso3: NZL, api_region: APAC, target: false}
+  ID: {name: Indonesia, currency: IDR, iso3: IDN, api_region: APAC, target: false}
+  MY: {name: Malaysia, currency: MYR, iso3: MYS, api_region: APAC, target: false}
+  TH: {name: Thailand, currency: THB, iso3: THA, api_region: APAC, target: false}
+  PH: {name: Philippines, currency: PHP, iso3: PHL, api_region: APAC, target: false}
+  SA: {name: Saudi Arabia, currency: SAR, iso3: SAU, api_region: OTHER, target: false}
+  CR: {name: Costa Rica, currency: CRC, iso3: CRI, api_region: LATAM, target: false}
+
+# indicator -> category (macro_series.category), default scale, display transform, typical frequency
+indicators:
+  policy_rate:          {category: rates, scale: percent, tf: level, freq: D, group: policy_rates}
+  rate_3m:              {category: rates, scale: percent, tf: level, freq: M, group: policy_rates}
+  yield_2y:             {category: rates, scale: percent, tf: level, freq: D, group: policy_rates}
+  yield_10y:            {category: rates, scale: percent, tf: level, freq: D, group: policy_rates}
+  yield_curve:          {category: rates, scale: percent, tf: level, freq: D, group: policy_rates, note: "other curve tenors"}
+  cpi_yoy:              {category: inflation, scale: percent, tf: level, freq: M, group: inflation}
+  core_cpi_yoy:         {category: inflation, scale: percent, tf: level, freq: M, group: inflation}
+  ppi_yoy:              {category: inflation, scale: percent, tf: level, freq: M, group: inflation}
+  gdp_qoq:              {category: growth, scale: percent, tf: level, freq: Q, group: growth}
+  gdp_yoy:              {category: growth, scale: percent, tf: level, freq: Q, group: growth}
+  industrial_production: {category: growth, scale: percent, tf: level, freq: M, group: growth}
+  retail_sales:         {category: growth, scale: percent, tf: level, freq: M, group: growth}
+  pmi_proxy:            {category: sentiment, scale: index, tf: level, freq: M, group: sentiment, note: "OECD CLI/BCI, EC ESI, official PMI"}
+  consumer_confidence:  {category: sentiment, scale: index, tf: level, freq: M, group: sentiment}
+  unemployment:         {category: labor, scale: percent, tf: level, freq: M, group: labor}
+  employment:           {category: labor, scale: percent, tf: level, freq: M, group: labor}
+  house_prices:         {category: housing, scale: percent, tf: level, freq: Q, group: housing}
+  building_permits:     {category: housing, scale: index, tf: yoy, freq: M, group: housing}
+  money_supply:         {category: liquidity, scale: percent, tf: level, freq: M, group: money_credit}
+  private_credit:       {category: credit, scale: percent, tf: level, freq: M, group: money_credit}
+  credit_gap:           {category: credit, scale: percent, tf: level, freq: Q, group: money_credit}
+  current_account:      {category: trade, scale: percent, tf: level, freq: Q, group: external}
+  trade_balance:        {category: trade, scale: level, tf: level, freq: M, group: external}
+  gov_debt:             {category: fiscal, scale: percent, tf: level, freq: Q, group: fiscal}
+  gov_deficit:          {category: fiscal, scale: percent, tf: level, freq: Q, group: fiscal}
+  credit_spread:        {category: credit, scale: percent, tf: level, freq: D, group: markets}
+  financial_stress:     {category: liquidity, scale: index, tf: level, freq: W, group: markets}
+  commodities:          {category: commodities, scale: level, tf: log_diff, freq: M, group: markets}
+  reer:                 {category: fx, scale: index, tf: log_diff, freq: M, group: markets}
+  vix:                  {category: sentiment, scale: index, tf: level, freq: D, group: markets}
+  lending_rate:         {category: credit, scale: percent, tf: level, freq: M, group: money_credit, note: "bank lending rates (extra)"}
+
+# fetcher name -> job, base endpoint, key requirement (documentation + used by tests)
+sources:
+  fred:         {job: macro_fred, url: "https://api.stlouisfed.org/fred", key: fred_apikey}
+  ecb:          {job: macro_eu, url: "https://data-api.ecb.europa.eu/service/data"}
+  eurostat:     {job: macro_eu, url: "https://ec.europa.eu/eurostat/api/dissemination/statistics/1.0/data"}
+  bundesbank:   {job: macro_eu, url: "https://api.statistiken.bundesbank.de/rest/data"}
+  snb:          {job: macro_eu, url: "https://data.snb.ch/api/cube"}
+  oecd:         {job: macro_intl, url: "https://sdmx.oecd.org/public/rest/data", limit: "60 downloads/hour"}
+  bis:          {job: macro_intl, url: "https://stats.bis.org/api/v2/data/dataflow/BIS"}
+  imf:          {job: macro_intl, url: "https://api.imf.org/external/sdmx/2.1/data"}
+  worldbank:    {job: macro_intl, url: "https://api.worldbank.org/v2"}
+  wb_pinksheet: {job: macro_intl, url: "https://datacatalogapi.worldbank.org/ddhxext (CMO-Historical-Data-Monthly.xlsx)"}
+  nyfed:        {job: macro_national, url: "https://www.newyorkfed.org/medialibrary/media/research/data_indicators/ACMTermPremium.xls"}
+  nyfed_rates:  {job: macro_national, url: "https://markets.newyorkfed.org/api/rates/{path}/search.json"}
+  boe:          {job: macro_national, url: "https://www.bankofengland.co.uk/boeapps/database/_iadb-fromshowcolumns.asp"}
+  boj:          {job: macro_national, url: "https://www.stat-search.boj.or.jp/api/v1/getDataCode"}
+  bcb:          {job: macro_national, url: "https://api.bcb.gov.br/dados/serie"}
+  bok_ecos:     {job: macro_national, url: "https://ecos.bok.or.kr/api", key: bok_ecos_apikey}
+  banxico:      {job: macro_national, url: "https://www.banxico.org.mx/SieAPIRest/service/v1", key: banxico_token}
+
+series:
+  # ============================================================================================ FRED (additions)
+  - {id: "fred:DGS1MO", src: fred, region: US, ind: yield_curve, title: "UST 1M", freq: D, units: percent, sa: NSA, lag: 1, cat: rates}
+  - {id: "fred:DGS6MO", src: fred, region: US, ind: yield_curve, title: "UST 6M", freq: D, units: percent, sa: NSA, lag: 1, cat: rates}
+  - {id: "fred:DGS1", src: fred, region: US, ind: yield_curve, title: "UST 1Y", freq: D, units: percent, sa: NSA, lag: 1, cat: rates}
+  - {id: "fred:DGS3", src: fred, region: US, ind: yield_curve, title: "UST 3Y", freq: D, units: percent, sa: NSA, lag: 1, cat: rates}
+  - {id: "fred:DGS7", src: fred, region: US, ind: yield_curve, title: "UST 7Y", freq: D, units: percent, sa: NSA, lag: 1, cat: rates}
+  - {id: "fred:DGS20", src: fred, region: US, ind: yield_curve, title: "UST 20Y", freq: D, units: percent, sa: NSA, lag: 1, cat: rates}
+  - {id: "fred:BOPGSTB", src: fred, region: US, ind: trade_balance, title: "US trade balance (goods & services, BoP)", freq: M, units: "Millions of Dollars", sa: SA, lag: 36, vintages: true}
+  - {id: "fred:GFDEGDQ188S", src: fred, region: US, ind: gov_debt, title: "US federal debt % GDP", freq: Q, units: "Percent of GDP", sa: SA, lag: 85}
+  - {id: "fred:FYFSGDA188S", src: fred, region: US, ind: gov_deficit, title: "US federal surplus/deficit % GDP", freq: A, units: "Percent of GDP", sa: NSA, lag: 100}
+  - {id: "fred:TOTBKCR", src: fred, region: US, ind: private_credit, title: "US bank credit, all commercial banks", freq: W, units: "Billions of Dollars", sa: SA, lag: 9, tf: yoy, scale: level, cat: credit}
+  - {id: "fred:USSTHPI", src: fred, region: US, ind: house_prices, title: "US FHFA all-transactions house price index", freq: Q, units: "Index 1980Q1=100", sa: NSA, lag: 56, tf: yoy, scale: index, rank: 2, measure: fhfa}
+  - {id: "fred:BAMLEMEBCRPIEOAS", src: fred, region: EM, ind: credit_spread, title: "ICE BofA Euro EM corporate OAS", freq: D, units: percent, sa: NSA, lag: 1, rank: 2}
+  - {id: "fred:BAMLEMHBHYCRPIOAS", src: fred, region: EM, ind: credit_spread, title: "ICE BofA EM HY corporate OAS", freq: D, units: percent, sa: NSA, lag: 1, rank: 2}
+  - {id: "fred:BAMLEMIBHGCRPIOAS", src: fred, region: EM, ind: credit_spread, title: "ICE BofA EM high-grade corporate OAS", freq: D, units: percent, sa: NSA, lag: 1, rank: 3}
+  - {id: "fred:PNGASEUUSDM", src: fred, region: WLD, ind: commodities, title: "Natural gas EU (IMF)", freq: M, units: "USD per MMBtu", sa: NSA, lag: 20, tf: yoy, rank: 2, measure: natgas_eu}
+  - {id: "fred:PALUMUSDM", src: fred, region: WLD, ind: commodities, title: "Aluminium (IMF)", freq: M, units: "USD per metric ton", sa: NSA, lag: 20, tf: yoy, rank: 2, measure: aluminum}
+  - {id: "fred:PNICKUSDM", src: fred, region: WLD, ind: commodities, title: "Nickel (IMF)", freq: M, units: "USD per metric ton", sa: NSA, lag: 20, tf: yoy, rank: 2, measure: nickel}
+  # macro v2 / W1.4 thematic additions (macro-w1, verified live 2026-10-12)
+  - {id: "fred:DFII5", src: fred, region: US, title: "US 5Y TIPS real yield", freq: D, units: percent, sa: NSA, lag: 1, cat: rates}
+  - {id: "fred:WTREGEN", src: fred, region: US, title: "US Treasury General Account (Fed liabilities, weekly)", freq: W, units: "Millions of Dollars", scale: level, sa: NSA, lag: 1, cat: liquidity}
+  - {id: "fred:CPIUFDSL", src: fred, region: US, title: "US CPI: food", freq: M, units: "Index 1982-1984=100", scale: index, tf: yoy, sa: SA, lag: 14, cat: inflation}
+  - {id: "fred:CPIENGSL", src: fred, region: US, title: "US CPI: energy", freq: M, units: "Index 1982-1984=100", scale: index, tf: yoy, sa: SA, lag: 14, cat: inflation}
+  - {id: "fred:CUSR0000SAH1", src: fred, region: US, title: "US CPI: shelter", freq: M, units: "Index 1982-1984=100", scale: index, tf: yoy, sa: SA, lag: 14, cat: inflation}
+  - {id: "fred:CUSR0000SACL1E", src: fred, region: US, title: "US CPI: core goods (commodities less food and energy)", freq: M, units: "Index 1982-1984=100", scale: index, tf: yoy, sa: SA, lag: 14, cat: inflation}
+  - {id: "fred:CUSR0000SASLE", src: fred, region: US, title: "US CPI: core services (services less energy services)", freq: M, units: "Index 1982-1984=100", scale: index, tf: yoy, sa: SA, lag: 14, cat: inflation}
+  - {id: "fred:CUSR0000SASL2RS", src: fred, region: US, title: "US CPI: services less rent of shelter", freq: M, units: "Index Dec 1982=100", scale: index, tf: yoy, sa: SA, lag: 14, cat: inflation}
+  - {id: "fred:CPIMEDSL", src: fred, region: US, title: "US CPI: medical care", freq: M, units: "Index 1982-1984=100", scale: index, tf: yoy, sa: SA, lag: 14, cat: inflation}
+  - {id: "fred:DRTSCIS", src: fred, region: US, title: "Fed SLOOS: net % tightening C&I standards, small firms", freq: Q, units: percent, sa: NSA, lag: 35, cat: credit}
+  - {id: "fred:DRTSCLCC", src: fred, region: US, title: "Fed SLOOS: net % tightening credit card standards", freq: Q, units: percent, sa: NSA, lag: 35, cat: credit}
+  - {id: "fred:DRSDCILM", src: fred, region: US, title: "Fed SLOOS: net % reporting stronger C&I loan demand, large/middle firms", freq: Q, units: percent, sa: NSA, lag: 35, cat: credit}
+  - {id: "fred:SUBLPDRCSC", src: fred, region: US, title: "Fed SLOOS: net % tightening CRE construction & land development standards", freq: Q, units: percent, sa: NSA, lag: 35, cat: credit}
+  - {id: "fred:JTSJOR", src: fred, region: US, title: "JOLTS job openings rate", freq: M, units: percent, sa: SA, lag: 37, cat: labor}
+  - {id: "fred:JTSQUR", src: fred, region: US, title: "JOLTS quits rate", freq: M, units: percent, sa: SA, lag: 37, cat: labor}
+  - {id: "fred:JTSHIR", src: fred, region: US, title: "JOLTS hires rate", freq: M, units: percent, sa: SA, lag: 37, cat: labor}
+  # OECD MEI copies on FRED that are still refreshed (monthly averages; daily national sources rank first)
+  - id: "fred:IRLTLT01{code}M156N"
+    src: fred
+    ind: yield_10y
+    title: "{name} 10Y government bond yield (OECD, monthly)"
+    freq: M
+    units: percent
+    sa: NSA
+    lag: 30
+    cat: rates
+    rank: 2
+    each: {CA: CA, AU: AU, CH: CH, FR: FR, IT: IT, ES: ES, PT: PT, NL: NL, CL: CL, SE: SE, "NO": "NO", ZA: ZA}
+  - id: "fred:IR3TIB01{code}M156N"
+    src: fred
+    ind: rate_3m
+    title: "{name} 3M interbank rate (OECD, monthly)"
+    freq: M
+    units: percent
+    sa: NSA
+    lag: 30
+    cat: rates
+    rank: 2
+    each: {CA: CA, AU: AU, CH: CH, JP: JP, KR: KR, MX: MX, DE: DE, CL: CL}
+  - id: "fred:{code}LOLITOAASTSAM"
+    src: fred
+    ind: pmi_proxy
+    title: "{name} OECD composite leading indicator (FRED copy)"
+    freq: M
+    units: index
+    sa: SA
+    lag: 40
+    rank: 3
+    each: {FR: FRA, IT: ITA, ES: ESP, CA: CAN, AU: AUS, IN: IND}
+  - id: "fred:LRHUTTTT{code}M156S"
+    src: fred
+    ind: unemployment
+    title: "{name} unemployment rate (OECD, FRED copy)"
+    freq: M
+    units: percent
+    sa: SA
+    lag: 45
+    rank: 3
+    each: {CA: CA, AU: AU}
+  # indicator metadata for existing FRED catalog ids (app.ingestion.fred.CATALOG); no new requests
+  - {id: "fred:DFEDTARU", src: fred, region: US, ind: policy_rate, core: true}
+  - {id: "fred:EFFR", src: fred, region: US, ind: policy_rate, rank: 2}
+  - {id: "fred:DGS3MO", src: fred, region: US, ind: rate_3m}
+  - {id: "fred:SOFR", src: fred, region: US, ind: rate_3m, rank: 3}
+  - {id: "fred:DGS2", src: fred, region: US, ind: yield_2y}
+  - {id: "fred:DGS10", src: fred, region: US, ind: yield_10y, core: true}
+  - {id: "fred:DGS5", src: fred, region: US, ind: yield_curve}
+  - {id: "fred:DGS30", src: fred, region: US, ind: yield_curve}
+  - {id: "fred:CPIAUCSL", src: fred, region: US, ind: cpi_yoy, scale: index}
+  - {id: "fred:CPILFESL", src: fred, region: US, ind: core_cpi_yoy, scale: index}
+  - {id: "fred:PPIFIS", src: fred, region: US, ind: ppi_yoy, scale: index}
+  - {id: "fred:A191RL1Q225SBEA", src: fred, region: US, ind: gdp_qoq, note: "q/q SAAR", measure: saar}
+  - {id: "fred:GDPC1", src: fred, region: US, ind: [gdp_yoy, gdp_qoq], rank: 2, scale: level}
+  - {id: "fred:INDPRO", src: fred, region: US, ind: industrial_production, scale: index}
+  - {id: "fred:RRSFS", src: fred, region: US, ind: retail_sales, scale: level, measure: real}
+  - {id: "fred:RSAFS", src: fred, region: US, ind: retail_sales, rank: 2, scale: level, measure: nominal}
+  - {id: "fred:USALOLITOAASTSAM", src: fred, region: US, ind: pmi_proxy, rank: 2}
+  - {id: "fred:GACDFSA066MSFRBPHI", src: fred, region: US, ind: pmi_proxy, rank: 3}
+  - {id: "fred:BACTSAMFRBDAL", src: fred, region: US, ind: pmi_proxy, rank: 4}
+  - {id: "fred:UMCSENT", src: fred, region: US, ind: consumer_confidence}
+  - {id: "fred:UNRATE", src: fred, region: US, ind: unemployment, core: true}
+  - {id: "fred:PAYEMS", src: fred, region: US, ind: employment, scale: level}
+  - {id: "fred:CSUSHPISA", src: fred, region: US, ind: house_prices, scale: index, measure: case_shiller}
+  - {id: "fred:PERMIT", src: fred, region: US, ind: building_permits, scale: level}
+  - {id: "fred:HOUST", src: fred, region: US, ind: building_permits, rank: 2, scale: level}
+  - {id: "fred:M2SL", src: fred, region: US, ind: money_supply, scale: level}
+  - {id: "fred:BUSLOANS", src: fred, region: US, ind: private_credit, rank: 2, scale: level, measure: ci_loans}
+  - {id: "fred:BAMLH0A0HYM2", src: fred, region: US, ind: credit_spread}
+  - {id: "fred:BAMLC0A0CM", src: fred, region: US, ind: credit_spread, rank: 2}
+  - {id: "fred:BAA10Y", src: fred, region: US, ind: credit_spread, rank: 3}
+  - {id: "fred:BAMLHE00EHYIOAS", src: fred, region: EA, ind: credit_spread}
+  - {id: "fred:BAMLEMCBPIOAS", src: fred, region: EM, ind: credit_spread}
+  - {id: "fred:STLFSI4", src: fred, region: US, ind: financial_stress}
+  - {id: "fred:NFCI", src: fred, region: US, ind: financial_stress, rank: 2}
+  - {id: "fred:KCFSI", src: fred, region: US, ind: financial_stress, rank: 3}
+  - {id: "fred:VIXCLS", src: fred, region: US, ind: vix}
+  - {id: "fred:DCOILBRENTEU", src: fred, region: US, ind: commodities, measure: brent}
+  - {id: "fred:DCOILWTICO", src: fred, region: US, ind: commodities, measure: wti}
+  - {id: "fred:DHHNGSP", src: fred, region: US, ind: commodities, measure: natgas_us}
+  - {id: "fred:PCOPPUSDM", src: fred, region: US, ind: commodities, measure: copper}
+  - {id: "fred:DTWEXBGS", src: fred, region: US, ind: reer, rank: 2, note: "nominal broad dollar index"}
+  - {id: "fred:G7LOLITOAASTSAM", src: fred, region: G7, ind: pmi_proxy, rank: 2}
+  - {id: "fred:ECBDFR", src: fred, region: EA, ind: policy_rate, rank: 3}
+  - {id: "fred:CP0000EZ19M086NEST", src: fred, region: EA, ind: cpi_yoy, rank: 4, scale: index}
+  - {id: "fred:CLVMNACSCAB1GQEA19", src: fred, region: EA, ind: gdp_qoq, rank: 4, scale: level}
+  - {id: "fred:IRLTLT01DEM156N", src: fred, region: DE, ind: yield_10y, rank: 3}
+  - {id: "fred:IRLTLT01GBM156N", src: fred, region: GB, ind: yield_10y, rank: 3}
+  - {id: "fred:IRLTLT01JPM156N", src: fred, region: JP, ind: yield_10y, rank: 3}
+  - {id: "fred:IRLTLT01KRM156N", src: fred, region: KR, ind: yield_10y, rank: 3}
+  - {id: "fred:IRLTLT01MXM156N", src: fred, region: MX, ind: yield_10y, rank: 3}
+  - {id: "fred:IRSTCI01JPM156N", src: fred, region: JP, ind: policy_rate, rank: 5, note: "call money (overnight)"}
+  - {id: "fred:IRSTCI01KRM156N", src: fred, region: KR, ind: policy_rate, rank: 5, note: "call money (overnight)"}
+  - {id: "fred:IRSTCI01GBM156N", src: fred, region: GB, ind: policy_rate, rank: 5, note: "call money (overnight)"}
+  - {id: "fred:IRSTCI01MXM156N", src: fred, region: MX, ind: policy_rate, rank: 5, note: "call money (overnight)"}
+  - {id: "fred:IRSTCI01BRM156N", src: fred, region: BR, ind: policy_rate, rank: 5, note: "call money (overnight)"}
+  - {id: "fred:INTGSTBRM193N", src: fred, region: BR, ind: rate_3m, rank: 3}
+  - {id: "fred:LRHUTTTTJPM156S", src: fred, region: JP, ind: unemployment, rank: 2}
+  - {id: "fred:LRHUTTTTKRM156S", src: fred, region: KR, ind: unemployment, rank: 2}
+  - {id: "fred:LRHUTTTTGBM156S", src: fred, region: GB, ind: unemployment, rank: 3}
+  - {id: "fred:LRHUTTTTMXM156S", src: fred, region: MX, ind: unemployment, rank: 2}
+  - {id: "fred:NAEXKP01JPQ657S", src: fred, region: JP, ind: gdp_qoq, rank: 2}
+  - {id: "fred:NAEXKP01KRQ657S", src: fred, region: KR, ind: gdp_qoq, rank: 2}
+  - {id: "fred:JPNLOLITOAASTSAM", src: fred, region: JP, ind: pmi_proxy, rank: 3}
+  - {id: "fred:KORLOLITOAASTSAM", src: fred, region: KR, ind: pmi_proxy, rank: 3}
+  - {id: "fred:CHNLOLITOAASTSAM", src: fred, region: CN, ind: pmi_proxy, rank: 3}
+  - {id: "fred:DEULOLITOAASTSAM", src: fred, region: DE, ind: pmi_proxy, rank: 3}
+  - {id: "fred:GBRLOLITOAASTSAM", src: fred, region: GB, ind: pmi_proxy, rank: 3}
+  - {id: "fred:BRALOLITOAASTSAM", src: fred, region: BR, ind: pmi_proxy, rank: 3}
+  - {id: "fred:MEXLOLITOAASTSAM", src: fred, region: MX, ind: pmi_proxy, rank: 3}
+
+  # ============================================================================================ NON-FRED
+  # ============================================================================================ ECB Data Portal
+  - {id: "ecb:FM.D.U2.EUR.4F.KR.DFR.LEV", src: ecb, key: "FM/D.U2.EUR.4F.KR.DFR.LEV", region: EA, ind: policy_rate, title: "ECB deposit facility rate", freq: D, units: percent, sa: NSA, lag: 0, core: true}
+  - {id: "ecb:EST.B.EU000A2X2A25.WT", src: ecb, key: "EST/B.EU000A2X2A25.WT", region: EA, ind: policy_rate, title: "Euro short-term rate (EUR STR)", freq: D, units: percent, sa: NSA, lag: 1, rank: 4, measure: overnight}
+  - {id: "ecb:FM.M.U2.EUR.RT.MM.EURIBOR3MD_.HSTA", src: ecb, key: "FM/M.U2.EUR.RT.MM.EURIBOR3MD_.HSTA", region: EA, ind: rate_3m, title: "3M Euribor (monthly average)", freq: M, units: percent, sa: NSA, lag: 1}
+  - {id: "ecb:FM.M.U2.EUR.4F.BB.U2_2Y.YLD", src: ecb, key: "FM/M.U2.EUR.4F.BB.U2_2Y.YLD", region: EA, ind: yield_2y, title: "Euro area 2Y benchmark government bond yield (monthly)", freq: M, units: percent, sa: NSA, lag: 1, rank: 3, measure: benchmark}
+  - {id: "ecb:FM.M.U2.EUR.4F.BB.U2_10Y.YLD", src: ecb, key: "FM/M.U2.EUR.4F.BB.U2_10Y.YLD", region: EA, ind: yield_10y, title: "Euro area 10Y benchmark government bond yield (monthly)", freq: M, units: percent, sa: NSA, lag: 1, rank: 2, measure: benchmark}
+  - id: "ecb:YC.B.U2.EUR.4F.G_N_A.SV_C_YM.{code}"
+    src: ecb
+    key: "YC/B.U2.EUR.4F.G_N_A.SV_C_YM.{code}"
+    region: EA
+    ind: yield_curve
+    title: "Euro area AAA government spot yield {code}"
+    freq: D
+    units: percent
+    sa: NSA
+    lag: 1
+    measure: aaa_spot
+    each:
+      EA: SR_3M
+      EA_6M: {code: SR_6M, region: EA}
+      EA_1Y: {code: SR_1Y, region: EA}
+      EA_2Y: {code: SR_2Y, region: EA, ind: yield_2y}
+      EA_3Y: {code: SR_3Y, region: EA}
+      EA_5Y: {code: SR_5Y, region: EA}
+      EA_7Y: {code: SR_7Y, region: EA}
+      EA_10Y: {code: SR_10Y, region: EA, ind: yield_10y, core: true}
+      EA_15Y: {code: SR_15Y, region: EA}
+      EA_20Y: {code: SR_20Y, region: EA}
+      EA_30Y: {code: SR_30Y, region: EA}
+  - id: "ecb:YC.B.U2.EUR.4F.G_N_C.SV_C_YM.{code}"
+    src: ecb
+    key: "YC/B.U2.EUR.4F.G_N_C.SV_C_YM.{code}"
+    region: EA
+    title: "Euro area all-issuer government spot yield {code}"
+    freq: D
+    units: percent
+    sa: NSA
+    lag: 1
+    rank: 2
+    measure: all_spot
+    each:
+      EA_2Y: {code: SR_2Y, region: EA, ind: yield_2y}
+      EA_10Y: {code: SR_10Y, region: EA, ind: yield_10y}
+  - {id: "ecb:HICP.M.U2.N.000000.4D0.ANR", src: ecb, key: "HICP/M.U2.N.000000.4D0.ANR", region: EA, ind: cpi_yoy, title: "Euro area HICP inflation y/y", freq: M, units: percent y/y, sa: NSA, lag: 0, core: true, measure: hicp}
+  - {id: "ecb:HICP.M.U2.N.XEF000.4D0.ANR", src: ecb, key: "HICP/M.U2.N.XEF000.4D0.ANR", region: EA, ind: core_cpi_yoy, title: "Euro area core HICP (ex energy, food, alcohol, tobacco) y/y", freq: M, units: percent y/y, sa: NSA, lag: 0, measure: hicp}
+  - id: "ecb:HICP.M.{code}.N.000000.4D0.ANR"
+    src: ecb
+    key: "HICP/M.{code}.N.000000.4D0.ANR"
+    ind: cpi_yoy
+    title: "{name} HICP inflation y/y (ECB)"
+    freq: M
+    units: percent y/y
+    sa: NSA
+    lag: 0
+    rank: 2
+    measure: hicp
+    each: &eu6 {DE: DE, FR: FR, IT: IT, ES: ES, PT: PT, NL: NL}
+  - id: "ecb:HICP.M.{code}.N.XEF000.4D0.ANR"
+    src: ecb
+    key: "HICP/M.{code}.N.XEF000.4D0.ANR"
+    ind: core_cpi_yoy
+    title: "{name} core HICP y/y (ECB)"
+    freq: M
+    units: percent y/y
+    sa: NSA
+    lag: 0
+    rank: 2
+    measure: hicp
+    each: *eu6
+  - {id: "ecb:MNA.Q.Y.I10.W2.S1.S1.B.B1GQ._Z._Z._Z.EUR.LR.GY", src: ecb, key: "MNA/Q.Y.I10.W2.S1.S1.B.B1GQ._Z._Z._Z.EUR.LR.GY", region: EA, ind: gdp_yoy, title: "Euro area (EA21) real GDP y/y", freq: Q, units: percent y/y, sa: SCA, lag: 45, core: true}
+  - {id: "ecb:MNA.Q.Y.I10.W2.S1.S1.B.B1GQ._Z._Z._Z.EUR.LR.G1", src: ecb, key: "MNA/Q.Y.I10.W2.S1.S1.B.B1GQ._Z._Z._Z.EUR.LR.G1", region: EA, ind: gdp_qoq, title: "Euro area (EA21) real GDP q/q", freq: Q, units: percent q/q, sa: SCA, lag: 45}
+  - {id: "ecb:BSI.M.U2.Y.V.M30.X.I.U2.2300.Z01.A", src: ecb, key: "BSI/M.U2.Y.V.M30.X.I.U2.2300.Z01.A", region: EA, ind: money_supply, title: "Euro area M3 annual growth", freq: M, units: percent y/y, sa: SA, lag: 28}
+  - {id: "ecb:BSI.M.U2.Y.V.M10.X.I.U2.2300.Z01.A", src: ecb, key: "BSI/M.U2.Y.V.M10.X.I.U2.2300.Z01.A", region: EA, ind: money_supply, title: "Euro area M1 annual growth", freq: M, units: percent y/y, sa: SA, lag: 28, rank: 2, measure: m1}
+  - {id: "ecb:BSI.M.U2.Y.U.A20T.A.I.U2.2240.Z01.A", src: ecb, key: "BSI/M.U2.Y.U.A20T.A.I.U2.2240.Z01.A", region: EA, ind: private_credit, title: "Euro area adjusted loans to NFCs, annual growth", freq: M, units: percent y/y, sa: SA, lag: 28}
+  - {id: "ecb:BSI.M.U2.Y.U.A20T.A.I.U2.2250.Z01.A", src: ecb, key: "BSI/M.U2.Y.U.A20T.A.I.U2.2250.Z01.A", region: EA, ind: private_credit, title: "Euro area adjusted loans to households, annual growth", freq: M, units: percent y/y, sa: SA, lag: 28, rank: 2, measure: households}
+  - id: "ecb:MIR.M.{code}.B.A2I.AM.R.A.2240.EUR.N"
+    src: ecb
+    key: "MIR/M.{code}.B.A2I.AM.R.A.2240.EUR.N"
+    ind: lending_rate
+    title: "{name} composite cost of borrowing, NFCs"
+    freq: M
+    units: percent
+    sa: NSA
+    lag: 35
+    each: &ea_eu6 {EA: U2, DE: DE, FR: FR, IT: IT, ES: ES, PT: PT, NL: NL}
+  - id: "ecb:MIR.M.{code}.B.A2C.AM.R.A.2250.EUR.N"
+    src: ecb
+    key: "MIR/M.{code}.B.A2C.AM.R.A.2250.EUR.N"
+    ind: lending_rate
+    title: "{name} composite cost of borrowing, house purchase"
+    freq: M
+    units: percent
+    sa: NSA
+    lag: 35
+    rank: 2
+    measure: mortgage
+    each: *ea_eu6
+  # macro v2 / W1.4 (macro-w1, verified live 2026-10-12): HICP main aggregates, Eurosystem balance sheet, Bank Lending Survey
+  - id: "ecb:HICP.M.U2.N.{code}.4D0.ANR"
+    src: ecb
+    key: "HICP/M.U2.N.{code}.4D0.ANR"
+    region: EA
+    cat: inflation
+    freq: M
+    units: percent y/y
+    scale: percent
+    sa: NSA
+    lag: 0
+    each:
+      NRGY00: {title: "Euro area HICP energy y/y"}
+      FOOD00: {title: "Euro area HICP food, alcohol & tobacco y/y"}
+      IGXE00: {title: "Euro area HICP non-energy industrial goods y/y"}
+      SERV00: {title: "Euro area HICP services y/y"}
+  - {id: "ecb:ILM.W.U2.C.T000000.Z5.Z01", src: ecb, key: "ILM/W.U2.C.T000000.Z5.Z01", region: EA, cat: liquidity, title: "Eurosystem consolidated balance sheet: total assets (weekly, EUR millions)", freq: W, units: EUR millions, scale: level, mult: 1000000, sa: NSA, lag: 2}
+  - id: "ecb:BLS.Q.U2.ALL.{code}"
+    src: ecb
+    key: "BLS/Q.U2.ALL.{code}"
+    region: EA
+    cat: credit
+    freq: Q
+    units: percent (weighted net percentage)
+    scale: percent
+    sa: NSA
+    lag: 20
+    each:
+      O.E.Z.B3.ST.S.WFNET: {title: "ECB BLS: credit standards on loans to enterprises (net % tightening)"}
+      O.E.Z.B3.ZZ.D.WFNET: {title: "ECB BLS: demand for loans to enterprises (net %)"}
+      Z.H.H.B3.ST.S.WFNET: {title: "ECB BLS: credit standards on housing loans (net % tightening)"}
+      Z.H.H.B3.ZZ.D.WFNET: {title: "ECB BLS: demand for housing loans (net %)"}
+  - id: "ecb:CISS.D.{code}.Z0Z.4F.EC.SS_CIN.IDX"
+    src: ecb
+    key: "CISS/D.{code}.Z0Z.4F.EC.SS_CIN.IDX"
+    ind: financial_stress
+    title: "{name} composite indicator of systemic stress (CISS)"
+    freq: D
+    units: index 0-1
+    scale: index
+    sa: NSA
+    lag: 2
+    measure: ciss
+    each: {EA: U2, DE: DE, FR: FR, IT: IT, ES: ES, PT: PT, NL: NL, GB: GB, CN: CN, US: {code: US, rank: 4}}
+  - id: "ecb:IRS.M.{code}.L.L40.CI.0000.EUR.N.Z"
+    src: ecb
+    key: "IRS/M.{code}.L.L40.CI.0000.EUR.N.Z"
+    ind: yield_10y
+    title: "{name} 10Y government bond yield (EMU convergence, ECB)"
+    freq: M
+    units: percent
+    sa: NSA
+    lag: 10
+    rank: 3
+    measure: convergence
+    each: {EA: {code: U2, rank: 5}, DE: DE, FR: FR, IT: IT, ES: ES, PT: PT, NL: NL}
+  - {id: "ecb:RESR.Q.U2._T.N._TR.TVAL.4D0.TB.N.IX", src: ecb, key: "RESR/Q.U2._T.N._TR.TVAL.4D0.TB.N.IX", region: EA, ind: house_prices, title: "Euro area residential property price index", freq: Q, units: "index 2015=100", scale: index, tf: yoy, sa: NSA, lag: 95, rank: 3}
+
+  # ============================================================================================ Eurostat (JSON-stat)
+  - id: "eurostat:prc_hicp_minr.{region}.TOTAL"
+    src: eurostat
+    dataset: prc_hicp_minr
+    filters: {coicop18: TOTAL, unit: RCH_A}
+    ind: cpi_yoy
+    title: "{name} HICP inflation y/y"
+    freq: M
+    units: percent y/y
+    sa: NSA
+    lag: 0
+    measure: hicp
+    each: &es_eu {EA: {code: EA21, alt_codes: [EA20, EA], rank: 2}, DE: {code: DE, core: true}, FR: {code: FR, core: true}, IT: {code: IT, core: true}, ES: {code: ES, core: true}, PT: {code: PT, core: true}, NL: {code: NL, core: true}, CH: {code: CH, rank: 2}}
+  - id: "eurostat:prc_hicp_minr.{region}.TOT_X_NRG_FOOD"
+    src: eurostat
+    dataset: prc_hicp_minr
+    filters: {coicop18: TOT_X_NRG_FOOD, unit: RCH_A}
+    ind: core_cpi_yoy
+    title: "{name} core HICP (ex energy, food, alcohol, tobacco) y/y"
+    freq: M
+    units: percent y/y
+    sa: NSA
+    lag: 0
+    measure: hicp
+    each: &es_eu_plain {EA: {code: EA21, alt_codes: [EA20, EA], rank: 2}, DE: DE, FR: FR, IT: IT, ES: ES, PT: PT, NL: NL, CH: CH}
+  - id: "eurostat:sts_inppd_m.{region}.B-E36"
+    src: eurostat
+    dataset: sts_inppd_m
+    filters: {indic_bt: PRC_PRR_DOM, nace_r2: B-E36, s_adj: NSA, unit: PCH_SM}
+    ind: ppi_yoy
+    title: "{name} producer prices (domestic, industry B-E36) y/y"
+    freq: M
+    units: percent y/y
+    sa: NSA
+    lag: 35
+    each: &es_eu7 {EA: {code: EA21, alt_codes: [EA20, EA]}, DE: DE, FR: FR, IT: IT, ES: ES, PT: PT, NL: NL}
+  - id: "eurostat:namq_10_gdp.{region}.CLV_PCH_PRE"
+    src: eurostat
+    dataset: namq_10_gdp
+    filters: {na_item: B1GQ, s_adj: SCA, unit: CLV_PCH_PRE}
+    ind: gdp_qoq
+    title: "{name} real GDP q/q"
+    freq: Q
+    units: percent q/q
+    sa: SCA
+    lag: 30
+    each: &es_gdp {EA: {code: EA21, alt_codes: [EA20, EA], rank: 2}, DE: DE, FR: FR, IT: IT, ES: ES, PT: PT, NL: NL, CH: CH}
+  - id: "eurostat:namq_10_gdp.{region}.CLV_PCH_SM"
+    src: eurostat
+    dataset: namq_10_gdp
+    filters: {na_item: B1GQ, s_adj: SCA, unit: CLV_PCH_SM}
+    ind: gdp_yoy
+    title: "{name} real GDP y/y"
+    freq: Q
+    units: percent y/y
+    sa: SCA
+    lag: 30
+    each: {EA: {code: EA21, alt_codes: [EA20, EA], rank: 2}, DE: {code: DE, core: true}, FR: {code: FR, core: true}, IT: {code: IT, core: true}, ES: {code: ES, core: true}, PT: {code: PT, core: true}, NL: {code: NL, core: true}, CH: {code: CH, core: true}}
+  - id: "eurostat:sts_inpr_m.{region}.PCH_SM"
+    src: eurostat
+    dataset: sts_inpr_m
+    filters: {indic_bt: PRD, nace_r2: B-D, s_adj: CA, unit: PCH_SM}
+    ind: industrial_production
+    title: "{name} industrial production (B-D) y/y"
+    freq: M
+    units: percent y/y
+    sa: CA
+    lag: 45
+    each: *es_eu7
+  - {id: "eurostat:sts_inpr_m.EA.B-D", src: eurostat, dataset: sts_inpr_m, filters: {indic_bt: PRD, nace_r2: B-D, s_adj: SCA, unit: I21}, code: EA21, alt_codes: [EA20], region: EA, ind: industrial_production, title: "Euro area industrial production (B-D) index", freq: M, units: "index 2021=100", scale: index, tf: yoy, sa: SCA, lag: 45, rank: 2}
+  - id: "eurostat:sts_trtu_m.{region}.PCH_SM"
+    src: eurostat
+    dataset: sts_trtu_m
+    filters: {indic_bt: VOL_SLS, nace_r2: G47, s_adj: CA, unit: PCH_SM}
+    ind: retail_sales
+    title: "{name} retail trade volume y/y"
+    freq: M
+    units: percent y/y
+    sa: CA
+    lag: 35
+    each: *es_eu7
+  - id: "eurostat:ei_bssi_m_r2.{region}.ESI"
+    src: eurostat
+    dataset: ei_bssi_m_r2
+    filters: {indic: BS-ESI-I, s_adj: SA}
+    ind: pmi_proxy
+    title: "{name} economic sentiment indicator (EC)"
+    freq: M
+    units: "index, long-term average = 100"
+    scale: index
+    sa: SA
+    lag: 0
+    measure: esi
+    each: {EA: {code: EA21, alt_codes: [EA20, EA], core: true}, DE: DE, FR: FR, IT: IT, ES: ES, PT: PT, NL: NL}
+  - id: "eurostat:ei_bssi_m_r2.{region}.CSMCI"
+    src: eurostat
+    dataset: ei_bssi_m_r2
+    filters: {indic: BS-CSMCI-BAL, s_adj: SA}
+    ind: consumer_confidence
+    title: "{name} consumer confidence (EC, balance)"
+    freq: M
+    units: balance
+    scale: index
+    sa: SA
+    lag: 0
+    measure: ec_balance
+    each: *es_eu7
+  - id: "eurostat:ei_bssi_m_r2.{region}.ICI"
+    src: eurostat
+    dataset: ei_bssi_m_r2
+    filters: {indic: BS-ICI-BAL, s_adj: SA}
+    ind: pmi_proxy
+    title: "{name} industrial confidence (EC, balance)"
+    freq: M
+    units: balance
+    scale: index
+    sa: SA
+    lag: 0
+    rank: 5
+    measure: ec_industry
+    each: *es_eu7
+  - id: "eurostat:une_rt_m.{region}.SA.TOTAL"
+    src: eurostat
+    dataset: une_rt_m
+    filters: {s_adj: SA, age: TOTAL, sex: T, unit: PC_ACT}
+    ind: unemployment
+    title: "{name} unemployment rate (ILO, SA)"
+    freq: M
+    units: percent of labour force
+    scale: percent
+    sa: SA
+    lag: 30
+    measure: ilo
+    each: {EA: {code: EA21, alt_codes: [EA20, EA], core: true}, DE: {code: DE, core: true}, FR: {code: FR, core: true}, IT: {code: IT, core: true}, ES: {code: ES, core: true}, PT: {code: PT, core: true}, NL: {code: NL, core: true}, CH: {code: CH, rank: 2}}
+  - id: "eurostat:namq_10_pe.{region}.EMP_DC"
+    src: eurostat
+    dataset: namq_10_pe
+    filters: {na_item: EMP_DC, unit: PCH_SM_PER, s_adj: SCA}
+    ind: employment
+    title: "{name} employment (persons, domestic concept) y/y"
+    freq: Q
+    units: percent y/y
+    sa: SCA
+    lag: 45
+    each: {EA: {code: EA21, alt_codes: [EA20, EA]}, DE: DE, IT: IT, ES: ES, NL: NL, FR: {code: FR, filters: {na_item: EMP_DC, unit: PCH_SM_PER, s_adj: SA}, sa: SA}, PT: {code: PT, filters: {na_item: EMP_DC, unit: PCH_SM_PER, s_adj: SA}, sa: SA}}
+  - id: "eurostat:prc_hpi_q.{region}.RCH_A"
+    src: eurostat
+    dataset: prc_hpi_q
+    filters: {purchase: TOTAL, unit: RCH_A}
+    ind: house_prices
+    title: "{name} house price index y/y"
+    freq: Q
+    units: percent y/y
+    sa: NSA
+    lag: 95
+    each: *es_eu7
+  - id: "eurostat:sts_cobp_m.{region}.PCH_SM"
+    src: eurostat
+    dataset: sts_cobp_m
+    filters: {indic_bt: BPRM_DW, cpa2_1: CPA_F41001_X_410014, s_adj: NSA, unit: PCH_SM}
+    ind: building_permits
+    title: "{name} building permits (dwellings) y/y"
+    freq: M
+    units: percent y/y
+    scale: percent
+    tf: level
+    sa: NSA
+    lag: 75
+    each: {EA: {code: EA21, alt_codes: [EA20, EA]}, DE: DE, FR: FR, ES: ES, PT: PT, NL: NL}
+  - id: "eurostat:gov_10q_ggdebt.{region}.PC_GDP"
+    src: eurostat
+    dataset: gov_10q_ggdebt
+    filters: {na_item: GD, sector: S13, unit: PC_GDP}
+    ind: gov_debt
+    title: "{name} general government gross debt % GDP"
+    freq: Q
+    units: percent of GDP
+    sa: NSA
+    lag: 112
+    each: *es_eu7
+  - id: "eurostat:gov_10q_ggnfa.{region}.B9"
+    src: eurostat
+    dataset: gov_10q_ggnfa
+    filters: {na_item: B9, sector: S13, unit: PC_GDP, s_adj: SCA}
+    ind: gov_deficit
+    title: "{name} general government net lending (+) / borrowing (-) % GDP"
+    freq: Q
+    units: percent of GDP
+    sa: SCA
+    lag: 112
+    each: {EA: {code: EA21, alt_codes: [EA20, EA]}, DE: DE, FR: FR, ES: ES, PT: PT, NL: NL, IT: {code: IT, filters: {na_item: B9, sector: S13, unit: PC_GDP, s_adj: NSA}, sa: NSA}}
+  - id: "eurostat:bop_gdp6_q.{region}.CA"
+    src: eurostat
+    dataset: bop_gdp6_q
+    filters: {freq: Q, unit: PC_GDP, bop_item: CA, stk_flow: BAL, partner: WRL_REST}
+    ind: current_account
+    title: "{name} current account balance % GDP"
+    freq: Q
+    units: percent of GDP
+    sa: NSA
+    lag: 100
+    each: {EA: {code: EA21, alt_codes: [EA20], filters: {freq: Q, unit: PC_GDP, bop_item: CA, stk_flow: BAL, partner: EXT_EA21}}, DE: DE, FR: FR, IT: IT, ES: ES, PT: PT, NL: NL}
+  - id: "eurostat:ei_eteu27_2020_m.{region}.BAL"
+    src: eurostat
+    dataset: ei_eteu27_2020_m
+    filters: {stk_flow: BAL_RT, indic: ET-T, partner: WORLD, unit: MIO-EUR-SA}
+    ind: trade_balance
+    title: "{name} trade balance (goods, SA)"
+    freq: M
+    units: EUR million
+    scale: level
+    mult: 1000000
+    sa: SA
+    lag: 45
+    each: *eu6
+  - {id: "eurostat:ei_etea_m.EA.BAL", src: eurostat, dataset: ei_etea_m, filters: {stk_flow: BAL_RT, indic: ET-T, unit: MIO-EUR-SA}, code: EA21, alt_codes: [EA20], region: EA, ind: trade_balance, title: "Euro area trade balance (extra-EA goods, SA)", freq: M, units: EUR million, scale: level, mult: 1000000, sa: SA, lag: 45}
+  - id: "eurostat:irt_lt_mcby_m.{region}"
+    src: eurostat
+    dataset: irt_lt_mcby_m
+    filters: {}
+    ind: yield_10y
+    title: "{name} 10Y government bond yield (EMU convergence criterion, monthly)"
+    freq: M
+    units: percent
+    sa: NSA
+    lag: 10
+    measure: convergence
+    each: {EA: {code: EA, rank: 4}, DE: {code: DE, rank: 2}, PT: {code: PT, rank: 2}, FR: {code: FR, core: true}, IT: {code: IT, core: true}, ES: {code: ES, core: true}, NL: {code: NL, core: true}}
+  - {id: "eurostat:irt_st_m.EA.IRT_M3", src: eurostat, dataset: irt_st_m, filters: {int_rt: IRT_M3}, code: EA, region: EA, ind: rate_3m, title: "Euro area 3M money market rate (Euribor, monthly)", freq: M, units: percent, sa: NSA, lag: 5, rank: 2}
+
+  # ============================================================================================ national Europe
+  - id: "bundesbank:BBSIS.D.{code}"
+    src: bundesbank
+    key: "BBSIS/D.I.ZST.ZI.EUR.S1311.B.A604.{code}.R.A.A._Z._Z.A"
+    region: DE
+    title: "German Bund zero-coupon yield {code} (Svensson)"
+    freq: D
+    units: percent
+    sa: NSA
+    lag: 1
+    measure: zero_coupon
+    each:
+      DE: {code: R02XX, ind: yield_2y}
+      DE_10: {code: R10XX, region: DE, ind: yield_10y, core: true}
+      DE_05: {code: R05XX, region: DE, ind: yield_curve}
+      DE_30: {code: R30XX, region: DE, ind: yield_curve}
+  - id: "bpstat:{code}"
+    src: bpstat
+    domain: 26
+    dataset: 690b7b36fd36c0dbe249c48cbbc39524
+    region: PT
+    freq: D
+    units: percent
+    sa: NSA
+    lag: 1
+    measure: treasury_bond
+    each:
+      PT: {code: "12099454", sid: "12099454", ind: yield_2y, title: "Portugal 2Y treasury bond yield (BPstat)"}
+      PT_10: {code: "12099459", sid: "12099459", region: PT, ind: yield_10y, core: true, title: "Portugal 10Y treasury bond yield (BPstat)"}
+  - {id: "insee:011814632", src: insee, idbank: "011814632", region: FR, ind: cpi_yoy, title: "France CPI (base 2025) y/y (INSEE)", freq: M, units: percent y/y, sa: NSA, lag: 0, rank: 3, measure: cpi_national}
+  - {id: "insee:001688527", src: insee, idbank: "001688527", region: FR, ind: unemployment, title: "France ILO unemployment rate (INSEE, quarterly)", freq: Q, units: percent, sa: SA, lag: 45, rank: 2, measure: ilo_quarterly}
+  - {id: "ine_es:IPC290750", src: ine_es, cod: IPC290750, region: ES, ind: cpi_yoy, title: "Spain CPI (base 2025) y/y (INE)", freq: M, units: percent y/y, sa: NSA, lag: 0, rank: 3, measure: cpi_national}
+  - {id: "snb:snboffzisa.LZ", src: snb, cube: snboffzisa, dims: {D0: LZ}, region: CH, ind: policy_rate, title: "SNB policy rate", freq: M, units: percent, sa: NSA, lag: 0, core: true}
+  - {id: "snb:zimoma.SARON", src: snb, cube: zimoma, dims: {D0: SARON}, region: CH, ind: policy_rate, title: "SARON (monthly)", freq: M, units: percent, sa: NSA, lag: 1, rank: 3, measure: overnight}
+  - {id: "snb:rendeiduebd.CHF.2J", src: snb, cube: rendeiduebd, dims: {D0: CHF, D1: 2J}, region: CH, ind: yield_2y, title: "Swiss Confederation 2Y spot yield", freq: D, units: percent, sa: NSA, lag: 35}
+  - {id: "snb:rendeiduebd.CHF.10J", src: snb, cube: rendeiduebd, dims: {D0: CHF, D1: 10J}, region: CH, ind: yield_10y, title: "Swiss Confederation 10Y spot yield", freq: D, units: percent, sa: NSA, lag: 35, core: true}
+  - {id: "snb:plkopr.VVP", src: snb, cube: plkopr, dims: {D0: VVP}, region: CH, ind: cpi_yoy, title: "Switzerland CPI y/y", freq: M, units: percent y/y, sa: NSA, lag: 5, core: true, measure: cpi_national}
+  - {id: "snb:snbmonagg.VV.GM3", src: snb, cube: snbmonagg, dims: {D0: VV, D1: GM3}, region: CH, ind: money_supply, title: "Switzerland M3 y/y", freq: M, units: percent y/y, sa: NSA, lag: 35}
+  - {id: "snb:gdpap.VVP.BBIP", src: snb, cube: gdpap, dims: {D0: VVP, D1: BBIP}, region: CH, ind: gdp_qoq, title: "Switzerland GDP q/q (SECO via SNB)", freq: Q, units: percent q/q, sa: SA, lag: 60, rank: 2}
+  - {id: "snb:amarbma.S1", src: snb, cube: amarbma, dims: {D0: S1}, region: CH, ind: unemployment, title: "Switzerland registered unemployment rate (SECO, SA)", freq: M, units: percent, sa: SA, lag: 8, core: true, measure: registered}
+
+  # ============================================================================================ OECD (<= 60 downloads/h)
+  - id: "oecd:CLI.{code}.LI"
+    src: oecd
+    flow: "OECD.SDD.STES,DSD_STES@DF_CLI,4.1"
+    key: "{code}.M.LI.IX._Z.AA.IX._Z.H"
+    ind: pmi_proxy
+    title: "{name} OECD composite leading indicator (amplitude adjusted)"
+    freq: M
+    units: "index, long-term average = 100"
+    scale: index
+    sa: SA
+    lag: 40
+    measure: cli
+    each: {US: USA, JP: JPN, KR: KOR, CN: {code: CHN, rank: 2}, IN: IND, AU: AUS, CA: CAN, BR: BRA, MX: MEX, GB: GBR, G7: G7, DE: {code: DEU, rank: 2}, FR: {code: FRA, rank: 2}, IT: {code: ITA, rank: 2}, ES: {code: ESP, rank: 2}}
+  - id: "oecd:CLI.{code}.BCICP"
+    src: oecd
+    flow: "OECD.SDD.STES,DSD_STES@DF_CLI,4.1"
+    key: "{code}.M.BCICP.IX._Z.AA.IX._Z.H"
+    ind: pmi_proxy
+    title: "{name} OECD business confidence indicator"
+    freq: M
+    units: "index, long-term average = 100"
+    scale: index
+    sa: SA
+    lag: 30
+    rank: 3
+    measure: bci
+    each: {EA: EA20, US: USA, JP: JPN, GB: GBR, DE: DEU, FR: FRA, IT: ITA, ES: ESP, PT: PRT, NL: NLD, KR: KOR, MX: MEX, BR: BRA, CN: CHN, AU: AUS, CA: CAN, IN: IND, CH: {code: CHE, rank: 1}, CL: {code: CHL, rank: 1}, CO: {code: COL, rank: 1}}
+  - id: "oecd:CLI.{code}.CCICP"
+    src: oecd
+    flow: "OECD.SDD.STES,DSD_STES@DF_CLI,4.1"
+    key: "{code}.M.CCICP.IX._Z.AA.IX._Z.H"
+    ind: consumer_confidence
+    title: "{name} OECD consumer confidence indicator"
+    freq: M
+    units: "index, long-term average = 100"
+    scale: index
+    sa: SA
+    lag: 30
+    measure: oecd_cci
+    each: {EA: {code: EA20, rank: 2}, US: {code: USA, rank: 2}, DE: {code: DEU, rank: 2}, FR: {code: FRA, rank: 2}, IT: {code: ITA, rank: 2}, ES: {code: ESP, rank: 2}, PT: {code: PRT, rank: 2}, NL: {code: NLD, rank: 2}, GB: GBR, JP: JPN, KR: KOR, MX: MEX, BR: BRA, CN: CHN, AU: AUS, CA: CAN, IN: IND, CH: CHE, CL: CHL, CO: COL}
+  - id: "oecd:KEI.{code}.IR3TIB"
+    src: oecd
+    flow: "OECD.SDD.STES,DSD_KEI@DF_KEI,4.0"
+    key: "{code}.M.IR3TIB.PA._Z._Z._Z"
+    ind: rate_3m
+    title: "{name} 3M interbank rate (OECD KEI)"
+    freq: M
+    units: percent
+    sa: NSA
+    lag: 20
+    each: {CA: CAN, CH: CHE, CL: CHL, CO: COL, IN: IND, KR: KOR, MX: MEX, AU: AUS, JP: JPN, CN: CHN}
+  - id: "oecd:KEI.{code}.IRLT"
+    src: oecd
+    flow: "OECD.SDD.STES,DSD_KEI@DF_KEI,4.0"
+    key: "{code}.M.IRLT.PA._Z._Z._Z"
+    ind: yield_10y
+    title: "{name} long-term (10Y) government bond yield (OECD KEI, monthly)"
+    freq: M
+    units: percent
+    sa: NSA
+    lag: 20
+    rank: 2
+    measure: monthly_avg
+    each: {IN: IND, AU: AUS, CA: CAN, CH: CHE, CL: CHL, CO: COL, CN: CHN, MX: MEX, JP: JPN, KR: KOR, GB: GBR,
+           BR: {code: BRA, ind: [], cat: rates, measure: oecd_lt_rate_admin, title: "Brazil OECD long-term interest rate (administered ~9.1%; NOT the 10Y market yield)"}}
+  - id: "oecd:KEI.{code}.UNEMP"
+    src: oecd
+    flow: "OECD.SDD.STES,DSD_KEI@DF_KEI,4.0"
+    key: "{code}.M.UNEMP.PT_LF._T.Y._Z"
+    ind: unemployment
+    title: "{name} unemployment rate (OECD KEI, SA)"
+    freq: M
+    units: percent of labour force
+    scale: percent
+    sa: SA
+    lag: 60
+    rank: 2
+    measure: harmonised
+    each: {JP: JPN, KR: KOR, GB: GBR, CA: CAN, AU: AUS, MX: MEX, CL: CHL, CO: COL}
+  - id: "oecd:KEI.{code}.PRVM.GY"
+    src: oecd
+    flow: "OECD.SDD.STES,DSD_KEI@DF_KEI,4.0"
+    key: "{code}.M.PRVM.GR.BTE.Y.GY"
+    ind: industrial_production
+    title: "{name} industrial production (B-E) y/y (OECD KEI)"
+    freq: M
+    units: percent y/y
+    sa: SA
+    lag: 70
+    rank: 2
+    each: {US: {code: USA, rank: 3}, JP: JPN, KR: KOR, GB: GBR, CA: CAN, BR: BRA, CO: COL, IN: IND, CH: CHE}
+  - id: "oecd:KEI.{code}.TOVM.GY"
+    src: oecd
+    flow: "OECD.SDD.STES,DSD_KEI@DF_KEI,4.0"
+    key: "{code}.M.TOVM.GR.G47.Y.GY"
+    ind: retail_sales
+    title: "{name} retail trade volume y/y (OECD KEI)"
+    freq: M
+    units: percent y/y
+    sa: SA
+    lag: 70
+    rank: 2
+    each: {JP: JPN, KR: KOR, GB: GBR, CA: CAN, MX: MEX, BR: BRA, CO: COL, CH: CHE}
+  - id: "oecd:QNA.{code}.G1"
+    src: oecd
+    flow: "OECD.SDD.NAD,DSD_NAMAIN1@DF_QNA_EXPENDITURE_GROWTH_OECD,1.1"
+    key: "Q.Y.{code}.S1.S1.B1GQ._Z._Z._Z.PC.L.G1.T0102"
+    ind: gdp_qoq
+    title: "{name} real GDP q/q (OECD QNA)"
+    freq: Q
+    units: percent q/q
+    sa: SCA
+    lag: 50
+    rank: 2
+    each: &oecd_gdp {JP: JPN, KR: KOR, CN: CHN, IN: IND, AU: AUS, CA: CAN, GB: GBR, MX: MEX, BR: BRA, CL: CHL, CO: COL, AR: ARG, US: {code: USA, rank: 3}, G7: G7}
+  - id: "oecd:QNA.{code}.GY"
+    src: oecd
+    flow: "OECD.SDD.NAD,DSD_NAMAIN1@DF_QNA_EXPENDITURE_GROWTH_OECD,1.1"
+    key: "Q.Y.{code}.S1.S1.B1GQ._Z._Z._Z.PC.L.GY.T0102"
+    ind: gdp_yoy
+    title: "{name} real GDP y/y (OECD QNA)"
+    freq: Q
+    units: percent y/y
+    sa: SCA
+    lag: 50
+    rank: 2
+    each: *oecd_gdp
+  - id: "oecd:PRICES.{code}.CPI"
+    src: oecd
+    flow: "OECD.SDD.TPS,DSD_PRICES_COICOP2018@DF_PRICES_C2018_ALL,1.0"
+    key: "{code}.M.N.CPI.PA._T.N.GY"
+    ind: cpi_yoy
+    title: "{name} CPI y/y (OECD, COICOP 2018)"
+    freq: M
+    units: percent y/y
+    sa: NSA
+    lag: 25
+    rank: 2
+    measure: cpi_national
+    each: &c2018 {JP: JPN, MX: MEX, CA: CAN, CH: CHE, CL: CHL}
+  - id: "oecd:PRICES.{code}.CORE"
+    src: oecd
+    flow: "OECD.SDD.TPS,DSD_PRICES_COICOP2018@DF_PRICES_C2018_ALL,1.0"
+    key: "{code}.M.N.CPI.PA._TXCP01_NRG.N.GY"
+    ind: core_cpi_yoy
+    title: "{name} core CPI (ex food & energy) y/y (OECD)"
+    freq: M
+    units: percent y/y
+    sa: NSA
+    lag: 25
+    rank: 2
+    measure: cpi_national
+    each: *c2018
+  - id: "oecd:PRICES99.{code}.CPI"
+    src: oecd
+    flow: "OECD.SDD.TPS,DSD_PRICES@DF_PRICES_ALL,1.0"
+    key: "{code}.M.N.CPI.PA._T.N.GY"
+    ind: cpi_yoy
+    title: "{name} CPI y/y (OECD)"
+    freq: M
+    units: percent y/y
+    sa: NSA
+    lag: 25
+    rank: 2
+    measure: cpi_national
+    each: {GB: GBR, AU: AUS, IN: IND, CN: CHN, BR: BRA, CO: COL, AR: ARG, KR: KOR}
+  - id: "oecd:PRICES99.{code}.CORE"
+    src: oecd
+    flow: "OECD.SDD.TPS,DSD_PRICES@DF_PRICES_ALL,1.0"
+    key: "{code}.M.N.CPI.PA._TXCP01_NRG.N.GY"
+    ind: core_cpi_yoy
+    title: "{name} core CPI (ex food & energy) y/y (OECD)"
+    freq: M
+    units: percent y/y
+    sa: NSA
+    lag: 25
+    rank: 2
+    measure: cpi_national
+    each: {GB: GBR, AU: AUS, CO: COL, KR: KOR}
+
+  # ============================================================================================ BIS
+  - id: "bis:WS_CBPOL.M.{code}"
+    src: bis
+    flow: WS_CBPOL
+    key: "M.{code}"
+    ind: policy_rate
+    title: "Central bank policy rate - {region}"
+    freq: M
+    units: percent
+    sa: NSA
+    lag: 1
+    rank: 3
+    measure: policy_eop
+    each: {US: US, EA: XM, GB: GB, JP: JP, KR: {code: KR, core: true}, CN: {code: CN, core: true}, BR: BR, MX: {code: MX, core: true}, CH: CH, CA: CA, AU: AU, IN: IN, HK: HK, CL: CL, CO: CO, PE: PE}
+  - id: "bis:WS_CBPOL.D.{code}"
+    src: bis
+    flow: WS_CBPOL
+    key: "D.{code}"
+    ind: policy_rate
+    title: "Central bank policy rate (daily) - {region}"
+    freq: D
+    units: percent
+    sa: NSA
+    lag: 5
+    rank: 2
+    measure: policy_daily
+    each: {CA: {code: CA, core: true}, AU: {code: AU, core: true}, IN: {code: IN, core: true}, HK: {code: HK, core: true}, CL: {code: CL, core: true}, CO: {code: CO, core: true}, PE: {code: PE, core: true}, CN: CN, MX: MX, KR: KR, JP: JP, GB: GB, BR: BR, CH: CH, US: US, EA: XM}
+  # ============================================================================================ W3 rates & debt (rates-w3, 2026-10-31)
+  # Money markets: NY Fed Markets Data API (official reference rates; full history per request). EUR STR, SONIA,
+  # TONA, CORRA and the BIS policy rates already exist above (existing tables are reused, docs/COVERAGE_V2_PLAN.md W3).
+  - id: "nyfed_rates:{code}"
+    src: nyfed_rates
+    region: US
+    cat: rates
+    freq: D
+    units: percent
+    scale: percent
+    sa: NSA
+    lag: 1
+    each:
+      SOFR: {code: SOFR, path: secured/sofr, field: percentRate, title: "SOFR - Secured Overnight Financing Rate (NY Fed)", measure: overnight}
+      EFFR: {code: EFFR, path: unsecured/effr, field: percentRate, title: "EFFR - Effective Federal Funds Rate (NY Fed)", measure: overnight}
+      OBFR: {code: OBFR, path: unsecured/obfr, field: percentRate, title: "OBFR - Overnight Bank Funding Rate (NY Fed)", measure: overnight}
+      TGCR: {code: TGCR, path: secured/tgcr, field: percentRate, title: "TGCR - Tri-Party General Collateral Rate (NY Fed)", measure: overnight}
+      BGCR: {code: BGCR, path: secured/bgcr, field: percentRate, title: "BGCR - Broad General Collateral Rate (NY Fed)", measure: overnight}
+      SOFR30A: {code: SOFR30A, path: secured/sofrai, field: average30day, title: "30-day average SOFR (NY Fed)", measure: compounded_avg}
+      SOFR90A: {code: SOFR90A, path: secured/sofrai, field: average90day, title: "90-day average SOFR (NY Fed)", measure: compounded_avg}
+      SOFR180A: {code: SOFR180A, path: secured/sofrai, field: average180day, title: "180-day average SOFR (NY Fed)", measure: compounded_avg}
+      SOFRINDEX: {code: SOFRINDEX, path: secured/sofrai, field: index, title: "SOFR Index (NY Fed, 2018-04-02 = 1)", units: index, scale: index, measure: index}
+  # BIS daily policy rates of the remaining central banks (no indicator: monitor / Curve monitor only)
+  - id: "bis:WS_CBPOL.D.{code}"
+    src: bis
+    flow: WS_CBPOL
+    key: "D.{code}"
+    cat: rates
+    title: "Central bank policy rate (daily, BIS) - {region}"
+    freq: D
+    units: percent
+    sa: NSA
+    lag: 5
+    measure: policy_daily
+    each: {SE: SE, "NO": "NO", DK: DK, PL: PL, CZ: CZ, HU: HU, RO: RO, TR: TR, RU: RU, ZA: ZA, IL: IL, NZ: NZ, ID: ID, MY: MY, TH: TH, PH: PH, SA: SA, AR: AR, IS: IS, RS: RS, MK: MK}
+  # ICE BofA OAS by rating / maturity / EM sector + effective yields (FRED; ICE copyright: personal use, archived) and
+  # Moody's seasoned Aaa / Baa yields (FRED; Moody's copyright: personal use)
+  - id: "fred:{code}"
+    src: fred
+    region: US
+    cat: credit
+    freq: D
+    units: percent
+    sa: NSA
+    lag: 1
+    each:
+      BAMLC0A1CAAA: {code: BAMLC0A1CAAA, title: "ICE BofA AAA US Corporate OAS"}
+      BAMLC0A2CAA: {code: BAMLC0A2CAA, title: "ICE BofA AA US Corporate OAS"}
+      BAMLC0A3CA: {code: BAMLC0A3CA, title: "ICE BofA single-A US Corporate OAS"}
+      BAMLH0A1HYBB: {code: BAMLH0A1HYBB, title: "ICE BofA BB US High Yield OAS"}
+      BAMLH0A2HYB: {code: BAMLH0A2HYB, title: "ICE BofA single-B US High Yield OAS"}
+      BAMLC1A0C13Y: {code: BAMLC1A0C13Y, title: "ICE BofA 1-3y US Corporate OAS"}
+      BAMLC2A0C35Y: {code: BAMLC2A0C35Y, title: "ICE BofA 3-5y US Corporate OAS"}
+      BAMLC3A0C57Y: {code: BAMLC3A0C57Y, title: "ICE BofA 5-7y US Corporate OAS"}
+      BAMLC4A0C710Y: {code: BAMLC4A0C710Y, title: "ICE BofA 7-10y US Corporate OAS"}
+      BAMLC7A0C1015Y: {code: BAMLC7A0C1015Y, title: "ICE BofA 10-15y US Corporate OAS"}
+      BAMLC8A0C15PY: {code: BAMLC8A0C15PY, title: "ICE BofA 15y+ US Corporate OAS"}
+      BAMLC0A0CMEY: {code: BAMLC0A0CMEY, title: "ICE BofA US Corporate effective yield"}
+      BAMLC0A4CBBBEY: {code: BAMLC0A4CBBBEY, title: "ICE BofA BBB US Corporate effective yield"}
+      BAMLH0A0HYM2EY: {code: BAMLH0A0HYM2EY, title: "ICE BofA US High Yield effective yield"}
+      BAMLHE00EHYIEY: {code: BAMLHE00EHYIEY, region: EA, title: "ICE BofA Euro High Yield effective yield"}
+      BAMLEMFSFCRPIOAS: {code: BAMLEMFSFCRPIOAS, region: EM, title: "ICE BofA EM corporate OAS - private-sector financials"}
+      BAMLEMNSNFCRPIOAS: {code: BAMLEMNSNFCRPIOAS, region: EM, title: "ICE BofA EM corporate OAS - non-financials"}
+      BAMLEMRACRPIASIAOAS: {code: BAMLEMRACRPIASIAOAS, region: EM, title: "ICE BofA EM corporate OAS - Asia"}
+      BAMLEMRECRPIEMEAOAS: {code: BAMLEMRECRPIEMEAOAS, region: EM, title: "ICE BofA EM corporate OAS - EMEA"}
+      BAMLEMRLCRPILAOAS: {code: BAMLEMRLCRPILAOAS, region: EM, title: "ICE BofA EM corporate OAS - Latin America"}
+      DAAA: {code: DAAA, title: "Moody's seasoned Aaa corporate bond yield"}
+      DBAA: {code: DBAA, title: "Moody's seasoned Baa corporate bond yield"}
+      DFII7: {code: DFII7, cat: rates, title: "UST 7Y TIPS (real) constant maturity (H.15)"}
+      DFII20: {code: DFII20, cat: rates, title: "UST 20Y TIPS (real) constant maturity (H.15)"}
+      DFII30: {code: DFII30, cat: rates, title: "UST 30Y TIPS (real) constant maturity (H.15)"}
+  # Sovereign debt / deficits for the rest of the EU (Eurostat quarterly; GR is EL in Eurostat)
+  - id: "eurostat:gov_10q_ggdebt.{region}.PC_GDP"
+    src: eurostat
+    dataset: gov_10q_ggdebt
+    filters: {na_item: GD, sector: S13, unit: PC_GDP}
+    cat: fiscal
+    title: "{name} general government gross debt % GDP"
+    freq: Q
+    units: percent of GDP
+    sa: NSA
+    lag: 112
+    each: &w3_eu20 {AT: AT, BE: BE, BG: BG, HR: HR, CY: CY, CZ: CZ, DK: DK, EE: EE, FI: FI, GR: EL, HU: HU, IE: IE, LV: LV, LT: LT, LU: LU, MT: MT, PL: PL, RO: RO, SK: SK, SI: SI, SE: SE}
+  - id: "eurostat:gov_10q_ggnfa.{region}.B9"
+    src: eurostat
+    dataset: gov_10q_ggnfa
+    filters: {na_item: B9, sector: S13, unit: PC_GDP, s_adj: SCA}
+    cat: fiscal
+    title: "{name} general government net lending (+) / borrowing (-) % GDP (SCA)"
+    freq: Q
+    units: percent of GDP
+    sa: SCA
+    lag: 112
+    each: *w3_eu20
+  # ECB TARGET balances (Eurosystem intra-system claims / liabilities, EUR millions, end of month)
+  - id: "ecb:TGB.M.{code}.N.A094T.U2.EUR.E"
+    src: ecb
+    key: "TGB/M.{code}.N.A094T.U2.EUR.E"
+    cat: liquidity
+    title: "{name} TARGET balance (ECB, EUR millions, end of month)"
+    freq: M
+    units: EUR millions
+    scale: level
+    mult: 1000000
+    sa: NSA
+    lag: 40
+    each: {DE: DE, IT: IT, ES: ES, FR: FR, NL: NL, PT: PT, BE: BE, AT: AT, FI: FI, GR: GR, IE: IE, LU: LU}
+  # OECD long-term (~10y) rates for the countries the Curve monitor lists without another source (no indicator)
+  - id: "oecd:KEI.{code}.IRLT"
+    src: oecd
+    flow: "OECD.SDD.STES,DSD_KEI@DF_KEI,4.0"
+    key: "{code}.M.IRLT.PA._Z._Z._Z"
+    cat: rates
+    title: "{name} long-term (10Y) government bond yield (OECD KEI, monthly)"
+    freq: M
+    units: percent
+    sa: NSA
+    lag: 20
+    measure: monthly_avg
+    each: {US: USA, NZ: NZL, IL: ISR, IS: ISL, "NO": NOR, ZA: ZAF, CR: CRI, ID: IDN, TR: TUR}
+  - id: "bis:WS_CREDIT_GAP.Q.{code}.P.A.C"
+    src: bis
+    flow: WS_CREDIT_GAP
+    key: "Q.{code}.P.A.C"
+    ind: credit_gap
+    title: "{region} credit-to-GDP gap (BIS)"
+    freq: Q
+    units: percentage points of GDP
+    scale: percent
+    sa: NSA
+    lag: 160
+    each: &bis22 {US: US, EA: XM, DE: DE, FR: FR, IT: IT, ES: ES, PT: PT, NL: NL, GB: GB, CH: CH, JP: JP, KR: KR, CN: CN, HK: HK, IN: IN, AU: AU, CA: CA, BR: BR, MX: MX, CL: CL, CO: CO, AR: AR}
+  - id: "bis:WS_SPP.Q.{code}.N.771"
+    src: bis
+    flow: WS_SPP
+    key: "Q.{code}.N.771"
+    ind: house_prices
+    title: "{region} residential property prices, nominal y/y (BIS)"
+    freq: Q
+    units: percent y/y
+    sa: NSA
+    lag: 100
+    each: {US: {code: US, rank: 3}, EA: {code: XM, rank: 2}, DE: {code: DE, rank: 2}, FR: {code: FR, rank: 2}, IT: {code: IT, rank: 2}, ES: {code: ES, rank: 2}, PT: {code: PT, rank: 2}, NL: {code: NL, rank: 2}, GB: GB, CH: CH, JP: JP, KR: KR, CN: CN, HK: HK, IN: IN, AU: AU, CA: CA, BR: BR, MX: MX, CL: CL, CO: CO, PE: PE}
+  - id: "bis:WS_EER.M.R.B.{code}"
+    src: bis
+    flow: WS_EER
+    key: "M.R.B.{code}"
+    ind: reer
+    title: "{region} real effective exchange rate, broad (BIS)"
+    freq: M
+    units: "index 2020=100"
+    scale: index
+    tf: log_diff
+    sa: NSA
+    lag: 20
+    measure: reer
+    each: &bis_eer {US: US, EA: XM, DE: DE, FR: FR, IT: IT, ES: ES, PT: PT, NL: NL, GB: GB, CH: CH, JP: JP, KR: KR, CN: CN, HK: HK, TW: TW, IN: IN, AU: AU, CA: CA, BR: BR, MX: MX, CL: CL, CO: CO, PE: PE, AR: AR}
+  - id: "bis:WS_EER.M.N.B.{code}"
+    src: bis
+    flow: WS_EER
+    key: "M.N.B.{code}"
+    ind: reer
+    title: "{region} nominal effective exchange rate, broad (BIS)"
+    freq: M
+    units: "index 2020=100"
+    scale: index
+    tf: log_diff
+    sa: NSA
+    lag: 20
+    rank: 2
+    measure: neer
+    each: *bis_eer
+  - id: "bis:WS_TC.Q.{code}.P.A.M.770.A"
+    src: bis
+    flow: WS_TC
+    ver: "2.0"
+    key: "Q.{code}.P.A.M.770.A"
+    ind: private_credit
+    title: "{region} credit to the private non-financial sector % GDP (BIS)"
+    freq: Q
+    units: percent of GDP
+    sa: NSA
+    lag: 160
+    rank: 3
+    measure: total_credit_pct_gdp
+    each: *bis22
+  - id: "bis:WS_TC.Q.{code}.G.A.M.770.A"
+    src: bis
+    flow: WS_TC
+    ver: "2.0"
+    key: "Q.{code}.G.A.M.770.A"
+    ind: gov_debt
+    title: "{region} general government debt % GDP, market value (BIS)"
+    freq: Q
+    units: percent of GDP
+    sa: NSA
+    lag: 160
+    rank: 3
+    measure: market_value
+    each: {US: US, EA: XM, DE: DE, FR: FR, IT: IT, ES: ES, PT: PT, NL: NL, GB: GB, CH: CH, JP: JP, KR: KR, CA: CA, AU: AU, CL: CL}
+  - id: "bis:WS_TC.Q.{code}.G.A.N.770.A"
+    src: bis
+    flow: WS_TC
+    ver: "2.0"
+    key: "Q.{code}.G.A.N.770.A"
+    ind: gov_debt
+    title: "{region} general government debt % GDP, nominal value (BIS)"
+    freq: Q
+    units: percent of GDP
+    sa: NSA
+    lag: 160
+    rank: 2
+    measure: nominal_value
+    each: {BR: BR, CN: CN, IN: IN, MX: MX, HK: HK, CO: CO, AR: AR}
+
+  # ============================================================================================ IMF
+  - id: "imf:CPI.{code}.YOY"
+    src: imf
+    flow: "IMF.STA,CPI"
+    key: "{code}.CPI._T.YOY_PCH_PA_PT.M"
+    ind: cpi_yoy
+    title: "CPI inflation y/y - {region} (IMF)"
+    freq: M
+    units: percent y/y
+    sa: NSA
+    lag: 20
+    rank: 3
+    measure: cpi_national
+    each: {JP: {code: JPN, core: true}, KR: {code: KOR, core: true}, CN: {code: CHN, core: true}, GB: {code: GBR, core: true}, BR: BRA, MX: {code: MEX, core: true}, IN: {code: IND, core: true}, HK: {code: HKG, core: true}, AU: AUS, CA: CAN, CH: CHE, CL: {code: CHL, core: true}, CO: {code: COL, core: true}, PE: {code: PER, core: true}, AR: ARG}
+  - id: "imf:WEO.{code}.GGXWDG_NGDP"
+    src: imf
+    flow: "IMF.RES,WEO"
+    key: "{code}.GGXWDG_NGDP.A"
+    ind: gov_debt
+    title: "{region} general government gross debt % GDP (IMF WEO, actuals)"
+    freq: A
+    units: percent of GDP
+    sa: NSA
+    lag: 105
+    rank: 4
+    measure: weo_annual
+    actual_only: true
+    each: &weo {US: USA, DE: DEU, FR: FRA, IT: ITA, ES: ESP, PT: PRT, NL: NLD, GB: GBR, CH: CHE, JP: JPN, KR: KOR, CN: CHN, HK: HKG, TW: TWN, IN: IND, AU: AUS, CA: CAN, BR: BRA, MX: MEX, CL: CHL, CO: COL, PE: PER, AR: ARG}
+  - id: "imf:WEO.{code}.GGXCNL_NGDP"
+    src: imf
+    flow: "IMF.RES,WEO"
+    key: "{code}.GGXCNL_NGDP.A"
+    ind: gov_deficit
+    title: "{region} general government net lending/borrowing % GDP (IMF WEO, actuals)"
+    freq: A
+    units: percent of GDP
+    sa: NSA
+    lag: 105
+    rank: 3
+    measure: weo_annual
+    actual_only: true
+    each: *weo
+  - id: "imf:WEO.{code}.BCA_NGDPD"
+    src: imf
+    flow: "IMF.RES,WEO"
+    key: "{code}.BCA_NGDPD.A"
+    ind: current_account
+    title: "{region} current account balance % GDP (IMF WEO, actuals)"
+    freq: A
+    units: percent of GDP
+    sa: NSA
+    lag: 105
+    rank: 3
+    measure: weo_annual
+    actual_only: true
+    each: *weo
+  - id: "imf:WEO.{code}.NGDP_RPCH"
+    src: imf
+    flow: "IMF.RES,WEO"
+    key: "{code}.NGDP_RPCH.A"
+    ind: gdp_yoy
+    title: "{region} real GDP growth, annual (IMF WEO, actuals)"
+    freq: A
+    units: percent y/y
+    sa: NSA
+    lag: 105
+    rank: 5
+    measure: weo_annual
+    actual_only: true
+    each: {TW: TWN, HK: HKG, PE: PER}
+  - id: "imf:PCPS.{code}"
+    src: imf
+    flow: "IMF.RES,PCPS"
+    key: "G001.{code}.USD.M"
+    region: WLD
+    ind: commodities
+    title: "IMF primary commodity price {code}"
+    freq: M
+    units: USD per unit
+    scale: level
+    tf: yoy
+    sa: NSA
+    lag: 10
+    rank: 2
+    each:
+      POILBRE: {measure: brent}
+      POILWTI: {measure: wti}
+      PNGASEU: {measure: natgas_eu}
+      PNGASUS: {measure: natgas_us}
+      PNGASJP: {measure: lng_japan}
+      PCOALAU: {measure: coal_au}
+      PCOPP: {measure: copper}
+      PALUM: {measure: aluminum}
+      PIORECR: {measure: iron_ore}
+      PNICK: {measure: nickel}
+      PZINC: {measure: zinc}
+      PGOLD: {measure: gold}
+      PSILVER: {measure: silver}
+      PWHEAMT: {measure: wheat}
+      PMAIZMT: {measure: maize}
+      PSOYB: {measure: soybeans}
+
+  # ============================================================================================ World Bank
+  - id: "worldbank:{code}.NY.GDP.MKTP.KD.ZG"
+    src: worldbank
+    indicator: NY.GDP.MKTP.KD.ZG
+    ind: gdp_yoy
+    title: "{region} real GDP growth, annual (World Bank)"
+    freq: A
+    units: percent y/y
+    sa: NSA
+    lag: 120
+    rank: 6
+    measure: annual
+    each: {WLD: WLD, US: USA, EA: EMU, CN: CHN, IN: IND, JP: JPN, BR: BRA, AR: ARG, PE: PER, HK: HKG}
+  - id: "worldbank:{code}.BN.CAB.XOKA.GD.ZS"
+    src: worldbank
+    indicator: BN.CAB.XOKA.GD.ZS
+    ind: current_account
+    title: "{region} current account balance % GDP, annual (World Bank)"
+    freq: A
+    units: percent of GDP
+    sa: NSA
+    lag: 120
+    rank: 5
+    measure: annual
+    each: {US: USA, CN: CHN, IN: IND, JP: JPN, KR: KOR, BR: BRA, MX: MEX, AR: ARG, PE: PER, CL: CHL, CO: COL, AU: AUS, CA: CAN, HK: HKG}
+  - id: "wb_pinksheet:{code}"
+    src: wb_pinksheet
+    url: "https://thedocs.worldbank.org/en/doc/74e8be41ceb20fa0da750cda2f6b9e4e-0050012026/related/CMO-Historical-Data-Monthly.xlsx"
+    region: WLD
+    ind: commodities
+    freq: M
+    scale: level
+    tf: yoy
+    sa: NSA
+    lag: 3
+    each:
+      brent: {column: "Crude oil, Brent", units: "USD/bbl", measure: brent, title: "Crude oil, Brent (World Bank Pink Sheet)"}
+      wti: {column: "Crude oil, WTI", units: "USD/bbl", measure: wti, title: "Crude oil, WTI (World Bank Pink Sheet)"}
+      crude_avg: {column: "Crude oil, average", units: "USD/bbl", measure: crude_avg, title: "Crude oil, average spot (World Bank Pink Sheet)"}
+      natgas_eu: {column: "Natural gas, Europe", units: "USD/mmbtu", measure: natgas_eu, title: "Natural gas, Europe (World Bank Pink Sheet)"}
+      natgas_us: {column: "Natural gas, US", units: "USD/mmbtu", measure: natgas_us, title: "Natural gas, US (World Bank Pink Sheet)"}
+      lng_japan: {column: "Liquefied natural gas, Japan", units: "USD/mmbtu", measure: lng_japan, title: "LNG, Japan (World Bank Pink Sheet)"}
+      coal_au: {column: "Coal, Australian", units: "USD/mt", measure: coal_au, title: "Coal, Australian (World Bank Pink Sheet)"}
+      copper: {column: "Copper", units: "USD/mt", measure: copper, title: "Copper (World Bank Pink Sheet)"}
+      aluminum: {column: "Aluminum", units: "USD/mt", measure: aluminum, title: "Aluminum (World Bank Pink Sheet)"}
+      iron_ore: {column: "Iron ore, cfr spot", units: "USD/dmtu", measure: iron_ore, title: "Iron ore (World Bank Pink Sheet)"}
+      nickel: {column: "Nickel", units: "USD/mt", measure: nickel, title: "Nickel (World Bank Pink Sheet)"}
+      zinc: {column: "Zinc", units: "USD/mt", measure: zinc, title: "Zinc (World Bank Pink Sheet)"}
+      gold: {column: "Gold", units: "USD/troy oz", measure: gold, title: "Gold (World Bank Pink Sheet)"}
+      silver: {column: "Silver", units: "USD/troy oz", measure: silver, title: "Silver (World Bank Pink Sheet)"}
+      wheat: {column: "Wheat, US HRW", units: "USD/mt", measure: wheat, title: "Wheat, US HRW (World Bank Pink Sheet)"}
+      maize: {column: "Maize", units: "USD/mt", measure: maize, title: "Maize (World Bank Pink Sheet)"}
+      soybeans: {column: "Soybeans", units: "USD/mt", measure: soybeans, title: "Soybeans (World Bank Pink Sheet)"}
+
+  # ============================================================================================ United States extras
+  # NY Fed ACM Treasury term structure (official xls, daily; Adrian-Crump-Moench). macro-w1, verified live 2026-10-12
+  - id: "nyfed:{code}"
+    src: nyfed
+    url: "https://www.newyorkfed.org/medialibrary/media/research/data_indicators/ACMTermPremium.xls"
+    sheet: "ACM Daily"
+    region: US
+    cat: rates
+    freq: D
+    units: percent
+    scale: percent
+    sa: NSA
+    lag: 5
+    each:
+      ACMTP02: {column: ACMTP02, title: "ACM term premium, 2Y (NY Fed)"}
+      ACMTP05: {column: ACMTP05, title: "ACM term premium, 5Y (NY Fed)"}
+      ACMTP10: {column: ACMTP10, title: "ACM term premium, 10Y (NY Fed)"}
+      ACMRNY10: {column: ACMRNY10, title: "ACM risk-neutral 10Y yield (NY Fed)"}
+      ACMY10: {column: ACMY10, title: "ACM fitted 10Y yield (NY Fed)"}
+  - id: "ust:{code}"
+    src: ust
+    region: US
+    title: "US Treasury par yield {code} (Treasury daily curve)"
+    freq: D
+    units: percent
+    sa: NSA
+    lag: 0
+    measure: par_yield
+    each:
+      1M: {tenor: 1M, ind: yield_curve, rank: 2}
+      2M: {tenor: 2M, ind: yield_curve, rank: 2}
+      3M: {tenor: 3M, ind: rate_3m, rank: 2}
+      4M: {tenor: 4M, ind: yield_curve, rank: 2}
+      6M: {tenor: 6M, ind: yield_curve, rank: 2}
+      1Y: {tenor: 1Y, ind: yield_curve, rank: 2}
+      2Y: {tenor: 2Y, ind: yield_2y, rank: 2}
+      3Y: {tenor: 3Y, ind: yield_curve, rank: 2}
+      5Y: {tenor: 5Y, ind: yield_curve, rank: 2}
+      7Y: {tenor: 7Y, ind: yield_curve, rank: 2}
+      10Y: {tenor: 10Y, ind: yield_10y, rank: 2}
+      20Y: {tenor: 20Y, ind: yield_curve, rank: 2}
+      30Y: {tenor: 30Y, ind: yield_curve, rank: 2}
+
+  # ============================================================================================ Canada
+  - {id: "boc:V39079", src: boc, code: V39079, region: CA, ind: policy_rate, title: "Bank of Canada target for the overnight rate", freq: D, units: percent, sa: NSA, lag: 0, core: true}
+  - {id: "boc:AVG.INTWO", src: boc, code: AVG.INTWO, region: CA, ind: policy_rate, title: "CORRA (Canadian overnight repo rate average)", freq: D, units: percent, sa: NSA, lag: 1, rank: 4, measure: overnight}
+  - {id: "boc:TB.CDN.90D.MID", src: boc, code: TB.CDN.90D.MID, region: CA, ind: rate_3m, title: "Canada 3M treasury bill yield", freq: D, units: percent, sa: NSA, lag: 1, measure: tbill}
+  - {id: "boc:BD.CDN.2YR.DQ.YLD", src: boc, code: BD.CDN.2YR.DQ.YLD, region: CA, ind: yield_2y, title: "Canada 2Y benchmark bond yield", freq: D, units: percent, sa: NSA, lag: 1}
+  - {id: "boc:BD.CDN.10YR.DQ.YLD", src: boc, code: BD.CDN.10YR.DQ.YLD, region: CA, ind: yield_10y, title: "Canada 10Y benchmark bond yield", freq: D, units: percent, sa: NSA, lag: 1, core: true}
+  - {id: "boc:CPI_TRIM", src: boc, code: CPI_TRIM, region: CA, ind: core_cpi_yoy, title: "Canada CPI-trim y/y", freq: M, units: percent y/y, sa: NSA, lag: 20, measure: cpi_trim}
+  - {id: "boc:CPI_MEDIAN", src: boc, code: CPI_MEDIAN, region: CA, ind: core_cpi_yoy, title: "Canada CPI-median y/y", freq: M, units: percent y/y, sa: NSA, lag: 20, rank: 3, measure: cpi_median}
+  - {id: "boc:M2PP_12MTH", src: boc, code: M2PP_12MTH, region: CA, ind: money_supply, title: "Canada M2++ y/y", freq: M, units: percent y/y, sa: SA, lag: 40}
+  - {id: "statcan:v41690973", src: statcan, vector: v41690973, region: CA, ind: cpi_yoy, title: "Canada CPI all-items (NSA)", freq: M, units: "index 2002=100", scale: index, tf: yoy, sa: NSA, lag: 20, core: true, measure: cpi_national}
+  - {id: "statcan:v62305752", src: statcan, vector: v62305752, region: CA, ind: [gdp_yoy, gdp_qoq], title: "Canada real GDP (chained 2017 CAD, SAAR, quarterly)", freq: Q, units: "CAD millions, chained 2017, SAAR", scale: level, mult: 1000000, tf: yoy, sa: SAAR, lag: 60, core: true}
+  - {id: "statcan:v65201210", src: statcan, vector: v65201210, region: CA, title: "Canada real GDP at basic prices, monthly (chained 2017 CAD)", cat: growth, freq: M, units: "CAD millions, chained 2017, SAAR", scale: level, mult: 1000000, tf: yoy, sa: SAAR, lag: 60}
+  - {id: "statcan:v2062815", src: statcan, vector: v2062815, region: CA, ind: unemployment, title: "Canada unemployment rate (LFS, SA)", freq: M, units: percent, sa: SA, lag: 8, core: true}
+  - {id: "statcan:v2062811", src: statcan, vector: v2062811, region: CA, ind: employment, title: "Canada employment (LFS, SA, thousands)", freq: M, units: thousands of persons, scale: level, mult: 1000, tf: yoy, sa: SA, lag: 8}
+  - {id: "statcan:v1446859483", src: statcan, vector: v1446859483, region: CA, ind: retail_sales, title: "Canada retail sales (SA, CAD thousands)", freq: M, units: CAD thousands, scale: level, mult: 1000, tf: yoy, sa: SA, lag: 50, measure: nominal}
+  - {id: "statcan:v1230996007", src: statcan, vector: v1230996007, region: CA, ind: ppi_yoy, title: "Canada industrial product price index (IPPI)", freq: M, units: index, scale: index, tf: yoy, sa: NSA, lag: 20}
+  - {id: "statcan:v111955442", src: statcan, vector: v111955442, region: CA, ind: house_prices, title: "Canada new housing price index", freq: M, units: index, scale: index, tf: yoy, sa: NSA, lag: 20, measure: new_housing}
+  - {id: "statcan:v87008984", src: statcan, vector: v87008984, region: CA, ind: trade_balance, title: "Canada merchandise trade balance (BoP basis, SA)", freq: M, units: CAD millions, scale: level, mult: 1000000, sa: SA, lag: 35}
+
+  # ============================================================================================ Brazil
+  - {id: "bcb:432", src: bcb, code: 432, region: BR, ind: policy_rate, title: "Brazil Selic target rate", freq: D, units: percent, sa: NSA, lag: 0, core: true}
+  - {id: "bcb:1178", src: bcb, code: 1178, region: BR, ind: policy_rate, title: "Brazil Selic effective rate (annualised)", freq: D, units: percent, sa: NSA, lag: 1, rank: 4, measure: effective}
+  - {id: "bcb:433", src: bcb, code: 433, region: BR, title: "Brazil IPCA m/m", cat: inflation, freq: M, units: percent m/m, scale: percent, sa: NSA, lag: 12}
+  - {id: "bcb:13522", src: bcb, code: 13522, region: BR, ind: cpi_yoy, title: "Brazil IPCA 12m", freq: M, units: percent y/y, sa: NSA, lag: 12, core: true, measure: cpi_national}
+  - {id: "bcb:11427", src: bcb, code: 11427, region: BR, ind: core_cpi_yoy, title: "Brazil IPCA core EX0 (m/m; no official y/y core)", freq: M, units: percent m/m, sa: NSA, lag: 12, rank: 2, measure: mom}
+  - {id: "bcb:24363", src: bcb, code: 24363, region: BR, title: "Brazil IBC-Br activity index (NSA)", cat: growth, freq: M, units: index, scale: index, tf: yoy, sa: NSA, lag: 45}
+  - {id: "bcb:24364", src: bcb, code: 24364, region: BR, title: "Brazil IBC-Br activity index (SA)", cat: growth, freq: M, units: index, scale: index, tf: yoy, sa: SA, lag: 45}
+  - {id: "bcb:24369", src: bcb, code: 24369, region: BR, ind: unemployment, title: "Brazil unemployment rate (PNAD, rolling quarter)", freq: M, units: percent, sa: NSA, lag: 30, core: true}
+  - {id: "bcb:20622", src: bcb, code: 20622, region: BR, ind: private_credit, title: "Brazil credit outstanding % GDP", freq: M, units: percent of GDP, sa: NSA, lag: 30, measure: bank_credit_pct_gdp}
+  - {id: "bcb:20539", src: bcb, code: 20539, region: BR, ind: private_credit, title: "Brazil credit outstanding, total (BRL millions)", freq: M, units: BRL millions, scale: level, mult: 1000000, tf: yoy, sa: NSA, lag: 30, rank: 2, measure: level}
+  - {id: "bcb:27810", src: bcb, code: 27810, region: BR, ind: money_supply, title: "Brazil M2 (BRL thousands)", freq: M, units: BRL thousands, scale: level, mult: 1000, tf: yoy, sa: NSA, lag: 30}
+  - {id: "bcb:13762", src: bcb, code: 13762, region: BR, ind: gov_debt, title: "Brazil general government gross debt % GDP", freq: M, units: percent of GDP, sa: NSA, lag: 35}
+  - {id: "bcb:4513", src: bcb, code: 4513, region: BR, ind: gov_debt, title: "Brazil net public sector debt % GDP", freq: M, units: percent of GDP, sa: NSA, lag: 35, rank: 2, measure: net}
+  - {id: "bcb:23079", src: bcb, code: 23079, region: BR, ind: current_account, title: "Brazil current account, 12m % GDP", freq: M, units: percent of GDP, sa: NSA, lag: 30}
+  - {id: "bcb:22707", src: bcb, code: 22707, region: BR, ind: trade_balance, title: "Brazil trade balance (BoP, USD millions)", freq: M, units: USD millions, scale: level, mult: 1000000, sa: NSA, lag: 30}
+  - {id: "bcb:21340", src: bcb, code: 21340, region: BR, ind: house_prices, title: "Brazil residential real estate collateral value index (IVG-R)", freq: M, units: index, scale: index, tf: yoy, sa: NSA, lag: 40}
+  - {id: "bcb:4393", src: bcb, code: 4393, region: BR, ind: consumer_confidence, title: "Brazil consumer confidence (Fecomercio ICC)", freq: M, units: index, scale: index, sa: NSA, lag: 10}
+  - {id: "ibge:5932.6564", src: ibge, path: "/t/5932/n1/all/v/6564/p/all/c11255/90707", region: BR, ind: gdp_qoq, title: "Brazil real GDP q/q (SA)", freq: Q, units: percent q/q, sa: SA, lag: 65}
+  - {id: "ibge:5932.6561", src: ibge, path: "/t/5932/n1/all/v/6561/p/all/c11255/90707", region: BR, ind: gdp_yoy, title: "Brazil real GDP y/y", freq: Q, units: percent y/y, sa: NSA, lag: 65, core: true}
+  - {id: "ibge:8888.11602", src: ibge, path: "/t/8888/n1/all/v/11602/p/all/c544/129314", region: BR, ind: industrial_production, title: "Brazil industrial production (PIM-PF) y/y", freq: M, units: percent y/y, sa: NSA, lag: 40}
+  - {id: "ibge:8880.11709", src: ibge, path: "/t/8880/n1/all/v/11709/p/all/c11046/56734", region: BR, ind: retail_sales, title: "Brazil retail sales volume (PMC) y/y", freq: M, units: percent y/y, sa: NSA, lag: 45}
+  - {id: "ibge:6904.1394", src: ibge, path: "/t/6904/n1/all/v/1394/p/all/c543/33586", region: BR, ind: ppi_yoy, title: "Brazil producer prices (IPP, industry) y/y", freq: M, units: percent y/y, sa: NSA, lag: 35}
+  - {id: "ibge:7060.2265", src: ibge, path: "/t/7060/n1/all/v/2265/p/all/c315/7169", region: BR, ind: cpi_yoy, title: "Brazil IPCA 12m (IBGE)", freq: M, units: percent y/y, sa: NSA, lag: 12, rank: 2, measure: cpi_national}
+  - {id: "ibge:6381.4099", src: ibge, path: "/t/6381/n1/all/v/4099/p/all", region: BR, ind: unemployment, title: "Brazil unemployment rate (PNAD, IBGE)", freq: M, units: percent, sa: NSA, lag: 30, rank: 2}
+
+  # ============================================================================================ Mexico (keyed; keyless coverage = BIS/OECD/IMF/FRED)
+  - {id: "banxico:SF61745", src: banxico, code: SF61745, region: MX, ind: policy_rate, title: "Banxico target rate", freq: D, units: percent, sa: NSA, lag: 0, core: true, requires_key: banxico_token}
+  - {id: "banxico:SF43783", src: banxico, code: SF43783, region: MX, ind: rate_3m, title: "Mexico TIIE 28-day", freq: D, units: percent, sa: NSA, lag: 1, requires_key: banxico_token, measure: tiie28}
+  - {id: "banxico:SP1", src: banxico, code: SP1, region: MX, ind: cpi_yoy, title: "Mexico INPC (CPI) index", freq: M, units: index, scale: index, tf: yoy, sa: NSA, lag: 10, rank: 1, requires_key: banxico_token, measure: cpi_national, note: "id from research doc; unverified without token"}
+  - {id: "inegi:493911", src: inegi, indicator: "493911", region: MX, ind: gdp_yoy, title: "Mexico GDP (INEGI BIE)", freq: Q, units: index, scale: level, tf: yoy, sa: SA, lag: 55, requires_key: inegi_token, note: "indicator id unverified without token"}
+  - {id: "inegi:444612", src: inegi, indicator: "444612", region: MX, ind: unemployment, title: "Mexico unemployment rate (INEGI ENOE)", freq: M, units: percent, sa: SA, lag: 30, requires_key: inegi_token, note: "indicator id unverified without token"}
+
+  # ============================================================================================ Chile
+  - {id: "ine_cl:DF_TDD_SEXO._T.M.TDD.AS", src: ine_cl, flow: "CL01,DF_TDD_SEXO,1.0", key: "_T.M.TDD.AS", shift_months: 2, region: CL, ind: unemployment, title: "Chile unemployment rate (INE, SA, rolling quarter)", freq: M, units: percent, sa: SA, lag: 30, core: true}
+  - {id: "ine_cl:DF_TDES_SEXO.M.TDES._T.AS", src: ine_cl, flow: "CL01,DF_TDES_SEXO,1.0", key: "M.TDES._T.AS", shift_months: 2, region: CL, ind: unemployment, title: "Chile unemployment rate (INE, NSA, rolling quarter)", freq: M, units: percent, sa: NSA, lag: 30, rank: 2, measure: nsa}
+  - {id: "ine_cl:DF_OCU_SEXO.M.OCU._T.AS", src: ine_cl, flow: "CL01,DF_OCU_SEXO,1.0", key: "M.OCU._T.AS", shift_months: 2, region: CL, ind: employment, title: "Chile employment (INE, persons, rolling quarter)", freq: M, units: persons, scale: level, tf: yoy, sa: NSA, lag: 30}
+  - {id: "bcch:F022.TPM.TIN.D001.NO.Z.D", src: bcch, code: F022.TPM.TIN.D001.NO.Z.D, region: CL, ind: policy_rate, title: "Chile monetary policy rate (TPM)", freq: D, units: percent, sa: NSA, lag: 0, requires_key: bcch_user}
+
+  # ============================================================================================ Colombia
+  - {id: "banrep:DF_CBR_DAILY_HIST.IRCBRM01", src: banrep, flow: DF_CBR_DAILY_HIST, key: "CO.IRCBRM01._Z._Z._Z.PA.D", region: CO, ind: policy_rate, title: "Colombia central bank policy rate (BanRep)", freq: D, units: percent, sa: NSA, lag: 1, rank: 1}
+  - {id: "banrep:DF_IBR_DAILY_HIST.IRIBRM03.NR", src: banrep, flow: DF_IBR_DAILY_HIST, key: "CO.IRIBRM03._Z._Z._Z.NR.D", region: CO, ind: rate_3m, title: "Colombia IBR 3M (nominal)", freq: D, units: percent, sa: NSA, lag: 1, measure: ibr}
+  - {id: "banrep:DF_TES_MONTHLY_HIST.IRGBRY10", src: banrep, flow: DF_TES_MONTHLY_HIST, key: "CO.IRGBRY10._Z._Z._Z.PT.M", value_factor: 100, region: CO, ind: yield_10y, title: "Colombia 10Y TES yield (BanRep, monthly; source fraction x100)", freq: M, units: percent, sa: NSA, lag: 5, core: true}
+  - {id: "banrep:DF_MONAGG_MONTHLY_HIST.M2", src: banrep, flow: DF_MONAGG_MONTHLY_HIST, key: "CO.M2._Z._Z.N.COP.M", region: CO, ind: money_supply, title: "Colombia M2 (COP billions)", freq: M, units: COP billions, scale: level, mult: 1000000000, tf: yoy, sa: NSA, lag: 30}
+
+  # ============================================================================================ Peru (BCRP)
+  - id: "bcrp:{code}"
+    src: bcrp
+    region: PE
+    freq: M
+    sa: NSA
+    each:
+      PD04722MM: {ind: policy_rate, title: "Peru BCRP reference rate", units: percent, lag: 0, rank: 1}
+      PN01273PM: {ind: cpi_yoy, title: "Peru CPI Lima y/y", units: percent y/y, lag: 1, rank: 1, measure: cpi_lima}
+      PN01279PM: {ind: core_cpi_yoy, title: "Peru core CPI (subyacente) y/y", units: percent y/y, lag: 1}
+      PN01287PM: {ind: ppi_yoy, title: "Peru wholesale price index y/y", units: percent y/y, lag: 1}
+      PN01728AM: {ind: gdp_yoy, title: "Peru monthly GDP y/y", units: percent y/y, lag: 45, core: true, measure: monthly_gdp}
+      PN38063GM: {ind: unemployment, title: "Peru unemployment rate, Lima (3-month average)", units: percent, lag: 15, core: true}
+      PD31895MM: {ind: yield_10y, title: "Peru 10Y sovereign bond yield, PEN (monthly average)", units: percent, lag: 3, core: true}
+      PD38045AM: {ind: pmi_proxy, title: "Peru business expectations, economy 3 months ahead (50 = neutral)", units: index, scale: index, lag: 5}
+      PN00027MM: {cat: fx, title: "Peru net international reserves (USD millions)", units: USD millions, scale: level, mult: 1000000, lag: 5}
+
+  # ============================================================================================ Argentina
+  - {id: "bcra:28", src: bcra, region: AR, title: "Argentina CPI y/y (BCRA)", ind: cpi_yoy, freq: M, units: percent y/y, sa: NSA, lag: 14, core: true, measure: cpi_national}
+  - {id: "bcra:27", src: bcra, region: AR, title: "Argentina CPI m/m (BCRA)", cat: inflation, freq: M, units: percent m/m, scale: percent, sa: NSA, lag: 14}
+  - {id: "bcra:7", src: bcra, region: AR, title: "Argentina BADLAR rate, private banks", ind: rate_3m, freq: D, units: percent, sa: NSA, lag: 1, measure: badlar}
+  - {id: "bcra:44", src: bcra, region: AR, title: "Argentina TAMAR rate, private banks (policy proxy)", ind: policy_rate, freq: D, units: percent, sa: NSA, lag: 1, core: true, measure: tamar_proxy}
+  - {id: "bcra:25", src: bcra, region: AR, title: "Argentina private M2 y/y (30-day average)", ind: money_supply, freq: D, units: percent y/y, sa: NSA, lag: 2}
+  - {id: "bcra:26", src: bcra, region: AR, title: "Argentina loans to the private sector (ARS millions)", ind: private_credit, freq: D, units: ARS millions, scale: level, mult: 1000000, tf: yoy, sa: NSA, lag: 2, measure: level}
+  - {id: "datos_ar:148.3_INUCLEONAL_DICI_M_19", src: datos_ar, region: AR, title: "Argentina core CPI index (INDEC, Dec 2016=100)", ind: core_cpi_yoy, freq: M, units: "index Dec 2016=100", scale: index, tf: yoy, sa: NSA, lag: 14}
+  - {id: "datos_ar:148.3_INIVELNAL_DICI_M_26", src: datos_ar, region: AR, title: "Argentina CPI index (INDEC, Dec 2016=100)", ind: cpi_yoy, freq: M, units: "index Dec 2016=100", scale: index, tf: yoy, sa: NSA, lag: 14, rank: 2, measure: cpi_national}
+  - {id: "datos_ar:143.3_NO_PR_2004_A_21", src: datos_ar, region: AR, title: "Argentina EMAE economic activity index", ind: gdp_yoy, freq: M, units: "index 2004=100", scale: index, tf: yoy, sa: NSA, lag: 55, rank: 2, measure: monthly_activity}
+  - {id: "datos_ar:4.2_OGP_2004_T_17", src: datos_ar, region: AR, title: "Argentina real GDP (ARS millions at 2004 prices)", ind: gdp_yoy, freq: Q, units: "ARS millions, 2004 prices", scale: level, mult: 1000000, tf: yoy, sa: NSA, lag: 80, core: true}
+  - {id: "datos_ar:45.2_ECTDT_0_T_33", src: datos_ar, region: AR, title: "Argentina unemployment rate (EPH; source fraction x100)", ind: unemployment, value_factor: 100, freq: Q, units: percent, sa: NSA, lag: 80, core: true}
+  - {id: "datos_ar:453.1_SERIE_ORIGNAL_0_0_14_46", src: datos_ar, region: AR, title: "Argentina manufacturing production index (IPI)", ind: industrial_production, freq: M, units: "index 2004=100", scale: index, tf: yoy, sa: NSA, lag: 40}
+
+  # ============================================================================================ United Kingdom
+  - {id: "boe:IUDBEDR", src: boe, code: IUDBEDR, region: GB, ind: policy_rate, title: "Bank of England Bank Rate", freq: D, units: percent, sa: NSA, lag: 0, core: true}
+  - {id: "boe:IUDSOIA", src: boe, code: IUDSOIA, region: GB, ind: policy_rate, title: "SONIA overnight rate", freq: D, units: percent, sa: NSA, lag: 1, rank: 4, measure: overnight}
+  - {id: "boe:IUDMNPY", src: boe, code: IUDMNPY, region: GB, ind: yield_10y, title: "UK 10Y nominal par gilt yield", freq: D, units: percent, sa: NSA, lag: 1, core: true, measure: par}
+  - {id: "boe:IUDMNZC", src: boe, code: IUDMNZC, region: GB, ind: yield_10y, title: "UK 10Y nominal zero-coupon gilt yield", freq: D, units: percent, sa: NSA, lag: 1, rank: 2, measure: zero_coupon}
+  - {id: "boe:IUDSNPY", src: boe, code: IUDSNPY, region: GB, ind: yield_curve, title: "UK 5Y nominal par gilt yield", freq: D, units: percent, sa: NSA, lag: 1, measure: par}
+  - {id: "boe:IUDLNPY", src: boe, code: IUDLNPY, region: GB, ind: yield_curve, title: "UK 20Y nominal par gilt yield", freq: D, units: percent, sa: NSA, lag: 1, measure: par}
+  # A9 2026-11-07: zero-coupon 5Y / 20Y from the BoE yield-curve archive (allowed; the IADB par yields are retired below)
+  - {id: "boe:IUDSNZC", src: boe, code: IUDSNZC, region: GB, ind: yield_curve, title: "UK 5Y nominal zero-coupon gilt yield", freq: D, units: percent, sa: NSA, lag: 1, measure: zero_coupon}
+  - {id: "boe:IUDLNZC", src: boe, code: IUDLNZC, region: GB, ind: yield_curve, title: "UK 20Y nominal zero-coupon gilt yield", freq: D, units: percent, sa: NSA, lag: 1, measure: zero_coupon}
+  - {id: "boe:LPMVQJW", src: boe, code: LPMVQJW, region: GB, ind: money_supply, title: "UK M4 (ex intermediate OFCs) 12m growth", freq: M, units: percent y/y, sa: SA, lag: 30}
+  - {id: "boe:LPMBC57", src: boe, code: LPMBC57, region: GB, ind: private_credit, title: "UK lending to private non-financial corporations (stock, GBP millions)", freq: M, units: GBP millions, scale: level, mult: 1000000, tf: yoy, sa: SA, lag: 30, measure: level}
+  - {id: "boe:LPMVTVX", src: boe, code: LPMVTVX, region: GB, title: "UK mortgage approvals for house purchase (number)", cat: housing, freq: M, units: number, scale: level, sa: SA, lag: 30}
+  - {id: "boe:IUMBV34", src: boe, code: IUMBV34, region: GB, ind: lending_rate, title: "UK 2Y fixed mortgage rate (75% LTV)", freq: M, units: percent, sa: NSA, lag: 5, measure: mortgage}
+  - id: "ons:{code}"
+    src: ons
+    region: GB
+    sa: SA
+    each:
+      D7G7: {uri: /economy/inflationandpriceindices/timeseries/d7g7/mm23, ind: cpi_yoy, title: "UK CPI inflation y/y", freq: M, units: percent y/y, sa: NSA, lag: 18, core: true, measure: cpi_national}
+      DKO8: {uri: /economy/inflationandpriceindices/timeseries/dko8/mm23, ind: core_cpi_yoy, title: "UK core CPI (ex energy, food, alcohol, tobacco) y/y", freq: M, units: percent y/y, sa: NSA, lag: 18}
+      D7G8: {uri: /economy/inflationandpriceindices/timeseries/d7g8/mm23, cat: inflation, title: "UK CPI food & non-alcoholic beverages y/y", freq: M, units: percent y/y, sa: NSA, lag: 18}
+      D7GB: {uri: /economy/inflationandpriceindices/timeseries/d7gb/mm23, cat: inflation, title: "UK CPI housing, water, electricity, gas & fuels y/y", freq: M, units: percent y/y, sa: NSA, lag: 18}
+      D7GE: {uri: /economy/inflationandpriceindices/timeseries/d7ge/mm23, cat: inflation, title: "UK CPI transport y/y", freq: M, units: percent y/y, sa: NSA, lag: 18}
+      D7NM: {uri: /economy/inflationandpriceindices/timeseries/d7nm/mm23, cat: inflation, title: "UK CPI goods y/y", freq: M, units: percent y/y, sa: NSA, lag: 18}
+      D7NN: {uri: /economy/inflationandpriceindices/timeseries/d7nn/mm23, cat: inflation, title: "UK CPI services y/y", freq: M, units: percent y/y, sa: NSA, lag: 18}
+      L55O: {uri: /economy/inflationandpriceindices/timeseries/l55o/mm23, ind: cpi_yoy, title: "UK CPIH y/y", freq: M, units: percent y/y, sa: NSA, lag: 18, rank: 2, measure: cpih}
+      GB7S: {uri: /economy/inflationandpriceindices/timeseries/gb7s/ppi, ind: ppi_yoy, title: "UK PPI output prices index", freq: M, units: "index 2015=100", scale: index, tf: yoy, sa: NSA, lag: 18}
+      IHYQ: {uri: /economy/grossdomesticproductgdp/timeseries/ihyq/qna, ind: gdp_qoq, title: "UK real GDP q/q", freq: Q, units: percent q/q, lag: 45}
+      IHYR: {uri: /economy/grossdomesticproductgdp/timeseries/ihyr/qna, ind: gdp_yoy, title: "UK real GDP y/y", freq: Q, units: percent y/y, lag: 45, core: true}
+      ECY2: {uri: /economy/grossdomesticproductgdp/timeseries/ecy2/mgdp, title: "UK monthly GDP (GVA) index", cat: growth, freq: M, units: index, scale: index, tf: yoy, lag: 42}
+      MGSX: {uri: /employmentandlabourmarket/peoplenotinwork/unemployment/timeseries/mgsx/lms, ind: unemployment, title: "UK unemployment rate (LFS, rolling quarter)", freq: M, units: percent, lag: 50, core: true}
+      LF24: {uri: /employmentandlabourmarket/peopleinwork/employmentandemployeetypes/timeseries/lf24/lms, ind: employment, title: "UK employment rate 16-64", freq: M, units: percent, lag: 50, measure: rate}
+      J5EK: {uri: /businessindustryandtrade/retailindustry/timeseries/j5ek/drsi, ind: retail_sales, title: "UK retail sales volume index", freq: M, units: index, scale: index, tf: yoy, lag: 20}
+      K222: {uri: /economy/economicoutputandproductivity/output/timeseries/k222/diop, ind: industrial_production, title: "UK index of production", freq: M, units: index, scale: index, tf: yoy, lag: 42}
+      AA6H: {uri: /economy/nationalaccounts/balanceofpayments/timeseries/aa6h/pnbp, ind: current_account, title: "UK current account balance % GDP", freq: Q, units: percent of GDP, lag: 90}
+      IKBJ: {uri: /economy/nationalaccounts/balanceofpayments/timeseries/ikbj/mret, ind: trade_balance, title: "UK trade balance (goods & services, GBP millions)", freq: M, units: GBP millions, scale: level, mult: 1000000, lag: 42}
+      HF6X: {uri: /economy/governmentpublicsectorandtaxes/publicsectorfinance/timeseries/hf6x/pusf, ind: gov_debt, title: "UK public sector net debt % GDP", freq: M, units: percent of GDP, sa: NSA, lag: 21, measure: psnd}
+
+  # ============================================================================================ Japan
+  - {id: "boj:FM01.STRDCLUCON", src: boj, db: FM01, code: STRDCLUCON, region: JP, ind: policy_rate, title: "BoJ uncollateralized overnight call rate", freq: D, units: percent, sa: NSA, lag: 1, core: true}
+  - {id: "boj:CO.TK99F1000601GCQ01000", src: boj, db: CO, code: TK99F1000601GCQ01000, region: JP, ind: pmi_proxy, title: "BoJ Tankan business conditions DI, large manufacturers", freq: Q, units: "% points (DI)", scale: index, sa: NSA, lag: 2, measure: tankan}
+  - {id: "boj:CO.TK99F2000601GCQ01000", src: boj, db: CO, code: TK99F2000601GCQ01000, region: JP, ind: pmi_proxy, title: "BoJ Tankan business conditions DI, large non-manufacturers", freq: Q, units: "% points (DI)", scale: index, sa: NSA, lag: 2, rank: 4, measure: tankan_nonmfg}
+  - {id: "boj:MD02.MAM1YAM2M2MO", src: boj, db: MD02, code: MAM1YAM2M2MO, region: JP, ind: money_supply, title: "Japan M2 y/y", freq: M, units: percent y/y, sa: NSA, lag: 10}
+  - {id: "boj:PR01.PRCG20_2200000000.YOY", src: boj, db: PR01, code: "PRCG20_2200000000%", native: "PR01/PRCG20_2200000000%", region: JP, ind: ppi_yoy, title: "Japan corporate goods price index (CGPI) y/y", freq: M, units: percent y/y, sa: NSA, lag: 12}
+  - {id: "boj:MD13.FAAPOBAL1", src: boj, db: MD13, code: "FAAPOBAL1@", native: "MD13/FAAPOBAL1@", region: JP, ind: private_credit, title: "Japan bank lending y/y", freq: M, units: percent y/y, sa: NSA, lag: 10}
+  - id: "mof_jp:JGB.{code}"
+    src: mof_jp
+    region: JP
+    freq: D
+    units: percent
+    sa: NSA
+    lag: 1
+    measure: jgb_benchmark
+    each:
+      2Y: {tenor: 2Y, ind: yield_2y, title: "Japan 2Y JGB yield (MoF)"}
+      5Y: {tenor: 5Y, ind: yield_curve, title: "Japan 5Y JGB yield (MoF)"}
+      10Y: {tenor: 10Y, ind: yield_10y, core: true, title: "Japan 10Y JGB yield (MoF)"}
+      20Y: {tenor: 20Y, ind: yield_curve, title: "Japan 20Y JGB yield (MoF)"}
+      30Y: {tenor: 30Y, ind: yield_curve, title: "Japan 30Y JGB yield (MoF)"}
+  - {id: "estat_jp:0003427113.0001", src: estat_jp, stats_id: "0003427113", cat01: "0001", region: JP, ind: cpi_yoy, title: "Japan CPI all items (e-Stat)", freq: M, units: "index 2020=100", scale: index, tf: yoy, sa: NSA, lag: 20, requires_key: estat_appid, measure: cpi_national, params: {cdArea: "00000", cdTab: "1"}, note: "statsDataId per research doc; unverified without ESTAT_APPID"}
+  - {id: "estat_jp:0003427113.0161", src: estat_jp, stats_id: "0003427113", cat01: "0161", region: JP, ind: core_cpi_yoy, title: "Japan core CPI ex fresh food (e-Stat)", freq: M, units: "index 2020=100", scale: index, tf: yoy, sa: NSA, lag: 20, requires_key: estat_appid, params: {cdArea: "00000", cdTab: "1"}, measure: core_exfresh}
+
+  # ============================================================================================ Korea (BoK ECOS, key)
+  - id: "bok_ecos:{code}"
+    src: bok_ecos
+    region: KR
+    sa: NSA
+    requires_key: bok_ecos_apikey
+    each:
+      722Y001.0101000: {stat: 722Y001, item: "0101000", cycle: M, ind: policy_rate, title: "BoK base rate", freq: M, units: percent, lag: 0, rank: 1}
+      901Y009.0: {stat: 901Y009, item: "0", cycle: M, ind: cpi_yoy, title: "Korea CPI index", freq: M, units: "index 2020=100", scale: index, tf: yoy, lag: 5, rank: 1, measure: cpi_national}
+      817Y002.010210000: {stat: 817Y002, item: "010210000", cycle: D, ind: yield_10y, title: "Korea 10Y KTB yield", freq: D, units: percent, lag: 1, rank: 1, core: true}
+      817Y002.010195000: {stat: 817Y002, item: "010195000", cycle: D, ind: yield_2y, title: "Korea 2Y KTB yield", freq: D, units: percent, lag: 1}
+      817Y002.010502000: {stat: 817Y002, item: "010502000", cycle: D, ind: rate_3m, title: "Korea CD 91-day rate", freq: D, units: percent, lag: 1, measure: cd91}
+      200Y102.10111: {stat: 200Y102, item: "10111", cycle: Q, ind: gdp_qoq, title: "Korea real GDP q/q (SA)", freq: Q, units: percent q/q, sa: SA, lag: 30, rank: 1}
+      200Y102.10211: {stat: 200Y102, item: "10211", cycle: Q, ind: gdp_yoy, title: "Korea real GDP y/y", freq: Q, units: percent y/y, lag: 30, rank: 1}
+      161Y005.BBHS00: {stat: 161Y005, item: BBHS00, cycle: M, ind: money_supply, title: "Korea M2 (average, SA, KRW bn)", freq: M, units: KRW billions, scale: level, mult: 1000000000, tf: yoy, sa: SA, lag: 45}
+      901Y062.P63A: {stat: 901Y062, item: P63A, cycle: M, ind: house_prices, title: "Korea house price index (KB)", freq: M, units: index, scale: index, tf: yoy, lag: 5, rank: 1}
+      511Y002.FME: {stat: 511Y002, item: FME, cycle: M, ind: consumer_confidence, title: "Korea consumer sentiment index (CCSI)", freq: M, units: index, scale: index, lag: 0, rank: 1}
+      301Y013.000000: {stat: 301Y013, item: "000000", cycle: M, ind: current_account, title: "Korea current account (USD millions)", freq: M, units: USD millions, scale: level, mult: 1000000, lag: 35, rank: 1, measure: level}
+
+  # ============================================================================================ China (AKShare / Eastmoney)
+  - id: "akshare_cn:{code}"
+    src: akshare_cn
+    region: CN
+    sa: NSA
+    each:
+      cpi_yoy: {fn: macro_china_cpi, col: "全国-同比增长", date_col: "月份", ind: cpi_yoy, title: "China CPI y/y (NBS via AKShare)", freq: M, units: percent y/y, lag: 10, rank: 1, core: true, measure: cpi_national}
+      ppi_yoy: {fn: macro_china_ppi, col: "当月同比增长", date_col: "月份", ind: ppi_yoy, title: "China PPI y/y (NBS via AKShare)", freq: M, units: percent y/y, lag: 10}
+      pmi_mfg: {fn: macro_china_pmi, col: "制造业-指数", date_col: "月份", ind: pmi_proxy, title: "China official manufacturing PMI (NBS)", freq: M, units: index, scale: index, lag: 0, core: true, measure: official_pmi}
+      pmi_nonmfg: {fn: macro_china_pmi, col: "非制造业-指数", date_col: "月份", ind: pmi_proxy, title: "China official non-manufacturing PMI (NBS)", freq: M, units: index, scale: index, lag: 0, rank: 4, measure: official_pmi_nonmfg}
+      gdp_ytd: {fn: macro_china_gdp, col: "国内生产总值-同比增长", date_col: "季度", ind: gdp_yoy, title: "China real GDP y/y, year-to-date cumulative (NBS)", freq: Q, units: percent y/y, lag: 18, rank: 3, measure: ytd}
+      m2_yoy: {fn: macro_china_money_supply, col: "货币和准货币(M2)-同比增长", date_col: "月份", ind: money_supply, title: "China M2 y/y (PBoC)", freq: M, units: percent y/y, lag: 12}
+      retail_yoy: {fn: macro_china_consumer_goods_retail, col: "同比增长", date_col: "月份", ind: retail_sales, title: "China retail sales of consumer goods y/y", freq: M, units: percent y/y, lag: 16}
+      ip_yoy: {fn: macro_china_gyzjz, col: "同比增长", date_col: "月份", ind: industrial_production, title: "China industrial value added y/y", freq: M, units: percent y/y, lag: 16}
+      unemployment: {fn: macro_china_urban_unemployment, col: value, date_col: date, item_col: item, item: "全国城镇调查失业率", ind: unemployment, title: "China surveyed urban unemployment rate", freq: M, units: percent, lag: 16, core: true}
+      exports_yoy: {fn: macro_china_hgjck, col: "当月出口额-同比增长", date_col: "月份", cat: trade, title: "China exports y/y (customs, USD)", freq: M, units: percent y/y, scale: percent, lag: 10}
+      new_loans: {fn: macro_china_new_financial_credit, col: "当月", date_col: "月份", ind: private_credit, title: "China new RMB loans (CNY 100m, flow)", freq: M, units: CNY 100 millions, scale: level, mult: 100000000, lag: 12, rank: 2, measure: flow}
+      consumer_conf: {fn: macro_china_xfzxx, col: "消费者信心指数-指数值", date_col: "月份", ind: consumer_confidence, title: "China consumer confidence index", freq: M, units: index, scale: index, lag: 30}
+      lpr_1y: {fn: macro_china_lpr, col: LPR1Y, date_col: TRADE_DATE, ind: policy_rate, title: "China 1Y loan prime rate", freq: M, units: percent, lag: 0, rank: 1, measure: lpr}
+      lpr_5y: {fn: macro_china_lpr, col: LPR5Y, date_col: TRADE_DATE, ind: lending_rate, title: "China 5Y loan prime rate", freq: M, units: percent, lag: 0, measure: lpr5y}
+      shibor_3m: {fn: macro_china_shibor_all, col: "3M-定价", date_col: "日期", ind: rate_3m, title: "SHIBOR 3M", freq: D, units: percent, lag: 0, rank: 1}
+      cgb_2y: {fn: bond_zh_us_rate, since_kw: start_date, col: "中国国债收益率2年", date_col: "日期", ind: yield_2y, title: "China 2Y government bond yield (ChinaBond)", freq: D, units: percent, lag: 1}
+      cgb_5y: {fn: bond_zh_us_rate, since_kw: start_date, col: "中国国债收益率5年", date_col: "日期", ind: yield_curve, title: "China 5Y government bond yield (ChinaBond)", freq: D, units: percent, lag: 1}
+      cgb_10y: {fn: bond_zh_us_rate, since_kw: start_date, col: "中国国债收益率10年", date_col: "日期", ind: yield_10y, title: "China 10Y government bond yield (ChinaBond)", freq: D, units: percent, lag: 1, core: true}
+      cgb_30y: {fn: bond_zh_us_rate, since_kw: start_date, col: "中国国债收益率30年", date_col: "日期", ind: yield_curve, title: "China 30Y government bond yield (ChinaBond)", freq: D, units: percent, lag: 1}
+
+  # ============================================================================================ Hong Kong
+  - {id: "hkma:hibor_3m", src: hkma, path: market-data-and-statistics/monthly-statistical-bulletin/er-ir/hk-interbank-ir-daily, field: ir_3m, date_field: end_of_day, region: HK, ind: rate_3m, title: "HIBOR 3M (HKMA)", freq: D, units: percent, sa: NSA, lag: 14}
+  - {id: "hkma:base_rate", src: hkma, path: market-data-and-statistics/daily-monetary-statistics/daily-figures-interbank-liquidity, field: disc_win_base_rate, date_field: end_of_date, region: HK, ind: policy_rate, title: "HKMA base rate", freq: D, units: percent, sa: NSA, lag: 1, rank: 1}
+  - {id: "censtatd:510-60001.CCPI_YOY", src: censtatd, table: 510-60001, filters: {sv: CC_CM_1920, svDesc: "Year-on-year % change", freq: M}, region: HK, ind: cpi_yoy, title: "Hong Kong composite CPI y/y", freq: M, units: percent y/y, sa: NSA, lag: 22, rank: 1, measure: cpi_national}
+  - {id: "censtatd:210-06101.SAUR", src: censtatd, table: 210-06101, filters: {sv: SAUR, freq: M3M}, region: HK, ind: unemployment, title: "Hong Kong unemployment rate (SA, 3-month moving)", freq: M, units: percent, sa: SA, lag: 20, core: true}
+  - {id: "censtatd:310-31001.CON", src: censtatd, table: 310-31001, filters: {sv: CON, freq: Q}, region: HK, ind: gdp_yoy, title: "Hong Kong real GDP y/y", freq: Q, units: percent y/y, sa: NSA, lag: 45, core: true}
+  - {id: "censtatd:310-31001.SA1", src: censtatd, table: 310-31001, filters: {sv: SA1, freq: Q}, region: HK, ind: gdp_qoq, title: "Hong Kong real GDP q/q (SA)", freq: Q, units: percent q/q, sa: SA, lag: 45}
+  - {id: "censtatd:620-67001.VOL_IDX_RS", src: censtatd, table: 620-67001, filters: {sv: VOL_IDX_RS, freq: M}, region: HK, ind: retail_sales, title: "Hong Kong retail sales volume y/y", freq: M, units: percent y/y, sa: NSA, lag: 35}
+
+  # ============================================================================================ Australia
+  - {id: "rba:FIRMMCRTD", src: rba, table: f1, code: FIRMMCRTD, region: AU, ind: policy_rate, title: "RBA cash rate target", freq: D, units: percent, sa: NSA, lag: 1, rank: 1}
+  - {id: "rba:FIRMMBAB90D", src: rba, table: f1, code: FIRMMBAB90D, region: AU, ind: rate_3m, title: "Australia 90-day bank bill rate", freq: D, units: percent, sa: NSA, lag: 1, rank: 1, measure: bab}
+  - {id: "rba:FCMYGBAG2D", src: rba, table: f2, code: FCMYGBAG2D, region: AU, ind: yield_2y, title: "Australia 2Y government bond yield", freq: D, units: percent, sa: NSA, lag: 2}
+  - {id: "rba:FCMYGBAG10D", src: rba, table: f2, code: FCMYGBAG10D, region: AU, ind: yield_10y, title: "Australia 10Y government bond yield", freq: D, units: percent, sa: NSA, lag: 2, core: true}
+  - {id: "rba:FCMYGBAG5D", src: rba, table: f2, code: FCMYGBAG5D, region: AU, ind: yield_curve, title: "Australia 5Y government bond yield", freq: D, units: percent, sa: NSA, lag: 2}
+  - {id: "rba:GCPIAGYP", src: rba, table: g1, code: GCPIAGYP, region: AU, ind: cpi_yoy, title: "Australia CPI y/y (quarterly)", freq: Q, units: percent y/y, sa: NSA, lag: 30, rank: 3, measure: cpi_quarterly}
+  - {id: "rba:DGFACNW12", src: rba, table: d1, code: DGFACNW12, region: AU, ind: private_credit, title: "Australia total credit growth (12m)", freq: M, units: percent y/y, sa: SA, lag: 30}
+  - {id: "rba:DGFAM312", src: rba, table: d1, code: DGFAM312, region: AU, ind: money_supply, title: "Australia M3 growth (12m)", freq: M, units: percent y/y, sa: SA, lag: 30}
+  - {id: "abs:LF.M13.3.1599.20.AUS.M", src: abs, flow: "ABS,LF,1.0.0", key: "M13.3.1599.20.AUS.M", region: AU, ind: unemployment, title: "Australia unemployment rate (SA)", freq: M, units: percent, sa: SA, lag: 18, core: true}
+  - {id: "abs:CPI.3.10001.10.50.M", src: abs, flow: "ABS,CPI,2.0.0", key: "3.10001.10.50.M", region: AU, ind: cpi_yoy, title: "Australia monthly CPI y/y", freq: M, units: percent y/y, sa: NSA, lag: 28, core: true, measure: cpi_national}
+  - {id: "abs:CPI.3.999902.20.50.M", src: abs, flow: "ABS,CPI,2.0.0", key: "3.999902.20.50.M", region: AU, ind: core_cpi_yoy, title: "Australia trimmed-mean CPI y/y (monthly, SA)", freq: M, units: percent y/y, sa: SA, lag: 28}
+  - {id: "abs:ANA_AGG.M2.GPM.20.AUS.Q", src: abs, flow: "ABS,ANA_AGG,1.0.0", key: "M2.GPM.20.AUS.Q", region: AU, ind: gdp_qoq, title: "Australia real GDP q/q (SA)", freq: Q, units: percent q/q, sa: SA, lag: 65}
+
+  # ============================================================================================ Taiwan (CBC)
+  - {id: "cbc_tw:EG2AM01.0", src: cbc_tw, file: EG2AM01, col: 0, region: TW, ind: policy_rate, title: "Taiwan CBC discount rate", freq: M, units: percent, sa: NSA, lag: 5, core: true}
+  - {id: "cbc_tw:EF07M01.5", src: cbc_tw, file: EF07M01, col: 5, region: TW, ind: cpi_yoy, title: "Taiwan CPI y/y (CBC key indicators)", freq: M, units: percent y/y, sa: NSA, lag: 25, core: true, measure: cpi_national}
+  - {id: "cbc_tw:EF15M01.29", src: cbc_tw, file: EF15M01, col: 29, region: TW, ind: money_supply, title: "Taiwan M2 y/y (daily average)", freq: M, units: percent y/y, sa: NSA, lag: 25}
+  - {id: "cbc_tw:EF07M01.3", src: cbc_tw, file: EF07M01, col: 3, region: TW, cat: fx, title: "Taiwan FX reserves (USD millions)", freq: M, units: USD millions, scale: level, mult: 1000000, sa: NSA, lag: 10}
+
+
+# discontinued series kept for history (PIT) but demoted (is_core=false, title marked) by the owning job
+retired:
+  "ecb:MNA.Q.Y.I9.W2.S1.S1.B.B1GQ._Z._Z._Z.EUR.LR.GY": "ecb:MNA.Q.Y.I10.W2.S1.S1.B.B1GQ._Z._Z._Z.EUR.LR.GY"   # I9 = EA20, ends 2026-Q1 (Bulgaria joined: EA21 = I10)
+  # A9 2026-11-07: BoE IADB par yields (robots.txt disallows the IADB; reason code source_disallowed): history kept,
+  # replaced by the zero-coupon series of the same tenor, which cover the full history (BoE yield-curve archive)
+  "boe:IUDMNPY": "boe:IUDMNZC"   # 10Y par -> 10Y zero-coupon
+  "boe:IUDSNPY": "boe:IUDSNZC"
+  "boe:IUDLNPY": "boe:IUDLNZC"
+
+# series whose source stopped (no replacement): not fetched, but still served with their stored history and the normal
+# staleness ordering (app.macro.indicators keeps them as candidates; macro_audit / macro_freshness do not flag them).
+# Unlike `retired`, nothing replaces them, so dropping them would delete valid recent values from the macro panel.
+frozen:
+  # A9 2026-11-07: BoE Bankstats codes are IADB-only and robots.txt disallows the IADB; no allowed source carries them
+  "boe:LPMVQJW": {since: "2026-11-07", reason: source_disallowed, note: "BoE IADB-only (robots.txt disallows the IADB); no allowed source"}
+  "boe:LPMBC57": {since: "2026-11-07", reason: source_disallowed, note: "BoE IADB-only (robots.txt disallows the IADB); no allowed source"}
+  "boe:LPMVTVX": {since: "2026-11-07", reason: source_disallowed, note: "BoE IADB-only (robots.txt disallows the IADB); no allowed source"}
+  "boe:IUMBV34": {since: "2026-11-07", reason: source_disallowed, note: "BoE IADB-only (robots.txt disallows the IADB); no allowed source"}
+
+# region -> indicator -> reason the cell has no series (or why a region-level series stands in). '*' applies to
+# every region. 'key:<SECRET>' marks gaps an optional key would fill (macro_audit reports them).
+gaps:
+  "*":
+    commodities: "global series (region WLD: World Bank Pink Sheet, IMF PCPS; FRED oil/gas/copper under US)"
+    vix: "global series (US: FRED VIXCLS)"
+    credit_spread: "aggregate OAS only: US (ICE BofA US HY/IG), EA (ICE BofA Euro HY), EM (ICE BofA EM corporate) via FRED"
+    lending_rate: "extra indicator (ECB MIR for EA members, BoE mortgage rate, China 5Y LPR)"
+    financial_stress: "no free official stress index (ECB CISS covers EA, DE, FR, IT, ES, PT, NL, US, GB, CN; FRED STLFSI/NFCI for US)"
+    building_permits: "no keyless official API found (verified 2026-10-11)"
+    employment: "no keyless official employment series verified for this region"
+  US:
+    lending_rate: "not tracked (FRED MORTGAGE30US/DPRIME are in the FRED catalog without indicator)"
+  EA: {}
+  DE: &euro_member
+    policy_rate: "euro area member: ECB deposit facility rate (EA, ecb:FM.D.U2.EUR.4F.KR.DFR.LEV)"
+    rate_3m: "euro area member: 3M Euribor (EA, ecb:FM.M.U2.EUR.RT.MM.EURIBOR3MD_.HSTA)"
+    money_supply: "euro area member: euro area M3 (EA, ecb:BSI.M.U2.Y.V.M30.X.I.U2.2300.Z01.A)"
+    yield_2y: "no free daily/2Y sovereign source (ECB and Eurostat publish only the 10Y convergence yield; national debt agencies have no API)"
+    yield_curve: "only the 10Y convergence yield is published for this member (no free curve)"
+  FR: *euro_member
+  IT:
+    <<: *euro_member
+    building_permits: "Eurostat sts_cobp_m has no monthly Italian series (quarterly sts_cobp_q only)"
+  ES: *euro_member
+  PT: *euro_member
+  NL: *euro_member
+  GB:
+    rate_3m: "no live 3M rate (LIBOR ended; BoE 3M T-bill series IUMAJNB ended 2017; OECD GBR IR3TIB stale since 2026-02)"
+    yield_2y: "BoE IADB publishes no 2Y gilt code (5Y/10Y/20Y par and zero-coupon only)"
+    building_permits: "no official keyless API (ONS housing starts are not in the /data JSON series set)"
+  CH:
+    yield_curve: "SNB cube rendeiduebd carries 2Y and 10Y only in this catalog"
+    ppi_yoy: "FSO PPI not available via a keyless API (PXWeb has no PPI table)"
+    trade_balance: "no keyless official source verified (FOCBS/BAZG has no API)"
+  JP:
+    trade_balance: "MoF trade statistics have no API; key:ESTAT_APPID (e-Stat) would provide it"
+    employment: "key:ESTAT_APPID (e-Stat Labour Force Survey)"
+  KR:
+    yield_curve: "key:BOK_ECOS_APIKEY (ECOS 817Y002 KTB 3Y/5Y/20Y)"
+    ppi_yoy: "key:BOK_ECOS_APIKEY (ECOS 404Y014)"
+    employment: "key:KOSIS_APIKEY / key:BOK_ECOS_APIKEY (901Y027)"
+    trade_balance: "key:BOK_ECOS_APIKEY (301Y013 goods balance)"
+  CN:
+    core_cpi_yoy: "NBS core CPI not exposed by the AKShare Eastmoney functions; NBS site geo-blocked from the EU"
+    trade_balance: "AKShare macro_china_trade_balance (Jin10) frozen at 2025-09; exports y/y (akshare_cn:exports_yoy) kept"
+  HK:
+    yield_2y: "HKMA Exchange Fund Notes/HKGB yield endpoint not found (efbn-yield-daily -> API not found); HKMA WAF blocks probing"
+    yield_10y: "HKMA Exchange Fund Notes/HKGB yield endpoint not found; HKD is pegged to USD (cost of capital uses the UST 10Y)"
+    yield_curve: "see yield_10y"
+    core_cpi_yoy: "C&SD publishes underlying CPI only in press releases (no web-table API id verified)"
+    ppi_yoy: "C&SD PPI web table not verified"
+    industrial_production: "C&SD quarterly industrial production table not verified"
+    pmi_proxy: "no official PMI (S&P Global PMI is licensed)"
+    consumer_confidence: "no official keyless source"
+    money_supply: "HKMA monetary statistics endpoint not verified (WAF block during probing)"
+    trade_balance: "C&SD trade web table not verified"
+  TW:
+    rate_3m: "no keyless source verified (CBC DataAPI file for money-market rates not identified)"
+    yield_2y: "no keyless source (TPEx yields not available via API)"
+    yield_10y: "no keyless source (TPEx); cost of capital uses the dated fallback for TWD"
+    yield_curve: "see yield_10y"
+    core_cpi_yoy: "DGBAS core CPI only in the 15.8 MB XML release (not ingested)"
+    ppi_yoy: "DGBAS WPI XML not ingested"
+    gdp_qoq: "DGBAS nstatdb SDMX rejects every key ('parameter error'); annual IMF WEO growth only"
+    industrial_production: "MOEA statistics have no API"
+    retail_sales: "MOEA statistics have no API"
+    pmi_proxy: "CIER PMI not published via an API"
+    consumer_confidence: "no keyless source"
+    unemployment: "DGBAS nstatdb SDMX rejects every key; no other keyless source"
+    house_prices: "not in BIS SPP; no keyless source"
+    private_credit: "not in BIS total credit"
+    credit_gap: "not in BIS credit-to-GDP gaps"
+    trade_balance: "MoF trade statistics have no API"
+  IN:
+    yield_2y: "RBI DBIE has no public API"
+    yield_curve: "RBI DBIE has no public API"
+    core_cpi_yoy: "MOSPI API serves only the old 2012-base CPI (ends 2025-12)"
+    ppi_yoy: "MOSPI WPI only to 2026-04 (base 2011-12)"
+    retail_sales: "no official retail sales statistic"
+    unemployment: "PLFS monthly not exposed by the MOSPI API; OECD KEI has no India unemployment"
+    money_supply: "RBI DBIE has no public API"
+    trade_balance: "no keyless official API"
+  AU:
+    ppi_yoy: "ABS PPI dataflow not verified"
+    industrial_production: "no monthly official IP (quarterly manufacturing output only)"
+    retail_sales: "ABS retail trade discontinued 2025 (household spending indicator not verified)"
+    trade_balance: "ABS international trade dataflow not verified"
+  CA:
+    yield_curve: "BoC Valet: only 2Y/10Y benchmark and 3M bill ingested"
+  BR:
+    yield_10y: "no keyless 10Y market yield (ANBIMA needs a key; Tesouro Direto CSV is a 14.6 MB retail-rate file). OECD 'long-term rate' for BRA (~9.1%, flat) is an administered rate, not the ~12.6% NTN-F 10Y -> kept without indicator; cost of capital uses the dated BRL fallback"
+    yield_2y: "no keyless market yield curve (ANBIMA needs a key; Tesouro Direto retail rates only)"
+    yield_curve: "see yield_2y"
+  MX:
+    yield_2y: "key:BANXICO_TOKEN (SIE M-bono yields)"
+    yield_curve: "key:BANXICO_TOKEN"
+    ppi_yoy: "key:INEGI_TOKEN (INPP)"
+    industrial_production: "key:INEGI_TOKEN (IMAI); OECD KEI has no MEX production series"
+    money_supply: "key:BANXICO_TOKEN (SIE monetary aggregates)"
+    trade_balance: "key:INEGI_TOKEN (balanza comercial)"
+  CL:
+    yield_2y: "key:BCCH_USER/BCCH_PASS (BCCh BCP/BTP yields)"
+    yield_curve: "key:BCCH_USER/BCCH_PASS"
+    ppi_yoy: "key:BCCH_USER/BCCH_PASS (INE PPI is not in the INE SDMX labour-only catalogue)"
+    industrial_production: "key:BCCH_USER/BCCH_PASS"
+    retail_sales: "key:BCCH_USER/BCCH_PASS"
+    money_supply: "key:BCCH_USER/BCCH_PASS"
+    trade_balance: "key:BCCH_USER/BCCH_PASS"
+  CO:
+    yield_2y: "BanRep publishes TES 1Y/5Y/10Y monthly only (no 2Y)"
+    yield_curve: "BanRep TES monthly 1Y/5Y/10Y (10Y ingested)"
+    ppi_yoy: "only BanRep's undocumented suameca backend (not an official API)"
+    trade_balance: "DANE has no API"
+  PE:
+    rate_3m: "BCRP interbank rate code not verified"
+    yield_2y: "BCRP publishes only the 10Y sovereign yield series verified"
+    yield_curve: "see yield_2y"
+    gdp_qoq: "BCRP monthly GDP y/y (PN01728AM) used; no SA q/q series"
+    industrial_production: "BCRP code not verified"
+    retail_sales: "no official monthly retail sales"
+    consumer_confidence: "BCRP business expectations used as the sentiment proxy"
+    money_supply: "BCRP code not verified"
+    private_credit: "not in BIS total credit; BCRP code not verified"
+    credit_gap: "not in BIS credit-to-GDP gaps"
+    trade_balance: "BCRP publishes exports/imports only (no balance code); not ingested"
+  AR:
+    yield_2y: "no official sovereign yield API (BCRA/INDEC publish none)"
+    yield_10y: "no official sovereign yield API; cost of capital uses the dated fallback for ARS"
+    yield_curve: "see yield_10y"
+    ppi_yoy: "INDEC IPIM not verified in the datos.gob.ar series API"
+    retail_sales: "no official monthly retail sales"
+    pmi_proxy: "no official business-confidence series"
+    consumer_confidence: "UTDT consumer confidence is not official"
+    house_prices: "not in BIS SPP"
+    trade_balance: "datos.gob.ar exports only verified"

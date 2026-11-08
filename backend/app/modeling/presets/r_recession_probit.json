@@ -1,0 +1,97 @@
+{
+ "title": "Recession probability from the curve and credit (logit)",
+ "description": "Probability of an NBER recession 12 months ahead from the 10Y-3M term spread, the Baa spread and financial conditions.",
+ "question": "macro",
+ "tags": [
+  "macro",
+  "recession",
+  "logit"
+ ],
+ "method_note": "Estrella-Mishkin (1998) term-spread probit with credit (Gilchrist-Zakrajsek flavour) and the Chicago Fed NFCI. The target is the NBER indicator 12 months ahead (lead), regressors are month averages known at month end. Few recessions (4) make this low-power: read the fitted probability, not the p-values.",
+ "expected_outputs": [
+  "coefficients / marginal effects",
+  "fitted probability",
+  "pseudo R2"
+ ],
+ "runtime_s": 0.8,
+ "validated": "2026-11-06 on snapshot R20261106T010757G9ZB",
+ "result": {
+  "run_id": "SR20261106T0200565Q97A",
+  "n_obs": 478,
+  "metrics": {
+   "aic": 209.84439366290542,
+   "pseudo_r2": 0.2097442980087756
+  },
+  "coefficients": [
+   {
+    "term": "term_spread",
+    "estimate": -0.8749316897033551,
+    "statistic": -3.1416697437968537,
+    "p_value": 0.0016798740239184603
+   },
+   {
+    "term": "baa_spread",
+    "estimate": -0.5153690486031163,
+    "statistic": -0.9653278103403945,
+    "p_value": 0.3343806465929894
+   },
+   {
+    "term": "nfci",
+    "estimate": 1.9085568840559144,
+    "statistic": 3.0058946955906674,
+    "p_value": 0.0026480068421125104
+   }
+  ]
+ },
+ "study": {
+  "name": "Recession probability from the curve and credit (logit)",
+  "method": "glm",
+  "y": "rec_12m",
+  "x": [
+   "term_spread",
+   "baa_spread",
+   "nfci"
+  ],
+  "params": {
+   "family": "binomial",
+   "link": "logit",
+   "cov_type": "HAC"
+  },
+  "dataset": {
+   "kind": "timeseries",
+   "frequency": "M",
+   "start": "1986-01-01",
+   "variables": [
+    {
+     "name": "rec_12m",
+     "source": "macro",
+     "field": "fred:USREC",
+     "transforms": [
+      {
+       "op": "lead",
+       "k": 12
+      }
+     ]
+    },
+    {
+     "name": "term_spread",
+     "source": "macro",
+     "field": "fred:T10Y3M",
+     "agg": "mean"
+    },
+    {
+     "name": "baa_spread",
+     "source": "macro",
+     "field": "fred:BAA10Y",
+     "agg": "mean"
+    },
+    {
+     "name": "nfci",
+     "source": "macro",
+     "field": "fred:NFCI",
+     "agg": "mean"
+    }
+   ]
+  }
+ }
+}

@@ -1,0 +1,135 @@
+{
+ "title": "Heteroskedastic return forecast (NGBoost)",
+ "description": "Predictive mean and standard deviation of next-month stock returns from risk and style signals.",
+ "question": "factors",
+ "tags": [
+  "probabilistic",
+  "NGBoost",
+  "risk"
+ ],
+ "method_note": "NGBoost boosts the location and log-scale of a Normal with natural gradients, so each stock gets its own predictive sd. The scale importance shows what drives risk (IVOL, MAX, size); CRPS vs a homoskedastic linear-Gaussian baseline measures whether that matters out of fold. Caveat: the universe is today's constituents (membership history starts 2026-10), so early years carry survivorship bias; read the premium as an upper bound.",
+ "expected_outputs": [
+  "predictive sd distribution",
+  "loc / scale importance",
+  "CRPS / PIT vs baseline"
+ ],
+ "runtime_s": 45.5,
+ "validated": "2026-11-06 on snapshot R20261106T010757G9ZB",
+ "result": {
+  "run_id": "SR20261106T020317SVQDM",
+  "beats_baseline": true,
+  "beats_linear": false,
+  "verdict": "NGBoost beats linear-Gaussian baseline on CRPS (DM p = 1.27e-133); point forecast: NGBoost is worse than linear baseline out of sample (mean loss 0.009306 vs 0.009298)",
+  "n_obs": 55079,
+  "metrics": {
+   "oos_rmse": 0.09646813082536701,
+   "oos_r2_oos": -0.001802263088699796,
+   "oos_rank_ic": 0.03458908280968486,
+   "crps": 0.05083427660216892,
+   "crps_linear": 0.05173116644154588,
+   "crps_skill_vs_linear": 0.01733751432785513,
+   "coverage_90": 0.8925724867916992,
+   "dm_p_crps_vs_linear": 1.2659284060185626e-133,
+   "dm_p_vs_linear": 0.29642422083325287
+  },
+  "coefficients": []
+ },
+ "study": {
+  "name": "Heteroskedastic return forecast (NGBoost)",
+  "method": "ngboost",
+  "y": "fwd_ret_1m",
+  "x": [
+   "ivol",
+   "maxret",
+   "log_mcap",
+   "mom_12_1"
+  ],
+  "params": {
+   "n_estimators": 300,
+   "learning_rate": 0.05,
+   "min_samples_leaf": 200,
+   "minibatch_frac": 0.5,
+   "cv": {
+    "folds": 4,
+    "scheme": "purged_kfold",
+    "purge": 1
+   }
+  },
+  "dataset": {
+   "kind": "panel",
+   "frequency": "M",
+   "start": "2016-01-01",
+   "entities": {
+    "universe": "mvp_us"
+   },
+   "variables": [
+    {
+     "name": "fwd_ret_1m",
+     "source": "prices",
+     "field": "ret",
+     "transforms": [
+      {
+       "op": "fwd_compound",
+       "k": 1
+      },
+      {
+       "op": "winsorize"
+      }
+     ]
+    },
+    {
+     "name": "ivol",
+     "source": "tech_factors",
+     "field": "ivol",
+     "transforms": [
+      {
+       "op": "winsorize"
+      },
+      {
+       "op": "cs_zscore"
+      }
+     ]
+    },
+    {
+     "name": "maxret",
+     "source": "tech_factors",
+     "field": "maxret",
+     "transforms": [
+      {
+       "op": "winsorize"
+      },
+      {
+       "op": "cs_zscore"
+      }
+     ]
+    },
+    {
+     "name": "log_mcap",
+     "source": "valuation",
+     "field": "market_cap_usd",
+     "transforms": [
+      {
+       "op": "log"
+      },
+      {
+       "op": "cs_zscore"
+      }
+     ]
+    },
+    {
+     "name": "mom_12_1",
+     "source": "tech_factors",
+     "field": "mom",
+     "transforms": [
+      {
+       "op": "winsorize"
+      },
+      {
+       "op": "cs_zscore"
+      }
+     ]
+    }
+   ]
+  }
+ }
+}

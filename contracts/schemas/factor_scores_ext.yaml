@@ -1,0 +1,29 @@
+table: factor_scores_ext
+version: 1
+zone: scores
+owner: analytics-scoring (app.analytics.scoring_full)
+description: >
+  Factor-family scores for every security OUTSIDE the MVP model universe (full-universe extension, 2026-10-30).
+  Anchored to the MVP reference cross-section of the same as_of_date: every metric / factor percentile is the position
+  the security would take if it were added alone to the MVP universe (leave-one-in), so the MVP rows in factor_scores
+  are untouched and both tables share one scale. rank_in_sector / sector_count = rank among ALL scored securities
+  (MVP + extended) within sector x peer region. scope = 'extended' (anchored) or 'mvp' (a non-MVP listing of an MVP
+  issuer: copy of the issuer's MVP row). Retention: last 10 days daily, older dates month-ends only.
+storage: {path: scores/factor_scores_ext, format: parquet, partition_by: [as_of_month], write_mode: upsert, retention: "daily 10d, then month-end"}
+primary_key: [as_of_date, security_id, factor_id]
+pit: {knowledge_column: as_of_date, rule: "inputs knowledge_date <= as_of_date; MVP reference of the same as_of_date"}
+columns:
+  - {name: as_of_date, type: date, nullable: false, description: "Scoring date"}
+  - {name: as_of_month, type: string, nullable: false, description: "Partition YYYY-MM"}
+  - {name: security_id, type: string, nullable: false, description: "FK securities_master"}
+  - {name: issuer_id, type: string, nullable: false, description: "FK issuers"}
+  - {name: factor_id, type: enum, nullable: false, values: [quality, profitability, growth, value, balance_sheet, momentum, insider, sentiment, macro, moat], description: "scoring.yaml factor id"}
+  - {name: score, type: float64, nullable: true, description: "0..100, anchored to the MVP reference (see description)"}
+  - {name: score_raw, type: float64, nullable: true, description: "Weighted mean before re-percentiling"}
+  - {name: coverage, type: float32, nullable: false, description: "Weight share of metrics with non-imputed values"}
+  - {name: rank_in_sector, type: int32, nullable: true, description: "1 = best among all scored securities (MVP + extended) in sector x peer region"}
+  - {name: sector_count, type: int32, nullable: true, description: "Scored securities (MVP + extended) in sector x peer region"}
+  - {name: delta_1m, type: float64, nullable: true, description: "score - score ~1 month earlier (reference row 20..50 days back)"}
+  - {name: scope, type: enum, nullable: false, values: [extended, mvp], description: "extended = anchored score; mvp = copy of the issuer's MVP row"}
+  - {name: computed_at, type: datetime, nullable: false, description: "Write time UTC"}
+  - {name: run_id, type: string, nullable: true, description: "Producing run"}

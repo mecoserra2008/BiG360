@@ -1,0 +1,90 @@
+# BiG Equity 360 backend — Python 3.13, CPU only.
+# Install: "<root>\.venv\Scripts\python.exe" -m pip install -r backend/requirements.txt
+# torch CPU wheels come from the PyTorch CPU index (extra index keeps PyPI as primary).
+--extra-index-url https://download.pytorch.org/whl/cpu
+
+# --- core / config ---
+pydantic>=2.9,<3
+pydantic-settings>=2.6,<3
+python-dotenv>=1.0,<2
+PyYAML>=6.0.2,<7
+orjson>=3.10,<4
+python-dateutil>=2.9,<3
+tzdata>=2024.2
+filelock>=3.16
+
+# --- data engine ---
+polars>=1.20,<2
+duckdb>=1.1,<2
+pyarrow>=18,<22
+pandas>=2.2.3,<3
+numpy>=2.1,<3
+
+# --- http / ingestion helpers ---
+httpx[http2]>=0.27,<1
+tenacity>=9.0,<10
+lxml>=5.3,<7
+beautifulsoup4>=4.12,<5
+rapidfuzz>=3.10,<4
+yfinance>=0.2.54
+feedparser>=6.0,<7
+
+# --- api ---
+fastapi>=0.115,<1
+uvicorn[standard]>=0.32,<1
+apscheduler>=3.10,<4
+
+# --- analytics / stats ---
+scipy>=1.14,<2
+numba>=0.61,<1            # technicals: JIT event loops (pivots, zigzag, level backtest)
+statsmodels>=0.14.4,<1
+scikit-learn>=1.5.2,<2
+hmmlearn>=0.3.3,<1
+xgboost>=2.1,<4
+shap>=0.46,<1
+lightgbm==4.7.0           # Studio v2 S2: LightGBM / LambdaRank (MIT)
+optuna==5.0.0             # Studio v2 S2: hyper-parameter tuning on purged walk-forward CV (MIT; pulls SQLAlchemy, alembic, colorlog, Mako)
+ngboost==0.5.11           # Studio v2 S3: natural-gradient boosting of a Normal (Apache-2.0; pulls lifelines, autograd, autograd-gamma, matplotlib)
+
+# --- deep learning / nlp (CPU) ---
+torch>=2.6,<3
+transformers>=4.46,<5
+sentencepiece>=0.2,<1
+safetensors>=0.4.5
+
+# --- dev / test ---
+pytest>=8.3,<9
+pytest-asyncio>=0.24,<2
+respx>=0.21,<1
+tqdm>=4.66
+
+# --- ingest-market (prices / calendars / CN prices / GDELT country codes) ---
+exchange_calendars>=4.13,<5   # trading-calendar awareness in app.normalize.prices
+baostock>=0.9.4,<1            # A-share daily k-line (app.ingestion.baostock_prices)
+pycountry>=24.6               # ISO3->ISO2 (GDELT actors) and ISO 639 language codes
+
+# --- api (tests validate responses against contracts/api.yaml) ---
+jsonschema>=4.23,<5
+
+# --- ingest-global (CN statements; baostock already pinned above) ---
+akshare>=1.19.1,<2            # Sina/THS/CNINFO only, always via HardTimeoutRunner child process (app.ingestion.cn_akshare)
+
+# --- coverage-B (EU OAM / LATAM ESEF + iXBRL parsing; run in a subprocess by app.ingestion._arelle) ---
+arelle-release==2.46.1        # ESEF/iXBRL report packages -> OIM xBRL-JSON (saveLoadableOIM plugin)
+
+# --- model studio (Phase B panel / volatility methods; app.modeling) ---
+linearmodels>=7.0,<8          # panel FE/RE, Fama-MacBeth, IV/2SLS
+arch>=8.0,<9                  # GARCH / EGARCH / GJR
+xlrd>=2.0          # NY Fed ACM term premium .xls (macro_national nyfed)
+
+# --- macro v3 / W3.6 (macro-w3): BoJ monetary-policy statements are PDFs ---
+pypdf>=5,<7
+
+# --- event-models (spatial econometrics B1/B2/B5; app.events_models) ---
+esda>=2.10,<3                 # Moran's I, LISA, Getis-Ord Gi*
+spreg>=1.9,<2                 # SAR / SEM / SDM (ML + GM)
+libpysal>=4.12,<5             # weights (also used by linkage)
+
+# --- linkage (A1 Natural Earth geography; libpysal pinned above) ---
+geopandas>=1.0,<2             # read Natural Earth admin-0 zip, dissolve, equal-area centroids (pulls pyogrio + pyproj)
+shapely>=2.0,<3               # polygon geometry for contiguity (libpysal Queen / Rook)

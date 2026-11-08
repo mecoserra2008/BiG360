@@ -1,0 +1,171 @@
+{
+"documentInfo": {
+"documentType": "https://xbrl.org/2021/xbrl-json",
+"features": {
+"xbrl:canonicalValues": true
+},
+"namespaces": {
+"dan": "http://danone.com/20251231",
+"ifrs-full": "https://xbrl.ifrs.org/taxonomy/2024-03-27/ifrs-full",
+"iso4217": "http://www.xbrl.org/2003/iso4217",
+"scheme": "http://standards.iso.org/iso/17442",
+"xbrl": "https://xbrl.org/2021",
+"xbrli": "http://www.xbrl.org/2003/instance"
+},
+"taxonomy": [
+"http://danone.com/20251231/dan-2025-12-31.xsd"
+]
+},
+"facts": {
+"f-1": {
+"value": "27376000000.0",
+"decimals": -6,
+"dimensions": {
+"concept": "ifrs-full:Revenue",
+"entity": "scheme:969500KMUQ2B6CBAF162",
+"period": "2024-01-01T00:00:00/2025-01-01T00:00:00",
+"unit": "iso4217:EUR"
+}
+},
+"f-2": {
+"value": "27283000000.0",
+"decimals": -6,
+"dimensions": {
+"concept": "ifrs-full:Revenue",
+"entity": "scheme:969500KMUQ2B6CBAF162",
+"period": "2025-01-01T00:00:00/2026-01-01T00:00:00",
+"unit": "iso4217:EUR"
+}
+},
+"f-37": {
+"value": "2100000000.0",
+"decimals": -6,
+"dimensions": {
+"concept": "ifrs-full:ProfitLoss",
+"entity": "scheme:969500KMUQ2B6CBAF162",
+"period": "2024-01-01T00:00:00/2025-01-01T00:00:00",
+"unit": "iso4217:EUR"
+}
+},
+"f-38": {
+"value": "1887000000.0",
+"decimals": -6,
+"dimensions": {
+"concept": "ifrs-full:ProfitLoss",
+"entity": "scheme:969500KMUQ2B6CBAF162",
+"period": "2025-01-01T00:00:00/2026-01-01T00:00:00",
+"unit": "iso4217:EUR"
+}
+},
+"f-39": {
+"value": "2021000000.0",
+"decimals": -6,
+"dimensions": {
+"concept": "ifrs-full:ProfitLossAttributableToOwnersOfParent",
+"entity": "scheme:969500KMUQ2B6CBAF162",
+"period": "2024-01-01T00:00:00/2025-01-01T00:00:00",
+"unit": "iso4217:EUR"
+}
+},
+"f-40": {
+"value": "1825000000.0",
+"decimals": -6,
+"dimensions": {
+"concept": "ifrs-full:ProfitLossAttributableToOwnersOfParent",
+"entity": "scheme:969500KMUQ2B6CBAF162",
+"period": "2025-01-01T00:00:00/2026-01-01T00:00:00",
+"unit": "iso4217:EUR"
+}
+},
+"f-47": {
+"value": "2021000000.0",
+"decimals": -6,
+"dimensions": {
+"concept": "ifrs-full:ProfitLossAttributableToOwnersOfParent",
+"entity": "scheme:969500KMUQ2B6CBAF162",
+"period": "2024-01-01T00:00:00/2025-01-01T00:00:00",
+"unit": "iso4217:EUR"
+}
+},
+"f-48": {
+"value": "1825000000.0",
+"decimals": -6,
+"dimensions": {
+"concept": "ifrs-full:ProfitLossAttributableToOwnersOfParent",
+"entity": "scheme:969500KMUQ2B6CBAF162",
+"period": "2025-01-01T00:00:00/2026-01-01T00:00:00",
+"unit": "iso4217:EUR"
+}
+},
+"f-117": {
+"value": "45292000000.0",
+"decimals": -6,
+"dimensions": {
+"concept": "ifrs-full:Assets",
+"entity": "scheme:969500KMUQ2B6CBAF162",
+"period": "2025-01-01T00:00:00",
+"unit": "iso4217:EUR"
+}
+},
+"f-118": {
+"value": "45071000000.0",
+"decimals": -6,
+"dimensions": {
+"concept": "ifrs-full:Assets",
+"entity": "scheme:969500KMUQ2B6CBAF162",
+"period": "2026-01-01T00:00:00",
+"unit": "iso4217:EUR"
+}
+},
+"f-172": {
+"value": "2100000000.0",
+"decimals": -6,
+"dimensions": {
+"concept": "ifrs-full:ProfitLoss",
+"entity": "scheme:969500KMUQ2B6CBAF162",
+"period": "2024-01-01T00:00:00/2025-01-01T00:00:00",
+"unit": "iso4217:EUR"
+}
+},
+"f-173": {
+"value": "1887000000.0",
+"decimals": -6,
+"dimensions": {
+"concept": "ifrs-full:ProfitLoss",
+"entity": "scheme:969500KMUQ2B6CBAF162",
+"period": "2025-01-01T00:00:00/2026-01-01T00:00:00",
+"unit": "iso4217:EUR"
+}
+},
+"f-206": {
+"value": "3831000000.0",
+"decimals": -6,
+"dimensions": {
+"concept": "ifrs-full:CashFlowsFromUsedInOperatingActivities",
+"entity": "scheme:969500KMUQ2B6CBAF162",
+"period": "2024-01-01T00:00:00/2025-01-01T00:00:00",
+"unit": "iso4217:EUR"
+}
+},
+"f-207": {
+"value": "3779000000.0",
+"decimals": -6,
+"dimensions": {
+"concept": "ifrs-full:CashFlowsFromUsedInOperatingActivities",
+"entity": "scheme:969500KMUQ2B6CBAF162",
+"period": "2025-01-01T00:00:00/2026-01-01T00:00:00",
+"unit": "iso4217:EUR"
+}
+},
+"f-613": {
+"value": "27283000000.0",
+"decimals": -6,
+"dimensions": {
+"concept": "ifrs-full:Revenue",
+"entity": "scheme:969500KMUQ2B6CBAF162",
+"period": "2025-01-01T00:00:00/2026-01-01T00:00:00",
+"unit": "iso4217:EUR"
+}
+}
+}
+}
